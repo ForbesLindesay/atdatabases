@@ -1,0 +1,64 @@
+{
+  "name": "atdatabases",
+  "private": true,
+  "bolt": {
+    "workspaces": [
+      "packages/*"
+    ]
+  },
+  "scripts": {
+    "postinstall": "node scripts/postinstall",
+    "build": "node scripts/build-all --only-changed",
+    "build:all": "node scripts/build-all",
+    "prerelease": "yarn build:all",
+    "prettier": "prettier --write \"packages/*/src/**/*.{ts,tsx}\"",
+    "release": "bolt publish",
+    "pretest": "yarn build",
+    "test": "jest",
+    "posttest": "bolt ws run test",
+    "watch:jest": "jest --watch",
+    "clean": "rimraf packages/*/lib && rimraf packages/*/.last_build && rimraf packages/*/.cache && rimraf packages/*/build && rimraf packages/*/node_modules && rimraf node_modules"
+  },
+  "jest": {
+    "globalSetup": "./packages/pg-test/jest/globalSetup.js",
+    "globalTeardown": "./packages/pg-test/jest/globalTeardown.js",
+    "transformIgnorePatterns": [
+      "<rootDir>.*(node_modules)(?!.*databases.*).*$"
+    ],
+    "transform": {
+      "^.+\\.tsx?$": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+    },
+    "testRegex": "/__tests__/.+\\.test\\.(tsx?)$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json"
+    ]
+  },
+  "dependencies": {
+    "@babel/code-frame": "^7.0.0",
+    "@moped/babel-preset": "^0.0.8",
+    "@types/cross-spawn": "^6.0.0",
+    "@types/jest": "^23.3.10",
+    "@types/mkdirp": "^0.5.2",
+    "@types/node": "^10.12.17",
+    "@types/rimraf": "^2.0.2",
+    "babel-core": "^6.26.3",
+    "chalk": "^2.4.1",
+    "cross-spawn": "^6.0.5",
+    "detect-port": "^1.3.0",
+    "jest": "^23.6.0",
+    "lsr": "^2.0.0",
+    "mkdirp": "^0.5.1",
+    "pg-error-constants": "^1.0.0",
+    "pg-minify": "^0.5.5",
+    "pg-promise": "^8.5.4",
+    "pg-types": "1.13.0",
+    "prettier": "^1.15.3",
+    "rimraf": "^2.6.2",
+    "ts-jest": "^23.10.5",
+    "typescript": "^3.2.2"
+  }
+}

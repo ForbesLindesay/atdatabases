@@ -1,0 +1,79 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`downAll 1`] = `
+"relation \\"users\\" does not exist
+
+> 1 | SELECT * FROM users
+    |               ^^^^^
+"
+`;
+
+exports[`downLast 1`] = `
+Array [
+  Object {
+    "id": 1,
+    "name": "Forbes Lindesay",
+  },
+]
+`;
+
+exports[`downLast 2`] = `
+Array [
+  Object {
+    "id": 1,
+    "name": "Forbes Lindesay",
+  },
+]
+`;
+
+exports[`downOne 1`] = `
+Array [
+  Object {
+    "id": 1,
+    "name": "Forbes Lindesay",
+  },
+]
+`;
+
+exports[`downOne 2`] = `
+"relation \\"users\\" does not exist
+
+> 1 | SELECT * FROM users
+    |               ^^^^^
+"
+`;
+
+exports[`upAll 1`] = `
+Array [
+  Object {
+    "id": 1,
+    "name": "Forbes Lindesay",
+  },
+  Object {
+    "id": 2,
+    "name": "Eleanor Brodie",
+  },
+]
+`;
+
+exports[`upOne 1`] = `
+Array [
+  Object {
+    "id": 1,
+    "name": "Forbes Lindesay",
+  },
+]
+`;
+
+exports[`upOne 2`] = `
+Array [
+  Object {
+    "id": 1,
+    "name": "Forbes Lindesay",
+  },
+  Object {
+    "id": 2,
+    "name": "Eleanor Brodie",
+  },
+]
+`;

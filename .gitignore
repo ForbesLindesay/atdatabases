@@ -1,0 +1,34 @@
+# Logs
+logs
+*.log
+
+# Runtime data
+pids
+*.pid
+*.seed
+
+# Coverage directory used by tools like istanbul
+coverage
+
+# Compiled binary addons (http://nodejs.org/api/addons.html)
+build/Release
+
+# Dependency directory
+node_modules
+
+# Users Environment Variables
+.lock-wscript
+
+# build output
+
+packages/*/build
+packages/*/lib
+packages/*/LICENSE.md
+packages/*/tsconfig.build.json
+packages/*/tsconfig.json
+packages/*/.cache
+
+.DS_Store
+.env
+
+.last_build

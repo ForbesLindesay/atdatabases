@@ -1,0 +1,93 @@
+version: 2
+
+refs:
+  - &container
+    docker:
+      - image: node:8.11
+        environment:
+          DATABASE_URL: 'postgres://pg-jest-user@localhost:5432/pg-jest-db'
+      - image: circleci/postgres:10.6-alpine-ram
+        environment:
+          POSTGRES_USER: pg-jest-user
+          POSTGRES_DB: pg-jest-db
+    working_directory: ~/repo
+  - &restore_cache
+    restore_cache:
+      keys:
+        - v1-dependencies-{{ checksum "yarn.lock" }}
+        - v1-dependencies-
+  - &save_cache
+    save_cache:
+      paths:
+        - node_modules
+      key: v1-dependencies-{{ checksum "yarn.lock" }}
+  - &npm_auth
+    run:
+      name: NPM Auth
+      command: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
+  - &bolt_install
+    run:
+      name: Bolt Install
+      command: yarn global add bolt && bolt
+  - &build
+    run:
+      name: Build
+      command: yarn build:all
+  - &test
+    run:
+      name: Test
+      command: yarn test
+
+jobs:
+  all:
+    <<: *container
+    steps:
+      - checkout
+      - *restore_cache
+      - *npm_auth
+      - *bolt_install
+      - *save_cache
+      - *build
+      - *test
+
+  master:
+    <<: *container
+    steps:
+      - checkout
+      - *restore_cache
+      - *npm_auth
+      - *bolt_install
+      - *save_cache
+      - *build
+      - *test
+      - run:
+          name: Release
+          command: bolt publish
+
+workflows:
+  version: 2
+  all:
+    jobs:
+      - all:
+          context: common-env
+          filters:
+            branches:
+              ignore:
+                - master
+  master:
+    jobs:
+      - master:
+          context: common-env
+          filters:
+            branches:
+              only: master
+  nightly:
+    triggers:
+      - schedule:
+          cron: '0 1 * * *'
+          filters:
+            branches:
+              only: master
+    jobs:
+      - all:
+          context: common-env

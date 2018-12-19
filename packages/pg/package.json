@@ -1,0 +1,24 @@
+{
+  "name": "@databases/pg",
+  "version": "0.0.0",
+  "description": "",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "dependencies": {
+    "@babel/code-frame": "^7.0.0",
+    "@databases/pg-data-type-id": "^0.0.0",
+    "@databases/pg-errors": "^0.0.0",
+    "@databases/sql": "^0.0.0",
+    "pg-promise": "^8.5.4"
+  },
+  "scripts": {},
+  "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/pg",
+  "license": "GPL-3.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "@types/node": "^10.12.17"
+  },
+  "bugs": "https://github.com/ForbesLindesay/atdatabases/issues"
+}
