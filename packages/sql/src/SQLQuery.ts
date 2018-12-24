@@ -44,7 +44,7 @@ const formatter = Symbol('SQL Query Formatter');
  */
 export default class SQLQuery implements PGQuery {
   public static registerFormatter<T>(
-    constructor: {new (...args: any[]): T},
+    constructor: new (...args: any[]) => T,
     format: (value: T) => SQLQuery,
   ): void {
     constructor.prototype[formatter] = format;

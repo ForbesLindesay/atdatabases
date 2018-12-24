@@ -20,7 +20,7 @@ export enum NumberOfOperations {
   one = 'one',
 }
 
-export function operation(op: Operation): Operation {
+export function packageOperation(op: Operation): Operation {
   return op;
 }
 
@@ -77,19 +77,19 @@ export class MigrationsPackage {
     });
   }
 
-  getState(db?: Connection | string) {
-    return this.run(db, async (db, migrations) => {
+  async getState(db?: Connection | string) {
+    return await this.run(db, async (_db, migrations) => {
       return migrations;
     });
   }
 
-  runOperation(
+  async runOperation(
     connectionString: string | undefined,
     direction: Direction,
     numberOfOperations: NumberOfOperations,
     options: Options = {},
   ) {
-    return this.run(connectionString, async (db, migrations) => {
+    return await this.run(connectionString, async (db, migrations) => {
       if (!this.checkState(migrations)) {
         return migrations;
       }
@@ -103,7 +103,7 @@ export class MigrationsPackage {
           for (const m of migrations) {
             if (!m.is_applied) {
               if (!options.silent) {
-                console.log(
+                console.info(
                   chalk.green('applying') +
                     ' database migration ' +
                     chalk.cyan(m.name),
@@ -111,7 +111,7 @@ export class MigrationsPackage {
               }
               await m.up(db);
               if (numberOfOperations === NumberOfOperations.one) {
-                return;
+                return undefined;
               }
             }
           }
@@ -120,7 +120,7 @@ export class MigrationsPackage {
           for (const m of migrations.slice().reverse()) {
             if (m.is_applied) {
               if (!options.silent) {
-                console.log(
+                console.info(
                   chalk.red('reverting') +
                     ' database migration ' +
                     chalk.cyan(m.name),
@@ -128,29 +128,29 @@ export class MigrationsPackage {
               }
               await m.down(db);
               if (numberOfOperations === NumberOfOperations.one) {
-                return;
+                return undefined;
               }
             }
             if (numberOfOperations === NumberOfOperations.last) {
-              return;
+              return undefined;
             }
           }
           break;
       }
-      return;
+      return undefined;
     });
   }
 
-  upOne(connectionString?: string, options: Options = {}) {
-    return this.runOperation(
+  async upOne(connectionString?: string, options: Options = {}) {
+    return await this.runOperation(
       connectionString,
       Direction.up,
       NumberOfOperations.one,
       options,
     );
   }
-  upAll(connectionString?: string, options: Options = {}) {
-    return this.runOperation(
+  async upAll(connectionString?: string, options: Options = {}) {
+    return await this.runOperation(
       connectionString,
       Direction.up,
       NumberOfOperations.all,
@@ -158,24 +158,24 @@ export class MigrationsPackage {
     );
   }
 
-  downAll(connectionString?: string, options: Options = {}) {
-    return this.runOperation(
+  async downAll(connectionString?: string, options: Options = {}) {
+    return await this.runOperation(
       connectionString,
       Direction.down,
       NumberOfOperations.all,
       options,
     );
   }
-  downOne(connectionString?: string, options: Options = {}) {
-    return this.runOperation(
+  async downOne(connectionString?: string, options: Options = {}) {
+    return await this.runOperation(
       connectionString,
       Direction.down,
       NumberOfOperations.one,
       options,
     );
   }
-  downLast(connectionString?: string, options: Options = {}) {
-    return this.runOperation(
+  async downLast(connectionString?: string, options: Options = {}) {
+    return await this.runOperation(
       connectionString,
       Direction.down,
       NumberOfOperations.last,
@@ -183,7 +183,7 @@ export class MigrationsPackage {
     );
   }
 }
-export default function migrations(
+export default function packageMigrations(
   ...migrations: MigrationSpec[]
 ): MigrationsPackage {
   const pkg = new MigrationsPackage(migrations);

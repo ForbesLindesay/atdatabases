@@ -49,7 +49,7 @@ function writeIfDifferent(filename: string, content: string) {
 
 test('get built in types', async () => {
   const builtInTypes = await getTypes(db, {schemaName: 'pg_catalog'});
-  const groupedTypes = builtInTypes.reduce(
+  const groupedTypes = builtInTypes.reduce<{[key: string]: Type[]}>(
     (result, ty) => {
       const category = Object.keys(TypeCateogry).find(
         c => (TypeCateogry as any)[c] === ty.category,
@@ -57,29 +57,24 @@ test('get built in types', async () => {
       result[category] = (result[category] || []).concat([ty]);
       return result;
     },
-    {} as {[key: string]: Type[]},
+    {},
   );
   expect(
     Object.keys(groupedTypes)
       .sort()
-      .reduce(
-        (result, key) => {
-          return {
-            ...result,
-            [key]: groupedTypes[key].map(
-              ty =>
-                ty.typeID +
-                ' = ' +
-                ty.typeName +
-                ('subtypeName' in ty && ty.subtypeName
-                  ? `<${ty.subtypeName}>`
-                  : '') +
-                (ty.comment ? ' // ' + ty.comment : ''),
-            ),
-          };
-        },
-        {} as {[key: string]: string[]},
-      ),
+      .reduce<{[key: string]: string[]}>((result, key) => {
+        return {
+          ...result,
+          [key]: groupedTypes[key].map(
+            ty =>
+              `${ty.typeID} = ${ty.typeName}` +
+              ('subtypeName' in ty && ty.subtypeName
+                ? `<${ty.subtypeName}>`
+                : '') +
+              (ty.comment ? ' // ' + ty.comment : ''),
+          ),
+        };
+      }, {}),
   ).toMatchSnapshot();
 
   const PgDataTypeIDsEnum = [
@@ -101,8 +96,8 @@ test('get built in types', async () => {
       }
       if (commentLines.length) {
         PgDataTypeIDsEnum.push(`  /**`);
-        commentLines.forEach((commentLine, i) => {
-          if (i !== 0) {
+        commentLines.forEach((commentLine, j) => {
+          if (j !== 0) {
             PgDataTypeIDsEnum.push(`   *`);
           }
           PgDataTypeIDsEnum.push(`   * ${commentLine}`);
@@ -134,17 +129,17 @@ test('get built in types', async () => {
   const typeMappingLines: string[] = [];
   mapping.forEach((parser, id) => {
     const allIDs = reverseMapping.get(parser) || [];
-    const idsWithMapping = allIDs.filter(id => id in typeMappings);
+    const idsWithMapping = allIDs.filter(typeID => typeID in typeMappings);
     if (idsWithMapping.length === 0) {
       throw new Error(
         'There is no mapping for: ' +
-          allIDs.map(id => DataTypeID[id]).join(', '),
+          allIDs.map(typeID => DataTypeID[typeID]).join(', '),
       );
     }
     if (idsWithMapping.length > 1) {
       throw new Error(
         'There is ambiguity between: ' +
-          idsWithMapping.map(id => DataTypeID[id]).join(', '),
+          idsWithMapping.map(typeID => DataTypeID[typeID]).join(', '),
       );
     }
     typeMappingLines.push(

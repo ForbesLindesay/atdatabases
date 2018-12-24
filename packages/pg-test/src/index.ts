@@ -44,7 +44,7 @@ export async function pullDockerImage(options: Options) {
       i => i.Repository === Repository && (!Tag || i.Tag === Tag),
     )
   ) {
-    console.log('Image already exists');
+    console.info('Image already exists');
     return;
   }
   await run('docker', ['pull', options.image], {
@@ -78,7 +78,7 @@ export function startDockerContainer(options: Options) {
 }
 
 export async function waitForDatabaseToStart(options: Options) {
-  await new Promise(resolve => {
+  await new Promise<void>(resolve => {
     let finished = false;
     const timeout = setTimeout(() => {
       finished = true;
@@ -89,7 +89,7 @@ export async function waitForDatabaseToStart(options: Options) {
       );
     }, options.connectTimeoutSeconds * 1000);
     function test() {
-      console.log(`Waiting for database on port ${options.port}...`);
+      console.info(`Waiting for database on port ${options.port}...`);
       const connection = connect(options.port)
         .on('error', () => {
           if (finished) return;
@@ -136,10 +136,10 @@ export default async function getDatabase(options: Partial<Options> = {}) {
     throw new Error('connectTimeoutSeconds must be a valid integer.');
   }
 
-  console.log('Pulling Docker Image');
+  console.info('Pulling Docker Image');
   await Promise.all([pullDockerImage(opts), killOldContainers(opts)]);
 
-  console.log('Starting Docker Container');
+  console.info('Starting Docker Container');
   const proc = startDockerContainer(opts);
 
   await waitForDatabaseToStart(opts);

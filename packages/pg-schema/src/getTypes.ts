@@ -22,10 +22,10 @@ export interface TypeRecord {
    * classID if composite type
    */
   classID?: number;
-  subtypeID: number;
-  subtypeName: string;
-  basetypeID: number;
-  basetypeName: string;
+  subtypeID?: number;
+  subtypeName?: string;
+  basetypeID?: number;
+  basetypeName?: string;
   comment: string | null;
 }
 
@@ -157,7 +157,7 @@ export default async function getTypes(
               ...base,
               kind: TypeKind.Enum,
               values: (await getEnumValues(connection, {
-                typeID: tr.typeID!,
+                typeID: tr.typeID,
               })).map(v => v.value),
             };
           case TypeKind.Pseudo:

@@ -13,11 +13,12 @@
     "prerelease": "yarn build:all",
     "prettier": "prettier --write \"packages/*/src/**/*.{ts,tsx}\"",
     "release": "bolt publish",
-    "pretest": "yarn build",
+    "pretest": "yarn build && yarn tslint",
     "test": "jest",
     "posttest": "bolt ws run test",
     "watch:jest": "jest --watch",
-    "clean": "rimraf packages/*/lib && rimraf packages/*/.last_build && rimraf packages/*/.cache && rimraf packages/*/build && rimraf packages/*/node_modules && rimraf node_modules"
+    "clean": "rimraf packages/*/lib && rimraf packages/*/.last_build && rimraf packages/*/.cache && rimraf packages/*/build && rimraf packages/*/node_modules && rimraf node_modules",
+    "tslint": "tslint './packages/*/src/**/*.{js,jsx,ts,tsx}' -t verbose -p ."
   },
   "jest": {
     "globalSetup": "./packages/pg-test/jest/globalSetup.js",
@@ -26,7 +27,7 @@
       "<rootDir>.*(node_modules)(?!.*databases.*).*$"
     ],
     "transform": {
-      "^.+\\.tsx?$": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+      "^.+\\.tsx?$": "ts-jest"
     },
     "testRegex": "/__tests__/.+\\.test\\.(tsx?)$",
     "moduleFileExtensions": [
@@ -59,6 +60,7 @@
     "prettier": "^1.15.3",
     "rimraf": "^2.6.2",
     "ts-jest": "^23.10.5",
+    "tslint": "^5.12.0",
     "typescript": "^3.2.2"
   }
 }

@@ -7,7 +7,8 @@
   "dependencies": {
     "@databases/pg": "^0.0.0",
     "@databases/sql": "^0.0.0",
-    "chalk": "^2.4.1"
+    "chalk": "^2.4.1",
+    "prettier": "^1.15.3"
   },
   "scripts": {},
   "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/pg-migrations",

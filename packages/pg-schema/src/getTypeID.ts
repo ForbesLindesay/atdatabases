@@ -26,9 +26,9 @@ export default async function getTypeID(
     includeNonExistantSchemas: true,
   });
   for (const schemaName of searchPath) {
-    const t = types.find(t => t.schemaName === schemaName);
-    if (t) {
-      return t.typeID;
+    const type = types.find(ty => ty.schemaName === schemaName);
+    if (type) {
+      return type.typeID;
     }
   }
   throw new Error(

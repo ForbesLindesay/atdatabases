@@ -13,7 +13,7 @@ export interface SQL {
   value(value: any): SQLQuery;
   ident(...names: Array<any>): SQLQuery;
   registerFormatter<T>(
-    constructor: {new (...args: any[]): T},
+    constructor: new (...args: any[]) => T,
     format: (value: T) => SQLQuery,
   ): void;
 }
@@ -23,11 +23,13 @@ const modifiedSQL: SQL = Object.assign(
   (strings: TemplateStringsArray, ...values: Array<any>): SQLQuery =>
     SQLQuery.query(strings, ...values),
   {
+    // tslint:disable:no-unbound-method
     join: SQLQuery.join,
     __dangerous__rawValue: SQLQuery.raw,
     value: SQLQuery.value,
     ident: SQLQuery.ident,
     registerFormatter: SQLQuery.registerFormatter,
+    // tslint:enable:no-unbound-method
   },
 );
 

@@ -35,7 +35,7 @@ export default async function run(
       // if we haven't already debug logged
       process.stderr.write(stderr);
       process.stdout.write(stdout);
-      const err = new Error(options.name + ' extited with code ' + code);
+      const err = new Error(`${options.name} extited with code ${code}`);
       (err as any).code = code;
       (err as any).stdout = stdout;
       (err as any).stderr = stderr;

@@ -5,10 +5,10 @@ refs:
     docker:
       - image: node:8.11
         environment:
-          DATABASE_URL: 'postgres://pg-jest-user@localhost:5432/pg-jest-db'
+          DATABASE_URL: 'postgres://test-user@localhost:5432/pg-jest-db'
       - image: circleci/postgres:10.6-alpine-ram
         environment:
-          POSTGRES_USER: pg-jest-user
+          POSTGRES_USER: test-user
           POSTGRES_DB: pg-jest-db
     working_directory: ~/repo
   - &restore_cache

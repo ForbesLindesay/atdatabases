@@ -24,15 +24,15 @@ module.exports = async () => {
   const {databaseURL, kill} = await getDatabase(opts);
   process.env[envVar] = databaseURL;
   if (migrationsScript) {
-    console.log('Running migrations');
+    console.info('Running migrations');
     await run(migrationsScript[0], migrationsScript.slice(1), {
       debug: (opts as any).debug || false,
       name: migrationsScript.join(' '),
     });
   }
-  killers.push(() => {
+  killers.push(async () => {
     delete process.env[envVar];
-    return kill();
+    await kill();
   });
 };
 

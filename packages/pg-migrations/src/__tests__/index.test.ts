@@ -35,7 +35,9 @@ test('downOne', async () => {
   await output.downOne(undefined, {silent: true});
   expect(await db.query(sql`SELECT * FROM users`)).toMatchSnapshot();
   await output.downOne(undefined, {silent: true});
-  const err = await getError(() => db.query(sql`SELECT * FROM users`));
+  const err = await getError(
+    async () => await db.query(sql`SELECT * FROM users`),
+  );
   expect(() => {
     if (err) throw err;
   }).toThrowErrorMatchingSnapshot();
@@ -43,7 +45,9 @@ test('downOne', async () => {
 });
 test('downAll', async () => {
   await output.downAll(undefined, {silent: true});
-  const err = await getError(() => db.query(sql`SELECT * FROM users`));
+  const err = await getError(
+    async () => await db.query(sql`SELECT * FROM users`),
+  );
   expect(() => {
     if (err) throw err;
   }).toThrowErrorMatchingSnapshot();

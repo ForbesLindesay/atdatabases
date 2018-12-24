@@ -26,7 +26,7 @@ function con<T>(
 function tx<T>(
   fn: (tx: Connection) => Promise<T>,
 ): (db: Connection) => Promise<T> {
-  return (db: Connection): Promise<T> => db.tx(fn);
+  return async (db: Connection): Promise<T> => await db.tx(fn);
 }
 
 export {con, tx};

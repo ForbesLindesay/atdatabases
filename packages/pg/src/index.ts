@@ -20,18 +20,18 @@ class ConnectionImplementation {
   constructor(connection: pg.IBaseProtocol<{}>) {
     this.connection = connection;
   }
-  query(query: SQLQuery): Promise<any[]> {
+  async query(query: SQLQuery): Promise<any[]> {
     if (!(query instanceof SQLQuery)) {
-      return Promise.reject(
-        new Error(
-          'Invalid query, you must use @databases/sql to create your queries.',
-        ),
+      throw new Error(
+        'Invalid query, you must use @databases/sql to create your queries.',
       );
     }
     if (process.env.NODE_ENV !== 'production') {
       query.disableMinifying();
     }
-    return this.connection.query(query).catch(ex => {
+    try {
+      return await this.connection.query(query);
+    } catch (ex) {
       if (isSQLError(ex) && ex.position) {
         const position = parseInt(ex.position, 10);
         const q = query.compile();
@@ -50,25 +50,27 @@ class ConnectionImplementation {
         }
 
         const start = {line, column};
-        let end: void | {line: number; column: number} = undefined;
+        let end: undefined | {line: number; column: number};
         if (match) {
           end = {line, column: column + match[1].length};
         }
 
-        ex.message += '\n\n' + codeFrameColumns(q.text, {start, end}) + '\n';
+        ex.message += `\n\n${codeFrameColumns(q.text, {start, end})}\n`;
       }
       throw ex;
-    });
+    }
   }
-  task<T>(
+  async task<T>(
     fn: (connection: ConnectionImplementation) => Promise<T>,
   ): Promise<T> {
-    return this.connection.task(t => {
+    return await this.connection.task(t => {
       return fn(new ConnectionImplementation(t)) as any;
     });
   }
-  tx<T>(fn: (connection: ConnectionImplementation) => Promise<T>): Promise<T> {
-    return this.connection.tx(t => {
+  async tx<T>(
+    fn: (connection: ConnectionImplementation) => Promise<T>,
+  ): Promise<T> {
+    return await this.connection.tx(t => {
       return fn(new ConnectionImplementation(t)) as any;
     });
   }
@@ -260,8 +262,9 @@ export default function createConnection(
         (str.length === MAX_SAFE_INTEGER.length && str > MAX_SAFE_INTEGER)
       ) {
         throw new Error(
-          'JavaScript cannot handle integers great than: ' +
-            Number.MAX_SAFE_INTEGER,
+          `JavaScript cannot handle integers great than: ${
+            Number.MAX_SAFE_INTEGER
+          }`,
         );
       }
       return parseInteger(str);
@@ -276,8 +279,9 @@ export default function createConnection(
         result.some((val: number) => val && val > Number.MAX_SAFE_INTEGER)
       ) {
         throw new Error(
-          'JavaScript cannot handle integers great than: ' +
-            Number.MAX_SAFE_INTEGER,
+          `JavaScript cannot handle integers great than: ${
+            Number.MAX_SAFE_INTEGER
+          }`,
         );
       }
     });

@@ -6,12 +6,12 @@ import chalk from 'chalk';
 import {spawn as nodeSpawn} from 'child_process';
 const spawn: typeof nodeSpawn = require('cross-spawn');
 
-function runCommand(
+async function runCommand(
   command: string,
   args?: string[],
   allowFailure: boolean = false,
 ) {
-  return new Promise<string>((resolve, reject) => {
+  return await new Promise<string>((resolve, reject) => {
     const output: {kind: 'stdout' | 'stderr'; chunk: string | Buffer}[] = [];
     let result = '';
     const proc = spawn(command, args, {
@@ -131,11 +131,11 @@ export default async function run(
       }
     }
     if (!/\bpostgresql\b/.test(listing) && hasBrew) {
-      console.log('Installing postgresql...');
+      console.info('Installing postgresql...');
       await runCommand('brew', ['install', 'postgresql']);
     }
     if (!existsSync('/usr/local/var/postgres')) {
-      console.log('Initialising database...');
+      console.info('Initialising database...');
       try {
         await runCommand('initdb', ['/usr/local/var/postgres', '-E', 'utf8']);
       } catch (ex) {
@@ -148,13 +148,15 @@ export default async function run(
       }
     }
     if (hasBrew) {
-      console.log('Starting postgresql service...');
+      console.info('Starting postgresql service...');
       await runCommand('brew', ['services', 'start', 'postgresql']);
     }
   }
   try {
-    console.log('Creating user...');
-    await whenStarted(() => runCommand('createuser', [userName], true));
+    console.info('Creating user...');
+    await whenStarted(
+      async () => await runCommand('createuser', [userName], true),
+    );
   } catch (ex) {
     if (
       hasBrew &&
@@ -165,13 +167,15 @@ export default async function run(
       await runCommand('brew', ['services', 'stop', 'postgresql']);
       rimraf('/usr/local/var/postgres/postmaster.pid');
       await runCommand('brew', ['services', 'start', 'postgresql']);
-      await whenStarted(() => runCommand('createuser', [userName], true));
+      await whenStarted(
+        async () => await runCommand('createuser', [userName], true),
+      );
     } else if (!/already exists/.test(ex.message)) {
       throw ex;
     }
   }
   try {
-    console.log('Creating database...');
+    console.info('Creating database...');
     await runCommand('createdb', [dbName], true);
   } catch (ex) {
     if (!/already exists/.test(ex.message)) {
@@ -179,7 +183,7 @@ export default async function run(
     }
   }
   if (await isWorking(dbConnection)) {
-    console.log('Database created :)');
+    console.info('Database created :)');
     return;
   }
   console.warn('Failed to create the database ' + chalk.cyan(dbConnection));
