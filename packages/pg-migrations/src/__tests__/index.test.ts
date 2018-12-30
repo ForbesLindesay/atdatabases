@@ -1,8 +1,26 @@
+import {readFileSync} from 'fs';
 import connect from '@databases/pg';
 import sql from '@databases/sql';
-import output from './output';
+import {MigrationsPackage} from '../';
+import buildPackage from '../build-package';
 
 jest.setTimeout(30000);
+
+// for some reason prettier in jest fails if this isn't required before it is used
+require('prettier/parser-typescript');
+
+let output: MigrationsPackage = null as any;
+
+test('generate', async () => {
+  await buildPackage({
+    migrationsDirectory: __dirname + '/migrations',
+    outputFile: __dirname + '/output.ts',
+    databasesDbPgMigrationsName: '../',
+  });
+  expect(readFileSync(__dirname + '/output.ts', 'utf8')).toMatchSnapshot();
+  output = require('./output').default;
+  expect(output).toBeInstanceOf(MigrationsPackage);
+});
 
 const db = connect();
 

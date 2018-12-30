@@ -2,7 +2,7 @@
 
 import getDatabase, {run} from '../';
 
-const DEFAULT_ENV_VAR = process.env.PG_JEST_ENV_VAR || 'DATABASE_URL';
+const DEFAULT_ENV_VAR = process.env.PG_TEST_ENV_VAR || 'DATABASE_URL';
 
 export const killers: Array<() => Promise<void>> = [];
 
@@ -14,8 +14,8 @@ module.exports = async () => {
   const envVar: string = (opts as any).environmentVariable || DEFAULT_ENV_VAR;
   const migrationsScript =
     (opts as any).migrationsScript ||
-    (process.env.PG_JEST_MIGRATIONS_SCRIPT
-      ? process.env.PG_JEST_MIGRATIONS_SCRIPT.split(' ')
+    (process.env.PG_TEST_MIGRATIONS_SCRIPT
+      ? process.env.PG_TEST_MIGRATIONS_SCRIPT.split(' ')
       : undefined);
   if (process.env[envVar]) {
     console.info('Using existing database: ', process.env[envVar]);
