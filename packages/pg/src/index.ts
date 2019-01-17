@@ -3,7 +3,10 @@ import sql, {SQLQuery} from '@databases/sql';
 import pg = require('pg-promise');
 import {TConfig} from 'pg-promise';
 import DataTypeID from '@databases/pg-data-type-id';
+import {getPgConfigSync} from '@databases/pg-config';
 const {codeFrameColumns} = require('@babel/code-frame');
+
+const {connectionStringEnvironmentVariable} = getPgConfigSync();
 
 export {sql, SQLQuery, isSQLError, SQLError, SQLErrorCode, DataTypeID};
 
@@ -13,7 +16,7 @@ export interface Connection {
   tx<T>(fn: (connection: Connection) => Promise<T>): Promise<T>;
 }
 // export interface RootConnection extends Connection {
-//   dispose(): void;
+//   dispose(): Promise<void>;
 // }
 class ConnectionImplementation {
   protected connection: pg.IBaseProtocol<{}>;
@@ -77,7 +80,7 @@ class ConnectionImplementation {
 }
 
 class RootConnection extends ConnectionImplementation {
-  readonly dispose: () => void;
+  readonly dispose: () => Promise<void>;
   private readonly pgp: pg.IMain;
   constructor(connection: pg.IDatabase<{}>, pgp: pg.IMain) {
     super(connection);
@@ -227,17 +230,37 @@ export interface ConnectionOptions
 }
 
 export default function createConnection(
-  connectionConfig: string | ConnectionParams | undefined = process.env
-    .DATABASE_URL,
+  connectionConfig: string | ConnectionParams | undefined = process.env[
+    connectionStringEnvironmentVariable
+  ],
   {bigIntAsString, ...otherOptions}: ConnectionOptions = {},
 ): RootConnection {
   if (!connectionConfig) {
     throw new Error(
       'You must provide a connection string for @databases/pg. You can ' +
         'either pass one directly to the createConnection call or set ' +
-        'the DATABASE_URL environment variable.',
+        `the ${connectionStringEnvironmentVariable} environment variable.`,
     );
   }
+
+  if (typeof connectionConfig === 'string') {
+    let url;
+    try {
+      url = new URL(connectionConfig);
+    } catch (ex) {
+      throw new Error(
+        'Invalid Postgres connection string, expected a URI: ' +
+          connectionConfig,
+      );
+    }
+    if (url.protocol !== 'postgres:') {
+      throw new Error(
+        'Invalid Postgres connection string, expected protocol to be "postgres": ' +
+          connectionConfig,
+      );
+    }
+  }
+
   if (typeof connectionConfig === 'object') {
     Object.keys(connectionConfig).forEach(key => {
       if (!ConnectionParamNames.includes(key)) {
@@ -287,11 +310,23 @@ export default function createConnection(
     });
   }
 
-  const connection = pgp(
+  // tslint:disable-next-line:no-unbound-method
+  // const originalWarn = console.warn;
+  if (process.env.NODE_ENV === 'test' || true) {
+    console.warn = () => {
+      // ignore warnings
+    };
+  }
+
+  const c =
     typeof connectionConfig === 'object'
       ? {...connectionConfig, ...otherOptions}
-      : {connectionString: connectionConfig, ...otherOptions},
-  );
+      : {connectionString: connectionConfig, ...otherOptions};
+  const connection = pgp({...c, noWarnings: true} as any);
+
+  // if (process.env.NODE_ENV === 'test' || true) {
+  //   console.warn = originalWarn;
+  // }
 
   return new RootConnection(connection, pgp);
 }

@@ -2,20 +2,30 @@ import startContainer, {
   run,
   Options as WithContainerOptions,
 } from '@databases/with-container';
+import {getPgConfigSync} from '@databases/pg-config';
 
-const DEFAULT_PG_DEBUG = !!process.env.PG_TEST_DEBUG;
-const DEFAULT_IMAGE =
-  process.env.PG_TEST_IMAGE || 'circleci/postgres:10.6-alpine-ram';
-const DEFAULT_CONTAINER_NAME = process.env.PG_TEST_CONTAINER_NAME || 'pg-test';
+const config = getPgConfigSync();
+const DEFAULT_PG_DEBUG = !!process.env.PG_TEST_DEBUG || config.test.debug;
+const DEFAULT_IMAGE = process.env.PG_TEST_IMAGE || config.test.image;
+const DEFAULT_CONTAINER_NAME =
+  process.env.PG_TEST_CONTAINER_NAME || config.test.containerName;
+if (
+  process.env.PG_TEST_CONNECT_TIMEOUT_SECONDS &&
+  !/^\d+$/.test(process.env.PG_TEST_CONNECT_TIMEOUT_SECONDS)
+) {
+  throw new Error(
+    'Expected PG_TEST_CONNECT_TIMEOUT_SECONDS environment variable to be a positive integer',
+  );
+}
 const DEFAULT_CONNECT_TIMEOUT_SECONDS = process.env
   .PG_TEST_CONNECT_TIMEOUT_SECONDS
   ? parseInt(process.env.PG_TEST_CONNECT_TIMEOUT_SECONDS, 10)
-  : 20;
+  : config.test.connectTimeoutSeconds;
 const DEFAULT_PG_PORT = 5432;
-const DEFAULT_PG_USER = process.env.PG_TEST_USER || 'test-user';
-const DEFAULT_PG_DB = process.env.PG_TEST_DB || 'test-db';
+const DEFAULT_PG_USER = process.env.PG_TEST_USER || config.test.pgUser;
+const DEFAULT_PG_DB = process.env.PG_TEST_DB || config.test.pgDb;
 
-interface Options
+export interface Options
   extends Pick<
     WithContainerOptions,
     Exclude<keyof WithContainerOptions, 'internalPort'>
@@ -38,7 +48,7 @@ export default async function getDatabase(options: Partial<Options> = {}) {
     ...options,
   };
 
-  const {proc, externalPort, kill} = await startContainer({
+  const {proc, externalPort = config.test.port, kill} = await startContainer({
     ...rawOptions,
     internalPort: DEFAULT_PG_PORT,
     environment: {...environment, POSTGRES_USER: pgUser, POSTGRES_DB: pgDb},

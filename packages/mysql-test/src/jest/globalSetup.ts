@@ -1,12 +1,11 @@
 // @public
 
+import {getMySqlConfigSync} from '@databases/mysql-config';
 import getDatabase, {run, Options} from '../';
-import {getPgConfigSync} from '@databases/pg-config';
 
-const config = getPgConfigSync();
-
+const config = getMySqlConfigSync();
 const DEFAULT_ENV_VAR =
-  process.env.PG_TEST_ENV_VAR || config.connectionStringEnvironmentVariable;
+  process.env.MYSQL_TEST_ENV_VAR || config.connectionStringEnvironmentVariable;
 
 export const killers: Array<() => Promise<void>> = [];
 
@@ -19,18 +18,18 @@ module.exports = async (
   const envVar: string = opts.environmentVariable || DEFAULT_ENV_VAR;
   const migrationsScript =
     opts.migrationsScript ||
-    (process.env.PG_TEST_MIGRATIONS_SCRIPT
-      ? process.env.PG_TEST_MIGRATIONS_SCRIPT.split(' ')
+    (process.env.MYSQL_TEST_MIGRATIONS_SCRIPT
+      ? process.env.MYSQL_TEST_MIGRATIONS_SCRIPT.split(' ')
       : config.test.migrationsScript);
   if (process.env[envVar]) {
-    console.info(`Using existing pg database from: ${envVar}`);
+    console.info(`Using existing mysql database from: ${envVar}`);
     return;
   }
   const {databaseURL, kill} = await getDatabase(opts);
-  console.info(`Setting pg connection string on environment: ${envVar}`);
+  console.info(`Setting mysql connection string on environment: ${envVar}`);
   process.env[envVar] = databaseURL;
   if (migrationsScript) {
-    console.info('Running pg migrations');
+    console.info('Running mysql migrations');
     await run(migrationsScript[0], migrationsScript.slice(1), {
       debug:
         opts.debug || (opts.debug === undefined && config.test.debug) || false,

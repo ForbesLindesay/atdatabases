@@ -53,10 +53,12 @@ async function isWorking(dbConnection: string): Promise<boolean> {
   // if we can connect to the database, it already exists :-)
   try {
     await db.query(sql`SELECT 1 + 1 AS solution`);
-    db.dispose();
+    await db.dispose();
     return true;
   } catch (ex) {
-    db.dispose();
+    db.dispose().catch(() => {
+      // ignore errors trying to dispose
+    });
     return false;
   }
 }

@@ -24,15 +24,17 @@ export interface Options {
    * get updates to the image.
    */
   refreshImage?: boolean;
+  detached?: boolean;
 }
 
 export interface NormalizedOptions
   extends Pick<Options, Exclude<keyof Options, 'defaultExternalPort'>> {
+  detached: boolean;
   externalPort: number;
 }
 
 export async function imageExists(
-  options: NormalizedOptions,
+  options: NormalizedOptions | Options,
 ): Promise<boolean> {
   const {stdout} = await run('docker', ['images', '--format', '{{json .}}'], {
     debug: options.debug,
@@ -48,7 +50,7 @@ export async function imageExists(
     i => i.Repository === Repository && (!Tag || i.Tag === Tag),
   );
 }
-export async function pullDockerImage(options: NormalizedOptions) {
+export async function pullDockerImage(options: NormalizedOptions | Options) {
   if (
     !options.refreshImage &&
     /.+\:.+/.test(options.image) &&
@@ -83,6 +85,7 @@ export function startDockerContainer(options: NormalizedOptions) {
       '--rm', // automatically remove when container is killed
       '-p', // forward appropriate port
       `${options.externalPort}:${options.internalPort}`,
+      ...(options.detached ? ['--detach'] : []),
       // set enviornment variables
       ...envArgs,
       options.image,
@@ -94,18 +97,24 @@ export function startDockerContainer(options: NormalizedOptions) {
 }
 
 export async function waitForDatabaseToStart(options: NormalizedOptions) {
-  await new Promise<void>(resolve => {
+  await new Promise<void>((resolve, reject) => {
     let finished = false;
     const timeout = setTimeout(() => {
       finished = true;
-      throw new Error(
-        `Unable to connect to database after ${
-          options.connectTimeoutSeconds
-        } seconds. To view logs, run with DEBUG_PG_DOCKER=true environment variable`,
+      reject(
+        new Error(
+          `Unable to connect to database after ${
+            options.connectTimeoutSeconds
+          } seconds. To view logs, run with DEBUG_PG_DOCKER=true environment variable`,
+        ),
       );
     }, options.connectTimeoutSeconds * 1000);
     function test() {
-      console.info(`Waiting for database on port ${options.externalPort}...`);
+      console.info(
+        `Waiting for ${options.containerName} on port ${
+          options.externalPort
+        }...`,
+      );
       const connection = connect(options.externalPort)
         .on('error', () => {
           if (finished) return;
@@ -122,7 +131,9 @@ export async function waitForDatabaseToStart(options: NormalizedOptions) {
   });
 }
 
-export async function killOldContainers(options: NormalizedOptions) {
+export async function killOldContainers(
+  options: Pick<NormalizedOptions, 'debug' | 'containerName'>,
+) {
   await run('docker', ['kill', options.containerName], {
     allowFailure: true, // kill fails if there is no container running
     debug: options.debug,
@@ -136,20 +147,22 @@ export async function killOldContainers(options: NormalizedOptions) {
 }
 
 export default async function startContainer(options: Options) {
+  if (isNaN(options.connectTimeoutSeconds)) {
+    throw new Error('connectTimeoutSeconds must be a valid integer.');
+  }
+
+  await Promise.all([pullDockerImage(options), killOldContainers(options)]);
+
   const {defaultExternalPort, ...rawOptions} = options;
   const externalPort =
     rawOptions.externalPort || (await detectPort(defaultExternalPort));
   const opts: NormalizedOptions = {
     externalPort,
+    detached: false,
     ...rawOptions,
   };
-  if (isNaN(opts.connectTimeoutSeconds)) {
-    throw new Error('connectTimeoutSeconds must be a valid integer.');
-  }
 
-  await Promise.all([pullDockerImage(opts), killOldContainers(opts)]);
-
-  console.info('Starting Docker Container');
+  console.info('Starting Docker Container ' + opts.containerName);
   const proc = startDockerContainer(opts);
 
   await waitForDatabaseToStart(opts);
@@ -158,15 +171,7 @@ export default async function startContainer(options: Options) {
     proc,
     externalPort,
     async kill() {
-      try {
-        await run('docker', ['kill', opts.containerName], {
-          allowFailure: true,
-          debug: opts.debug,
-          name: 'docker kill ' + JSON.stringify(opts.containerName),
-        });
-      } catch (ex) {
-        // ignore errors on teardown
-      }
+      await killOldContainers(options);
     },
   };
 }

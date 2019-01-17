@@ -1,0 +1,19 @@
+{
+  "name": "@databases/mysql-test",
+  "version": "0.0.0",
+  "description": "",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "dependencies": {
+    "@databases/mysql-config": "^0.0.0",
+    "@databases/with-container": "^0.0.0",
+    "yargs": "^12.0.5"
+  },
+  "scripts": {},
+  "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/mysql-test",
+  "bugs": "https://github.com/ForbesLindesay/atdatabases/issues",
+  "license": "GPL-3.0",
+  "publishConfig": {
+    "access": "public"
+  }
+}

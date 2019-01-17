@@ -1,0 +1,26 @@
+{
+  "name": "@databases/mysql-config",
+  "version": "0.0.0",
+  "description": "",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "dependencies": {
+    "@types/ajv": "^1.0.0",
+    "@types/cosmiconfig": "^5.0.3",
+    "ajv": "^6.7.0",
+    "cosmiconfig": "^5.0.7"
+  },
+  "devDependencies": {
+    "typescript-json-validator": "^1.0.0"
+  },
+  "scripts": {
+    "schema": "typescript-json-validator src/MySqlConfig.ts MySqlConfig",
+    "build": "yarn schema"
+  },
+  "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/mysql-config",
+  "bugs": "https://github.com/ForbesLindesay/atdatabases/issues",
+  "license": "GPL-3.0",
+  "publishConfig": {
+    "access": "public"
+  }
+}

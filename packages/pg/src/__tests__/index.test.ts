@@ -55,19 +55,20 @@ test('bigint', async () => {
   `);
   const result = await db.query(sql`SELECT id from bigint_test.bigints;`);
   expect(result).toEqual([{id: 1}, {id: 2}, {id: 42}]);
-  db.dispose();
+  // tslint:disable-next-line:no-void-expression
+  expect(await db.dispose()).toBe(undefined);
 
   expect(await db2.query(sql`SELECT id from bigint_test.bigints;`)).toEqual([
     {id: 1},
     {id: 2},
     {id: 42},
   ]);
-  db2.dispose();
+  await db2.dispose();
 
   expect(await db3.query(sql`SELECT id from bigint_test.bigints;`)).toEqual([
     {id: 1},
     {id: 2},
     {id: 42},
   ]);
-  db3.dispose();
+  await db3.dispose();
 });

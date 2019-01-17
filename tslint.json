@@ -113,7 +113,6 @@
     "encoding": true,
     "jsdoc-format": true,
     "no-angle-bracket-type-assertion": true,
-    "no-redundant-jsdoc": true,
     "no-reference-import": true,
     "no-unnecessary-initializer": true,
     "one-variable-per-declaration": true,

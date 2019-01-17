@@ -41,7 +41,7 @@ export class MigrationsPackage {
     if (typeof db === 'string' || db === undefined) {
       const connection = connect(db);
       const result = await this.run(connection, operation);
-      connection.dispose();
+      await connection.dispose();
       return result;
     }
     return await db.task(async task => {

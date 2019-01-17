@@ -16,7 +16,7 @@ function con<T>(
     if (typeof db === 'string' || db === undefined) {
       const connection = connect(db);
       const result = await fn(connection, ...args);
-      connection.dispose();
+      await connection.dispose();
       return result;
     }
     return await fn(db, ...args);

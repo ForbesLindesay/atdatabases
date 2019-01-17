@@ -5,6 +5,7 @@
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {
+    "@databases/pg-config": "^0.0.0",
     "@databases/with-container": "^0.0.0"
   },
   "scripts": {},
