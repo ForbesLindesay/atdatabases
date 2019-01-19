@@ -7,6 +7,7 @@
   "dependencies": {
     "@databases/mysql-config": "^0.0.0",
     "@databases/with-container": "^0.0.0",
+    "mysql2": "^1.6.4",
     "yargs": "^12.0.5"
   },
   "scripts": {},

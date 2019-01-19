@@ -4,6 +4,7 @@ import startContainer, {
   killOldContainers,
 } from '@databases/with-container';
 import {getMySqlConfigSync} from '@databases/mysql-config';
+const {createConnection} = require('mysql2');
 
 const config = getMySqlConfigSync();
 const DEFAULT_MYSQL_DEBUG = !!process.env.MYSQL_TEST_DEBUG || config.test.debug;
@@ -40,6 +41,69 @@ export interface Options
 
 export {run};
 
+export async function waitForConnection(
+  databaseURL: string,
+  timeoutSeconds: number,
+) {
+  const start = Date.now();
+  const timeoutMilliseconds = timeoutSeconds * 1000;
+  let lastAttempt = false;
+  while (true) {
+    await new Promise<void>(resolve => setTimeout(resolve, 1000));
+    let conn: any;
+    try {
+      try {
+        await new Promise<void>((resolve, reject) => {
+          let errored = false;
+          conn = createConnection(databaseURL);
+          const createConnectionErr: any = new Error();
+          conn.once('connect', () => {
+            resolve();
+          });
+          conn.on('error', (err: any) => {
+            if (errored) return;
+            errored = true;
+            createConnectionErr.message = err.message;
+            createConnectionErr.code = err.code;
+            createConnectionErr.errno = err.errno;
+            createConnectionErr.sqlState = err.sqlState;
+            reject(createConnectionErr);
+          });
+        });
+        const result = await new Promise<any>((resolve, reject) => {
+          const queryErr: any = new Error();
+          conn.query(`SELECT 1 + 1 AS foo;`, (err: any, result: any) => {
+            if (err) {
+              queryErr.message = err.message;
+              reject(queryErr);
+            } else {
+              resolve(result);
+            }
+          });
+        });
+        if (result && result[0] && result[0].foo === 2) {
+          break;
+        } else {
+          if (lastAttempt) {
+            throw new Error('Got unexpected result: ' + JSON.stringify(result));
+          }
+        }
+      } catch (ex) {
+        if (lastAttempt) {
+          throw ex;
+        }
+      }
+    } finally {
+      conn.end(() => {
+        // ignore error closing connection
+      });
+    }
+    if (Date.now() - timeoutMilliseconds > start) {
+      lastAttempt = true;
+    }
+  }
+}
+
 export async function killDatabase(options: Partial<Options> = {}) {
   await killOldContainers({
     debug: DEFAULT_MYSQL_DEBUG,
@@ -63,10 +127,11 @@ export default async function getDatabase(options: Partial<Options> = {}) {
     mysqlPassword: DEFAULT_MYSQL_PASSWORD,
     mysqlDb: DEFAULT_MYSQL_DB,
     defaultExternalPort: DEFAULT_MYSQL_PORT,
+    externalPort: config.test.port,
     ...options,
   };
 
-  const {proc, externalPort = config.test.port, kill} = await startContainer({
+  const {proc, externalPort, kill} = await startContainer({
     ...rawOptions,
     internalPort: DEFAULT_MYSQL_PORT,
     environment: {
@@ -80,9 +145,9 @@ export default async function getDatabase(options: Partial<Options> = {}) {
     },
   });
 
-  await new Promise<void>(resolve => setTimeout(resolve, 4000));
-
   const databaseURL = `mysql://${mysqlUser}:${mysqlPassword}@localhost:${externalPort}/${mysqlDb}`;
+
+  await waitForConnection(databaseURL, rawOptions.connectTimeoutSeconds);
 
   return {
     proc,

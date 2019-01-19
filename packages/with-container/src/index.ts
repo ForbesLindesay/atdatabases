@@ -156,10 +156,13 @@ export default async function startContainer(options: Options) {
   const {defaultExternalPort, ...rawOptions} = options;
   const externalPort =
     rawOptions.externalPort || (await detectPort(defaultExternalPort));
+  if (typeof externalPort !== 'number') {
+    throw new Error('Expected external port to be a number');
+  }
   const opts: NormalizedOptions = {
-    externalPort,
     detached: false,
     ...rawOptions,
+    externalPort,
   };
 
   console.info('Starting Docker Container ' + opts.containerName);

@@ -45,10 +45,11 @@ export default async function getDatabase(options: Partial<Options> = {}) {
     pgUser: DEFAULT_PG_USER,
     pgDb: DEFAULT_PG_DB,
     defaultExternalPort: DEFAULT_PG_PORT,
+    externalPort: config.test.port,
     ...options,
   };
 
-  const {proc, externalPort = config.test.port, kill} = await startContainer({
+  const {proc, externalPort, kill} = await startContainer({
     ...rawOptions,
     internalPort: DEFAULT_PG_PORT,
     environment: {...environment, POSTGRES_USER: pgUser, POSTGRES_DB: pgDb},
