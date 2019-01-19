@@ -50,15 +50,14 @@ class ConnectionImplementation {
         'Invalid query, you must use @databases/sql to create your queries.',
       );
     }
-    if (process.env.NODE_ENV !== 'production') {
-      query.disableMinifying();
-    }
+    const q = query.compile(
+      process.env.NODE_ENV !== 'production' ? {minify: false} : undefined,
+    );
     try {
-      return await this.connection.query(query);
+      return await this.connection.query(q);
     } catch (ex) {
       if (isSQLError(ex) && ex.position) {
         const position = parseInt(ex.position, 10);
-        const q = query.compile();
         const match =
           /syntax error at or near \"([^\"\n]+)\"/.exec(ex.message) ||
           /relation \"([^\"\n]+)\" does not exist/.exec(ex.message);

@@ -15,6 +15,28 @@ export interface PGQuery {
    * The values used to fill the placeholders in `text`.
    */
   values: Array<any>;
+
+  /**
+   * Was the query minified
+   */
+  minified: boolean;
+}
+
+/**
+ * A MySQL query which may be fed directly into the `mysql2` module for
+ * execution.
+ */
+export interface MySqlQuery {
+  /**
+   * The SQL query text with placeholders for values. The placeholders refer to
+   * a value in the `values` array.
+   */
+  text: string;
+
+  /**
+   * The values used to fill the placeholders in `text`.
+   */
+  values: Array<any>;
 }
 
 enum SQLItemType {
@@ -33,6 +55,7 @@ type SQLItem =
 
 const formatter = Symbol('SQL Query Formatter');
 
+const DEFAULT_COMPILE_OPTIONS = {minify: true};
 /**
  * The representation of a SQL query. Call `compile` to turn it into a SQL
  * string with value placeholders.
@@ -43,6 +66,10 @@ const formatter = Symbol('SQL Query Formatter');
  * The constructor for this class is private and may not be called.
  */
 export default class SQLQuery implements PGQuery {
+  /**
+   * To implement PGQuery
+   */
+  public readonly minified = true;
   public static registerFormatter<T>(
     constructor: new (...args: any[]) => T,
     format: (value: T) => SQLQuery,
@@ -60,8 +87,10 @@ export default class SQLQuery implements PGQuery {
     const items: Array<SQLItem> = [];
 
     // Add all of the strings as raw items and values as placeholder values.
-    strings: for (let i = 0; i < strings.length; i++) {
-      items.push({type: SQLItemType.RAW, text: strings[i]});
+    for (let i = 0; i < strings.length; i++) {
+      if (strings[i]) {
+        items.push({type: SQLItemType.RAW, text: strings[i]});
+      }
 
       if (i < values.length) {
         const value = values[i];
@@ -140,12 +169,11 @@ export default class SQLQuery implements PGQuery {
   /**
    * Storage for our memoized compiled query.
    */
-  private _query: PGQuery | null = null;
-
+  private _pgQuery: PGQuery | null = null;
   /**
-   * Is minifying enabled
+   * Storage for our memoized compiled query.
    */
-  private readonly _options: {minify: boolean} = {minify: true};
+  private _mysqlQuery: MySqlQuery | null = null;
 
   // The constructor is private. Users should use the static `create` method to
   // make a new `SQLQuery`.
@@ -172,29 +200,39 @@ export default class SQLQuery implements PGQuery {
    * Compiles this SQL query into a Postgres query. Memoized so it only does the
    * work once.
    */
-  public compile(): PGQuery {
+  public compile(
+    options: {minify: boolean} = DEFAULT_COMPILE_OPTIONS,
+  ): PGQuery {
     // If we don’t yet have a compiled query, create one.
-    if (this._query == null) {
-      this._query = compile(this._items, this._options);
+    if (this._pgQuery == null || this._pgQuery.minified !== options.minify) {
+      this._pgQuery = compilePG(this._items, options);
     }
 
-    return this._query;
+    return this._pgQuery;
   }
+  /**
+   * Compiles this SQL query into a Postgres query. Memoized so it only does the
+   * work once.
+   */
+  public compileMySQL(): MySqlQuery {
+    // If we don’t yet have a compiled query, create one.
+    if (this._mysqlQuery == null) {
+      this._mysqlQuery = compileMySQL(this._items);
+    }
 
-  public disableMinifying() {
-    this._query = null;
-    this._options.minify = false;
+    return this._mysqlQuery;
   }
 }
 
 /**
  * Compiles a list of `SQLItem`s into a single `PGQuery`.
  */
-function compile(items: Array<SQLItem>, options: {minify: boolean}): PGQuery {
+function compilePG(items: Array<SQLItem>, options: {minify: boolean}): PGQuery {
   // Create an empty query object.
   const query: PGQuery = {
     text: '',
     values: [],
+    minified: false,
   };
 
   const localIdentifiers = new Map<any, string>();
@@ -241,7 +279,61 @@ function compile(items: Array<SQLItem>, options: {minify: boolean}): PGQuery {
   // Minify the query text before returning it.
   if (options.minify) {
     query.text = minify(query.text);
+    query.minified = true;
   }
+
+  return query;
+}
+
+function compileMySQL(items: Array<SQLItem>): MySqlQuery {
+  // Create an empty query object.
+  const query: MySqlQuery = {
+    text: '',
+    values: [],
+  };
+
+  const localIdentifiers = new Map<any, string>();
+
+  for (const item of items) {
+    switch (item.type) {
+      // If this is just raw text, we add it directly to the query text.
+      case SQLItemType.RAW: {
+        query.text += item.text;
+        break;
+      }
+
+      // If we got a value SQL item, add a placeholder and add the value to our
+      // placeholder values array.
+      case SQLItemType.VALUE: {
+        query.text += `?`;
+        query.values.push(item.value);
+        break;
+      }
+
+      // If we got an identifier type, escape the strings and get a local
+      // identifier for non-string identifiers.
+      case SQLItemType.IDENTIFIER: {
+        query.text += item.names
+          .map(
+            (name): string => {
+              if (typeof name === 'string') return escapeMySqlIdentifier(name);
+
+              if (!localIdentifiers.has(name))
+                localIdentifiers.set(
+                  name,
+                  `__local_${localIdentifiers.size}__`,
+                );
+
+              return localIdentifiers.get(name)!;
+            },
+          )
+          .join('.');
+        break;
+      }
+    }
+  }
+
+  query.text = query.text.trim();
 
   return query;
 }
@@ -252,6 +344,20 @@ function compile(items: Array<SQLItem>, options: {minify: boolean}): PGQuery {
  * [1]: https://github.com/brianc/node-postgres/blob/a536afb1a8baa6d584bd460e7c1286d75bb36fe3/lib/client.js#L255-L272
  */
 function escapePGIdentifier(str: string): string {
+  if (!str) {
+    throw new Error('Postgres identifiers must be at least 1 character long.');
+  }
+  if (str.length > 63) {
+    throw new Error(
+      'Postgres identifiers should not be longer than 63 characters. https://www.postgresql.org/docs/9.3/sql-syntax-lexical.html',
+    );
+  }
+  if (!/^[A-Za-z0-9_]*$/.test(str)) {
+    throw new Error(
+      '@database/sql restricts postgres identifiers to alphanumeric characers and underscores.',
+    );
+  }
+
   let escaped = '"';
 
   for (const c of str) {
@@ -260,6 +366,41 @@ function escapePGIdentifier(str: string): string {
   }
 
   escaped += '"';
+
+  return escaped;
+}
+
+/**
+ * Escapes a MySQL identifier.
+ *
+ * https://www.codetinkerer.com/2015/07/08/escaping-column-and-table-names-in-mysql-part2.html
+ */
+function escapeMySqlIdentifier(str: string): string {
+  if (!str) {
+    throw new Error('MySQL identifiers must be at least 1 character long.');
+  }
+  if (str.length > 64) {
+    throw new Error(
+      'MySQL identifiers should not be longer than 64 characters. http://dev.mysql.com/doc/refman/5.7/en/identifiers.html',
+    );
+  }
+  if (str[str.length - 1] === ' ') {
+    throw new Error('MySQL identifiers may not end in whitespace');
+  }
+  if (!/^[A-Za-z0-9_]*$/.test(str)) {
+    throw new Error(
+      '@database/sql restricts mysql identifiers to alphanumeric characers and underscores.',
+    );
+  }
+
+  let escaped = '`';
+
+  for (const c of str) {
+    if (c === '`') escaped += c + c;
+    else escaped += c;
+  }
+
+  escaped += '`';
 
   return escaped;
 }

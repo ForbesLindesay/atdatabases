@@ -7,7 +7,7 @@ const mysql: {
 export interface PoolConnection {
   release(): void;
   destroy(): void;
-  query(sql: string, args: any[]): Promise<unknown[]>;
+  query(sql: string, args: any[]): Promise<[unknown[], unknown[]]>;
   execute(sql: string, args: any[]): Promise<unknown>;
   beginTransaction(): Promise<void>;
   commit(): Promise<void>;

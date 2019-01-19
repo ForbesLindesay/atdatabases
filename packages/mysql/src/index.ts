@@ -1,20 +1,65 @@
-// import sql, {SQLQuery} from '@databases/sql';
 import {URL} from 'url';
 import {getMySqlConfigSync} from '@databases/mysql-config';
+import sql, {SQLQuery} from '@databases/sql';
 import createPool, {Pool, PoolConnection} from './raw';
+const {codeFrameColumns} = require('@babel/code-frame');
 
 const {connectionStringEnvironmentVariable} = getMySqlConfigSync();
 
+export {sql};
 export class Connection {
-  public readonly conn: PoolConnection;
-  constructor(conn: PoolConnection) {
+  private readonly conn: Pick<PoolConnection, 'query'>;
+  constructor(conn: Pick<PoolConnection, 'query'>) {
     this.conn = conn;
+  }
+
+  async query(query: SQLQuery): Promise<any[]> {
+    const {text, values} = query.compileMySQL();
+    try {
+      return (await this.conn.query(text, values))[0] as any[];
+    } catch (ex) {
+      // TODO: consider using https://github.com/Vincit/db-errors
+      if (
+        ex.code === 'ER_PARSE_ERROR' &&
+        ex.sqlState === '42000' &&
+        typeof ex.sqlMessage === 'string'
+      ) {
+        const match = / near \'((?:.|\n)+)\' at line (\d+)$/.exec(
+          ex.sqlMessage,
+        );
+        if (match) {
+          const index = text.indexOf(match[1]);
+          if (index === text.lastIndexOf(match[1])) {
+            const linesUptoStart = text.substr(0, index).split('\n');
+            const line = linesUptoStart.length;
+            const start = {
+              line,
+              column: linesUptoStart[linesUptoStart.length - 1].length + 1,
+            };
+            const linesUptoEnd = text
+              .substr(0, index + match[1].length)
+              .split('\n');
+            const end = {
+              line: linesUptoEnd.length,
+              column: linesUptoEnd[linesUptoEnd.length - 1].length + 1,
+            };
+
+            ex.message = ex.message.replace(
+              / near \'((?:.|\n)+)\' at line (\d+)$/,
+              ` near:\n\n${codeFrameColumns(text, {start, end})}\n`,
+            );
+          }
+        }
+      }
+      throw ex;
+    }
   }
 }
 
-export class ConnectionPool {
+export class ConnectionPool extends Connection {
   private readonly pool: Pool;
   constructor(pool: Pool) {
+    super(pool);
     this.pool = pool;
   }
 
@@ -70,7 +115,7 @@ export default function connect(
     );
   }
 
-  parseUrl(connectionConfig);
+  validateMySqlUrl(connectionConfig);
 
   const pool = createPool({
     uri: connectionConfig,
@@ -86,7 +131,7 @@ export default function connect(
   return new ConnectionPool(pool);
 }
 
-function parseUrl(urlString: string) {
+function validateMySqlUrl(urlString: string) {
   let url;
   try {
     url = new URL(urlString);
@@ -101,27 +146,4 @@ function parseUrl(urlString: string) {
         urlString,
     );
   }
-
-  // const options: any = {
-  //   host: url.hostname,
-  //   port: url.port,
-  //   database: url.pathname.substr(1),
-  // };
-  // if (url.username) {
-  //   options.user = url.username;
-  //   options.password = url.password;
-  // }
-
-  // for (const key of url.searchParams.keys()) {
-  //   const value = url.searchParams.get(key)!;
-  //   try {
-  //     // Try to parse this as a JSON expression first
-  //     options[key] = JSON.parse(value);
-  //   } catch (err) {
-  //     // Otherwise assume it is a plain string
-  //     options[key] = value;
-  //   }
-  // }
-
-  // return options;
 }
