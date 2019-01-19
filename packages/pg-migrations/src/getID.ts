@@ -4,7 +4,7 @@ const base = 36;
 const blockSize = 4;
 const discreteValues = Math.pow(base, blockSize);
 
-export default function getID() {
+export default function getID(): string {
   return 'd' + timestamp() + randomBlock() + randomBlock();
 }
 

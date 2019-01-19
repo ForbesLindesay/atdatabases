@@ -1,19 +1,18 @@
 import {Connection} from '@databases/pg';
-import sql from '@databases/sql';
 
 export default async function prepareMigrationsTable(connection: Connection) {
   await connection.tx(async tx => {
-    await tx.query(sql`
+    await tx.query(tx.sql`
       CREATE TABLE IF NOT EXISTS "atdatabases_migrations_version" (
         "id" INTEGER NOT NULL PRIMARY KEY,
         "version" INTEGER
       );
     `);
     const v = await tx.query(
-      sql`SELECT "version" FROM "atdatabases_migrations_version" WHERE "id" = 0`,
+      tx.sql`SELECT "version" FROM "atdatabases_migrations_version" WHERE "id" = 0`,
     );
     if (v.length === 0) {
-      await tx.query(sql`
+      await tx.query(tx.sql`
         CREATE TABLE "atdatabases_migrations" (
           "id" TEXT NOT NULL PRIMARY KEY,
           "index" INTEGER NOT NULL,

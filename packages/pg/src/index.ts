@@ -1,5 +1,5 @@
 import {isSQLError, SQLError, SQLErrorCode} from '@databases/pg-errors';
-import sql, {SQLQuery} from '@databases/sql';
+import sql, {SQLQuery, SQL} from '@databases/sql';
 import pg = require('pg-promise');
 import {TConfig} from 'pg-promise';
 import DataTypeID from '@databases/pg-data-type-id';
@@ -11,14 +11,35 @@ const {connectionStringEnvironmentVariable} = getPgConfigSync();
 export {sql, SQLQuery, isSQLError, SQLError, SQLErrorCode, DataTypeID};
 
 export interface Connection {
+  readonly sql: SQL;
   query(query: SQLQuery): Promise<any[]>;
   task<T>(fn: (connection: Connection) => Promise<T>): Promise<T>;
   tx<T>(fn: (connection: Connection) => Promise<T>): Promise<T>;
 }
-// export interface RootConnection extends Connection {
-//   dispose(): Promise<void>;
-// }
+export interface RootConnection extends Connection {
+  dispose(): Promise<void>;
+  registerTypeParser<T>(
+    type: number | string,
+    parser: (value: string) => T,
+  ): Promise<(value: string) => T>;
+  getTypeParser(type: number | string): Promise<(value: string) => any>;
+  /**
+   * Parses an n-dimensional array
+   *
+   * @param value The string value from the database
+   * @param entryParser A transform function to apply to each string
+   */
+  parseArray(value: string, entryParser?: (entry: string | null) => any): any[];
+  /**
+   * Parse a composite value and get a tuple of strings where
+   * each string represents one attribute.
+   *
+   * @param value The raw string.
+   */
+  parseComposite(value: string): string[];
+}
 class ConnectionImplementation {
+  public readonly sql = sql;
   protected connection: pg.IBaseProtocol<{}>;
   constructor(connection: pg.IBaseProtocol<{}>) {
     this.connection = connection;
@@ -79,8 +100,9 @@ class ConnectionImplementation {
   }
 }
 
-class RootConnection extends ConnectionImplementation {
-  readonly dispose: () => Promise<void>;
+class RootConnectionImplementation extends ConnectionImplementation {
+  public readonly sql = sql;
+  public readonly dispose: () => Promise<void>;
   private readonly pgp: pg.IMain;
   constructor(connection: pg.IDatabase<{}>, pgp: pg.IMain) {
     super(connection);
@@ -206,6 +228,12 @@ class RootConnection extends ConnectionImplementation {
   }
 }
 
+export function isRootConnection(
+  c: Connection | RootConnection,
+): c is RootConnection {
+  return c instanceof RootConnectionImplementation;
+}
+
 export type ConnectionParamNames =
   | 'database'
   | 'user'
@@ -328,7 +356,7 @@ export default function createConnection(
   //   console.warn = originalWarn;
   // }
 
-  return new RootConnection(connection, pgp);
+  return new RootConnectionImplementation(connection, pgp);
 }
 
 module.exports = createConnection;
