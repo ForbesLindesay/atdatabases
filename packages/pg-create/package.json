@@ -5,7 +5,7 @@
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {
-    "@databases/pg": "^0.0.0",
+    "@databases/pg": "^0.1.0",
     "@databases/sql": "^0.0.0",
     "@types/rimraf": "^2.0.2",
     "chalk": "^2.4.1",
