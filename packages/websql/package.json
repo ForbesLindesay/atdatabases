@@ -1,0 +1,18 @@
+{
+  "name": "@databases/websql",
+  "version": "0.0.0",
+  "description": "",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "dependencies": {
+    "@databases/websql-core": "^0.0.0",
+    "websql": "^1.0.0"
+  },
+  "scripts": {},
+  "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/websql",
+  "bugs": "https://github.com/ForbesLindesay/atdatabases/issues",
+  "license": "GPL-3.0",
+  "publishConfig": {
+    "access": "public"
+  }
+}

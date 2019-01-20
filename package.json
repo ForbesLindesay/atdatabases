@@ -7,7 +7,7 @@
     ]
   },
   "scripts": {
-    "postinstall": "node scripts/postinstall",
+    "postinstall": "node scripts/delete-expo-ts && node scripts/postinstall",
     "prebuild": "bolt ws run build",
     "prebuild:all": "bolt ws run build",
     "build": "node scripts/build-all --only-changed",
@@ -47,6 +47,7 @@
   },
   "dependencies": {
     "@babel/code-frame": "^7.0.0",
+    "@babel/core": "^7.2.2",
     "@moped/babel-preset": "^0.0.8",
     "@types/ajv": "^1.0.0",
     "@types/cosmiconfig": "^5.0.3",
@@ -62,6 +63,7 @@
     "cosmiconfig": "^5.0.7",
     "cross-spawn": "^6.0.5",
     "detect-port": "^1.3.0",
+    "expo": "^32.0.1",
     "jest": "^23.6.0",
     "lsr": "^2.0.0",
     "mkdirp": "^0.5.1",
@@ -76,6 +78,7 @@
     "tslint": "^5.12.0",
     "typescript": "^3.2.2",
     "typescript-json-validator": "^1.0.0",
+    "websql": "^1.0.0",
     "yargs": "^12.0.5"
   },
   "engines": {
