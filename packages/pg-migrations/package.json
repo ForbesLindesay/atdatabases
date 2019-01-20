@@ -1,0 +1,23 @@
+{
+  "name": "@databases/pg-migrations",
+  "version": "0.0.0",
+  "description": "",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "dependencies": {
+    "@databases/pg": "^0.0.0",
+    "chalk": "^2.4.1",
+    "prettier": "^1.15.3"
+  },
+  "scripts": {},
+  "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/pg-migrations",
+  "license": "GPL-3.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "@types/node": "^10.12.17",
+    "lsr": "^2.0.0"
+  },
+  "bugs": "https://github.com/ForbesLindesay/atdatabases/issues"
+}

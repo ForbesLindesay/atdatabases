@@ -1,0 +1,21 @@
+{
+  "name": "@databases/mysql",
+  "version": "0.0.0",
+  "description": "",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "dependencies": {
+    "@babel/code-frame": "^7.0.0",
+    "@databases/mysql-config": "^0.0.0",
+    "@databases/sql": "^0.0.0",
+    "@types/mysql": "^2.15.5",
+    "mysql2": "^1.6.4"
+  },
+  "scripts": {},
+  "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/mysql",
+  "bugs": "https://github.com/ForbesLindesay/atdatabases/issues",
+  "license": "GPL-3.0",
+  "publishConfig": {
+    "access": "public"
+  }
+}

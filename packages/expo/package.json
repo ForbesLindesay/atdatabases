@@ -1,0 +1,24 @@
+{
+  "name": "@databases/expo",
+  "version": "0.0.0",
+  "description": "",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "dependencies": {
+    "@databases/websql-core": "^0.0.0"
+  },
+  "peerDependencies": {
+    "expo": "*"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.2.2",
+    "expo": "^32.0.1"
+  },
+  "scripts": {},
+  "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/expo",
+  "bugs": "https://github.com/ForbesLindesay/atdatabases/issues",
+  "license": "GPL-3.0",
+  "publishConfig": {
+    "access": "public"
+  }
+}
