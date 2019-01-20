@@ -4,6 +4,8 @@ import pg = require('pg-promise');
 import {TConfig} from 'pg-promise';
 import DataTypeID from '@databases/pg-data-type-id';
 import {getPgConfigSync} from '@databases/pg-config';
+import QueryStream = require('pg-query-stream');
+import {PassThrough, Readable} from 'stream';
 const {codeFrameColumns} = require('@babel/code-frame');
 
 const {connectionStringEnvironmentVariable} = getPgConfigSync();
@@ -13,6 +15,13 @@ export {sql, SQLQuery, isSQLError, SQLError, SQLErrorCode, DataTypeID};
 export interface Connection {
   readonly sql: SQL;
   query(query: SQLQuery): Promise<any[]>;
+  stream(
+    query: SQLQuery,
+    options?: {
+      highWaterMark?: number;
+      batchSize?: number;
+    },
+  ): Readable;
   task<T>(fn: (connection: Connection) => Promise<T>): Promise<T>;
   tx<T>(fn: (connection: Connection) => Promise<T>): Promise<T>;
 }
@@ -82,6 +91,31 @@ class ConnectionImplementation {
       }
       throw ex;
     }
+  }
+  stream(
+    query: SQLQuery,
+    options: {
+      highWaterMark?: number;
+      batchSize?: number;
+    } = {},
+  ): Readable {
+    if (!(query instanceof SQLQuery)) {
+      throw new Error(
+        'Invalid query, you must use @databases/sql to create your queries.',
+      );
+    }
+    const {text, values} = query.compile(
+      process.env.NODE_ENV !== 'production' ? {minify: false} : undefined,
+    );
+    const qs = new QueryStream(text, values, options);
+    const stream = new PassThrough({objectMode: true});
+    this.connection
+      .stream(qs, results => {
+        results.pipe(stream);
+        results.on('error', err => stream.emit('error', err));
+      })
+      .catch(err => stream.emit('error', err));
+    return stream;
   }
   async task<T>(
     fn: (connection: ConnectionImplementation) => Promise<T>,

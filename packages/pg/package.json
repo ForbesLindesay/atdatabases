@@ -1,6 +1,6 @@
 {
   "name": "@databases/pg",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
@@ -10,7 +10,9 @@
     "@databases/pg-data-type-id": "^0.0.0",
     "@databases/pg-errors": "^0.0.0",
     "@databases/sql": "^0.0.0",
-    "pg-promise": "^8.5.4"
+    "@types/pg-query-stream": "^1.0.2",
+    "pg-promise": "^8.5.4",
+    "pg-query-stream": "1.1.2"
   },
   "scripts": {},
   "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/pg",
