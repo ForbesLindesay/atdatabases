@@ -14,6 +14,11 @@ export class Connection {
   }
 
   async query(query: SQLQuery): Promise<any[]> {
+    if (!(query instanceof SQLQuery)) {
+      throw new Error(
+        'Invalid query, you must use @databases/sql to create your queries.',
+      );
+    }
     const {text, values} = query.compileMySQL();
     try {
       return (await this.conn.query(text, values))[0] as any[];
