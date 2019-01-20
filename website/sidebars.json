@@ -1,0 +1,5 @@
+{
+  "pg": {
+    "Getting started": ["pg", "pg-options", "pg-custom-types"]
+  }
+}

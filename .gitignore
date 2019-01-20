@@ -32,3 +32,5 @@ packages/*/.cache
 .env
 
 .last_build
+
+website/build

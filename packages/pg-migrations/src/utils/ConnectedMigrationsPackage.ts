@@ -1,5 +1,5 @@
 import MigrationSpec from './MigrationSpec';
-import {RootConnection, Connection, isRootConnection} from '@databases/pg';
+import {ConnectionPool, Connection, isConnectionPool} from '@databases/pg';
 import Migration from './Migration';
 import prepareMigrationsTable from './prepareMigrationsTable';
 import getPgVersion from './getPgVersion';
@@ -32,12 +32,12 @@ export interface OperationOptions {
   // interactive?: boolean;
 }
 export default class ConnectedMigrationsPackage {
-  private readonly _connection: RootConnection | Connection;
+  private readonly _connection: ConnectionPool | Connection;
   private readonly _migrations: ReadonlyArray<MigrationSpec>;
   public readonly migrations: ReadonlyArray<MigrationMetadata>;
   private _supportsOn = true;
   constructor(
-    connection: RootConnection | Connection,
+    connection: ConnectionPool | Connection,
     migrations: ReadonlyArray<MigrationSpec>,
   ) {
     this._connection = connection;
@@ -211,7 +211,7 @@ export default class ConnectedMigrationsPackage {
     );
   }
   async dispose() {
-    if (isRootConnection(this._connection)) {
+    if (isConnectionPool(this._connection)) {
       await this._connection.dispose();
     }
   }
