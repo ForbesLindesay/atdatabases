@@ -77,7 +77,7 @@ readdirSync(__dirname + '/../packages').forEach(directory => {
     directory;
   pkg.bugs = 'https://github.com/ForbesLindesay/atdatabases/issues';
   if (existsSync(__dirname + '/../docs/' + directory + '.md')) {
-    pkg.homepage = 'https://www.atdatabases.com/docs/' + directory + '.html';
+    pkg.homepage = 'https://www.atdatabases.com/docs/' + directory;
     writeFileSync(
       __dirname + '/../packages/' + directory + '/README.md',
       '# ' +
@@ -85,8 +85,7 @@ readdirSync(__dirname + '/../packages').forEach(directory => {
         '\n\n' +
         'For documentation, see ' +
         'https://www.atdatabases.com/docs/' +
-        directory +
-        '.html',
+        directory,
     );
   }
   pkg.license = 'GPL-3.0';

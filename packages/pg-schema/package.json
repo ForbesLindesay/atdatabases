@@ -6,7 +6,7 @@
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {
-    "@databases/pg": "^0.2.0",
+    "@databases/pg": "^0.2.1",
     "@databases/sql": "^0.0.0"
   },
   "devDependencies": {
