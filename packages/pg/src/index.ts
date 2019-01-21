@@ -31,10 +31,8 @@ export interface Connection {
     },
   ): Readable;
   task<T>(
-    fn: (
-      connection: Connection,
-      options?: {tag?: string | number},
-    ) => Promise<T>,
+    fn: (connection: Connection) => Promise<T>,
+    options?: {tag?: string | number},
   ): Promise<T>;
   tx<T>(
     fn: (connection: Connection) => Promise<T>,

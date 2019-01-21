@@ -1,6 +1,6 @@
 {
   "name": "@databases/pg",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
@@ -23,5 +23,6 @@
   "devDependencies": {
     "@types/node": "^10.12.17"
   },
-  "bugs": "https://github.com/ForbesLindesay/atdatabases/issues"
+  "bugs": "https://github.com/ForbesLindesay/atdatabases/issues",
+  "homepage": "https://www.atdatabases.com/docs/pg"
 }
