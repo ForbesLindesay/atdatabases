@@ -44,7 +44,15 @@ export async function imageExists(
     .toString('utf8')
     .trim()
     .split('\n')
-    .map(str => JSON.parse(str));
+    .map(str => {
+      try {
+        return JSON.parse(str);
+      } catch (ex) {
+        console.warn('Unable to parse: ' + str);
+        return null;
+      }
+    })
+    .filter(n => n != null);
   const [Repository, Tag] = options.image.split(':');
   return existingImages.some(
     i => i.Repository === Repository && (!Tag || i.Tag === Tag),
