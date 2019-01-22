@@ -1,12 +1,12 @@
 {
   "name": "@databases/pg-test",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {
     "@databases/pg-config": "^0.0.0",
-    "@databases/with-container": "^0.0.0"
+    "@databases/with-container": "^0.0.1"
   },
   "scripts": {},
   "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/pg-test",
