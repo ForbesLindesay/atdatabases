@@ -5,7 +5,7 @@
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {
-    "@databases/pg": "^0.2.1",
+    "@databases/pg": "^0.2.2",
     "chalk": "^2.4.1",
     "prettier": "^1.15.3"
   },

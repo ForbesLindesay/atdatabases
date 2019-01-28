@@ -1,3 +1,4 @@
+import {URL} from 'url';
 import {isSQLError, SQLError, SQLErrorCode} from '@databases/pg-errors';
 import sql, {SQLQuery, SQL} from '@databases/sql';
 import pg = require('pg-promise');
