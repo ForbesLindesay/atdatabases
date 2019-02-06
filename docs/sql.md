@@ -15,7 +15,7 @@ import sql from '@databases/sql';
 
 ### ``` sql`...` ```
 
-Builds part of, or the whoel of, an SQL query, safely interpretting the embedded expressions. You can use it for a basic SQL query with no parameters:
+Builds part of, or the whole of, an SQL query, safely interpreting the embedded expressions. You can use it for a basic SQL query with no parameters:
 
 ```ts
 db.query(sql`SELECT * FROM users;`);
@@ -69,7 +69,7 @@ db.query(sql`SELECT * FROM users WHERE id=${id};`);
 
 ### ``` sql.join(arrayOfFragments, delimiter) ```
 
-Joins an array of SQLQuery values using the delimtier (which is treated as a raw SQL string). It properly handles joining the array of values and ensuring that the placeholders match up.
+Joins an array of SQLQuery values using the delimiter (which is treated as a raw SQL string). It properly handles joining the array of values and ensuring that the placeholders match up.
 
 ```ts
 const arrayOfSqlFields = ["a", "b", "c", "d"].map(
