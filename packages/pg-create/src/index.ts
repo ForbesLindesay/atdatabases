@@ -1,7 +1,6 @@
 import {existsSync} from 'fs';
 import {sync as rimraf} from 'rimraf';
-import connect from '@databases/pg';
-import sql from '@databases/sql';
+import connect, {sql} from '@databases/pg';
 import chalk from 'chalk';
 import {spawn as nodeSpawn} from 'child_process';
 const spawn: typeof nodeSpawn = require('cross-spawn');

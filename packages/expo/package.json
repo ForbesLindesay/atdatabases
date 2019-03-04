@@ -1,11 +1,11 @@
 {
   "name": "@databases/expo",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {
-    "@databases/websql-core": "^0.0.0"
+    "@databases/websql-core": "^1.0.0"
   },
   "peerDependencies": {
     "expo": "*"

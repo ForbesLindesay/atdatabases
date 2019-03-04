@@ -15,11 +15,6 @@ export interface PGQuery {
    * The values used to fill the placeholders in `text`.
    */
   values: Array<any>;
-
-  /**
-   * Was the query minified
-   */
-  minified: boolean;
 }
 
 /**
@@ -170,6 +165,7 @@ export default class SQLQuery implements PGQuery {
    * Storage for our memoized compiled query.
    */
   private _pgQuery: PGQuery | null = null;
+  private _pgQueryMinified: boolean | null = null;
   /**
    * Storage for our memoized compiled query.
    */
@@ -204,8 +200,9 @@ export default class SQLQuery implements PGQuery {
     options: {minify: boolean} = DEFAULT_COMPILE_OPTIONS,
   ): PGQuery {
     // If we don’t yet have a compiled query, create one.
-    if (this._pgQuery == null || this._pgQuery.minified !== options.minify) {
+    if (this._pgQuery == null || this._pgQueryMinified !== options.minify) {
       this._pgQuery = compilePG(this._items, options);
+      this._pgQueryMinified = options.minify;
     }
 
     return this._pgQuery;
@@ -232,7 +229,6 @@ function compilePG(items: Array<SQLItem>, options: {minify: boolean}): PGQuery {
   const query: PGQuery = {
     text: '',
     values: [],
-    minified: false,
   };
 
   const localIdentifiers = new Map<any, string>();
@@ -279,7 +275,6 @@ function compilePG(items: Array<SQLItem>, options: {minify: boolean}): PGQuery {
   // Minify the query text before returning it.
   if (options.minify) {
     query.text = minify(query.text);
-    query.minified = true;
   }
 
   return query;
