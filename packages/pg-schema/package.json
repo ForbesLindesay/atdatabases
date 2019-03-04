@@ -1,13 +1,12 @@
 {
   "name": "@databases/pg-schema",
   "private": true,
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {
-    "@databases/pg": "^0.2.3",
-    "@databases/sql": "^0.0.0"
+    "@databases/pg": "^1.0.0"
   },
   "devDependencies": {
     "@types/node": "^10.12.17",

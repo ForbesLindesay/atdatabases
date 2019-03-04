@@ -1,6 +1,6 @@
 {
   "name": "@databases/pg",
-  "version": "0.2.3",
+  "version": "1.0.0",
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
@@ -9,9 +9,9 @@
     "@databases/pg-config": "^0.0.0",
     "@databases/pg-data-type-id": "^0.0.0",
     "@databases/pg-errors": "^0.0.0",
-    "@databases/sql": "^0.0.0",
+    "@databases/sql": "^1.0.0",
     "@types/pg-query-stream": "^1.0.2",
-    "pg-promise": "8.5.6",
+    "pg-promise": "^8.6.0",
     "pg-query-stream": "1.1.2"
   },
   "scripts": {},

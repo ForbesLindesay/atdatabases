@@ -9,7 +9,6 @@ test('correctly renders sql', () => {
   `;
   expect(query.compile()).toMatchInlineSnapshot(`
 Object {
-  "minified": true,
   "text": "SELECT * FROM foo WHERE id = $1 AND created_at > $2;",
   "values": Array [
     10,
@@ -30,7 +29,6 @@ test('can join parts of query', () => {
   `;
   expect(query.compile()).toMatchInlineSnapshot(`
 Object {
-  "minified": true,
   "text": "SELECT * FROM foo WHERE id = $1 AND created_at > $2;",
   "values": Array [
     10,
