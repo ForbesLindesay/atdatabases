@@ -61,10 +61,6 @@ const DEFAULT_COMPILE_OPTIONS = {minify: true};
  * The constructor for this class is private and may not be called.
  */
 export default class SQLQuery implements PGQuery {
-  /**
-   * To implement PGQuery
-   */
-  public readonly minified = true;
   public static registerFormatter<T>(
     constructor: new (...args: any[]) => T,
     format: (value: T) => SQLQuery,
