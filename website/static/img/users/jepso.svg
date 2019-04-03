@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="177px" height="111px" viewBox="0 0 177 111" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 44.1 (41455) - http://www.bohemiancoding.com/sketch -->
+    <title>Jepso Logo</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <text id="JEPSO" font-family="Helvetica" font-size="53" font-weight="normal" fill="#27334E">
+            <tspan x="2.11157227" y="80">JEPSO</tspan>
+        </text>
+        <text id="Building-the-tools-y" font-family="Helvetica" font-size="14.3999996" font-weight="normal" fill="#27334E">
+            <tspan x="2.03672104" y="107">Building the tools you need</tspan>
+        </text>
+        <path d="M5.19061125,27.8699284 C19.6360432,11.7756574 36.6734007,3.49133 56.3026836,3.01694608 C85.7466081,2.30537021 100.923797,24.2362609 127.040645,24.9251598 C144.451878,25.3844258 159.43833,19.0989591 172,6.06875974" id="Path" stroke="#C00080" stroke-width="5"></path>
+    </g>
+</svg>

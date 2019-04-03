@@ -11,11 +11,27 @@
 // List of projects/orgs using your project for the users page.
 const users = [
   {
-    caption: 'User1',
-    // You will need to prepend the image path with your baseUrl
-    // if it is not '/', like: '/test-site/img/docusaurus.svg'.
-    image: '/img/docusaurus.svg',
-    infoLink: 'https://www.facebook.com',
+    caption: 'Canoe Slalom Entries',
+    image: 'https://www.canoeslalomentries.co.uk/favicon.ico',
+    infoLink: 'https://www.canoeslalomentries.co.uk',
+    pinned: true,
+  },
+  {
+    caption: 'Save Willpower',
+    image: '/img/users/savewillpower.svg',
+    infoLink: 'https://savewillpower.com/',
+    pinned: true,
+  },
+  {
+    caption: 'Threads',
+    image: '/img/users/threads.jpg',
+    infoLink: 'https://www.threadsstyling.com/careers',
+    pinned: true,
+  },
+  {
+    caption: 'Jepso',
+    image: '/img/users/jepso.svg',
+    infoLink: 'https://www.jepso.com/',
     pinned: true,
   },
 ];
@@ -48,14 +64,14 @@ const siteConfig = {
   users,
 
   /* path to images for header/footer */
-  headerIcon: 'img/docusaurus.svg',
-  footerIcon: 'img/docusaurus.svg',
+  headerIcon: 'img/word-mark.svg',
+  footerIcon: 'img/logo-white.svg',
   favicon: 'img/favicon.png',
 
   /* Colors for website */
   colors: {
-    primaryColor: '#2E8555',
-    secondaryColor: '#205C3B',
+    primaryColor: '#FA2B3A',
+    secondaryColor: '#FA2B3A',
   },
 
   /* Custom fonts for website */
