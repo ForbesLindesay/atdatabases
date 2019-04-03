@@ -18,3 +18,8 @@
 .headerTitleWithLogo {
   display: none !important;
 }
+
+.homeContainer .button {
+  border-color: white;
+  color: white;
+}

@@ -654,6 +654,12 @@
     "@types/glob" "*"
     "@types/node" "*"
 
+"@types/sqlite3@^3.1.5":
+  version "3.1.5"
+  resolved "https://registry.yarnpkg.com/@types/sqlite3/-/sqlite3-3.1.5.tgz#c9bbc94b8e8ed0654e1f8bc98716aba6030e9533"
+  dependencies:
+    "@types/node" "*"
+
 "@types/uuid-js@^0.7.1":
   version "0.7.1"
   resolved "https://registry.yarnpkg.com/@types/uuid-js/-/uuid-js-0.7.1.tgz#8f58e32a9e7d3fccd434ce02deafeab013068e77"
@@ -5165,7 +5171,7 @@ sprintf-js@~1.0.2:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/sprintf-js/-/sprintf-js-1.0.3.tgz#04e6926f662895354f3dd015203633b857297e2c"
 
-sqlite3@^4.0.0:
+sqlite3@^4.0.0, sqlite3@^4.0.6:
   version "4.0.6"
   resolved "https://registry.yarnpkg.com/sqlite3/-/sqlite3-4.0.6.tgz#e587b583b5acc6cb38d4437dedb2572359c080ad"
   dependencies:

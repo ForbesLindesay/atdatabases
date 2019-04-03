@@ -5,46 +5,43 @@
     "previous": "Previous",
     "tagline": "Database libraries for Node.js that protect you from SQL Injection",
     "docs": {
-      "doc1": {
-        "title": "Latin-ish",
-        "sidebar_label": "Example Page"
-      },
-      "doc2": {
-        "title": "document number 2"
-      },
-      "doc3": {
-        "title": "This is document number 3"
-      },
-      "doc4": {
-        "title": "Other Document"
-      },
-      "doc5": {
-        "title": "Fifth Document"
+      "mysql": {
+        "title": "MySQL",
+        "sidebar_label": "API"
       },
       "pg-custom-types": {
         "title": "Postgres Custom Types",
         "sidebar_label": "Custom Types"
       },
       "pg-options": {
-        "title": "Postgres Options",
-        "sidebar_label": "Postgres Options"
+        "title": "Postgres Connection Options",
+        "sidebar_label": "Connection Options"
       },
       "pg": {
         "title": "Postgres",
-        "sidebar_label": "Postgres"
+        "sidebar_label": "API"
       },
       "sql": {
         "title": "Building SQL Queries"
+      },
+      "sqlite": {
+        "title": "SQLite",
+        "sidebar_label": "API"
+      },
+      "websql": {
+        "title": "Expo / WebSQL",
+        "sidebar_label": "API"
       }
     },
     "links": {
-      "Building SQL Queries": "Building SQL Queries",
-      "Postgres": "Postgres",
-      "Help": "Help",
-      "Blog": "Blog"
+      "Documentation": "Documentation"
     },
     "categories": {
-      "Getting started": "Getting started"
+      "Getting Started": "Getting Started",
+      "Postgres": "Postgres",
+      "MySQL": "MySQL",
+      "SQLite": "SQLite",
+      "Expo/WebSQL": "Expo/WebSQL"
     }
   },
   "pages-strings": {
