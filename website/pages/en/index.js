@@ -92,8 +92,25 @@ class Index extends React.Component {
         className="productShowcaseSection paddingBottom"
         style={{textAlign: 'center'}}
       >
-        <h2>Feature Callout</h2>
-        <MarkdownBlock>These are features of this project</MarkdownBlock>
+        <img src={`${baseUrl}img/padlock.svg`} width="100" height="100" />
+        <h2>Safe From SQL Injection</h2>
+        <MarkdownBlock>
+          {`Using tagged template literals for queries, e.g.
+\`\`\`ts
+db.query(sql\`SELECT * FROM users WHERE id=\${userID}\`);
+\`\`\`
+
+makes it virtually impossible for SQL Injection attacks to slip in
+un-noticed. All the \`@databases\` libraries enforce the use of the sql
+tagged template literals, so you can't accidentally miss them.
+
+The query is then passed to Postgres as a separate string and values:
+
+\`\`\`
+{text: 'SELECT * FROM users WHERE id=?', values: [userID]}
+\`\`\`
+`}
+        </MarkdownBlock>
       </div>
     );
 
@@ -101,10 +118,11 @@ class Index extends React.Component {
       <Block id="try">
         {[
           {
-            content: 'Talk about trying this out',
-            image: `${baseUrl}img/docusaurus.svg`,
+            content:
+              'Written in TypeScript, so every module has type safety and type definitions built in.',
+            image: `${baseUrl}img/typescript.svg`,
             imageAlign: 'left',
-            title: 'Try it Out',
+            title: 'Type Safe',
           },
         ]}
       </Block>
@@ -115,10 +133,10 @@ class Index extends React.Component {
         {[
           {
             content:
-              'This is another description of how this project is useful',
-            image: `${baseUrl}img/docusaurus.svg`,
+              'Each database driver is published to npm as a separate module.',
+            image: `${baseUrl}img/npm.svg`,
             imageAlign: 'right',
-            title: 'Description',
+            title: 'Modular',
           },
         ]}
       </Block>
@@ -128,10 +146,11 @@ class Index extends React.Component {
       <Block background="light">
         {[
           {
-            content: 'Talk about learning how to use this',
-            image: `${baseUrl}img/docusaurus.svg`,
+            content:
+              'All the @databases APIs are designed with promises in mind from the get go.',
+            image: `${baseUrl}img/promises.svg`,
             imageAlign: 'right',
-            title: 'Learn How',
+            title: 'Promises',
           },
         ]}
       </Block>
@@ -202,11 +221,10 @@ class Index extends React.Component {
         <HomeSplash siteConfig={siteConfig} language={language} />
         <div className="mainContainer">
           <Features />
-          {/* 
           <FeatureCallout />
           <LearnHow />
           <TryOut />
-          <Description /> */}
+          <Description />
           <Showcase />
         </div>
       </div>
