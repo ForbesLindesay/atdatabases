@@ -1,15 +1,15 @@
 ---
-id: pg
-title: Postgres
+id: mysql
+title: MySQL
 sidebar_label: API
 ---
 
-The `@databases/pg` library provides a safe and convenient API for querying postgres databases in node.js.
+The `@databases/mysql` library provides a safe and convenient API for querying MySQL databases in node.js.
 
 ## Usage
 
 ```ts
-import connect, {sql} from '@databases/pg';
+import connect, {sql} from '@databases/mysql';
 
 const db = connect();
 
@@ -23,17 +23,14 @@ db.query(sql`SELECT * FROM users;`).then(
 
 ## API
 
-### ``` connect(connection, options) ```
+### ``` connect(connection) ```
 
 Create a `ConnectionPool` for a given database. You should only create one ConnectionPool per database for your entire applicaiton. Normally this means having one module that creates and exports the connection pool.
 
-You can pass two parameters to the `connect` function. The first is the connection string/details. It can be one of:
+The `connect` function just takes the connection string:
 
- * a connection string, e.g. `postgresql://my-user:my-password@localhost/my-db`
- * an object with `{database?: string, user?: string, password?: string, port?: number, host?: string, ssl?: boolean}`
+ * a connection string, e.g. `mysql://my-user:my-password@localhost/my-db`
  * if you don't provide a value, the `DATABASE_URL` environment variable is treated as a postgres connection string.
-
-The second, `options` allows you to perform advanced customisation of the database connection. See [Postgres Options](pg-options.md)
 
 The `ConnectionPool` inherits from `Connection`, so you call `ConnectionPool.query` directly instead of having to manually aquire a connection to run the query. If you intend to run a sequence of queries, it is generally better for performance to aquire a single connection for them, using `connectionPool.task` even if you do not want a transaction.
 
@@ -41,7 +38,7 @@ The `ConnectionPool` inherits from `Connection`, so you call `ConnectionPool.que
 
 Run an SQL Query and get a promise for an array of results.
 
-### ``` Connection.task(fn, options?): Promise<T> ```
+### ``` Connection.task(fn): Promise<T> ```
 
 Executes a callback function with automatically managed connection.
 
@@ -62,13 +59,7 @@ const result = await db.task(async task => {
 
 > N.B. this is not a transaction. If later statements fail, the earlier queries will already have taken effect. You can manulaly execute `BEGIN` and `COMMIT`/`ROLLBACK` SQL on the connection though, to impelement the transaction yourself.
 
-Options:
-
-Name | Type | Optional | Description
------|-------|---------|------------
-`tag` | <code>string &#124; number</code> | ✓ | Traceable context for the task
-
-### ``` Connection.tx(fn, options?): Promise<T> ```
+### ``` Connection.tx(fn): Promise<T> ```
 
 Executes a callback function as a transaction, with automatically managed connection.
 
@@ -90,32 +81,6 @@ const result = await db.task(async task => {
 // => 4
 ```
 
-Options:
-
-Name | Type | <abbr title="Optional">Opt</abbr> | Description
------|-------|---------|------------
-`tag` | <code>string &#124; number</code> | ✓ | Traceable context for the task
-`isolationLevel` | `IsolationLevel` | ✓ | Transaction Isolation Level
-`readOnly` | `boolean` | ✓ | Sets transaction access mode
-`deferrable` | `boolean` | ✓ | Sets the transaction deferrable mode. It is only used when `isolationLevel` is `IsolationLevel.serializable` and `readOnly=true`
-
-### IsolationLevel
-
-```ts
-import {IsolationLevel} from '@databases/pg';
-```
-
-The Isolation Level can be passed to `Connection.tx` as an option. It should be one of:
-
-* `IsolationLeve.none`
-* `IsolationLevel.serializable`
-* `IsolationLevel.repeatableRead`
-* `IsolationLevel.readCommitted`
-
 ### ``` ConnectionPool.dispose(): Promise<void> ```
 
 Dispose the connection pool. Once this is called, any subsequent queries will fail.
-
-### ``` ConnectionPool.registerTypeParser(type, parser) ``` / ``` ConnectionPool.getTypeParser(type) ``` / ``` ConnectionPool.parseArray(string, entryParser) ``` / ``` ConnectionPool.parseComposite(string) ```
-
-See: [Custom Types](pg-custom-types.md)

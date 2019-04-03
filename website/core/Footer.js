@@ -37,14 +37,11 @@ class Footer extends React.Component {
           </a>
           <div>
             <h5>Docs</h5>
-            <a href={this.docUrl('doc1.html', this.props.language)}>
-              Getting Started (or other categories)
-            </a>
-            <a href={this.docUrl('doc2.html', this.props.language)}>
-              Guides (or other categories)
-            </a>
-            <a href={this.docUrl('doc3.html', this.props.language)}>
-              API Reference (or other categories)
+            <a href={this.docUrl('pg.html', this.props.language)}>Postgres</a>
+            <a href={this.docUrl('mysql.html', this.props.language)}>MySQL</a>
+            <a href={this.docUrl('sqlite.html', this.props.language)}>SQLite</a>
+            <a href={this.docUrl('websql.html', this.props.language)}>
+              Expo/WebSQL
             </a>
           </div>
           <div>
@@ -52,7 +49,7 @@ class Footer extends React.Component {
             <a href={this.pageUrl('users.html', this.props.language)}>
               User Showcase
             </a>
-            <a
+            {/* <a
               href="http://stackoverflow.com/questions/tagged/"
               target="_blank"
               rel="noreferrer noopener"
@@ -66,12 +63,12 @@ class Footer extends React.Component {
               rel="noreferrer noopener"
             >
               Twitter
-            </a>
+            </a> */}
           </div>
           <div>
             <h5>More</h5>
             <a href={`${this.props.config.baseUrl}blog`}>Blog</a>
-            <a href="https://github.com/">GitHub</a>
+            <a href="https://github.com/ForbesLindesay/atdatabases">GitHub</a>
             <a
               className="github-button"
               href={this.props.config.repoUrl}

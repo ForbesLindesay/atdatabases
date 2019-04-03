@@ -29,12 +29,6 @@ class HomeSplash extends React.Component {
       </div>
     );
 
-    const Logo = props => (
-      <div className="projectLogo">
-        <img src={props.img_src} alt="Project Logo" />
-      </div>
-    );
-
     const ProjectTitle = () => (
       <h2 className="projectTitle">
         <img src={`${baseUrl}img/word-mark.svg`} />
@@ -42,10 +36,29 @@ class HomeSplash extends React.Component {
       </h2>
     );
 
+    const PromoSection = props => (
+      <div className="section promoSection">
+        <div className="promoRow">
+          <div className="pluginRowBlock">{props.children}</div>
+        </div>
+      </div>
+    );
+
+    const Button = props => (
+      <div className="pluginWrapper buttonWrapper">
+        <a className="button" href={props.href} target={props.target}>
+          {props.children}
+        </a>
+      </div>
+    );
+
     return (
       <SplashContainer>
         <div className="inner">
           <ProjectTitle siteConfig={siteConfig} />
+          <PromoSection>
+            <Button href={docUrl('sql.html')}>Getting Started</Button>
+          </PromoSection>
         </div>
       </SplashContainer>
     );
@@ -55,7 +68,10 @@ class HomeSplash extends React.Component {
 class Index extends React.Component {
   render() {
     const {config: siteConfig, language = ''} = this.props;
-    const {baseUrl} = siteConfig;
+    const {baseUrl, docsUrl} = siteConfig;
+    const docsPart = `${docsUrl ? `${docsUrl}/` : ''}`;
+    const langPart = `${language ? `${language}/` : ''}`;
+    const docUrl = doc => `${baseUrl}${docsPart}${langPart}${doc}`;
 
     const Block = props => (
       <Container
@@ -128,25 +144,25 @@ class Index extends React.Component {
             // content: 'This is the content of my feature',
             image: `${baseUrl}img/postgres.svg`,
             imageAlign: 'top',
-            title: 'Postgres',
+            title: `[Postgres](${docUrl('pg.html')})`,
           },
           {
             // content: 'The content of my second feature',
             image: `${baseUrl}img/mysql.svg`,
             imageAlign: 'top',
-            title: 'MySQL',
+            title: `[MySQL](${docUrl('mysql.html')})`,
           },
           {
             // content: 'The content of my second feature',
             image: `${baseUrl}img/sqlite.svg`,
             imageAlign: 'top',
-            title: 'SQLite',
+            title: `[SQLite](${docUrl('sqlite.html')})`,
           },
           {
             // content: 'The content of my second feature',
             image: `${baseUrl}img/expo.svg`,
             imageAlign: 'top',
-            title: 'Expo/WebSQL',
+            title: `[Expo/WebSQL](${docUrl('websql.html')})`,
           },
         ]}
       </Block>

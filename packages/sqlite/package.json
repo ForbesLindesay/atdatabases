@@ -1,0 +1,19 @@
+{
+  "name": "@databases/sqlite",
+  "version": "0.0.0",
+  "description": "",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "dependencies": {
+    "@databases/sql": "^1.0.1",
+    "@types/sqlite3": "^3.1.5",
+    "sqlite3": "^4.0.6"
+  },
+  "scripts": {},
+  "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/sqlite",
+  "bugs": "https://github.com/ForbesLindesay/atdatabases/issues",
+  "license": "GPL-3.0",
+  "publishConfig": {
+    "access": "public"
+  }
+}

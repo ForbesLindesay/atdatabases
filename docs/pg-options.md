@@ -1,7 +1,7 @@
 ---
 id: pg-options
-title: Postgres Options
-sidebar_label: Postgres Options
+title: Postgres Connection Options
+sidebar_label: Connection Options
 ---
 
 For most people, the defaults should be fine, but you can customise the postgres connection with the following options:

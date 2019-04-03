@@ -1,5 +1,9 @@
 {
-  "pg": {
-    "Getting started": ["pg", "pg-options", "pg-custom-types"]
+  "docs": {
+    "Getting Started": ["sql"],
+    "Postgres": ["pg", "pg-options", "pg-custom-types"],
+    "MySQL": ["mysql"],
+    "SQLite": ["sqlite"],
+    "Expo/WebSQL": ["websql"]
   }
 }

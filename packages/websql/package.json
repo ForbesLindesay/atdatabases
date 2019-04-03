@@ -14,5 +14,6 @@
   "license": "GPL-3.0",
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "homepage": "https://www.atdatabases.com/docs/websql"
 }
