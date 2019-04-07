@@ -1,9 +1,9 @@
 {
   "docs": {
     "Getting Started": ["sql"],
-    "Postgres": ["pg", "pg-options", "pg-custom-types"],
-    "MySQL": ["mysql"],
-    "SQLite": ["sqlite"],
-    "Expo/WebSQL": ["websql"]
+    "Postgres": ["pg", "pg-options", "pg-custom-types", "pg-test"],
+    "MySQL": ["mysql", "mysql-test"],
+    "SQLite": ["sqlite", "sqlite-test"],
+    "Expo/WebSQL": ["websql", "websql-test"]
   }
 }
