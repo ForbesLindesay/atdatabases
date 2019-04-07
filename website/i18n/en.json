@@ -5,6 +5,10 @@
     "previous": "Previous",
     "tagline": "Database libraries for Node.js that protect you from SQL Injection",
     "docs": {
+      "mysql-test": {
+        "title": "MySQL Testing",
+        "sidebar_label": "Testing"
+      },
       "mysql": {
         "title": "MySQL",
         "sidebar_label": "API"
@@ -17,6 +21,10 @@
         "title": "Postgres Connection Options",
         "sidebar_label": "Connection Options"
       },
+      "pg-test": {
+        "title": "Postgres Testing",
+        "sidebar_label": "Testing"
+      },
       "pg": {
         "title": "Postgres",
         "sidebar_label": "API"
@@ -24,9 +32,17 @@
       "sql": {
         "title": "Building SQL Queries"
       },
+      "sqlite-test": {
+        "title": "SQLite Testing",
+        "sidebar_label": "Testing"
+      },
       "sqlite": {
         "title": "SQLite",
         "sidebar_label": "API"
+      },
+      "websql-test": {
+        "title": "Expo / WebSQL Testing",
+        "sidebar_label": "Testing"
       },
       "websql": {
         "title": "Expo / WebSQL",
