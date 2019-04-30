@@ -6,7 +6,7 @@ sidebar_label: Testing
 
 The `@databases/pg-test` library uses docker to allow you to run tests against a real postgres database.
 
-I've found that if your application has lots of complex business logic, and an extremely simple database schema/set of database queries, it makes sense to just mock out database calls in tests. However, I've also found applications where the code is just plumbing from a simple REST API to a database, where testing without a real database feels pretty pointless. Docker makes it remarcably simple to test your application against a real database. When I've tried this technique, it has only added a few seconds to each test run, and it's caught many bugs that would otherwise have made it into staging deployments.
+I've found that if your application has lots of complex business logic, and an extremely simple database schema/set of database queries, it makes sense to just mock out database calls in tests. However, I've also found applications where the code is just plumbing from a simple REST API to a database, where testing without a real database feels pretty pointless. Docker makes it remarkably simple to test your application against a real database. When I've tried this technique, it has only added a few seconds to each test run, and it's caught many bugs that would otherwise have made it into staging deployments.
 
 ## Installing
 
