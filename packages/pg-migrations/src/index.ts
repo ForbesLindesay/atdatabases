@@ -1,3 +1,4 @@
+import Migration from './utils/Migration';
 import Operation from './utils/Operation';
 import MigrationSpec from './utils/MigrationSpec';
 import MigrationStatus from './utils/MigrationStatus';
@@ -11,6 +12,7 @@ import MigrationsPackage from './utils/MigrationsPackage';
 import {Connection, sql} from '@databases/pg';
 
 export {
+  Migration,
   MigrationSpec,
   Operation,
   MigrationsPackage,
