@@ -49,7 +49,6 @@
     "@babel/code-frame": "^7.0.0",
     "@babel/core": "^7.2.2",
     "@moped/babel-preset": "^0.0.8",
-    "@types/ajv": "^1.0.0",
     "@types/cosmiconfig": "^5.0.3",
     "@types/cross-spawn": "^6.0.0",
     "@types/jest": "^23.3.10",

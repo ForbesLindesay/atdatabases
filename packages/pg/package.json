@@ -1,12 +1,12 @@
 {
   "name": "@databases/pg",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {
     "@babel/code-frame": "^7.0.0",
-    "@databases/pg-config": "^0.0.0",
+    "@databases/pg-config": "^1.0.0",
     "@databases/pg-data-type-id": "^0.0.0",
     "@databases/pg-errors": "^0.0.0",
     "@databases/sql": "^1.0.1",
