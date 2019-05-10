@@ -9,12 +9,12 @@ const DEFAULT_ENV_VAR =
 
 export const killers: Array<() => Promise<void>> = [];
 
-module.exports = async (
+export default async function setup(
   opts: Partial<Options> & {
     environmentVariable?: string;
     migrationsScript?: string[];
   } = {},
-) => {
+) {
   const envVar: string = opts.environmentVariable || DEFAULT_ENV_VAR;
   const migrationsScript =
     opts.migrationsScript ||
@@ -40,6 +40,8 @@ module.exports = async (
     delete process.env[envVar];
     await kill();
   });
-};
+}
 
+module.exports = setup;
+module.exports.default = setup;
 module.exports.killers = killers;
