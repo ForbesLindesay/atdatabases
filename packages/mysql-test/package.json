@@ -1,11 +1,11 @@
 {
   "name": "@databases/mysql-test",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {
-    "@databases/mysql-config": "^0.0.0",
+    "@databases/mysql-config": "^1.0.0",
     "@databases/with-container": "^0.0.1",
     "mysql2": "^1.6.4",
     "yargs": "^12.0.5"
@@ -16,5 +16,6 @@
   "license": "GPL-3.0",
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "homepage": "https://www.atdatabases.com/docs/mysql-test"
 }

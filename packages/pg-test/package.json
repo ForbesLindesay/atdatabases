@@ -1,11 +1,11 @@
 {
   "name": "@databases/pg-test",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {
-    "@databases/pg-config": "^0.0.0",
+    "@databases/pg-config": "^1.0.0",
     "@databases/with-container": "^0.0.1"
   },
   "scripts": {},
@@ -17,5 +17,6 @@
   "devDependencies": {
     "@types/node": "^10.12.17"
   },
-  "bugs": "https://github.com/ForbesLindesay/atdatabases/issues"
+  "bugs": "https://github.com/ForbesLindesay/atdatabases/issues",
+  "homepage": "https://www.atdatabases.com/docs/pg-test"
 }
