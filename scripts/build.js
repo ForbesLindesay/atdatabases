@@ -75,8 +75,17 @@ lsrSync(cwd, {
 
 // tsc -p tsconfig.build.json
 const result = spawnSync(
-  require.resolve('.bin/tsc'),
-  ['-p', 'tsconfig.build.json'],
+  ...(
+    pkg.scripts && pkg.scripts.build
+    ? [
+      'yarn',
+      ['build'],
+    ]
+    : [
+      require.resolve('.bin/tsc'),
+      ['-p', 'tsconfig.build.json'],
+    ]
+  ),
   {
     stdio: 'inherit',
   },

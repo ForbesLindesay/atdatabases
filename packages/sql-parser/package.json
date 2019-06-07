@@ -11,6 +11,7 @@
     "mkdirp": "^0.5.1"
   },
   "scripts": {
+    "build": "yarn build:grammar",
     "build:grammar": "mkdirp lib/ && pegjs -o lib/tcl.js src/tcl.pegjs && node src/tcl-to-json && node src/json-to-peg && pegjs -o lib/sql.js lib/sql.pegjs && node src/test",
     "build:grammar:w": "nodemon --watch src/tcl.pegjs --watch src/tcl-to-json.js --watch src/json-to-peg.js --watch src/test.js --exec \"yarn build:grammar\""
   },
