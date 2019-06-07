@@ -51,7 +51,6 @@ test('invalid config', () => {
   expect(() => _testReadPgConfigSync(__dirname + '/fixtures/invalid.json'))
     .toThrowErrorMatchingInlineSnapshot(`
 "PgConfig.connectionStringEnvironmentVariable should be string
-PgConfig value:
 
 { connectionStringEnvironmentVariable: 10,
   test:
