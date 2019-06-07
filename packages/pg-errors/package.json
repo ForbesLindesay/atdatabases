@@ -5,7 +5,7 @@
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
-    "build": "node build"
+    "postbuild": "node build"
   },
   "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/pg-errors",
   "license": "GPL-3.0",
