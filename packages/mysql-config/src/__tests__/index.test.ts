@@ -54,7 +54,6 @@ test('invalid config', () => {
   expect(() => _testReadMySqlConfigSync(__dirname + '/fixtures/invalid.json'))
     .toThrowErrorMatchingInlineSnapshot(`
 "MySqlConfig.connectionStringEnvironmentVariable should be string
-MySqlConfig value:
 
 { connectionStringEnvironmentVariable: 10,
   test:

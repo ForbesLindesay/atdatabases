@@ -64,8 +64,8 @@ export interface ConnectionPool extends Connection {
 }
 class ConnectionImplementation {
   public readonly sql = sql;
-  protected connection: pg.IBaseProtocol<{}>;
-  constructor(connection: pg.IBaseProtocol<{}>) {
+  protected connection: pg.IBaseProtocol<unknown>;
+  constructor(connection: pg.IBaseProtocol<unknown>) {
     this.connection = connection;
   }
   async query(query: SQLQuery): Promise<any[]> {
@@ -176,7 +176,7 @@ class ConnectionPoolImplementation extends ConnectionImplementation {
   public readonly sql = sql;
   public readonly dispose: () => Promise<void>;
   private readonly pgp: pg.IMain;
-  constructor(connection: pg.IDatabase<{}>, pgp: pg.IMain) {
+  constructor(connection: pg.IDatabase<unknown>, pgp: pg.IMain) {
     super(connection);
     this.dispose = () => connection.$pool.end();
     this.pgp = pgp;
