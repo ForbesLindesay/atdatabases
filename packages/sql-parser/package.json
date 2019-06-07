@@ -1,0 +1,23 @@
+{
+  "name": "@databases/sql-parser",
+  "version": "0.0.0",
+  "description": "",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "dependencies": {
+    "pegjs": "^0.10.0"
+  },
+  "devDependencies": {
+    "mkdirp": "^0.5.1"
+  },
+  "scripts": {
+    "build:grammar": "mkdirp lib/ && pegjs -o lib/tcl.js src/tcl.pegjs && node src/tcl-to-json && node src/json-to-peg && pegjs -o lib/sql.js lib/sql.pegjs && node src/test",
+    "build:grammar:w": "nodemon --watch src/tcl.pegjs --watch src/tcl-to-json.js --watch src/json-to-peg.js --watch src/test.js --exec \"yarn build:grammar\""
+  },
+  "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/sql-parser",
+  "bugs": "https://github.com/ForbesLindesay/atdatabases/issues",
+  "license": "GPL-3.0",
+  "publishConfig": {
+    "access": "public"
+  }
+}

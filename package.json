@@ -69,6 +69,7 @@
     "lsr": "^2.0.0",
     "mkdirp": "^0.5.1",
     "mysql2": "^1.6.4",
+    "pegjs": "^0.10.0",
     "pg-error-constants": "^1.0.0",
     "pg-minify": "^0.5.5",
     "pg-promise": "^8.6.0",
