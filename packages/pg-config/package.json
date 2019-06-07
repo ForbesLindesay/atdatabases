@@ -14,7 +14,7 @@
   },
   "scripts": {
     "schema": "typescript-json-validator src/PgConfig.ts PgConfig",
-    "build": "yarn schema"
+    "prebuild": "yarn schema"
   },
   "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/pg-config",
   "bugs": "https://github.com/ForbesLindesay/atdatabases/issues",

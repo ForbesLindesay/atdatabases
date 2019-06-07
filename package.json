@@ -8,8 +8,8 @@
   },
   "scripts": {
     "postinstall": "node scripts/delete-expo-ts && node scripts/postinstall",
-    "prebuild": "bolt ws run build",
-    "prebuild:all": "bolt ws run build",
+    "prebuild": "bolt ws run prebuild",
+    "prebuild:all": "bolt ws run prebuild",
     "build": "node scripts/build-all --only-changed",
     "build:all": "node scripts/build-all",
     "prerelease": "yarn build:all",

@@ -14,7 +14,7 @@
   },
   "scripts": {
     "schema": "typescript-json-validator src/MySqlConfig.ts MySqlConfig",
-    "build": "yarn schema"
+    "prebuild": "yarn schema"
   },
   "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/mysql-config",
   "bugs": "https://github.com/ForbesLindesay/atdatabases/issues",
