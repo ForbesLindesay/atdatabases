@@ -11,9 +11,16 @@
     "mkdirp": "^0.5.1"
   },
   "scripts": {
+    "prebuild": "mkdirp lib/",
     "build": "yarn build:grammar",
-    "build:grammar": "mkdirp lib/ && pegjs -o lib/tcl.js src/tcl.pegjs && node src/tcl-to-json && node src/json-to-peg && pegjs -o lib/sql.js lib/sql.pegjs && node src/test",
-    "build:grammar:w": "nodemon --watch src/tcl.pegjs --watch src/tcl-to-json.js --watch src/json-to-peg.js --watch src/test.js --exec \"yarn build:grammar\""
+    "build:tcl-to-json": "pegjs -o lib/tcl.js src/tcl.pegjs && node src/tcl-to-json",
+    "build:json-to-peg": "node src/json-to-peg",
+    "build:peg": "pegjs -o lib/sql.js lib/sql.pegjs",
+    "test": "node src/test",
+    "build:grammar": "pegjs -o lib/sql.js src/sql.pegjs && node src/test.js",
+    "build:grammar:w": "nodemon --watch src --exec \"yarn build:grammar\"",
+    "_build:grammar": "yarn build:tcl-to-json && yarn build:json-to-peg && yarn build:peg && yarn test",
+    "_build:grammar:w": "nodemon --watch src/tcl.pegjs --watch src/tcl-to-json.js --watch src/json-to-peg.js --watch src/test.js --exec \"yarn build:grammar\""
   },
   "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/sql-parser",
   "bugs": "https://github.com/ForbesLindesay/atdatabases/issues",

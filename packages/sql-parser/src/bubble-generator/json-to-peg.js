@@ -14,7 +14,6 @@ function printRule(ruleName) {
     const r = rules[ruleName];
     assert.strictEqual(r.body.name, 'or');
     const exps = r.body.body;
-    console.log(exps);
     output += `BASE_EXPR = ` + exps.filter(
       e => e.name !== 'line' || e.body[0] !== 'expr'
     ).map(e => `(${print(e, r.body)})`).join(' / ') + '\n\n';
@@ -31,7 +30,6 @@ function printRule(ruleName) {
 
 printRuleName('sql-stmt-list');
 const output = rulesOutput.join('') + require('fs').readFileSync(__dirname + '/sql-extra.pegjs', 'utf8');
-console.log(output);
 
 console.log([...missing].sort());
 // console.log(printedRules);
@@ -51,7 +49,7 @@ function printRuleName(rawName) {
     return name;
   }
 }
-function print(group, parent) {
+function print(group, parent, indent = '  ') {
   if (typeof group === 'string') {
     if (group === 'nil') return `""`;
     if (group in rules) {
@@ -94,7 +92,7 @@ function print(group, parent) {
       return `(${group.body.map(g => print(g, group)).join(' ')})?`;
     case 'or':
     case 'tailbranch':
-      return `(${group.body.map(g => `(${print(g, group)})`).join(' / ')})`;
+      return `(\n${group.body.map(g => `${indent + '  '}${print(g, group, indent + '  ')}`).join(' /\n')}\n${indent})`;
     case ',':
       return `"," ${group.body.map(g => print(g, group)).join(' ')}`;
     default:
