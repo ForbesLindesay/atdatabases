@@ -23,6 +23,12 @@ export interface Options {
    */
   refreshImage?: boolean;
   detached?: boolean;
+  mount?: ReadonlyArray<{
+    type: 'bind' | 'volume' | 'tmpfs';
+    src: string;
+    dst: string;
+    readonly?: boolean;
+  }>;
 }
 
 export interface NormalizedOptions
@@ -82,6 +88,15 @@ export function startDockerContainer(options: NormalizedOptions) {
     envArgs.push('--env');
     envArgs.push(`${key}=${env[key]}`);
   });
+  const mounts: string[] = [];
+  (options.mount || []).forEach(mount => {
+    mounts.push('--mount');
+    mounts.push(
+      `type=${mount.type},src=${mount.src},dst=${mount.dst}${
+        mount.readonly ? `,readonly` : ``
+      }`,
+    );
+  });
   return spawn(
     'docker',
     [
@@ -93,6 +108,7 @@ export function startDockerContainer(options: NormalizedOptions) {
       '-p', // forward appropriate port
       `${options.externalPort}:${options.internalPort}`,
       ...(options.detached ? ['--detach'] : []),
+      ...mounts,
       // set enviornment variables
       ...envArgs,
       options.image,
