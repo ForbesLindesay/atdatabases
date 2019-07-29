@@ -1,5 +1,5 @@
 ---
-title: SQL Injection
+title: SQL Injection in Node.js
 author: Forbes Lindesay
 authorURL: http://twitter.com/ForbesLindesay
 authorTwitter: ForbesLindesay
