@@ -2,9 +2,12 @@
 title: SQL Injection
 author: Forbes Lindesay
 authorURL: http://twitter.com/ForbesLindesay
+authorTwitter: ForbesLindesay
 ---
 
 SQL Injection remains one of the most prevalent and easily exploitable security vulnerabilities in modern web applications. It think a lot of that is that SQL libraries make it so easy to get this wrong, and it's not always obvious why it's such a big deal.
+
+<!--truncate-->
 
 # What's the big deal?
 
@@ -42,8 +45,8 @@ function addPost(body, username) {
 
 This code is invitingly simple, but consider a typical scenario:
 
- - the body is provided by the user, who types their message into a text box.
- - the username is provided by the server, based on some secure authentication, e.g. a username and password.
+- the body is provided by the user, who types their message into a text box.
+- the username is provided by the server, based on some secure authentication, e.g. a username and password.
 
 A malicious user might try to post the message:
 
@@ -70,10 +73,13 @@ If the problem is that SQL combines code with data, the solution is to separate 
 
 ```js
 function addPost(body, username) {
-  return db.query(`
+  return db.query(
+    `
     INSERT INTO posts (body, username)
     VALUES (?, ?)
-  `, [body, username]);
+  `,
+    [body, username],
+  );
 }
 ```
 
@@ -87,7 +93,7 @@ VALUES (?, ?)
 along with the values:
 
 ```js
-['I am stupid", "someone_else") --', 'my_username']
+['I am stupid", "someone_else") --', 'my_username'];
 ```
 
 This is totally safe. If you can be disciplined about writing your queries this way, your code will be secure.
@@ -111,14 +117,14 @@ function addPost(body, username) {
 }
 ```
 
-The `sql` tag before the SQL query tells JavaScript to pass the literal strings separately from the values to the `sql` function, whichh can process them as needed. The `sql` function then returns the query and the values separately.  In this example, the database gets passed the query:
+The `sql` tag before the SQL query tells JavaScript to pass the literal strings separately from the values to the `sql` function, whichh can process them as needed. The `sql` function then returns the query and the values separately. In this example, the database gets passed the query:
 
 ```sql
 INSERT INTO posts (body, username)
 VALUES (?, ?)
 ```
 
-along with the values for `body` and `username`. The great thing about using `@databases` consistently is that `@databases` will throw an exception if you try to pass it anything that's not been tagged as `sql` so you can't accidentally pass it a string (and neither can your team mates). If you're using TypeScript, you even get a type error at build time if you forget to tag your SQL statements.
+along with the values for `body` and `username`. The great thing about using `@databases` consistently is that `@databases` will throw an exception if you try to pass it anything that's not been tagged as `sql` so you can't accidentally pass it a string (and neither can your team mates). If you're using TypeScript, you even get a type error at build time if you forget to tag your SQL statements. You can use `@databases` with Postgres, MySQL, SQLite and WebSQL.
 
 # Alternatives
 
@@ -127,4 +133,6 @@ There are a couple of alternative approaches:
 1. Using a query builder like "knex" that lets you safely construct SQL statements using a JavaScript API.
 2. Using an ORM like Sequelize that maps your database into a native feeling JavaScript API.
 
-The biggest problem with both of these is that they separate you from the actual SQL, which often means you miss opportunities to take advantage of the most useful/powerful features of databases, and can lead to much less efficient code. I've found that the more I actually use SQL directly, the less I dislike working with it.
+These are a great option for accessing databases without risking SQL injection. If they work for you, please continue using them. The biggest problem with both of these is that they separate you from the actual SQL, which often means you miss opportunities to take advantage of the most useful/powerful features of databases, and can lead to much less efficient code. I've found that the more I actually use SQL directly, the less I dislike working with it.
+
+> If you like working with node.js and databases, you could be perfect for a role as a [Senior JavaScript Full-Stack Developer](https://threadsstyling.workable.com/jobs/748730) at [Threads](https://www.threadsstyling.com/careers).
