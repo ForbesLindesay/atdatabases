@@ -75,9 +75,9 @@ If the problem is that SQL combines code with data, the solution is to separate 
 function addPost(body, username) {
   return db.query(
     `
-    INSERT INTO posts (body, username)
-    VALUES (?, ?)
-  `,
+      INSERT INTO posts (body, username)
+      VALUES (?, ?)
+    `,
     [body, username],
   );
 }
