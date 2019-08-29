@@ -1,3 +1,3 @@
 # @databases/websql
 
-For documentation, see https://www.atdatabases.com/docs/websql
+For documentation, see https://www.atdatabases.org/docs/websql
