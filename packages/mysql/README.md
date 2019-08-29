@@ -1,3 +1,3 @@
 # @databases/mysql
 
-For documentation, see https://www.atdatabases.com/docs/mysql
+For documentation, see https://www.atdatabases.org/docs/mysql

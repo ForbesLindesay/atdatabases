@@ -18,5 +18,5 @@
     "@types/node": "^10.12.17"
   },
   "bugs": "https://github.com/ForbesLindesay/atdatabases/issues",
-  "homepage": "https://www.atdatabases.com/docs/pg-test"
+  "homepage": "https://www.atdatabases.org/docs/pg-test"
 }
