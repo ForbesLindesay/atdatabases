@@ -325,7 +325,20 @@ export const ConnectionParamNames = [
 export type ConnectionParams = Pick<TConfig, ConnectionParamNames>;
 
 export interface ConnectionOptions
-  extends Pick<TConfig, Exclude<keyof TConfig, ConnectionParamNames>> {
+  extends Pick<
+    TConfig,
+    Exclude<
+      keyof TConfig,
+      | ConnectionParamNames
+      | 'connectionString'
+      | 'poolSize'
+      | 'max'
+      | 'min'
+      | 'reapIntervalMillis'
+      | 'returnToHead'
+      | 'poolLog'
+    >
+  > {
   /**
    * Disable the warning:
    *
@@ -341,6 +354,12 @@ export interface ConnectionOptions
    * which work for much larger numbers.
    */
   bigIntAsString?: boolean;
+
+  /**
+   * The maximum number of connections in the connection pool.
+   * Defaults to 10.
+   */
+  poolSize?: number;
 
   /**
    * Redirects all query formatting to the pg driver.
@@ -470,6 +489,8 @@ function splitOptions(
         raw.noDuplicateDatabaseObjectsWarning || false;
     } else if (key === 'bigIntAsString') {
       bigIntAsString = raw.bigIntAsString || false;
+    } else if (key === 'poolSize') {
+      connectOptions.max = raw.poolSize;
     } else if (INIT_OPTIONS.has(key as keyof IOptions<{}>)) {
       initOptions[key as keyof IOptions<{}>] =
         raw[key as keyof ConnectionOptions];
