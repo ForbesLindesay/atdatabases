@@ -24,7 +24,7 @@ test('error messages', async () => {
   1 | SELECT 1 + ? as foo;
   2 |       SELECT 1 + 42 as bar;
 > 3 |       SELECT * FRM 'baz;
-    |                ^^^^^^^^
+    |                ^^^^^^^^^
 > 4 |       SELECT * FROM bing;
     | ^^^^^^^^^^^^^^^^^^^^^^^^^
 "

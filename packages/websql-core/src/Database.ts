@@ -28,11 +28,11 @@ export default class Database {
     this._db = db;
   }
   async tx<TResult>(
-    fn: (tx: Transaction) => Iterator<TResult | QueryTask>,
+    fn: (tx: Transaction) => Iterator<QueryTask, TResult, any[]>,
     options: {readOnly: boolean} = DEFAULT_OPTIONS,
-  ): Promise<Exclude<TResult, QueryTask>> {
+  ): Promise<TResult> {
     const db = await this._db;
-    return await new Promise<Exclude<TResult, QueryTask>>((resolve, reject) => {
+    return await new Promise<TResult>((resolve, reject) => {
       db[options.readOnly ? 'readTransaction' : 'transaction'](transaction => {
         let ended = false;
         let task: QueryTask | undefined;
@@ -75,14 +75,14 @@ export default class Database {
           next(nextResult);
           return false;
         }
-        function next(r: IteratorResult<TResult | QueryTask>) {
+        function next(r: IteratorResult<QueryTask, TResult>) {
           if (r.done) {
             if (r.value instanceof QueryTask) {
               txThrow(new Error('You should not return a QueryTask.'));
               return;
             }
             ended = true;
-            resolve(r.value as any);
+            resolve(r.value);
           }
           if (!(r.value instanceof QueryTask)) {
             txThrow(
