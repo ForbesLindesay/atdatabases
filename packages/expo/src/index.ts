@@ -1,6 +1,7 @@
 import {websql, Database, sql} from '@databases/websql-core';
 
-const openDatabase: websql.OpenDatabase = require('expo').SQLite.openDatabase;
+const openDatabase: websql.OpenDatabase = require('expo-sqlite').SQLite
+  .openDatabase;
 
 export {sql};
 
