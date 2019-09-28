@@ -71,7 +71,7 @@ export class ConnectionPool extends Connection {
   async task<T>(fn: (connection: Connection) => Promise<T>) {
     const connection = await this.pool.getConnection();
     try {
-      const result = fn(new Connection(connection));
+      const result = await fn(new Connection(connection));
       return result;
     } finally {
       connection.release();
