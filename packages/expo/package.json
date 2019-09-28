@@ -17,7 +17,7 @@
   "scripts": {},
   "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/expo",
   "bugs": "https://github.com/ForbesLindesay/atdatabases/issues",
-  "license": "GPL-3.0",
+  "license": "MIT",
   "publishConfig": {
     "access": "public"
   }

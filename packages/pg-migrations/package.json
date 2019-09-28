@@ -11,7 +11,7 @@
   },
   "scripts": {},
   "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/pg-migrations",
-  "license": "GPL-3.0",
+  "license": "MIT",
   "publishConfig": {
     "access": "public"
   },
