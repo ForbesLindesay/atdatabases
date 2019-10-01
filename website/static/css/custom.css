@@ -23,3 +23,7 @@
   border-color: white;
   color: white;
 }
+
+.blockImage img {
+  max-height: 200px;
+}
