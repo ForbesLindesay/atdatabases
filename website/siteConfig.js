@@ -23,6 +23,12 @@ const users = [
     pinned: true,
   },
   {
+    caption: 'Quandoo',
+    image: '/img/users/quandoo.png',
+    infoLink: 'https://www.quandoo.com',
+    pinned: true,
+  },
+  {
     caption: 'Threads',
     image: '/img/users/threads.jpg',
     infoLink: 'https://www.threadsstyling.com/careers',
