@@ -10,7 +10,7 @@
   "scripts": {},
   "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/websql-core",
   "bugs": "https://github.com/ForbesLindesay/atdatabases/issues",
-  "license": "GPL-3.0",
+  "license": "MIT",
   "publishConfig": {
     "access": "public"
   }

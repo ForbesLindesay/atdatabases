@@ -88,7 +88,7 @@ readdirSync(__dirname + '/../packages').forEach(directory => {
         directory,
     );
   }
-  pkg.license = 'GPL-3.0';
+  pkg.license = 'MIT';
   if (!pkg.private) {
     pkg.publishConfig = {
       access: 'public',
