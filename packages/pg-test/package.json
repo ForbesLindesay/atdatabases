@@ -4,6 +4,9 @@
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
+  "bin": {
+    "pg-test": "./lib/cli.js"
+  },
   "dependencies": {
     "@databases/pg-config": "^0.0.0",
     "@databases/with-container": "^0.0.0",

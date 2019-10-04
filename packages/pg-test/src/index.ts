@@ -1,5 +1,6 @@
 import startContainer, {
   Options as WithContainerOptions,
+  killOldContainers,
 } from '@databases/with-container';
 import {getPgConfigSync} from '@databases/pg-config';
 
@@ -34,8 +35,31 @@ export interface Options
   persistVolume?: string;
 }
 
+export async function stopDatabase(
+  options: Partial<Pick<Options, 'debug' | 'containerName'>> = {},
+) {
+  await killOldContainers({
+    debug: options.debug !== undefined ? options.debug : DEFAULT_PG_DEBUG,
+    containerName: options.containerName || DEFAULT_CONTAINER_NAME,
+  });
+}
+function withDefaults<T>(overrides: Partial<T>, defaults: T): T {
+  const result = {...defaults};
+  Object.keys(overrides).forEach(key => {
+    if ((overrides as any)[key] !== undefined) {
+      (result as any)[key] = (overrides as any)[key];
+    }
+  });
+  return result;
+}
 export default async function getDatabase(options: Partial<Options> = {}) {
-  const {pgUser, pgDb, environment, persistVolume, ...rawOptions}: Options = {
+  const {
+    pgUser,
+    pgDb,
+    environment,
+    persistVolume,
+    ...rawOptions
+  }: Options = withDefaults(options, {
     debug: DEFAULT_PG_DEBUG,
     image: DEFAULT_IMAGE,
     containerName: DEFAULT_CONTAINER_NAME,
@@ -45,8 +69,7 @@ export default async function getDatabase(options: Partial<Options> = {}) {
     defaultExternalPort: DEFAULT_PG_PORT,
     externalPort: config.test.port,
     persistVolume: config.test.persistVolume,
-    ...options,
-  };
+  });
   if (persistVolume) {
     rawOptions.image = rawOptions.image.replace(/\-ram$/, '');
   }
