@@ -1,6 +1,10 @@
 // @public
 
+<<<<<<< HEAD
 import getDatabase, {Options} from '../';
+=======
+import getDatabase, {run, runExec, Options} from '../';
+>>>>>>> feat: allow migrationsScript to be a string
 import {getPgConfigSync} from '@databases/pg-config';
 import {spawnBuffered, execBuffered} from 'modern-spawn';
 
@@ -20,7 +24,7 @@ export default async function setup(
   const migrationsScript =
     opts.migrationsScript ||
     (process.env.PG_TEST_MIGRATIONS_SCRIPT
-      ? process.env.PG_TEST_MIGRATIONS_SCRIPT.split(' ')
+      ? process.env.PG_TEST_MIGRATIONS_SCRIPT
       : config.test.migrationsScript);
   if (process.env[envVar]) {
     console.info(`Using existing pg database from: ${envVar}`);
@@ -34,16 +38,12 @@ export default async function setup(
     if (typeof migrationsScript === 'string') {
       await execBuffered(migrationsScript, {
         debug:
-          opts.debug ||
-          (opts.debug === undefined && config.test.debug) ||
-          false,
+          opts.debug || (opts.debug === undefined && config.test.debug) || false,
       }).getResult();
     } else {
       await spawnBuffered(migrationsScript[0], migrationsScript.slice(1), {
         debug:
-          opts.debug ||
-          (opts.debug === undefined && config.test.debug) ||
-          false,
+          opts.debug || (opts.debug === undefined && config.test.debug) || false,
       }).getResult();
     }
   }

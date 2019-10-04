@@ -53,7 +53,9 @@ export default async function getDatabase(options: Partial<Options> = {}) {
 
   if (options.persistVolume) {
     console.info(`Using ${options.persistVolume} to store sql data`);
-    console.info(`Run "docker volume rm ${options.persistVolume}" to clear data`);
+    console.info(
+      `Run "docker volume rm ${options.persistVolume}" to clear data`,
+    );
   }
   const {proc, externalPort, kill} = await startContainer({
     ...rawOptions,
