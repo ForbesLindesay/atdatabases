@@ -19,5 +19,12 @@
     "@types/node": "^10.12.17",
     "lsr": "^2.0.0"
   },
-  "bugs": "https://github.com/ForbesLindesay/atdatabases/issues"
+  "bugs": "https://github.com/ForbesLindesay/atdatabases/issues",
+  "files": [
+    "lib/",
+    "build-package.js",
+    "build-package.d.ts",
+    "getID.js",
+    "getID.d.ts"
+  ]
 }

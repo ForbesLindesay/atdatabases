@@ -18,5 +18,12 @@
     "@types/node": "^10.12.17"
   },
   "bugs": "https://github.com/ForbesLindesay/atdatabases/issues",
-  "homepage": "https://www.atdatabases.org/docs/pg-test"
+  "homepage": "https://www.atdatabases.org/docs/pg-test",
+  "files": [
+    "lib/",
+    "jest/globalSetup.js",
+    "jest/globalSetup.d.ts",
+    "jest/globalTeardown.js",
+    "jest/globalTeardown.d.ts"
+  ]
 }

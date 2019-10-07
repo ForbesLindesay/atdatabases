@@ -23,5 +23,8 @@
   "publishConfig": {
     "access": "public"
   },
-  "bugs": "https://github.com/ForbesLindesay/atdatabases/issues"
+  "bugs": "https://github.com/ForbesLindesay/atdatabases/issues",
+  "files": [
+    "lib/"
+  ]
 }

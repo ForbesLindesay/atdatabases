@@ -17,5 +17,12 @@
   "publishConfig": {
     "access": "public"
   },
-  "homepage": "https://www.atdatabases.org/docs/mysql-test"
+  "homepage": "https://www.atdatabases.org/docs/mysql-test",
+  "files": [
+    "lib/",
+    "jest/globalSetup.js",
+    "jest/globalSetup.d.ts",
+    "jest/globalTeardown.js",
+    "jest/globalTeardown.d.ts"
+  ]
 }

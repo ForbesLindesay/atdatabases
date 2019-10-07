@@ -20,5 +20,8 @@
   "license": "MIT",
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "files": [
+    "lib/"
+  ]
 }

@@ -21,5 +21,8 @@
     "build.js"
   ],
   "bugs": "https://github.com/ForbesLindesay/atdatabases/issues",
-  "dependencies": {}
+  "dependencies": {},
+  "files": [
+    "lib/"
+  ]
 }

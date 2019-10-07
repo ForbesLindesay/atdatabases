@@ -15,5 +15,8 @@
   "publishConfig": {
     "access": "public"
   },
-  "homepage": "https://www.atdatabases.org/docs/websql"
+  "homepage": "https://www.atdatabases.org/docs/websql",
+  "files": [
+    "lib/"
+  ]
 }

@@ -18,5 +18,8 @@
   "publishConfig": {
     "access": "public"
   },
-  "homepage": "https://www.atdatabases.org/docs/mysql"
+  "homepage": "https://www.atdatabases.org/docs/mysql",
+  "files": [
+    "lib/"
+  ]
 }
