@@ -1,11 +1,11 @@
 {
   "name": "@databases/websql-core",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {
-    "@databases/sql": "^1.0.1"
+    "@databases/sql": "^1.0.3"
   },
   "scripts": {},
   "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/websql-core",
@@ -13,5 +13,8 @@
   "license": "MIT",
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "files": [
+    "lib/"
+  ]
 }

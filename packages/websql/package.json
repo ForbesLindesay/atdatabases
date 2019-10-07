@@ -1,11 +1,11 @@
 {
   "name": "@databases/websql",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {
-    "@databases/websql-core": "^2.0.0",
+    "@databases/websql-core": "^2.0.1",
     "websql": "^1.0.0"
   },
   "scripts": {},
@@ -15,5 +15,8 @@
   "publishConfig": {
     "access": "public"
   },
-  "homepage": "https://www.atdatabases.org/docs/websql"
+  "homepage": "https://www.atdatabases.org/docs/websql",
+  "files": [
+    "lib/"
+  ]
 }

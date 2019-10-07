@@ -1,6 +1,6 @@
 {
   "name": "@databases/pg-data-type-id",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
@@ -12,5 +12,8 @@
   "publishConfig": {
     "access": "public"
   },
-  "bugs": "https://github.com/ForbesLindesay/atdatabases/issues"
+  "bugs": "https://github.com/ForbesLindesay/atdatabases/issues",
+  "files": [
+    "lib/"
+  ]
 }

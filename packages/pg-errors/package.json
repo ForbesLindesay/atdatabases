@@ -1,6 +1,6 @@
 {
   "name": "@databases/pg-errors",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
@@ -21,5 +21,8 @@
     "build.js"
   ],
   "bugs": "https://github.com/ForbesLindesay/atdatabases/issues",
-  "dependencies": {}
+  "dependencies": {},
+  "files": [
+    "lib/"
+  ]
 }

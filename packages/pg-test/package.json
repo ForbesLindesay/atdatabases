@@ -1,12 +1,12 @@
 {
   "name": "@databases/pg-test",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {
-    "@databases/pg-config": "^1.0.0",
-    "@databases/with-container": "^0.0.1"
+    "@databases/pg-config": "^1.0.1",
+    "@databases/with-container": "^0.0.2"
   },
   "scripts": {},
   "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/pg-test",
@@ -18,5 +18,12 @@
     "@types/node": "^10.12.17"
   },
   "bugs": "https://github.com/ForbesLindesay/atdatabases/issues",
-  "homepage": "https://www.atdatabases.org/docs/pg-test"
+  "homepage": "https://www.atdatabases.org/docs/pg-test",
+  "files": [
+    "lib/",
+    "jest/globalSetup.js",
+    "jest/globalSetup.d.ts",
+    "jest/globalTeardown.js",
+    "jest/globalTeardown.d.ts"
+  ]
 }

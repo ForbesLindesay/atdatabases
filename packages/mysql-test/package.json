@@ -1,12 +1,12 @@
 {
   "name": "@databases/mysql-test",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {
-    "@databases/mysql-config": "^1.0.0",
-    "@databases/with-container": "^0.0.1",
+    "@databases/mysql-config": "^1.0.1",
+    "@databases/with-container": "^0.0.2",
     "mysql2": "^1.6.4",
     "yargs": "^12.0.5"
   },
@@ -17,5 +17,12 @@
   "publishConfig": {
     "access": "public"
   },
-  "homepage": "https://www.atdatabases.org/docs/mysql-test"
+  "homepage": "https://www.atdatabases.org/docs/mysql-test",
+  "files": [
+    "lib/",
+    "jest/globalSetup.js",
+    "jest/globalSetup.d.ts",
+    "jest/globalTeardown.js",
+    "jest/globalTeardown.d.ts"
+  ]
 }
