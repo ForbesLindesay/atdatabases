@@ -40,7 +40,13 @@ export class DatabaseTransaction {
     return runQuery(query, this._database, async fn => fn());
   }
 
+  /**
+   * @deprecated use queryStream
+   */
   stream(query: SQLQuery): AsyncIterableIterator<any> {
+    return this.queryStream(query);
+  }
+  queryStream(query: SQLQuery): AsyncIterableIterator<any> {
     return runQueryStream(query, this._database, async fn => fn());
   }
 }
@@ -64,7 +70,13 @@ export class DatabaseConnection {
     );
   }
 
+  /**
+   * @deprecated use queryStream
+   */
   stream(query: SQLQuery): AsyncIterableIterator<any> {
+    return this.queryStream(query);
+  }
+  queryStream(query: SQLQuery): AsyncIterableIterator<any> {
     return runQueryStream(query, this._database, async fn =>
       this._mutex.readLock(fn),
     );

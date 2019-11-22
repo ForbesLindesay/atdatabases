@@ -24,7 +24,24 @@ export interface TransactionOptions {
 export interface Connection {
   readonly sql: SQL;
   query(query: SQLQuery): Promise<any[]>;
+  queryStream(
+    query: SQLQuery,
+    options?: {
+      highWaterMark?: number;
+      batchSize?: number;
+    },
+  ): AsyncIterable<any>;
+  /**
+   * @deprecated use queryNodeStream
+   */
   stream(
+    query: SQLQuery,
+    options?: {
+      highWaterMark?: number;
+      batchSize?: number;
+    },
+  ): Readable;
+  queryNodeStream(
     query: SQLQuery,
     options?: {
       highWaterMark?: number;
@@ -107,7 +124,71 @@ class ConnectionImplementation {
       throw ex;
     }
   }
+
+  async *queryStream(
+    query: SQLQuery,
+    options: {
+      highWaterMark?: number;
+      batchSize?: number;
+    } = {},
+  ): AsyncIterableIterator<any> {
+    type Value = {done: false; value: any} | {done: true};
+    let resolve: (value: Value) => void;
+    let reject: (value: any) => void;
+    let nextValue = new Promise<Value>((_resolve, _reject) => {
+      resolve = _resolve;
+      reject = _reject;
+    });
+    let emittedValues = 0;
+    let consumedValues = 0;
+    let paused = false;
+
+    const stream = this.nodeStream(query, options);
+    stream
+      .on('data', data => {
+        emittedValues++;
+        if (!paused && consumedValues <= emittedValues - 5) {
+          paused = true;
+          stream.pause();
+        }
+        resolve({done: false, value: data});
+        nextValue = new Promise<any>((_resolve, _reject) => {
+          resolve = _resolve;
+          reject = _reject;
+        });
+      })
+      .on('error', err => {
+        reject(err);
+      })
+      .on('end', () => {
+        resolve({done: true});
+      });
+
+    let value = await nextValue;
+    while (!value.done) {
+      stream.pause();
+      yield value.value;
+      consumedValues++;
+      if (paused && consumedValues > emittedValues - 5) {
+        paused = false;
+        stream.resume();
+      }
+      value = await nextValue;
+    }
+  }
+  /**
+   * @deprecated use queryNodeStream
+   */
   stream(
+    query: SQLQuery,
+    options: {
+      highWaterMark?: number;
+      batchSize?: number;
+    } = {},
+  ) {
+    return this.queryNodeStream(query, options);
+  }
+  queryNodeStream(
     query: SQLQuery,
     options: {
       highWaterMark?: number;
@@ -571,9 +652,7 @@ export default function createConnection(
         (str.length === MAX_SAFE_INTEGER.length && str > MAX_SAFE_INTEGER)
       ) {
         throw new Error(
-          `JavaScript cannot handle integers great than: ${
-            Number.MAX_SAFE_INTEGER
-          }`,
+          `JavaScript cannot handle integers great than: ${Number.MAX_SAFE_INTEGER}`,
         );
       }
       return parseInteger(str);
@@ -588,9 +667,7 @@ export default function createConnection(
         result.some((val: number) => val && val > Number.MAX_SAFE_INTEGER)
       ) {
         throw new Error(
-          `JavaScript cannot handle integers great than: ${
-            Number.MAX_SAFE_INTEGER
-          }`,
+          `JavaScript cannot handle integers great than: ${Number.MAX_SAFE_INTEGER}`,
         );
       }
     });
