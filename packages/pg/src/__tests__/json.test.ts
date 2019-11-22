@@ -1,5 +1,4 @@
-import connect, {sql} from '../';
-import {SQLQuery} from 'packages/pg/lib';
+import connect, {sql, SQLQuery} from '../';
 
 jest.setTimeout(30000);
 
