@@ -1,23 +1,19 @@
 {
-  "name": "@databases/sqlite",
-  "version": "1.1.0",
+  "name": "@databases/push-to-async-iterable",
+  "version": "1.0.0",
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {
-    "@databases/sql": "^1.0.3",
-    "@types/sqlite3": "^3.1.5",
-    "sqlite3": "^4.0.6",
     "then-queue": "^1.3.0"
   },
   "scripts": {},
-  "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/sqlite",
+  "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/push-to-async-iterable",
   "bugs": "https://github.com/ForbesLindesay/atdatabases/issues",
   "license": "MIT",
   "publishConfig": {
     "access": "public"
   },
-  "homepage": "https://www.atdatabases.org/docs/sqlite",
   "files": [
     "lib/"
   ]

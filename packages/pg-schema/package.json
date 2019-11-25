@@ -6,7 +6,7 @@
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {
-    "@databases/pg": "^1.1.1"
+    "@databases/pg": "^1.2.0"
   },
   "devDependencies": {
     "@types/node": "^10.12.17",

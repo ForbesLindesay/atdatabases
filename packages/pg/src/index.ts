@@ -5,6 +5,7 @@ import pg = require('pg-promise');
 import {TConfig, IOptions} from 'pg-promise';
 import DataTypeID from '@databases/pg-data-type-id';
 import {getPgConfigSync} from '@databases/pg-config';
+import pushToAsyncIterable from '@databases/push-to-async-iterable';
 import QueryStream = require('pg-query-stream');
 import {PassThrough, Readable} from 'stream';
 const {codeFrameColumns} = require('@babel/code-frame');
@@ -24,7 +25,24 @@ export interface TransactionOptions {
 export interface Connection {
   readonly sql: SQL;
   query(query: SQLQuery): Promise<any[]>;
+  queryStream(
+    query: SQLQuery,
+    options?: {
+      highWaterMark?: number;
+      batchSize?: number;
+    },
+  ): AsyncIterable<any>;
+  /**
+   * @deprecated use queryNodeStream
+   */
   stream(
+    query: SQLQuery,
+    options?: {
+      highWaterMark?: number;
+      batchSize?: number;
+    },
+  ): Readable;
+  queryNodeStream(
     query: SQLQuery,
     options?: {
       highWaterMark?: number;
@@ -107,7 +125,50 @@ class ConnectionImplementation {
       throw ex;
     }
   }
+
+  queryStream(
+    query: SQLQuery,
+    options: {
+      highWaterMark?: number;
+      batchSize?: number;
+    } = {},
+  ): AsyncIterableIterator<any> {
+    const stream = this.queryNodeStream(query, options);
+    return pushToAsyncIterable<any>({
+      onData(fn) {
+        stream.on('data', fn);
+      },
+      onError(fn) {
+        stream.on('error', fn);
+      },
+      onEnd(fn) {
+        stream.on('end', fn);
+      },
+      pause() {
+        stream.pause();
+      },
+      resume() {
+        stream.resume();
+      },
+      /**
+       * Rely mainly on high water mark of the underlying node stream
+       */
+      highWaterMark: 2,
+    });
+  }
+  /**
+   * @deprecated use queryNodeStream
+   */
   stream(
+    query: SQLQuery,
+    options: {
+      highWaterMark?: number;
+      batchSize?: number;
+    } = {},
+  ) {
+    return this.queryNodeStream(query, options);
+  }
+  queryNodeStream(
     query: SQLQuery,
     options: {
       highWaterMark?: number;
@@ -571,9 +632,7 @@ export default function createConnection(
         (str.length === MAX_SAFE_INTEGER.length && str > MAX_SAFE_INTEGER)
       ) {
         throw new Error(
-          `JavaScript cannot handle integers great than: ${
-            Number.MAX_SAFE_INTEGER
-          }`,
+          `JavaScript cannot handle integers great than: ${Number.MAX_SAFE_INTEGER}`,
         );
       }
       return parseInteger(str);
@@ -588,9 +647,7 @@ export default function createConnection(
         result.some((val: number) => val && val > Number.MAX_SAFE_INTEGER)
       ) {
         throw new Error(
-          `JavaScript cannot handle integers great than: ${
-            Number.MAX_SAFE_INTEGER
-          }`,
+          `JavaScript cannot handle integers great than: ${Number.MAX_SAFE_INTEGER}`,
         );
       }
     });

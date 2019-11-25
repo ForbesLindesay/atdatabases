@@ -50,6 +50,16 @@ The `Database` inherits from `DatabaseTransaction`, so you call `Database.query`
 
 Run an SQL Query and get a promise for an array of results.
 
+### ``` Conneciton.queryStream(SQLQuery): AsyncIterable<any> ```
+
+Run an SQL Query and get an async iterable of the results. e.g.
+
+```js
+for await (const record of db.queryStream(sql`SELECT * FROM massive_table`)) {
+  console.log(result);
+}
+```
+
 ### ``` Connection.tx(fn): Promise<T> ```
 
 Executes a callback function as a transaction, with automatically managed connection.
