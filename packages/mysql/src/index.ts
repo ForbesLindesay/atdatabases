@@ -1,15 +1,51 @@
 import {URL} from 'url';
 import {getMySqlConfigSync} from '@databases/mysql-config';
+import pushToAsyncIterable from '@databases/push-to-async-iterable';
 import sql, {SQLQuery} from '@databases/sql';
 import createPool, {Pool, PoolConnection} from './raw';
+import {PassThrough} from 'stream';
 const {codeFrameColumns} = require('@babel/code-frame');
 
 const {connectionStringEnvironmentVariable} = getMySqlConfigSync();
 
+function transformError(text: string, ex: any) {
+  // TODO: consider using https://github.com/Vincit/db-errors
+  if (
+    ex.code === 'ER_PARSE_ERROR' &&
+    ex.sqlState === '42000' &&
+    typeof ex.sqlMessage === 'string'
+  ) {
+    const match = / near \'((?:.|\n)+)\' at line (\d+)$/.exec(ex.sqlMessage);
+    if (match) {
+      const index = text.indexOf(match[1]);
+      if (index === text.lastIndexOf(match[1])) {
+        const linesUptoStart = text.substr(0, index).split('\n');
+        const line = linesUptoStart.length;
+        const start = {
+          line,
+          column: linesUptoStart[linesUptoStart.length - 1].length + 1,
+        };
+        const linesUptoEnd = text
+          .substr(0, index + match[1].length)
+          .split('\n');
+        const end = {
+          line: linesUptoEnd.length,
+          column: linesUptoEnd[linesUptoEnd.length - 1].length + 1,
+        };
+
+        ex.message = ex.message.replace(
+          / near \'((?:.|\n)+)\' at line (\d+)$/,
+          ` near:\n\n${codeFrameColumns(text, {start, end})}\n`,
+        );
+      }
+    }
+  }
+}
+
 export {sql};
 export class Connection {
-  private readonly conn: Pick<PoolConnection, 'query'>;
-  constructor(conn: Pick<PoolConnection, 'query'>) {
+  private readonly conn: Pick<PoolConnection, 'query' | 'connection'>;
+  constructor(conn: Pick<PoolConnection, 'query' | 'connection'>) {
     this.conn = conn;
   }
 
@@ -23,49 +59,150 @@ export class Connection {
     try {
       return (await this.conn.query(text, values))[0] as any[];
     } catch (ex) {
-      // TODO: consider using https://github.com/Vincit/db-errors
-      if (
-        ex.code === 'ER_PARSE_ERROR' &&
-        ex.sqlState === '42000' &&
-        typeof ex.sqlMessage === 'string'
-      ) {
-        const match = / near \'((?:.|\n)+)\' at line (\d+)$/.exec(
-          ex.sqlMessage,
-        );
-        if (match) {
-          const index = text.indexOf(match[1]);
-          if (index === text.lastIndexOf(match[1])) {
-            const linesUptoStart = text.substr(0, index).split('\n');
-            const line = linesUptoStart.length;
-            const start = {
-              line,
-              column: linesUptoStart[linesUptoStart.length - 1].length + 1,
-            };
-            const linesUptoEnd = text
-              .substr(0, index + match[1].length)
-              .split('\n');
-            const end = {
-              line: linesUptoEnd.length,
-              column: linesUptoEnd[linesUptoEnd.length - 1].length + 1,
-            };
-
-            ex.message = ex.message.replace(
-              / near \'((?:.|\n)+)\' at line (\d+)$/,
-              ` near:\n\n${codeFrameColumns(text, {start, end})}\n`,
-            );
-          }
-        }
-      }
+      transformError(text, ex);
       throw ex;
     }
   }
+
+  queryStream(
+    query: SQLQuery,
+    options?: {
+      highWaterMark?: number;
+    },
+  ) {
+    if (!(query instanceof SQLQuery)) {
+      throw new Error(
+        'Invalid query, you must use @databases/sql to create your queries.',
+      );
+    }
+    const {text, values} = query.compileMySQL();
+    const highWaterMark = (options && options.highWaterMark) || 5;
+    const stream = this.conn.connection.query(text, values);
+
+    return pushToAsyncIterable<any>({
+      onData(fn) {
+        stream.on('result', fn);
+      },
+      onError(fn) {
+        stream.on('error', fn);
+      },
+      onEnd(fn) {
+        stream.on('end', fn);
+      },
+      pause: () => {
+        this.conn.connection.pause();
+      },
+      resume: () => {
+        this.conn.connection.resume();
+      },
+      highWaterMark,
+    });
+  }
+
+  queryNodeStream(
+    query: SQLQuery,
+    options?: {
+      highWaterMark?: number;
+    },
+  ): NodeJS.ReadableStream {
+    if (!(query instanceof SQLQuery)) {
+      throw new Error(
+        'Invalid query, you must use @databases/sql to create your queries.',
+      );
+    }
+    const {text, values} = query.compileMySQL();
+    const result = this.conn.connection.query(text, values).stream(options);
+    // tslint:disable-next-line:no-unbound-method
+    const on = result.on;
+    const transformedExceptions = new Set();
+    return Object.assign(result, {
+      on(event: string, cb: (...args: any[]) => void) {
+        if (event !== 'error') return on.call(this, event, cb);
+        return on.call(this, event, ex => {
+          // TODO: consider using https://github.com/Vincit/db-errors
+          if (!transformedExceptions.has(ex)) {
+            transformedExceptions.add(ex);
+            transformError(text, ex);
+          }
+          cb(ex);
+        });
+      },
+    });
+  }
 }
 
-export class ConnectionPool extends Connection {
+export class ConnectionPool {
   private readonly pool: Pool;
   constructor(pool: Pool) {
-    super(pool);
     this.pool = pool;
+  }
+
+  async query(query: SQLQuery): Promise<any[]> {
+    if (!(query instanceof SQLQuery)) {
+      throw new Error(
+        'Invalid query, you must use @databases/sql to create your queries.',
+      );
+    }
+    const {text, values} = query.compileMySQL();
+    try {
+      return (await this.pool.query(text, values))[0] as any[];
+    } catch (ex) {
+      transformError(text, ex);
+      throw ex;
+    }
+  }
+
+  async *queryStream(
+    query: SQLQuery,
+    options?: {
+      highWaterMark?: number;
+    },
+  ) {
+    const connection = await this.pool.getConnection();
+    const c = new Connection(connection);
+    try {
+      for await (const record of c.queryStream(query, options)) {
+        yield record;
+      }
+    } finally {
+      connection.release();
+    }
+  }
+  queryNodeStream(
+    query: SQLQuery,
+    options?: {
+      highWaterMark?: number;
+    },
+  ) {
+    const stream = new PassThrough({objectMode: true, highWaterMark: 2});
+    this.pool
+      .getConnection()
+      .then(connection => {
+        const c = new Connection(connection);
+        let released = false;
+        return c
+          .queryNodeStream(query, options)
+          .on('fields', fields => {
+            stream.emit('fields', fields);
+          })
+          .on('error', err => {
+            if (!released) {
+              released = true;
+              connection.release();
+            }
+            stream.emit('error', err);
+          })
+          .on('end', () => {
+            if (!released) {
+              released = true;
+              connection.release();
+            }
+            stream.emit('end');
+          })
+          .pipe(stream);
+      })
+      .catch(ex => stream.emit('error', ex));
+    return stream;
   }
 
   async task<T>(fn: (connection: Connection) => Promise<T>) {

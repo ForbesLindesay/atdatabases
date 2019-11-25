@@ -2,6 +2,7 @@ import * as sqlite from 'sqlite3';
 import sql, {SQLQuery} from '@databases/sql';
 import Mutex from './Mutex';
 export {sql};
+const Queue = require('then-queue');
 
 export enum DatabaseConnectionMode {
   ReadOnly = sqlite.OPEN_READONLY,
@@ -143,36 +144,37 @@ async function runQuery(
     });
   });
 }
+
+interface Queue<T> {
+  push(item: T): void;
+  pop(): Promise<T>;
+  /**
+   * Amount of items in the queue
+   * This can be negative if pop has been called more times than push.
+   */
+  length: number;
+}
 async function* runQueryStream(
   query: SQLQuery,
   database: sqlite.Database,
   lock: <T>(fn: () => Promise<T>) => Promise<T>,
 ): AsyncIterableIterator<any> {
+  const queue: Queue<
+    {done: false; value: any} | {done: true; err: any}
+  > = new Queue();
   const {text, values} = query.compileMySQL();
-  type Value = {done: false; value: any} | {done: true};
-  let resolve: (value: Value) => void;
-  let reject: (value: any) => void;
-  let nextValue = new Promise<Value>((_resolve, _reject) => {
-    resolve = _resolve;
-    reject = _reject;
-  });
   lock(async () => {
     await new Promise<void>(releaseMutex => {
       database.each(
         text,
         values,
         (err, row) => {
-          if (err) reject(err);
-          else resolve({done: false, value: row});
-          nextValue = new Promise<any>((_resolve, _reject) => {
-            resolve = _resolve;
-            reject = _reject;
-          });
+          if (err) queue.push({done: true, err});
+          else queue.push({done: false, value: row});
         },
         err => {
           releaseMutex();
-          if (err) reject(err);
-          else resolve({done: true});
+          queue.push({done: true, err});
         },
       );
     });
@@ -181,9 +183,9 @@ async function* runQueryStream(
       throw ex;
     });
   });
-  let value = await nextValue;
+  let value = await queue.pop();
   while (!value.done) {
     yield value.value;
-    value = await nextValue;
+    value = await queue.pop();
   }
 }

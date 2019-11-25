@@ -5,6 +5,7 @@ import pg = require('pg-promise');
 import {TConfig, IOptions} from 'pg-promise';
 import DataTypeID from '@databases/pg-data-type-id';
 import {getPgConfigSync} from '@databases/pg-config';
+import pushToAsyncIterable from '@databases/push-to-async-iterable';
 import QueryStream = require('pg-query-stream');
 import {PassThrough, Readable} from 'stream';
 const {codeFrameColumns} = require('@babel/code-frame');
@@ -125,56 +126,35 @@ class ConnectionImplementation {
     }
   }
 
-  async *queryStream(
+  queryStream(
     query: SQLQuery,
     options: {
       highWaterMark?: number;
       batchSize?: number;
     } = {},
   ): AsyncIterableIterator<any> {
-    type Value = {done: false; value: any} | {done: true};
-    let resolve: (value: Value) => void;
-    let reject: (value: any) => void;
-    let nextValue = new Promise<Value>((_resolve, _reject) => {
-      resolve = _resolve;
-      reject = _reject;
-    });
-    let emittedValues = 0;
-    let consumedValues = 0;
-    let paused = false;
-
-    const stream = this.nodeStream(query, options);
-    stream
-      .on('data', data => {
-        emittedValues++;
-        if (!paused && consumedValues <= emittedValues - 5) {
-          paused = true;
-          stream.pause();
-        }
-        resolve({done: false, value: data});
-        nextValue = new Promise<any>((_resolve, _reject) => {
-          resolve = _resolve;
-          reject = _reject;
-        });
-      })
-      .on('error', err => {
-        reject(err);
-      })
-      .on('end', () => {
-        resolve({done: true});
-      });
-
-    let value = await nextValue;
-    while (!value.done) {
-      stream.pause();
-      yield value.value;
-      consumedValues++;
-      if (paused && consumedValues > emittedValues - 5) {
-        paused = false;
+    const stream = this.queryNodeStream(query, options);
+    return pushToAsyncIterable<any>({
+      onData(fn) {
+        stream.on('data', fn);
+      },
+      onError(fn) {
+        stream.on('error', fn);
+      },
+      onEnd(fn) {
+        stream.on('end', fn);
+      },
+      pause() {
+        stream.pause();
+      },
+      resume() {
         stream.resume();
-      }
-      value = await nextValue;
-    }
+      },
+      /**
+       * Rely mainly on high water mark of the underlying node stream
+       */
+      highWaterMark: 2,
+    });
   }
   /**
    * @deprecated use queryNodeStream

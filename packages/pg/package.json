@@ -9,6 +9,7 @@
     "@databases/pg-config": "^1.0.1",
     "@databases/pg-data-type-id": "^0.0.1",
     "@databases/pg-errors": "^0.0.1",
+    "@databases/push-to-async-iterable": "^1.0.0",
     "@databases/sql": "^1.0.3",
     "@types/pg-query-stream": "^1.0.2",
     "pg-promise": "^8.6.0",

@@ -22,7 +22,7 @@ test('streaming', async () => {
     `);
   }
   const results = [];
-  for await (const row of db.stream(sql`SELECT * FROM stream_values`)) {
+  for await (const row of db.queryStream(sql`SELECT * FROM stream_values`)) {
     results.push(row.id);
   }
   expect(results).toEqual(allValues);
