@@ -38,6 +38,26 @@ The `ConnectionPool` inherits from `Connection`, so you call `ConnectionPool.que
 
 Run an SQL Query and get a promise for an array of results.
 
+### ``` Conneciton.queryStream(SQLQuery): AsyncIterable<any> ```
+
+Run an SQL Query and get an async iterable of the results. e.g.
+
+```js
+for await (const record of db.queryStream(sql`SELECT * FROM massive_table`)) {
+  console.log(result);
+}
+```
+
+### ``` Conneciton.queryNodeStream(SQLQuery): ReadableStream ```
+
+Run an SQL Query and get a node.js readable stream of the results. e.g.
+
+```js
+const Stringifier = require('newline-json').Stringifier;
+
+db.queryNodeStream(sql`SELECT * FROM massive_table`).pipe(new Stringifier()).pipe(process.stdout);
+```
+
 ### ``` Connection.task(fn): Promise<T> ```
 
 Executes a callback function with automatically managed connection.
