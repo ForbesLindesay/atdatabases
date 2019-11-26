@@ -90,6 +90,17 @@ sql`WHERE (${sql.join(arrayOfSqlConditions, ') AND (')})`;
 
 > N.B. the delimiter should always be a string literal, never allow user input to be passed as the delimiter. If you allow user specified delimiters, it will lead to an SQL Injection Vulnerability.
 
+### ``` sql.file(filename) ```
+
+This reads a file containing an SQL query in utf8 text, and returns it as an SQLQuery. It's generally most useful for large blocks of SQL, like database migrations.
+
+```ts
+const migration = sql.file(`${__dirname}/my-migration.sql`);
+db.query(migration);
+```
+
+> N.B. if you allow users to write to the files that you later read in as queries via this method, your code will be vulnerable to SQL Injeciton. Only read in trusted files created by your own team of developers.
+
 ### ``` sql.__dangerous__rawValue(str) ```
 
 This is an escape hatch to allow you to take a string from a source you trust and treat it as an SQL query. There is almost always a better way.
