@@ -7,7 +7,7 @@ import DataTypeID from '@databases/pg-data-type-id';
 import {getPgConfigSync} from '@databases/pg-config';
 import pushToAsyncIterable from '@databases/push-to-async-iterable';
 import QueryStream = require('pg-query-stream');
-import {PassThrough, Readable} from 'stream';
+import {PassThrough, ReadableStream} from 'barrage';
 const {codeFrameColumns} = require('@babel/code-frame');
 
 const {connectionStringEnvironmentVariable} = getPgConfigSync();
@@ -41,14 +41,14 @@ export interface Connection {
       highWaterMark?: number;
       batchSize?: number;
     },
-  ): Readable;
+  ): ReadableStream<any>;
   queryNodeStream(
     query: SQLQuery,
     options?: {
       highWaterMark?: number;
       batchSize?: number;
     },
-  ): Readable;
+  ): ReadableStream<any>;
   task<T>(
     fn: (connection: Connection) => Promise<T>,
     options?: {tag?: string | number},
@@ -174,7 +174,7 @@ class ConnectionImplementation {
       highWaterMark?: number;
       batchSize?: number;
     } = {},
-  ): Readable {
+  ): ReadableStream<any> & Pick<PassThrough<any>, 'pause' | 'resume'> {
     if (!(query instanceof SQLQuery)) {
       throw new Error(
         'Invalid query, you must use @databases/sql to create your queries.',
@@ -184,7 +184,7 @@ class ConnectionImplementation {
       process.env.NODE_ENV !== 'production' ? {minify: false} : undefined,
     );
     const qs = new QueryStream(text, values, options);
-    const stream = new PassThrough({objectMode: true});
+    const stream = new PassThrough<any>({objectMode: true});
     this.connection
       .stream(qs, results => {
         results.pipe(stream);

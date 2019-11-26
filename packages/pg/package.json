@@ -12,6 +12,7 @@
     "@databases/push-to-async-iterable": "^1.0.0",
     "@databases/sql": "^1.0.3",
     "@types/pg-query-stream": "^1.0.2",
+    "barrage": "^2.0.4",
     "pg-promise": "^8.6.0",
     "pg-query-stream": "1.1.2"
   },

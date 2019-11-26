@@ -3,7 +3,7 @@ import {getMySqlConfigSync} from '@databases/mysql-config';
 import pushToAsyncIterable from '@databases/push-to-async-iterable';
 import sql, {SQLQuery} from '@databases/sql';
 import createPool, {Pool, PoolConnection} from './raw';
-import {PassThrough} from 'stream';
+import {PassThrough, ReadableStream} from 'barrage';
 const {codeFrameColumns} = require('@babel/code-frame');
 
 const {connectionStringEnvironmentVariable} = getMySqlConfigSync();
@@ -104,7 +104,7 @@ export class Connection {
     options?: {
       highWaterMark?: number;
     },
-  ): NodeJS.ReadableStream {
+  ): ReadableStream<any> {
     if (!(query instanceof SQLQuery)) {
       throw new Error(
         'Invalid query, you must use @databases/sql to create your queries.',
@@ -112,22 +112,14 @@ export class Connection {
     }
     const {text, values} = query.compileMySQL();
     const result = this.conn.connection.query(text, values).stream(options);
-    // tslint:disable-next-line:no-unbound-method
-    const on = result.on;
-    const transformedExceptions = new Set();
-    return Object.assign(result, {
-      on(event: string, cb: (...args: any[]) => void) {
-        if (event !== 'error') return on.call(this, event, cb);
-        return on.call(this, event, ex => {
-          // TODO: consider using https://github.com/Vincit/db-errors
-          if (!transformedExceptions.has(ex)) {
-            transformedExceptions.add(ex);
-            transformError(text, ex);
-          }
-          cb(ex);
-        });
-      },
+    const resultStream = new PassThrough({objectMode: true, highWaterMark: 2});
+    result.on('error', err => {
+      transformError(text, err);
+      resultStream.emit('error', err);
     });
+    result.on('fields', f => resultStream.emit('fields', f));
+    result.pipe(resultStream);
+    return resultStream;
   }
 }
 
@@ -173,33 +165,30 @@ export class ConnectionPool {
     options?: {
       highWaterMark?: number;
     },
-  ) {
-    const stream = new PassThrough({objectMode: true, highWaterMark: 2});
+  ): ReadableStream<any> {
+    const stream = new PassThrough<any>({objectMode: true, highWaterMark: 2});
     this.pool
       .getConnection()
       .then(connection => {
         const c = new Connection(connection);
         let released = false;
-        return c
+        return (c
           .queryNodeStream(query, options)
-          .on('fields', fields => {
-            stream.emit('fields', fields);
-          })
           .on('error', err => {
             if (!released) {
               released = true;
               connection.release();
             }
-            stream.emit('error', err);
           })
           .on('end', () => {
             if (!released) {
               released = true;
               connection.release();
             }
-            stream.emit('end');
           })
-          .pipe(stream);
+          .syphon(stream) as any).on('fields', (fields: any) => {
+          stream.emit('fields', fields);
+        });
       })
       .catch(ex => stream.emit('error', ex));
     return stream;

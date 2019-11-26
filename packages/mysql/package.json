@@ -10,6 +10,7 @@
     "@databases/push-to-async-iterable": "^1.0.0",
     "@databases/sql": "^1.0.3",
     "@types/mysql": "^2.15.5",
+    "barrage": "^2.0.4",
     "mysql2": "^1.6.4"
   },
   "scripts": {},

@@ -35,6 +35,18 @@ test('node streaming', async () => {
   expect(results).toEqual(allValues);
 });
 
+test('node streaming .map', async () => {
+  const results = await new Promise<any[]>((resolve, reject) => {
+    const results: number[] = [];
+    db.queryNodeStream(sql`SELECT * FROM streaming_test.values`, {batchSize: 1})
+      .map(data => data.id * 2)
+      .on('data', data => results.push(data))
+      .on('error', reject)
+      .on('end', () => resolve(results));
+  });
+  expect(results).toEqual(allValues.map(v => v * 2));
+});
+
 test('await streaming', async () => {
   const results: number[] = [];
   for await (const {id} of db.queryStream(
