@@ -10,6 +10,7 @@ export interface SQL {
 
   join(queries: Array<SQLQuery>, seperator?: string): SQLQuery;
   __dangerous__rawValue(text: string): SQLQuery;
+  file(filename: string): SQLQuery;
   value(value: any): SQLQuery;
   ident(...names: Array<any>): SQLQuery;
   registerFormatter<T>(
@@ -26,6 +27,7 @@ const modifiedSQL: SQL = Object.assign(
     // tslint:disable:no-unbound-method
     join: SQLQuery.join,
     __dangerous__rawValue: SQLQuery.raw,
+    file: SQLQuery.file,
     value: SQLQuery.value,
     ident: SQLQuery.ident,
     registerFormatter: SQLQuery.registerFormatter,

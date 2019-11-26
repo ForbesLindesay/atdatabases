@@ -17,6 +17,7 @@ Object {
 }
 `);
 });
+
 test('can join parts of query', () => {
   const conditions = [
     sql`id = ${10}`,
@@ -34,6 +35,16 @@ Object {
     10,
     2018-12-19T16:53:20.939Z,
   ],
+}
+`);
+});
+
+test('can read in a file', () => {
+  const query = sql.file(`${__dirname}/fixture.sql`);
+  expect(query.compile()).toMatchInlineSnapshot(`
+Object {
+  "text": "SELECT * FROM my_table;",
+  "values": Array [],
 }
 `);
 });
