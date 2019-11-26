@@ -60,6 +60,7 @@
     "@types/sqlite3": "^3.1.5",
     "ajv": "^6.7.0",
     "babel-core": "^6.26.3",
+    "barrage": "^2.0.4",
     "chalk": "^2.4.1",
     "cosmiconfig": "^5.0.7",
     "cross-spawn": "^6.0.5",

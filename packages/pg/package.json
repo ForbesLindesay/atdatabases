@@ -22,7 +22,8 @@
     "access": "public"
   },
   "devDependencies": {
-    "@types/node": "^10.12.17"
+    "@types/node": "^10.12.17",
+    "barrage": "^2.0.4"
   },
   "bugs": "https://github.com/ForbesLindesay/atdatabases/issues",
   "homepage": "https://www.atdatabases.org/docs/pg",
