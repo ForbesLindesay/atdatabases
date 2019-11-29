@@ -217,7 +217,7 @@ class ConnectionImplementation {
         opts.tag = tag;
       }
       if (Object.keys(txMode).length) {
-        opts.mode = new pg.TransactionMode(
+        opts.mode = new pg.txMode.TransactionMode(
           txMode.isolationLevel,
           txMode.readOnly,
           txMode.deferrable,
