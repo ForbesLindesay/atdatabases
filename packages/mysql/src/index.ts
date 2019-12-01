@@ -42,8 +42,34 @@ function transformError(text: string, ex: any) {
   }
 }
 
-export {sql};
-export class Connection {
+export interface Connection {
+  query(query: SQLQuery): Promise<any[]>;
+
+  queryStream(
+    query: SQLQuery,
+    options?: {
+      highWaterMark?: number;
+    },
+  ): AsyncIterableIterator<any>;
+
+  queryNodeStream(
+    query: SQLQuery,
+    options?: {
+      highWaterMark?: number;
+    },
+  ): NodeJS.ReadableStream;
+}
+
+export interface ConnectionPool extends Connection {
+  task<T>(fn: (connection: Connection) => Promise<T>): Promise<T>;
+
+  tx<T>(fn: (connection: Connection) => Promise<T>): Promise<T>;
+
+  dispose(): Promise<void>;
+}
+
+export {sql, SQLQuery};
+class ConnectionImplementation implements Connection {
   private readonly conn: Pick<PoolConnection, 'query' | 'connection'>;
   constructor(conn: Pick<PoolConnection, 'query' | 'connection'>) {
     this.conn = conn;
@@ -131,7 +157,7 @@ export class Connection {
   }
 }
 
-export class ConnectionPool {
+class ConnectionPoolImplemenation implements ConnectionPool {
   private readonly pool: Pool;
   constructor(pool: Pool) {
     this.pool = pool;
@@ -159,7 +185,7 @@ export class ConnectionPool {
     },
   ) {
     const connection = await this.pool.getConnection();
-    const c = new Connection(connection);
+    const c = new ConnectionImplementation(connection);
     try {
       for await (const record of c.queryStream(query, options)) {
         yield record;
@@ -178,7 +204,7 @@ export class ConnectionPool {
     this.pool
       .getConnection()
       .then(connection => {
-        const c = new Connection(connection);
+        const c = new ConnectionImplementation(connection);
         let released = false;
         return c
           .queryNodeStream(query, options)
@@ -208,7 +234,7 @@ export class ConnectionPool {
   async task<T>(fn: (connection: Connection) => Promise<T>) {
     const connection = await this.pool.getConnection();
     try {
-      const result = await fn(new Connection(connection));
+      const result = await fn(new ConnectionImplementation(connection));
       return result;
     } finally {
       connection.release();
@@ -222,7 +248,7 @@ export class ConnectionPool {
       await connection.beginTransaction();
       let result: T;
       try {
-        result = await fn(new Connection(connection));
+        result = await fn(new ConnectionImplementation(connection));
       } catch (ex) {
         await connection.rollback();
         completed = true;
@@ -248,7 +274,7 @@ export default function connect(
   connectionConfig: string | undefined = process.env[
     connectionStringEnvironmentVariable
   ],
-) {
+): ConnectionPool {
   if (!connectionConfig) {
     throw new Error(
       'You must provide a connection string for @databases/mysql. You can ' +
@@ -270,7 +296,7 @@ export default function connect(
     },
     multipleStatements: true,
   });
-  return new ConnectionPool(pool);
+  return new ConnectionPoolImplemenation(pool);
 }
 
 function validateMySqlUrl(urlString: string) {
@@ -289,3 +315,8 @@ function validateMySqlUrl(urlString: string) {
     );
   }
 }
+
+module.exports = connect;
+module.exports.default = connect;
+module.exports.sql = sql;
+module.exports.SQLQuery = SQLQuery;
