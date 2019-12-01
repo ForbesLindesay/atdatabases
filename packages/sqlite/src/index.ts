@@ -144,7 +144,7 @@ export default function connect(
   return new DatabaseConnectionImplementation(filename, options);
 }
 module.exports = Object.assign(connect, {
-  defualt: connect,
+  default: connect,
   DatabaseConnectionMode,
   IN_MEMORY,
   sql,
