@@ -1,7 +1,7 @@
 import * as sqlite from 'sqlite3';
 import sql, {SQLQuery} from '@databases/sql';
 import Mutex from './Mutex';
-export {sql};
+export {sql, SQLQuery};
 const Queue = require('then-queue');
 
 export enum DatabaseConnectionMode {
@@ -32,7 +32,20 @@ export interface DatabaseConnectionOptions {
   verbose?: boolean;
 }
 
-export class DatabaseTransaction {
+export interface DatabaseTransaction {
+  query(query: SQLQuery): Promise<any[]>;
+
+  /**
+   * @deprecated use queryStream
+   */
+  stream(query: SQLQuery): AsyncIterableIterator<any>;
+  queryStream(query: SQLQuery): AsyncIterableIterator<any>;
+}
+export interface DatabaseConnection extends DatabaseTransaction {
+  tx<T>(fn: (db: DatabaseTransaction) => Promise<T>): Promise<T>;
+  dispose(): Promise<void>;
+}
+class DatabaseTransactionImplementation implements DatabaseTransaction {
   private readonly _database: sqlite.Database;
   constructor(database: sqlite.Database) {
     this._database = database;
@@ -53,7 +66,7 @@ export class DatabaseTransaction {
 }
 
 export const IN_MEMORY = ':memory:';
-export class DatabaseConnection {
+class DatabaseConnectionImplementation implements DatabaseConnection {
   private readonly _database: sqlite.Database;
   private readonly _mutex = new Mutex();
   constructor(filename: string, options: DatabaseConnectionOptions = {}) {
@@ -92,7 +105,9 @@ export class DatabaseConnection {
         });
       });
       try {
-        const result = fn(new DatabaseTransaction(this._database));
+        const result = fn(
+          new DatabaseTransactionImplementation(this._database),
+        );
         await new Promise<void>((resolve, reject) => {
           this._database.run('COMMIT', err => {
             if (err) reject(err);
@@ -125,9 +140,16 @@ export class DatabaseConnection {
 export default function connect(
   filename: string = IN_MEMORY,
   options: DatabaseConnectionOptions = {},
-) {
-  return new DatabaseConnection(filename, options);
+): DatabaseConnection {
+  return new DatabaseConnectionImplementation(filename, options);
 }
+module.exports = Object.assign(connect, {
+  defualt: connect,
+  DatabaseConnectionMode,
+  IN_MEMORY,
+  sql,
+  SQLQuery,
+});
 
 async function runQuery(
   query: SQLQuery,
