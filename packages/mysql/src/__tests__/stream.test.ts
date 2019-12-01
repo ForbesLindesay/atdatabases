@@ -18,7 +18,7 @@ beforeAll(async () => {
     }
     await db.query(sql`
       INSERT INTO streaming_test_values (id)
-      VALUES ${sql.join(batchValues.map(v => sql`(${v})`), ',')};
+      VALUES ${sql.join(batchValues.map(v => sql`(${v})`), sql`,`)};
     `);
   }
 });

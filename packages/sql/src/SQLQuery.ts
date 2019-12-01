@@ -1,6 +1,7 @@
 import minify = require('pg-minify');
 import {readFileSync} from 'fs';
 
+const warnedJoinSeparators = new Set<string>();
 /**
  * A Postgres query which may be fed directly into the `pg` module for
  * execution.
@@ -118,26 +119,66 @@ export default class SQLQuery implements PGQuery {
     return new SQLQuery(items);
   }
 
+  // tslint:disable:unified-signatures
   /**
-   * Joins multiple queries together and puts a seperator in between if a
-   * seperator was defined.
+   * Joins multiple queries together and puts a separator in between if a
+   * separator was defined.
    */
-  public static join(queries: Array<SQLQuery>, seperator?: string) {
+  public static join(queries: Array<SQLQuery>, separator?: SQLQuery): SQLQuery;
+  /**
+   * Joins multiple queries together and puts a separator in between if a
+   * separator was defined.
+   */
+  public static join(
+    queries: Array<SQLQuery>,
+    separator: ',' | ', ' | ' AND ' | ' OR ',
+  ): SQLQuery;
+  /**
+   * Joins multiple queries together and puts a separator in between if a
+   * separator was defined.
+   *
+   * @deprecated please do not pass the separator as a string, use sql`` to mark it as an SQL string
+   */
+  public static join(queries: Array<SQLQuery>, separator: string): SQLQuery;
+  public static join(
+    queries: Array<SQLQuery>,
+    separator?: string | SQLQuery,
+  ): SQLQuery {
+    if (
+      typeof separator === 'string' &&
+      ![',', ', ', ' AND ', ' OR ', ') AND (', ') OR ('].includes(separator) &&
+      !warnedJoinSeparators.has(separator)
+    ) {
+      warnedJoinSeparators.add(separator);
+      const err = new Error(
+        `Passing join separators as a string is deprecated, please tag your string as an SQL query via "sql.join(..., sql\`${
+          separator.includes('`') ? 'your_separator' : separator
+        }\`)"`,
+      );
+      err.message = 'Deprecation Warning';
+      console.warn(err.stack);
+    }
     const items: Array<SQLItem> = [];
+    const separatorItems: SQLItem[] | undefined = separator
+      ? typeof separator === 'string'
+        ? [{type: SQLItemType.RAW, text: separator}]
+        : separator._items
+      : undefined;
 
     // Add the items of all our queries into the `items` array, adding text
-    // seperator items as necessary.
+    // separator items as necessary.
     for (const query of queries) {
       for (const item of query._items) items.push(item);
 
-      // If we have a seperator, and this is not the last query, add a
-      // seperator.
-      if (seperator && query !== queries[queries.length - 1])
-        items.push({type: SQLItemType.RAW, text: seperator});
+      // If we have a separator, and this is not the last query, add a
+      // separator.
+      if (separatorItems && query !== queries[queries.length - 1])
+        items.push(...separatorItems);
     }
 
     return new SQLQuery(items);
   }
+  // tslint:enable:unified-signatures
 
   /**
    * Creates a new query with the contents of a utf8 file

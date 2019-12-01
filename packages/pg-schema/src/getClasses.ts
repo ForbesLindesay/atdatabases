@@ -33,7 +33,9 @@ export default async function getClasses(
     FROM pg_catalog.pg_class cls
     INNER JOIN pg_catalog.pg_namespace ns
       ON (cls.relnamespace = ns.oid)
-    ${conditions.length ? sql`WHERE ${sql.join(conditions, ' AND ')}` : sql``}
+    ${
+      conditions.length ? sql`WHERE ${sql.join(conditions, sql` AND `)}` : sql``
+    }
     ORDER BY cls.relname;
   `);
 
@@ -45,7 +47,10 @@ export function classQuery(query: ClassQuery) {
   if (query.kind) {
     if (Array.isArray(query.kind)) {
       conditions.push(
-        sql`cls.relkind IN (${sql.join(query.kind.map(k => sql`${k}`), ', ')})`,
+        sql`cls.relkind IN (${sql.join(
+          query.kind.map(k => sql`${k}`),
+          sql`, `,
+        )})`,
       );
     } else {
       conditions.push(sql`cls.relkind = ${query.kind}`);
