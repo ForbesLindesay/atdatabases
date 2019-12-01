@@ -101,6 +101,15 @@ export default class SQLQuery implements PGQuery {
             }
             for (const item of formatted._items) items.push(item);
           } else {
+            if (
+              strings[i + 1] &&
+              strings[i + 1].startsWith("'") &&
+              strings[i].endsWith("'")
+            ) {
+              throw new Error(
+                `You do not need to wrap values in 'quotes' when using @databases. Any JavaScript string passed via \${...} syntax is already treated as a string. Please remove the quotes around this value.`,
+              );
+            }
             items.push({type: SQLItemType.VALUE, value});
           }
         }
