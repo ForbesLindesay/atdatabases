@@ -10,6 +10,9 @@ The `@databases/mysql` library provides a safe and convenient API for querying M
 
 ```ts
 import connect, {sql} from '@databases/mysql';
+// or in CommonJS:
+// const connect = require('@databases/mysql');
+// const {sql} = require('@databases/mysql');
 
 const db = connect();
 

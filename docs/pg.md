@@ -10,6 +10,9 @@ The `@databases/pg` library provides a safe and convenient API for querying post
 
 ```ts
 import connect, {sql} from '@databases/pg';
+// or in CommonJS:
+// const connect = require('@databases/pg');
+// const {sql} = require('@databases/pg');
 
 const db = connect();
 
