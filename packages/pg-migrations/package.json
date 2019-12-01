@@ -1,11 +1,11 @@
 {
   "name": "@databases/pg-migrations",
-  "version": "0.0.5",
+  "version": "0.1.0",
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {
-    "@databases/pg": "^1.2.0",
+    "@databases/pg": "^2.0.0",
     "chalk": "^2.4.1",
     "prettier": "^1.15.3"
   },
