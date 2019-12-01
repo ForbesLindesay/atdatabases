@@ -76,7 +76,7 @@ const arrayOfSqlFields = ["a", "b", "c", "d"].map(
   n => sql.identifier(n),
 );
 
-sql`SELECT ${sql.join(arrayOfSqlFields, ", ")}`;
+sql`SELECT ${sql.join(arrayOfSqlFields, sql`, `)}`;
 // => {text: 'SELECT "a", "b", "c", "d";', values: []}
 
 const arrayOfSqlConditions = [
@@ -84,7 +84,7 @@ const arrayOfSqlConditions = [
   sql.query`b = ${2}`,
   sql.query`c = ${3}`
 ];
-sql`WHERE (${sql.join(arrayOfSqlConditions, ') AND (')})`;
+sql`WHERE (${sql.join(arrayOfSqlConditions, sql`) AND (`)})`;
 // => {text: 'WHERE (a = $1) AND (b = $2) AND (c = $3)', values: [1, 2, 3]}
 ```
 

@@ -54,7 +54,9 @@ export default async function getConstraints(
       ON (c.conindid = cls.oid)
     INNER JOIN pg_catalog.pg_namespace ns
       ON (c.connamespace = ns.oid)
-    ${conditions.length ? sql`WHERE ${sql.join(conditions, ' AND ')}` : sql``}
+    ${
+      conditions.length ? sql`WHERE ${sql.join(conditions, sql` AND `)}` : sql``
+    }
   `);
 
   return constraints;

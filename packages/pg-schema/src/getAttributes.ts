@@ -57,7 +57,9 @@ export default async function getAttributes(
       ON (cls.relnamespace = ns.oid)
     LEFT OUTER JOIN pg_catalog.pg_attrdef def -- default values
       ON (def.adrelid = cls.oid AND def.adnum = a.attnum)
-    ${conditions.length ? sql`WHERE ${sql.join(conditions, ' AND ')}` : sql``}
+    ${
+      conditions.length ? sql`WHERE ${sql.join(conditions, sql` AND `)}` : sql``
+    }
   `);
 
   return attributes;

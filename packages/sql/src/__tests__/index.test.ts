@@ -26,7 +26,7 @@ test('can join parts of query', () => {
   const query = sql`
       SELECT *
       FROM foo
-      WHERE ${sql.join(conditions, ' AND ')};
+      WHERE ${sql.join(conditions, sql` AND `)};
   `;
   expect(query.compile()).toMatchInlineSnapshot(`
 Object {
