@@ -1,11 +1,11 @@
 {
   "name": "@databases/pg-create",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {
-    "@databases/pg": "^1.2.0",
+    "@databases/pg": "^2.0.0",
     "@types/rimraf": "^2.0.2",
     "chalk": "^2.4.1",
     "cross-spawn": "^6.0.5",

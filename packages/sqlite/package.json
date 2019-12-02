@@ -1,11 +1,11 @@
 {
   "name": "@databases/sqlite",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {
-    "@databases/sql": "^1.1.0",
+    "@databases/sql": "^2.0.0",
     "@types/sqlite3": "^3.1.5",
     "sqlite3": "^4.0.6",
     "then-queue": "^1.3.0"

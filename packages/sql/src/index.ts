@@ -8,7 +8,28 @@ export {SQLQuery};
 export interface SQL {
   (strings: TemplateStringsArray, ...values: Array<any>): SQLQuery;
 
-  join(queries: Array<SQLQuery>, seperator?: string): SQLQuery;
+  // tslint:disable:unified-signatures
+  /**
+   * Joins multiple queries together and puts a separator in between if a
+   * separator was defined.
+   */
+  join(queries: Array<SQLQuery>, separator?: SQLQuery): SQLQuery;
+  /**
+   * Joins multiple queries together and puts a separator in between if a
+   * separator was defined.
+   */
+  join(
+    queries: Array<SQLQuery>,
+    separator: ',' | ', ' | ' AND ' | ' OR ',
+  ): SQLQuery;
+  /**
+   * Joins multiple queries together and puts a separator in between if a
+   * separator was defined.
+   *
+   * @deprecated please do not pass the separator as a string, use sql`` to mark it as an SQL string
+   */
+  join(queries: Array<SQLQuery>, separator: string): SQLQuery;
+  // tslint:enable:unified-signatures
   __dangerous__rawValue(text: string): SQLQuery;
   file(filename: string): SQLQuery;
   value(value: any): SQLQuery;
@@ -25,6 +46,7 @@ const modifiedSQL: SQL = Object.assign(
     SQLQuery.query(strings, ...values),
   {
     // tslint:disable:no-unbound-method
+    // tslint:disable-next-line:deprecation
     join: SQLQuery.join,
     __dangerous__rawValue: SQLQuery.raw,
     file: SQLQuery.file,

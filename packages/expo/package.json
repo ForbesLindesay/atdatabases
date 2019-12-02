@@ -1,11 +1,11 @@
 {
   "name": "@databases/expo",
-  "version": "2.0.1",
+  "version": "3.0.0",
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {
-    "@databases/websql-core": "^2.0.1"
+    "@databases/websql-core": "^3.0.0"
   },
   "peerDependencies": {
     "expo-sqlite": "*"

@@ -12,6 +12,9 @@ N.B. you should only have one process connected to a given SQLite database at a 
 
 ```ts
 import connect, {sql} from '@databases/sqlite';
+// or in CommonJS:
+// const connect = require('@databases/sqlite');
+// const {sql} = require('@databases/sqlite');
 
 const db = connect();
 

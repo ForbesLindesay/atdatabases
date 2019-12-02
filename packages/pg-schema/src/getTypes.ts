@@ -103,7 +103,9 @@ export default async function getTypes(
       ON (ty.typelem = subt.oid)
     LEFT OUTER JOIN pg_catalog.pg_type baset
       ON (ty.typbasetype = baset.oid)
-    ${conditions.length ? sql`WHERE ${sql.join(conditions, ' AND ')}` : sql``}
+    ${
+      conditions.length ? sql`WHERE ${sql.join(conditions, sql` AND `)}` : sql``
+    }
   `)) as TypeRecord[];
 
   return Promise.all(

@@ -1,6 +1,6 @@
 {
   "name": "@databases/pg",
-  "version": "1.2.0",
+  "version": "2.0.0",
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
@@ -10,7 +10,7 @@
     "@databases/pg-data-type-id": "^0.0.1",
     "@databases/pg-errors": "^0.0.1",
     "@databases/push-to-async-iterable": "^1.0.0",
-    "@databases/sql": "^1.1.0",
+    "@databases/sql": "^2.0.0",
     "@types/pg-query-stream": "^1.0.2",
     "pg-promise": "^8.6.0",
     "pg-query-stream": "1.1.2"

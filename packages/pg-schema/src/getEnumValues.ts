@@ -28,7 +28,9 @@ export default async function getEnumValues(
       ON (ty.typnamespace = ns.oid)
     LEFT OUTER JOIN pg_catalog.pg_type subt
       ON (ty.typelem = subt.oid)
-    ${conditions.length ? sql`WHERE ${sql.join(conditions, ' AND ')}` : sql``}
+    ${
+      conditions.length ? sql`WHERE ${sql.join(conditions, sql` AND `)}` : sql``
+    }
   `);
 
   return enumValues;

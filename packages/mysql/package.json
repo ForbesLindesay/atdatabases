@@ -1,6 +1,6 @@
 {
   "name": "@databases/mysql",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
@@ -8,7 +8,7 @@
     "@babel/code-frame": "^7.0.0",
     "@databases/mysql-config": "^1.0.1",
     "@databases/push-to-async-iterable": "^1.0.0",
-    "@databases/sql": "^1.1.0",
+    "@databases/sql": "^2.0.0",
     "@types/mysql": "^2.15.5",
     "mysql2": "^1.6.4"
   },
