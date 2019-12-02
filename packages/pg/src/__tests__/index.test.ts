@@ -1,5 +1,6 @@
-import connect from '../';
+import connect, { TransactionOptions } from '../';
 import sql from '@databases/sql';
+import { txMode } from 'pg-promise';
 
 jest.setTimeout(30000);
 
@@ -15,6 +16,13 @@ const db3 = connect(
   undefined,
   {noDuplicateDatabaseObjectsWarning: true},
 );
+
+afterAll(async () => {
+  // tslint:disable-next-line:no-void-expression
+  expect(await db.dispose()).toBe(undefined);
+  await db2.dispose();
+  await db3.dispose();
+});
 
 test('error messages', async () => {
   try {
@@ -64,20 +72,63 @@ test('bigint', async () => {
   `);
   const result = await db.query(sql`SELECT id from bigint_test.bigints;`);
   expect(result).toEqual([{id: 1}, {id: 2}, {id: 42}]);
-  // tslint:disable-next-line:no-void-expression
-  expect(await db.dispose()).toBe(undefined);
 
   expect(await db2.query(sql`SELECT id from bigint_test.bigints;`)).toEqual([
     {id: 1},
     {id: 2},
     {id: 42},
   ]);
-  await db2.dispose();
 
   expect(await db3.query(sql`SELECT id from bigint_test.bigints;`)).toEqual([
     {id: 1},
     {id: 2},
     {id: 42},
   ]);
-  await db3.dispose();
+});
+
+test('deferrable transactions', async () => {
+  const transactionOptions: TransactionOptions = {
+    isolationLevel: txMode.isolationLevel.serializable,
+    readOnly: false,
+    deferrable: true,
+  };
+  let error;
+  try {
+    await db.tx(async (tx) => {
+      await tx.query(sql`
+      CREATE TABLE parents (
+        id SERIAL PRIMARY KEY
+      );
+    `);
+
+      await tx.query(sql`
+      CREATE TABLE children (
+        id SERIAL PRIMARY KEY,
+        parent_id INT REFERENCES parents(id) INITIALLY DEFERRED
+      );
+    `);
+
+      // inserting into children before creating the parent will throw an error
+      // unless the transaction is deferred
+      await tx.query(sql`
+      INSERT INTO children (
+        parent_id
+      ) VALUES (
+        1
+      );
+    `);
+
+      await tx.query(sql`
+      INSERT INTO parents (
+        id
+      ) VALUES (
+        1
+      );
+    `);
+    }, transactionOptions);
+  } catch (e) {
+    error = e;
+  } finally {
+    expect(error).toBe(undefined);
+  }
 });
