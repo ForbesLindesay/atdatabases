@@ -10,6 +10,7 @@
   "dependencies": {
     "@databases/pg-config": "^0.0.0",
     "@databases/with-container": "^0.0.0",
+    "generate-alphabetic-name": "^1.0.0",
     "modern-spawn": "^1.0.0"
   },
   "scripts": {},
@@ -19,7 +20,8 @@
     "access": "public"
   },
   "devDependencies": {
-    "@types/node": "^13.13.4"
+    "@types/node": "^13.13.4",
+    "@databases/pg": "^0.0.0"
   },
   "bugs": "https://github.com/ForbesLindesay/atdatabases/issues",
   "homepage": "https://www.atdatabases.org/docs/pg-test",
