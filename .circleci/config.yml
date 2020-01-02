@@ -75,7 +75,6 @@ workflows:
   all:
     jobs:
       - all:
-          context: common-env
           filters:
             branches:
               ignore:
