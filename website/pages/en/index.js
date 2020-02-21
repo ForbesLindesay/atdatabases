@@ -104,7 +104,7 @@ makes it virtually impossible for SQL Injection attacks to slip in
 un-noticed. All the \`@databases\` libraries enforce the use of the sql
 tagged template literals, so you can't accidentally miss them.
 
-The query is then passed to Postgres as a separate string and values:
+The query is then passed to your database engine as a separate string and values:
 
 \`\`\`
 {text: 'SELECT * FROM users WHERE id=?', values: [userID]}
