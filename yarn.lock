@@ -1861,14 +1861,14 @@ expect@^23.6.0:
     jest-message-util "^23.4.0"
     jest-regex-util "^23.3.0"
 
-expo-sqlite@^6.0.0:
-  version "6.0.0"
-  resolved "https://registry.yarnpkg.com/expo-sqlite/-/expo-sqlite-6.0.0.tgz#e7fe36b493a2230afdc77bdaedeab5f031690390"
-  integrity sha512-M8heovLeJoq7tb4f7PipDu0dqHSklbI2EqNvDM8XLjSZdSv6CqCMHg5Kvx0L9CLYTchjzktDPClZKjgvtGOVug==
+expo-sqlite@^8.0.0:
+  version "8.0.0"
+  resolved "https://registry.yarnpkg.com/expo-sqlite/-/expo-sqlite-8.0.0.tgz#293b45c78d612ab25400c8c579bd7d73f06ccb6f"
+  integrity sha512-nJBj1psOkYGIGh2hqMFV/+04EvfGAD3wkHMauUvveU6m/+c48GIxmesPMMDfqtzESgzMcVSKLfbiMYrdQJyrHg==
   dependencies:
     "@expo/websql" "^1.0.1"
     "@types/websql" "^0.0.27"
-    lodash "^4.17.11"
+    lodash "^4.17.15"
 
 extend-shallow@^2.0.1:
   version "2.0.1"
@@ -3203,7 +3203,7 @@ lodash.sortby@^4.7.0:
   resolved "https://registry.yarnpkg.com/lodash.sortby/-/lodash.sortby-4.7.0.tgz#edd14c824e2cc9c1e0b0a1b42bb5210516a42438"
   integrity sha1-7dFMgk4sycHgsKG0K7UhBRakJDg=
 
-lodash@^4.17.11, lodash@^4.17.13, lodash@^4.17.14, lodash@^4.17.4:
+lodash@^4.17.11, lodash@^4.17.13, lodash@^4.17.14, lodash@^4.17.15, lodash@^4.17.4:
   version "4.17.15"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.15.tgz#b447f6670a0455bbfeedd11392eff330ea097548"
   integrity sha512-8xOcRHvCjnocdS5cpwXQXVzmmh5e5+saE2QGoeQmbKmRS6J3VQppPOIt0MnmE+4xlZoumy0GPG0D0MVIQbNA1A==

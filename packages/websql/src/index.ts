@@ -1,7 +1,7 @@
-import {websql, Database, sql} from '@databases/websql-core';
+import {websql, Database, sql, SQLQuery} from '@databases/websql-core';
 const openDatabase: websql.OpenDatabase = require('websql');
 
-export {sql};
+export {sql, SQLQuery};
 export const IN_MEMORY = ':memory:';
 export interface Options {
   version?: string;

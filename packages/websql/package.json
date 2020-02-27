@@ -1,11 +1,11 @@
 {
   "name": "@databases/websql",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {
-    "@databases/websql-core": "^3.0.0",
+    "@databases/websql-core": "^3.0.1",
     "websql": "^1.0.0"
   },
   "scripts": {},
