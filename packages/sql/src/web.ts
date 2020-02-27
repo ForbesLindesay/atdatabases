@@ -1,16 +1,9 @@
-import {readFileSync} from 'fs';
-import minify = require('pg-minify');
-import SQLQuery, {setPgMinify, setReadFileSync} from './SQLQuery';
-import SQLBase from './SQL';
+// @public
 
-export interface SQL extends SQLBase {
-  file(filename: string): SQLQuery;
-}
+import SQLQuery from './SQLQuery';
+import SQL from './SQL';
 
-setPgMinify(minify);
-setReadFileSync(readFileSync);
-
-export {SQLQuery};
+export {SQLQuery, SQL};
 
 // Create the SQL interface we export.
 const modifiedSQL: SQL = Object.assign(
@@ -21,7 +14,6 @@ const modifiedSQL: SQL = Object.assign(
     // tslint:disable-next-line:deprecation
     join: SQLQuery.join,
     __dangerous__rawValue: SQLQuery.raw,
-    file: (filename: string) => SQLQuery.file(filename),
     value: SQLQuery.value,
     ident: SQLQuery.ident,
     registerFormatter: SQLQuery.registerFormatter,

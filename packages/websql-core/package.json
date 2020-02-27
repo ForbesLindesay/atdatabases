@@ -1,11 +1,12 @@
 {
   "name": "@databases/websql-core",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {
-    "@databases/sql": "^2.0.0"
+    "@babel/code-frame": "^7.0.0",
+    "@databases/sql": "^2.1.0"
   },
   "scripts": {},
   "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/websql-core",

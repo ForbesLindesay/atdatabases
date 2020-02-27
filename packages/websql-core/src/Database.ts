@@ -1,8 +1,9 @@
-import sql, {SQLQuery} from '@databases/sql';
+import sql, {SQLQuery} from '@databases/sql/web';
 import * as ws from './websql-types';
+const {codeFrameColumns} = require('@babel/code-frame');
 
 const DEFAULT_OPTIONS = {readOnly: false};
-export {sql};
+export {sql, SQLQuery};
 export class QueryTask {
   protected readonly _isQueryTask = true;
 }
@@ -21,6 +22,37 @@ export class Transaction {
     this._handler(task, query);
     return task;
   }
+}
+
+function convertError(err: any, query: string) {
+  if (!err || typeof err.message !== 'string') return err;
+  const match = /near \"([^\"]+)\"/.exec(err.message);
+  if (match) {
+    const split = /^[a-z]+$/i.test(match[1])
+      ? query.split(new RegExp(`\\b${match[1]}\\b`))
+      : query.split(match[1]);
+    if (split.length === 2) {
+      const lines = split[0].split('\n');
+      const line = lines.length;
+      const column = lines[lines.length - 1].length + 1;
+
+      const e = new Error(
+        `${err.message}\n\n${codeFrameColumns(query, {
+          start: {line, column},
+          end: {line, column: column + match[1].length},
+        })}\n`,
+      );
+      for (const i in err) {
+        (e as any)[i] = err[i];
+      }
+      return e;
+    }
+  }
+  const e = new Error(`${err.message}\n\n${query}`);
+  for (const i in err) {
+    (e as any)[i] = err[i];
+  }
+  return e;
 }
 export default class Database {
   private readonly _db: Promise<ws.Database>;
@@ -119,7 +151,7 @@ export default class Database {
               return;
             },
             (_, err) => {
-              return txThrow(err);
+              return txThrow(convertError(err, text));
             },
           );
         }
@@ -143,7 +175,7 @@ export default class Database {
             resultSet = _resultSet;
           });
         },
-        reject,
+        ex => reject(convertError(ex, text)),
         () => {
           resolve(resultSet);
         },

@@ -1,7 +1,5 @@
-import minify = require('pg-minify');
-import {readFileSync} from 'fs';
-
 const warnedJoinSeparators = new Set<string>();
+
 /**
  * A Postgres query which may be fed directly into the `pg` module for
  * execution.
@@ -53,6 +51,21 @@ type SQLItem =
 const formatter = Symbol('SQL Query Formatter');
 
 const DEFAULT_COMPILE_OPTIONS = {minify: true};
+
+export type MinifyFunction = (src: string) => string;
+let pgMinify: MinifyFunction = s => s;
+
+export type ReadFileSync = (filename: string, format: 'utf8') => string;
+let readFileSync: ReadFileSync = () => {
+  throw new Error('This environment does not support reading files');
+};
+
+export function setPgMinify(minify: MinifyFunction) {
+  pgMinify = minify;
+}
+export function setReadFileSync(readFileSyncArg: ReadFileSync) {
+  readFileSync = readFileSyncArg;
+}
 /**
  * The representation of a SQL query. Call `compile` to turn it into a SQL
  * string with value placeholders.
@@ -131,7 +144,7 @@ export default class SQLQuery implements PGQuery {
    */
   public static join(
     queries: Array<SQLQuery>,
-    separator: ',' | ', ' | ' AND ' | ' OR ',
+    separator: ',' | ', ' | ' AND ' | ' OR ' | ') AND (' | ') OR (' | ';',
   ): SQLQuery;
   /**
    * Joins multiple queries together and puts a separator in between if a
@@ -146,7 +159,9 @@ export default class SQLQuery implements PGQuery {
   ): SQLQuery {
     if (
       typeof separator === 'string' &&
-      ![',', ', ', ' AND ', ' OR ', ') AND (', ') OR ('].includes(separator) &&
+      ![',', ', ', ' AND ', ' OR ', ') AND (', ') OR (', ';'].includes(
+        separator,
+      ) &&
       !warnedJoinSeparators.has(separator)
     ) {
       warnedJoinSeparators.add(separator);
@@ -325,7 +340,7 @@ function compilePG(items: Array<SQLItem>, options: {minify: boolean}): PGQuery {
 
   // Minify the query text before returning it.
   if (options.minify) {
-    query.text = minify(query.text);
+    query.text = pgMinify(query.text);
   }
 
   return query;

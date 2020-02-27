@@ -1,6 +1,6 @@
 {
   "name": "@databases/sql",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
@@ -19,6 +19,8 @@
   "bugs": "https://github.com/ForbesLindesay/atdatabases/issues",
   "homepage": "https://www.atdatabases.org/docs/sql",
   "files": [
-    "lib/"
+    "lib/",
+    "web.js",
+    "web.d.ts"
   ]
 }
