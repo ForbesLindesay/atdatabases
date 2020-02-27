@@ -8,31 +8,26 @@ const db = connect();
 //   await db.dispose();
 // });
 
-// test('error messages', async () => {
-//   try {
-//     const s = sql;
-//     await db.query(s`
-//       SELECT 1 + ${1} as foo;
-//       SELECT 1 + 42 as bar;
-//       SELECT * FRM 'baz;
-//       SELECT * FROM bing;
-//     `);
-//   } catch (ex) {
-//     expect(ex.message).toMatchInlineSnapshot(`
-// "You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near:
+test('error messages', async () => {
+  try {
+    const s = sql;
+    await db.query(s`
+      SELECT * FRM 'baz;
+    `);
+  } catch (ex) {
+    expect(ex.message).toMatchInlineSnapshot(`
+"SQLITE_ERROR: near \\"FRM\\": syntax error
 
-//   1 | SELECT 1 + ? as foo;
-//   2 |       SELECT 1 + 42 as bar;
-// > 3 |       SELECT * FRM 'baz;
-//     |                ^^^^^^^^
-// > 4 |       SELECT * FROM bing;
-//     | ^^^^^^^^^^^^^^^^^^^^^^^^^
-// "
-// `);
-//     return;
-//   }
-//   expect(false).toBe(true);
-// });
+  1 | 
+> 2 |       SELECT * FRM 'baz;
+    |                ^^^
+  3 |     
+"
+`);
+    return;
+  }
+  expect(false).toBe(true);
+});
 
 test('query', async () => {
   const [{foo}] = await db.query(sql`SELECT 1 + 1 as foo`);
