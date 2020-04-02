@@ -26,26 +26,27 @@ db.query(sql`SELECT * FROM users;`).then(
 
 ## API
 
-### ``` connect(connection, options) ```
+### `connect(connection, options)`
 
 Create a `ConnectionPool` for a given database. You should only create one ConnectionPool per database for your entire applicaiton. Normally this means having one module that creates and exports the connection pool.
 
 You can pass two parameters to the `connect` function. The first is the connection string/details. It can be one of:
 
- * a connection string, e.g. `postgresql://my-user:my-password@localhost/my-db`
- * an object with `{database?: string, user?: string, password?: string, port?: number, host?: string, ssl?: boolean}`
- * if you don't provide a value, the `DATABASE_URL` environment variable is treated as a postgres connection string.
+- a connection string, e.g. `postgresql://my-user:my-password@localhost/my-db`
+- an object with `{database?: string, user?: string, password?: string, port?: number, host?: string, ssl?: boolean}`
+- if you don't provide a value, the `DATABASE_URL` environment variable is treated as a postgres connection string.
 
 The second, `options` allows you to perform advanced customisation of the database connection. See [Postgres Options](pg-options.md)
 
 The `ConnectionPool` inherits from `Connection`, so you call `ConnectionPool.query` directly instead of having to manually aquire a connection to run the query. If you intend to run a sequence of queries, it is generally better for performance to aquire a single connection for them, using `connectionPool.task` even if you do not want a transaction.
 
-### ``` Conneciton.query(SQLQuery): Promise<any[]> ```
+### `Connection.query(SQLQuery | SQLQuery[]): Promise<any[]>`
 
 Run an SQL Query and get a promise for an array of results.
 
+If you pass an array of SQLQueries, they will be run as a single transaction and you will get an array in response where each element of the array is the results of one of the queries.
 
-### ``` Conneciton.queryStream(SQLQuery): AsyncIterable<any> ```
+### `Connection.queryStream(SQLQuery): AsyncIterable<any>`
 
 Run an SQL Query and get an async iterable of the results. e.g.
 
@@ -55,17 +56,19 @@ for await (const record of db.queryStream(sql`SELECT * FROM massive_table`)) {
 }
 ```
 
-### ``` Conneciton.queryNodeStream(SQLQuery): ReadableStream ```
+### `Connection.queryNodeStream(SQLQuery): ReadableStream`
 
 Run an SQL Query and get a node.js readable stream of the results. e.g.
 
 ```js
 const Stringifier = require('newline-json').Stringifier;
 
-db.queryNodeStream(sql`SELECT * FROM massive_table`).pipe(new Stringifier()).pipe(process.stdout);
+db.queryNodeStream(sql`SELECT * FROM massive_table`)
+  .pipe(new Stringifier())
+  .pipe(process.stdout);
 ```
 
-### ``` Connection.task(fn, options?): Promise<T> ```
+### `Connection.task(fn, options?): Promise<T>`
 
 Executes a callback function with automatically managed connection.
 
@@ -88,11 +91,11 @@ const result = await db.task(async task => {
 
 Options:
 
-Name | Type | Optional | Description
------|-------|---------|------------
-`tag` | <code>string &#124; number</code> | ✓ | Traceable context for the task
+| Name  | Type                              | Optional | Description                    |
+| ----- | --------------------------------- | -------- | ------------------------------ |
+| `tag` | <code>string &#124; number</code> | ✓        | Traceable context for the task |
 
-### ``` Connection.tx(fn, options?): Promise<T> ```
+### `Connection.tx(fn, options?): Promise<T>`
 
 Executes a callback function as a transaction, with automatically managed connection.
 
@@ -116,12 +119,12 @@ const result = await db.task(async task => {
 
 Options:
 
-Name | Type | <abbr title="Optional">Opt</abbr> | Description
------|-------|---------|------------
-`tag` | <code>string &#124; number</code> | ✓ | Traceable context for the task
-`isolationLevel` | `IsolationLevel` | ✓ | Transaction Isolation Level
-`readOnly` | `boolean` | ✓ | Sets transaction access mode
-`deferrable` | `boolean` | ✓ | Sets the transaction deferrable mode. It is only used when `isolationLevel` is `IsolationLevel.serializable` and `readOnly=true`
+| Name             | Type                              | <abbr title="Optional">Opt</abbr> | Description                                                                                                                      |
+| ---------------- | --------------------------------- | --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `tag`            | <code>string &#124; number</code> | ✓                                 | Traceable context for the task                                                                                                   |
+| `isolationLevel` | `IsolationLevel`                  | ✓                                 | Transaction Isolation Level                                                                                                      |
+| `readOnly`       | `boolean`                         | ✓                                 | Sets transaction access mode                                                                                                     |
+| `deferrable`     | `boolean`                         | ✓                                 | Sets the transaction deferrable mode. It is only used when `isolationLevel` is `IsolationLevel.serializable` and `readOnly=true` |
 
 ### IsolationLevel
 
@@ -131,15 +134,15 @@ import {IsolationLevel} from '@databases/pg';
 
 The Isolation Level can be passed to `Connection.tx` as an option. It should be one of:
 
-* `IsolationLeve.none`
-* `IsolationLevel.serializable`
-* `IsolationLevel.repeatableRead`
-* `IsolationLevel.readCommitted`
+- `IsolationLeve.none`
+- `IsolationLevel.serializable`
+- `IsolationLevel.repeatableRead`
+- `IsolationLevel.readCommitted`
 
-### ``` ConnectionPool.dispose(): Promise<void> ```
+### `ConnectionPool.dispose(): Promise<void>`
 
 Dispose the connection pool. Once this is called, any subsequent queries will fail.
 
-### ``` ConnectionPool.registerTypeParser(type, parser) ``` / ``` ConnectionPool.getTypeParser(type) ``` / ``` ConnectionPool.parseArray(string, entryParser) ``` / ``` ConnectionPool.parseComposite(string) ```
+### `ConnectionPool.registerTypeParser(type, parser)` / `ConnectionPool.getTypeParser(type)` / `ConnectionPool.parseArray(string, entryParser)` / `ConnectionPool.parseComposite(string)`
 
 See: [Custom Types](pg-custom-types.md)

@@ -26,22 +26,22 @@ db.query(sql`SELECT * FROM users;`).then(
 
 ## API
 
-### ``` connect(connection) ```
+### `connect(connection)`
 
 Create a `ConnectionPool` for a given database. You should only create one ConnectionPool per database for your entire applicaiton. Normally this means having one module that creates and exports the connection pool.
 
 The `connect` function just takes the connection string:
 
- * a connection string, e.g. `mysql://my-user:my-password@localhost/my-db`
- * if you don't provide a value, the `DATABASE_URL` environment variable is treated as a postgres connection string.
+- a connection string, e.g. `mysql://my-user:my-password@localhost/my-db`
+- if you don't provide a value, the `DATABASE_URL` environment variable is treated as a postgres connection string.
 
 The `ConnectionPool` inherits from `Connection`, so you call `ConnectionPool.query` directly instead of having to manually aquire a connection to run the query. If you intend to run a sequence of queries, it is generally better for performance to aquire a single connection for them, using `connectionPool.task` even if you do not want a transaction.
 
-### ``` Conneciton.query(SQLQuery): Promise<any[]> ```
+### `Connection.query(SQLQuery): Promise<any[]>`
 
 Run an SQL Query and get a promise for an array of results.
 
-### ``` Conneciton.queryStream(SQLQuery): AsyncIterable<any> ```
+### `Connection.queryStream(SQLQuery): AsyncIterable<any>`
 
 Run an SQL Query and get an async iterable of the results. e.g.
 
@@ -51,17 +51,19 @@ for await (const record of db.queryStream(sql`SELECT * FROM massive_table`)) {
 }
 ```
 
-### ``` Conneciton.queryNodeStream(SQLQuery): ReadableStream ```
+### `Connection.queryNodeStream(SQLQuery): ReadableStream`
 
 Run an SQL Query and get a node.js readable stream of the results. e.g.
 
 ```js
 const Stringifier = require('newline-json').Stringifier;
 
-db.queryNodeStream(sql`SELECT * FROM massive_table`).pipe(new Stringifier()).pipe(process.stdout);
+db.queryNodeStream(sql`SELECT * FROM massive_table`)
+  .pipe(new Stringifier())
+  .pipe(process.stdout);
 ```
 
-### ``` Connection.task(fn): Promise<T> ```
+### `Connection.task(fn): Promise<T>`
 
 Executes a callback function with automatically managed connection.
 
@@ -82,7 +84,7 @@ const result = await db.task(async task => {
 
 > N.B. this is not a transaction. If later statements fail, the earlier queries will already have taken effect. You can manulaly execute `BEGIN` and `COMMIT`/`ROLLBACK` SQL on the connection though, to impelement the transaction yourself.
 
-### ``` Connection.tx(fn): Promise<T> ```
+### `Connection.tx(fn): Promise<T>`
 
 Executes a callback function as a transaction, with automatically managed connection.
 
@@ -104,6 +106,6 @@ const result = await db.task(async task => {
 // => 4
 ```
 
-### ``` ConnectionPool.dispose(): Promise<void> ```
+### `ConnectionPool.dispose(): Promise<void>`
 
 Dispose the connection pool. Once this is called, any subsequent queries will fail.

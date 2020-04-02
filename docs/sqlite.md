@@ -28,10 +28,9 @@ db.query(sql`SELECT * FROM users;`).then(
 
 ## API
 
-### ``` connect(fileName) ```
+### `connect(fileName)`
 
 Create a database connection for a given database. You should only create one connection per database for your entire applicaiton. Normally this means having one module that creates and exports the connection pool.
-
 
 In memory:
 
@@ -47,13 +46,13 @@ import connect from '@databases/websql';
 const db = connect(FILE_NAME);
 ```
 
-The `Database` inherits from `DatabaseTransaction`, so you call `Database.query` directly instead of having to create a transaction for every query.  Since SQLite has very limited support for actual transactions, we only support running one transaction at a time, but multiple queries can be run in parallel. You should therefore only use transactions when you actually need them.
+The `Database` inherits from `DatabaseTransaction`, so you call `Database.query` directly instead of having to create a transaction for every query. Since SQLite has very limited support for actual transactions, we only support running one transaction at a time, but multiple queries can be run in parallel. You should therefore only use transactions when you actually need them.
 
-### ``` Conneciton.query(SQLQuery): Promise<any[]> ```
+### `Connection.query(SQLQuery): Promise<any[]>`
 
 Run an SQL Query and get a promise for an array of results.
 
-### ``` Conneciton.queryStream(SQLQuery): AsyncIterable<any> ```
+### `Connection.queryStream(SQLQuery): AsyncIterable<any>`
 
 Run an SQL Query and get an async iterable of the results. e.g.
 
@@ -63,7 +62,7 @@ for await (const record of db.queryStream(sql`SELECT * FROM massive_table`)) {
 }
 ```
 
-### ``` Connection.tx(fn): Promise<T> ```
+### `Connection.tx(fn): Promise<T>`
 
 Executes a callback function as a transaction, with automatically managed connection.
 
@@ -84,6 +83,6 @@ const result = await db.tx(async transaction => {
 // => 4
 ```
 
-### ``` ConnectionPool.dispose(): Promise<void> ```
+### `ConnectionPool.dispose(): Promise<void>`
 
 Dispose the connection pool. Once this is called, any subsequent queries will fail.
