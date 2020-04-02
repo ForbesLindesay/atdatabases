@@ -40,13 +40,13 @@ The second, `options` allows you to perform advanced customisation of the databa
 
 The `ConnectionPool` inherits from `Connection`, so you call `ConnectionPool.query` directly instead of having to manually aquire a connection to run the query. If you intend to run a sequence of queries, it is generally better for performance to aquire a single connection for them, using `connectionPool.task` even if you do not want a transaction.
 
-### `Conneciton.query(SQLQuery | SQLQuery[]): Promise<any[]>`
+### `Connection.query(SQLQuery | SQLQuery[]): Promise<any[]>`
 
 Run an SQL Query and get a promise for an array of results.
 
 If you pass an array of SQLQueries, they will be run as a single transaction and you will get an array in response where each element of the array is the results of one of the queries.
 
-### `Conneciton.queryStream(SQLQuery): AsyncIterable<any>`
+### `Connection.queryStream(SQLQuery): AsyncIterable<any>`
 
 Run an SQL Query and get an async iterable of the results. e.g.
 
@@ -56,7 +56,7 @@ for await (const record of db.queryStream(sql`SELECT * FROM massive_table`)) {
 }
 ```
 
-### `Conneciton.queryNodeStream(SQLQuery): ReadableStream`
+### `Connection.queryNodeStream(SQLQuery): ReadableStream`
 
 Run an SQL Query and get a node.js readable stream of the results. e.g.
 
