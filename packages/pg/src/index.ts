@@ -108,7 +108,7 @@ class ConnectionImplementation {
     );
     try {
       return await (Array.isArray(query)
-        ? this.connection.multi(q)
+        ? this.connection.multi(q.text, q.values)
         : this.connection.query(q));
     } catch (ex) {
       if (isSQLError(ex) && ex.position) {
