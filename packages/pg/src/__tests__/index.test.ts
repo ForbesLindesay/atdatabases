@@ -50,8 +50,8 @@ test('query - multiple queries', async () => {
   const resultA = await db.query([sql`SELECT 1 + 1 as foo`]);
   expect(resultA).toEqual([[{foo: 2}]]);
   const resultB = await db.query([
-    sql`SELECT 1 + 1 as foo;`,
-    sql`SELECT 1 + 2 as bar;`,
+    sql`SELECT ${1} + 1 as foo;`,
+    sql`SELECT 1 + ${2} as bar;`,
   ]);
   expect(resultB).toEqual([[{foo: 2}], [{bar: 3}]]);
 });
