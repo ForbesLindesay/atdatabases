@@ -25,6 +25,7 @@ export interface TransactionOptions {
 export interface Connection {
   readonly sql: SQL;
   query(query: SQLQuery): Promise<any[]>;
+  query(query: SQLQuery[]): Promise<any[][]>;
   queryStream(
     query: SQLQuery,
     options?: {
@@ -86,17 +87,29 @@ class ConnectionImplementation {
   constructor(connection: pg.IBaseProtocol<unknown>) {
     this.connection = connection;
   }
-  async query(query: SQLQuery): Promise<any[]> {
-    if (!(query instanceof SQLQuery)) {
+  async query(query: SQLQuery): Promise<any[]>;
+  async query(query: SQLQuery[]): Promise<any[][]>;
+  async query(query: SQLQuery | SQLQuery[]): Promise<any[]> {
+    if (Array.isArray(query)) {
+      for (const el of query) {
+        if (!(el instanceof SQLQuery)) {
+          throw new Error(
+            'Invalid query, you must use @databases/sql to create your queries.',
+          );
+        }
+      }
+    } else if (!(query instanceof SQLQuery)) {
       throw new Error(
         'Invalid query, you must use @databases/sql to create your queries.',
       );
     }
-    const q = query.compile(
+    const q = (Array.isArray(query) ? sql.join(query, sql`;`) : query).compile(
       process.env.NODE_ENV !== 'production' ? {minify: false} : undefined,
     );
     try {
-      return await this.connection.query(q);
+      return await (Array.isArray(query)
+        ? this.connection.multi(q)
+        : this.connection.query(q));
     } catch (ex) {
       if (isSQLError(ex) && ex.position) {
         const position = parseInt(ex.position, 10);
