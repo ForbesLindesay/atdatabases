@@ -3,6 +3,7 @@
 process.env.NODE_ENV = 'production';
 
 const {createHash} = require('crypto');
+const readdirSync = require('fs').readdirSync;
 const readFileSync = require('fs').readFileSync;
 const unlinkSync = require('fs').unlinkSync;
 const writeFileSync = require('fs').writeFileSync;
@@ -15,7 +16,6 @@ const {sync: spawnSync} = require('cross-spawn');
 const mkdirp = require('mkdirp').sync;
 
 const cwd = process.cwd();
-const rootPkg = require('../package.json');
 const pkg = require(cwd + '/package.json');
 
 // .last_build
@@ -30,14 +30,24 @@ lsrSync(cwd, {
     buildHash.update(readFileSync(entry.fullPath));
   }
 });
+
+const packageNames = new Set(
+  readdirSync(__dirname + '/../packages').map(dir => {
+    try {
+      const src = readFileSync(
+        __dirname + '/../packages/' + dir + '/package.json',
+        'utf8',
+      );
+      return JSON.parse(src).name;
+    } catch (ex) {
+      if (ex.code !== 'ENOENT') throw ex;
+    }
+  }),
+);
 Object.keys(pkg.dependencies || {})
   .concat(Object.keys(pkg.devDependencies || {}))
   .sort()
-  .filter(
-    name =>
-      !(rootPkg.dependencies || {})[name] &&
-      !(rootPkg.devDependencies || {})[name],
-  )
+  .filter(name => packageNames.has(name))
   .forEach(name => {
     buildHash.update(
       readFileSync(

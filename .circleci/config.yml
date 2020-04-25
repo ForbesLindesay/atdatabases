@@ -31,10 +31,10 @@ refs:
     run:
       name: NPM Auth
       command: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
-  - &bolt_install
+  - &yarn_install
     run:
-      name: Bolt Install
-      command: yarn global add bolt && bolt
+      name: Install Dependencies
+      command: yarn install --frozen-lockfile
   - &build
     run:
       name: Build
@@ -51,7 +51,7 @@ jobs:
       - checkout
       - *restore_cache
       - *npm_auth
-      - *bolt_install
+      - *yarn_install
       - *save_cache
       - *build
       - *test
@@ -62,13 +62,25 @@ jobs:
       - checkout
       - *restore_cache
       - *npm_auth
-      - *bolt_install
+      - *yarn_install
       - *save_cache
       - *build
       - *test
       - run:
           name: Release
-          command: bolt publish
+          command: npx rollingversions publish --dry-run
+
+  publish:
+    <<: *container
+    steps:
+      - checkout
+      - *restore_cache
+      - *npm_auth
+      - *yarn_install
+      - *build
+      - run:
+          name: Release
+          command: npx rollingversions publish
 
 workflows:
   version: 2
@@ -86,6 +98,21 @@ workflows:
           filters:
             branches:
               only: master
+
+      - publish-approval:
+          type: approval
+          context: common-env
+          requires:
+            - master
+
+      - publish:
+          context: common-env
+          filters:
+            branches:
+              only: master
+          requires:
+            - publish-approval
+
   nightly:
     triggers:
       - schedule:
