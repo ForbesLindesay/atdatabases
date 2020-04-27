@@ -1,12 +1,12 @@
 {
   "name": "@databases/mysql-test",
-  "version": "1.0.3",
+  "version": "0.0.0",
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {
-    "@databases/mysql-config": "^1.0.1",
-    "@databases/with-container": "^0.0.2",
+    "@databases/mysql-config": "^0.0.0",
+    "@databases/with-container": "^0.0.0",
     "mysql2": "^1.6.4",
     "yargs": "^12.0.5"
   },
