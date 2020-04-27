@@ -28,7 +28,7 @@ export default async function run(
       proc.on('error', err => reject(err));
       proc.on('exit', code => resolve(code));
     }),
-  ]);
+  ] as const);
 
   if (code !== 0 && !options.allowFailure) {
     if (!options.debug) {

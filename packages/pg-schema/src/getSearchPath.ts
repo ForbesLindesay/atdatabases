@@ -19,7 +19,7 @@ export default async function getSearchPath(
       : (connection.query(
           sql`SELECT nspname FROM pg_catalog.pg_namespace`,
         ) as Promise<Array<{nspname: string}>>),
-  ]);
+  ] as const);
   const schemaNames = namespaces && namespaces.map(n => n.nspname);
   const searchPath = search_path
     .split(',')
