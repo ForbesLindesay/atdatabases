@@ -614,10 +614,10 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-13.13.2.tgz#160d82623610db590a64e8ca81784e11117e5a54"
   integrity sha512-LB2R1Oyhpg8gu4SON/mfforE525+Hi/M1ineICEDftqNVTyFg1aRIeGuTvXAoWHc4nbrFncWtJgMmoyRvuGh7A==
 
-"@types/node@^10.12.17":
-  version "10.17.21"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-10.17.21.tgz#c00e9603399126925806bed2d9a1e37da506965e"
-  integrity sha512-PQKsydPxYxF1DsAFWmunaxd3sOi3iMt6Zmx/tgaagHYmwJ/9cRH91hQkeJZaUGWbvn0K5HlSVEXkn5U/llWPpQ==
+"@types/node@^13.13.4":
+  version "13.13.4"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-13.13.4.tgz#1581d6c16e3d4803eb079c87d4ac893ee7501c2c"
+  integrity sha512-x26ur3dSXgv5AwKS0lNfbjpCakGIduWU1DU91Zz58ONRWrIKGunmZBNv4P7N+e27sJkiGDsw/3fT4AtsqQBrBA==
 
 "@types/node@^7.0.31":
   version "7.10.10"
@@ -3728,6 +3728,13 @@ mkdirp@^0.5.0, mkdirp@^0.5.1, mkdirp@^0.5.3:
   integrity sha512-NKmAlESf6jMGym1++R0Ra7wvhV+wFW63FaSOFPwRahvea0gMUcGUhVeAg/0BC0wiv9ih5NYPB1Wn1UEI1/L+xQ==
   dependencies:
     minimist "^1.2.5"
+
+modern-spawn@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/modern-spawn/-/modern-spawn-1.0.0.tgz#b810197d6445be96e2a216a7ad332441de609145"
+  integrity sha512-VYCaPqxfHcbUndhf3ucm8ntIPqTbVDgcF5QRtZyB4AUYVx+y5ZfU5wRBiYyjzPW6vLvOHm3mdW/X9boZPnSLlQ==
+  dependencies:
+    cross-spawn "^7.0.2"
 
 ms@2.0.0:
   version "2.0.0"

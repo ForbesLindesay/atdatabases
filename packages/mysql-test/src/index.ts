@@ -1,5 +1,4 @@
 import startContainer, {
-  run,
   Options as WithContainerOptions,
   killOldContainers,
 } from '@databases/with-container';
@@ -38,8 +37,6 @@ export interface Options
   mysqlPassword: string;
   mysqlDb: string;
 }
-
-export {run};
 
 export async function waitForConnection(
   databaseURL: string,

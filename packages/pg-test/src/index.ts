@@ -1,5 +1,4 @@
 import startContainer, {
-  run,
   Options as WithContainerOptions,
 } from '@databases/with-container';
 import {getPgConfigSync} from '@databases/pg-config';
@@ -33,8 +32,6 @@ export interface Options
   pgUser: string;
   pgDb: string;
 }
-
-export {run};
 
 export default async function getDatabase(options: Partial<Options> = {}) {
   const {pgUser, pgDb, environment, ...rawOptions}: Options = {
