@@ -1,12 +1,10 @@
 import {connect} from 'net';
 import spawn = require('cross-spawn');
-import run from './run';
+import {spawnBuffered} from 'modern-spawn';
 
 export const detectPort: (
   defaultPort: number,
 ) => Promise<number> = require('detect-port');
-
-export {run};
 
 export interface Options {
   debug: boolean;
@@ -36,12 +34,14 @@ export interface NormalizedOptions
 export async function imageExists(
   options: NormalizedOptions | Options,
 ): Promise<boolean> {
-  const {stdout} = await run('docker', ['images', '--format', '{{json .}}'], {
-    debug: options.debug,
-    name: 'docker images',
-  });
+  const stdout = await spawnBuffered(
+    'docker',
+    ['images', '--format', '{{json .}}'],
+    {
+      debug: options.debug,
+    },
+  ).getResult('utf8');
   const existingImages = stdout
-    .toString('utf8')
     .trim()
     .split('\n')
     .map(str => {
@@ -70,10 +70,9 @@ export async function pullDockerImage(options: NormalizedOptions | Options) {
     return;
   }
   console.info('Pulling Docker Image ' + options.image);
-  await run('docker', ['pull', options.image], {
+  await spawnBuffered('docker', ['pull', options.image], {
     debug: options.debug,
-    name: 'docker pull ' + JSON.stringify(options.image),
-  });
+  }).getResult();
 }
 
 export function startDockerContainer(options: NormalizedOptions) {
@@ -111,17 +110,13 @@ export async function waitForDatabaseToStart(options: NormalizedOptions) {
       finished = true;
       reject(
         new Error(
-          `Unable to connect to database after ${
-            options.connectTimeoutSeconds
-          } seconds. To view logs, run with DEBUG_PG_DOCKER=true environment variable`,
+          `Unable to connect to database after ${options.connectTimeoutSeconds} seconds. To view logs, run with DEBUG_PG_DOCKER=true environment variable`,
         ),
       );
     }, options.connectTimeoutSeconds * 1000);
     function test() {
       console.info(
-        `Waiting for ${options.containerName} on port ${
-          options.externalPort
-        }...`,
+        `Waiting for ${options.containerName} on port ${options.externalPort}...`,
       );
       const connection = connect(options.externalPort)
         .on('error', () => {
@@ -142,16 +137,12 @@ export async function waitForDatabaseToStart(options: NormalizedOptions) {
 export async function killOldContainers(
   options: Pick<NormalizedOptions, 'debug' | 'containerName'>,
 ) {
-  await run('docker', ['kill', options.containerName], {
-    allowFailure: true, // kill fails if there is no container running
+  await spawnBuffered('docker', ['kill', options.containerName], {
     debug: options.debug,
-    name: 'docker kill ' + JSON.stringify(options.containerName),
-  });
-  await run('docker', ['rm', options.containerName], {
-    allowFailure: true, // rm fails if there is no container running
+  }); // do not check exit code as there may not be a container to kill
+  await spawnBuffered('docker', ['rm', options.containerName], {
     debug: options.debug,
-    name: 'docker rm ' + JSON.stringify(options.containerName),
-  });
+  }); // do not check exit code as there may not be a container to remove
 }
 
 export default async function startContainer(options: Options) {

@@ -9,7 +9,7 @@
     "@databases/pg": "^0.0.0"
   },
   "devDependencies": {
-    "@types/node": "^10.12.17",
+    "@types/node": "^13.13.4",
     "pg-types": "1.13.0"
   },
   "scripts": {},
