@@ -6,13 +6,13 @@ export {sql, SQLQuery};
 
 export default function connect(name: string) {
   return new Database(
-    new Promise(resolve => {
+    new Promise((resolve) => {
       openDatabase(
         name,
         undefined as any,
         undefined as any,
         undefined as any,
-        database => {
+        (database) => {
           resolve(database);
         },
       );

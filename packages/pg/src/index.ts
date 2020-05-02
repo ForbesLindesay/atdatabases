@@ -199,11 +199,11 @@ class ConnectionImplementation {
     const qs = new QueryStream(text, values, options);
     const stream = new PassThrough({objectMode: true});
     this.connection
-      .stream(qs, results => {
+      .stream(qs, (results) => {
         results.pipe(stream);
-        results.on('error', err => stream.emit('error', err));
+        results.on('error', (err) => stream.emit('error', err));
       })
-      .catch(err => stream.emit('error', err));
+      .catch((err) => stream.emit('error', err));
     return stream;
   }
   async task<T>(
@@ -211,11 +211,11 @@ class ConnectionImplementation {
     options?: {tag?: string | number},
   ): Promise<T> {
     if (options) {
-      return await this.connection.task(options, t => {
+      return await this.connection.task(options, (t) => {
         return fn(new ConnectionImplementation(t)) as any;
       });
     }
-    return await this.connection.task(t => {
+    return await this.connection.task((t) => {
       return fn(new ConnectionImplementation(t)) as any;
     });
   }
@@ -236,11 +236,11 @@ class ConnectionImplementation {
           txMode.deferrable,
         );
       }
-      return await this.connection.tx(opts, t => {
+      return await this.connection.tx(opts, (t) => {
         return fn(new ConnectionImplementation(t)) as any;
       });
     }
-    return await this.connection.tx(t => {
+    return await this.connection.tx((t) => {
       return fn(new ConnectionImplementation(t)) as any;
     });
   }
@@ -294,7 +294,7 @@ class ConnectionPoolImplementation extends ConnectionImplementation {
         'The type name ' +
           type +
           ' was found in multiple schemas: ' +
-          results.map(r => r.schemaName).join(', '),
+          results.map((r) => r.schemaName).join(', '),
       );
     }
     return results[0].typeID;
@@ -557,7 +557,7 @@ function splitOptions(
   const connectOptions: TConfig = {};
   const initOptions: IOptions<{}> = {};
 
-  Object.keys(raw).forEach(key => {
+  Object.keys(raw).forEach((key) => {
     if (key === 'noDuplicateDatabaseObjectsWarning') {
       noDuplicateDatabaseObjectsWarning =
         raw.noDuplicateDatabaseObjectsWarning || false;
@@ -615,7 +615,7 @@ export default function createConnection(
   }
 
   if (typeof connectionConfig === 'object') {
-    Object.keys(connectionConfig).forEach(key => {
+    Object.keys(connectionConfig).forEach((key) => {
       if (!ConnectionParamNames.includes(key)) {
         throw new Error(`${key} is not a supported key for ConnectionConfig`);
       }
@@ -639,7 +639,7 @@ export default function createConnection(
     // BIGINT -> INT
     const parseInteger = pgp.pg.types.getTypeParser(DataTypeID.int4);
     const MAX_SAFE_INTEGER = `${Number.MAX_SAFE_INTEGER}`;
-    pgp.pg.types.setTypeParser(DataTypeID.int8, str => {
+    pgp.pg.types.setTypeParser(DataTypeID.int8, (str) => {
       if (
         (str && str.length > MAX_SAFE_INTEGER.length) ||
         (str.length === MAX_SAFE_INTEGER.length && str > MAX_SAFE_INTEGER)
@@ -653,7 +653,7 @@ export default function createConnection(
 
     // BIGINT ARRAY -> INT ARRAY
     const parseIntegerArray = pgp.pg.types.getTypeParser(DataTypeID.int4);
-    pgp.pg.types.setTypeParser(DataTypeID._int8, str => {
+    pgp.pg.types.setTypeParser(DataTypeID._int8, (str) => {
       const result = parseIntegerArray(str);
       if (
         result &&

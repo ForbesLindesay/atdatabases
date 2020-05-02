@@ -16,22 +16,22 @@ async function runCommand(
     const proc = spawn(command, args, {
       stdio: 'pipe',
     });
-    proc.stdout.on('data', chunk => {
+    proc.stdout.on('data', (chunk) => {
       output.push({kind: 'stdout', chunk});
       result += typeof chunk === 'string' ? chunk : chunk.toString('utf8');
     });
-    proc.stderr.on('data', chunk => {
+    proc.stderr.on('data', (chunk) => {
       output.push({kind: 'stderr', chunk});
     });
     proc.on('error', reject);
-    proc.on('exit', code => {
+    proc.on('exit', (code) => {
       if (code === 0) {
         resolve(result);
       } else if (allowFailure) {
         reject(
           new Error(
             output
-              .map(c =>
+              .map((c) =>
                 typeof c.chunk === 'string'
                   ? c.chunk
                   : c.chunk.toString('utf8'),
@@ -40,7 +40,7 @@ async function runCommand(
           ),
         );
       } else {
-        output.forEach(c => process[c.kind].write(c.chunk));
+        output.forEach((c) => process[c.kind].write(c.chunk));
         process.exit(code || 1);
       }
     });

@@ -37,14 +37,15 @@ export default async function buildPackage(options: Options) {
 
     import packageMigrations, {MigrationsPackage${
       migrations.length ? ', packageOperation' : ''
-    }} from '${options.databasesDbPgMigrationsName ||
-    '@databases/pg-migrations'}';
+    }} from '${
+    options.databasesDbPgMigrationsName || '@databases/pg-migrations'
+  }';
 
     export {MigrationsPackage};
     export default packageMigrations(
       ${migrations
         .map(
-          migration =>
+          (migration) =>
             `{
               id: ${JSON.stringify(migration.id)},
               index: ${migration.index},

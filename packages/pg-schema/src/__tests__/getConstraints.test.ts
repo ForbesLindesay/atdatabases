@@ -29,7 +29,7 @@ test('getConstraints', async () => {
         schemaName: 'getconstraints',
         // kind: [ClassKind.OrdinaryTable, ClassKind.View],
       })
-    ).map(t => ({
+    ).map((t) => ({
       ...t,
       classID: typeof t.classID === 'number' ? '<oid>' : t.classID,
       referencedClassID:

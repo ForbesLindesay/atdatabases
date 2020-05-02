@@ -48,7 +48,7 @@ export function classQuery(query: ClassQuery) {
     if (Array.isArray(query.kind)) {
       conditions.push(
         sql`cls.relkind IN (${sql.join(
-          query.kind.map(k => sql`${k}`),
+          query.kind.map((k) => sql`${k}`),
           sql`, `,
         )})`,
       );

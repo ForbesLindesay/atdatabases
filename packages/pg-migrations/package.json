@@ -6,14 +6,16 @@
   "types": "./lib/index.d.ts",
   "dependencies": {
     "@databases/pg": "^0.0.0",
-    "chalk": "^2.4.1",
-    "prettier": "^1.15.3"
+    "chalk": "^2.4.1"
   },
   "scripts": {},
   "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/pg-migrations",
   "license": "MIT",
   "publishConfig": {
     "access": "public"
+  },
+  "peerDependencies": {
+    "prettier": "*"
   },
   "devDependencies": {
     "@types/node": "^13.13.4",

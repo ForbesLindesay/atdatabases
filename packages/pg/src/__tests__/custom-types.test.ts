@@ -16,7 +16,7 @@ class MoneyWithCurrency {
     public readonly description: string,
   ) {}
 }
-sql.registerFormatter(MoneyWithCurrency, v => {
+sql.registerFormatter(MoneyWithCurrency, (v) => {
   return sql`ROW (${v.value}, ${v.currency}, ${v.description})`;
 });
 
@@ -26,7 +26,7 @@ class BalancePair {
     public readonly expenditure: MoneyWithCurrency,
   ) {}
 }
-sql.registerFormatter(BalancePair, v => {
+sql.registerFormatter(BalancePair, (v) => {
   return sql`ROW (${v.income}, ${v.expenditure})`;
 });
 
@@ -63,7 +63,7 @@ test('custom types', async () => {
   ]);
   const parseMoneyWithCurrency = await db.registerTypeParser(
     'custom_types.money_with_currency',
-    value => {
+    (value) => {
       const [v, currency, description] = db.parseComposite(value);
       return new MoneyWithCurrency(
         parseNumeric(v),
@@ -72,7 +72,7 @@ test('custom types', async () => {
       );
     },
   );
-  await db.registerTypeParser('custom_types.balance_pair', value => {
+  await db.registerTypeParser('custom_types.balance_pair', (value) => {
     const [income, expenditure] = db.parseComposite(value);
     return new BalancePair(
       parseMoneyWithCurrency(income),

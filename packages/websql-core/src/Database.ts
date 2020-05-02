@@ -65,98 +65,100 @@ export default class Database {
   ): Promise<TResult> {
     const db = await this._db;
     return await new Promise<TResult>((resolve, reject) => {
-      db[options.readOnly ? 'readTransaction' : 'transaction'](transaction => {
-        let ended = false;
-        let task: QueryTask | undefined;
-        let query: SQLQuery | undefined;
-        const tx = fn(
-          new Transaction((t, q) => {
-            if (ended) {
-              throw new Error(
-                'This query has already finished. You cannot query it after it has finished.',
-              );
+      db[options.readOnly ? 'readTransaction' : 'transaction'](
+        (transaction) => {
+          let ended = false;
+          let task: QueryTask | undefined;
+          let query: SQLQuery | undefined;
+          const tx = fn(
+            new Transaction((t, q) => {
+              if (ended) {
+                throw new Error(
+                  'This query has already finished. You cannot query it after it has finished.',
+                );
+              }
+              if (task || query) {
+                throw new Error(
+                  'You already have a query in flight. You need to "yield" your first query before starting a second query.',
+                );
+              }
+              task = t;
+              query = q;
+            }),
+          );
+          /**
+           * Returns false if the error was handled, true if it was fatal
+           */
+          function txThrow(err: any) {
+            if (!tx.throw) {
+              ended = true;
+              reject(err);
+              return true;
             }
-            if (task || query) {
-              throw new Error(
-                'You already have a query in flight. You need to "yield" your first query before starting a second query.',
-              );
+            let nextResult;
+            try {
+              task = undefined;
+              query = undefined;
+              nextResult = tx.throw(err);
+            } catch (ex) {
+              ended = true;
+              reject(ex);
+              return true;
             }
-            task = t;
-            query = q;
-          }),
-        );
-        /**
-         * Returns false if the error was handled, true if it was fatal
-         */
-        function txThrow(err: any) {
-          if (!tx.throw) {
-            ended = true;
-            reject(err);
-            return true;
+            next(nextResult);
+            return false;
           }
-          let nextResult;
-          try {
-            task = undefined;
-            query = undefined;
-            nextResult = tx.throw(err);
-          } catch (ex) {
-            ended = true;
-            reject(ex);
-            return true;
-          }
-          next(nextResult);
-          return false;
-        }
-        function next(r: IteratorResult<QueryTask, TResult>) {
-          if (r.done) {
-            if (r.value instanceof QueryTask) {
-              txThrow(new Error('You should not return a QueryTask.'));
-              return;
-            }
-            ended = true;
-            resolve(r.value);
-          }
-          if (!(r.value instanceof QueryTask)) {
-            txThrow(
-              new Error('You can only yield queries in a WebSQL transaction'),
-            );
-            return;
-          }
-
-          if (r.value !== task) {
-            txThrow(
-              new Error(
-                'The query yielded was not the most recent query calls. Please immediately yield any queries.',
-              ),
-            );
-            return;
-          }
-
-          const {text, values} = query!.compile();
-          transaction.executeSql(
-            text,
-            values,
-            (_, resultSet) => {
-              let nextResult;
-              try {
-                task = undefined;
-                query = undefined;
-                nextResult = tx.next(extractResults(resultSet));
-              } catch (ex) {
-                ended = true;
-                reject(ex);
+          function next(r: IteratorResult<QueryTask, TResult>) {
+            if (r.done) {
+              if (r.value instanceof QueryTask) {
+                txThrow(new Error('You should not return a QueryTask.'));
                 return;
               }
-              next(nextResult);
+              ended = true;
+              resolve(r.value);
+            }
+            if (!(r.value instanceof QueryTask)) {
+              txThrow(
+                new Error('You can only yield queries in a WebSQL transaction'),
+              );
               return;
-            },
-            (_, err) => {
-              return txThrow(convertError(err, text));
-            },
-          );
-        }
-        next(tx.next());
-      });
+            }
+
+            if (r.value !== task) {
+              txThrow(
+                new Error(
+                  'The query yielded was not the most recent query calls. Please immediately yield any queries.',
+                ),
+              );
+              return;
+            }
+
+            const {text, values} = query!.compile();
+            transaction.executeSql(
+              text,
+              values,
+              (_, resultSet) => {
+                let nextResult;
+                try {
+                  task = undefined;
+                  query = undefined;
+                  nextResult = tx.next(extractResults(resultSet));
+                } catch (ex) {
+                  ended = true;
+                  reject(ex);
+                  return;
+                }
+                next(nextResult);
+                return;
+              },
+              (_, err) => {
+                return txThrow(convertError(err, text));
+              },
+            );
+          }
+          next(tx.next());
+        },
+      );
     });
   }
   async query(query: SQLQuery, options: {readOnly: boolean} = DEFAULT_OPTIONS) {
@@ -170,12 +172,12 @@ export default class Database {
     const results = await new Promise<ws.SQLResultSet>((resolve, reject) => {
       let resultSet: ws.SQLResultSet | undefined;
       db[options.readOnly ? 'readTransaction' : 'transaction'](
-        tx => {
+        (tx) => {
           tx.executeSql(text, values, (_tx, _resultSet) => {
             resultSet = _resultSet;
           });
         },
-        ex => reject(convertError(ex, text)),
+        (ex) => reject(convertError(ex, text)),
         () => {
           resolve(resultSet);
         },

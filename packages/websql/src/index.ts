@@ -13,13 +13,13 @@ export default function connect(
   options: Options = {},
 ) {
   return new Database(
-    new Promise(resolve => {
+    new Promise((resolve) => {
       openDatabase(
         name,
         options.version!,
         options.displayName!,
         options.estimatedSize!,
-        database => {
+        (database) => {
           resolve(database);
         },
       );

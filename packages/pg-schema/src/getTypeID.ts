@@ -26,14 +26,14 @@ export default async function getTypeID(
     includeNonExistantSchemas: true,
   });
   for (const schemaName of searchPath) {
-    const type = types.find(ty => ty.schemaName === schemaName);
+    const type = types.find((ty) => ty.schemaName === schemaName);
     if (type) {
       return type.typeID;
     }
   }
   throw new Error(
     `Could not find type: ${fullTypeName}. It could be any of: ${types
-      .map(t => `${t.schemaName}.${t.typeName}`)
+      .map((t) => `${t.schemaName}.${t.typeName}`)
       .join(', ')}`,
   );
 }

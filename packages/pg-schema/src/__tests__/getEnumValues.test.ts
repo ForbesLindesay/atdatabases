@@ -12,7 +12,7 @@ test('get custom types', async () => {
     `,
   );
   expect(
-    (await getEnumValues(db, {schemaName: 'getenumvalues'})).map(v => ({
+    (await getEnumValues(db, {schemaName: 'getenumvalues'})).map((v) => ({
       ...v,
       schemaID: typeof v.schemaID === 'number' ? '<oid>' : v.schemaID,
       typeID: typeof v.typeID === 'number' ? '<oid>' : v.typeID,
