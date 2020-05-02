@@ -45,7 +45,7 @@ refs:
       command: yarn test --maxWorkers 2
   - &prettier
     run:
-      name: Test
+      name: Prettier (check yarn prettier:write has been run)
       command: yarn prettier:check
 
 jobs:
