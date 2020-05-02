@@ -30,7 +30,7 @@ test('valid config', () => {
   });
   expect(
     _testReadMySqlConfigSync(__dirname + '/fixtures/override.json'),
-  ).toMatchInlineSnapshot({
+  ).toEqual({
     connectionStringEnvironmentVariable: 'PG_CONNECTION',
     test: {
       connectTimeoutSeconds: 20,
