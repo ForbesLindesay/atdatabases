@@ -1,7 +1,7 @@
 import connect, {sql} from '@databases/pg';
 import {readFileSync} from 'fs';
-import {run} from '../';
 import call from '../cli-function';
+import {spawnBuffered} from 'modern-spawn';
 
 jest.setTimeout(60_000);
 if (!process.env.CI) {
@@ -10,15 +10,12 @@ if (!process.env.CI) {
       'atdatabases-test-volume-1',
       'atdatabases-test-volume-2',
     ]) {
-      await run('docker', ['kill', volume], {
+      // these may fail without harm, so we don't check the exit code
+      await spawnBuffered('docker', ['kill', volume], {
         debug: false,
-        name: 'docker kill',
-        allowFailure: true,
       });
-      await run('docker', ['volume', 'rm', volume], {
+      await spawnBuffered('docker', ['volume', 'rm', volume], {
         debug: false,
-        name: 'docker volume rm',
-        allowFailure: true,
       });
     }
   };
@@ -29,11 +26,9 @@ if (!process.env.CI) {
       'atdatabases-test-volume-1',
       'atdatabases-test-volume-2',
     ]) {
-      await run('docker', ['volume', 'create', volume], {
+      await spawnBuffered('docker', ['volume', 'create', volume], {
         debug: true,
-        name: 'docker volume create',
-        allowFailure: false,
-      });
+      }).getResult();
       await call([
         'start',
         '--persistVolume',
