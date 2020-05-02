@@ -53,16 +53,19 @@ Object {
 test('invalid config', () => {
   expect(() => _testReadMySqlConfigSync(__dirname + '/fixtures/invalid.json'))
     .toThrowErrorMatchingInlineSnapshot(`
-"MySqlConfig.connectionStringEnvironmentVariable should be string
+    "MySqlConfig.connectionStringEnvironmentVariable should be string
 
-{ connectionStringEnvironmentVariable: 10,
-  test:
-   { connectTimeoutSeconds: 20,
-     containerName: 'mysql-test',
-     debug: false,
-     image: 'mysql:5.7.24',
-     mySqlDb: 'test-db',
-     mySqlPassword: 'password',
-     mySqlUser: 'test-user' } }"
-`);
+    {
+      connectionStringEnvironmentVariable: 10,
+      test: {
+        connectTimeoutSeconds: 20,
+        containerName: 'mysql-test',
+        debug: false,
+        image: 'mysql:5.7.24',
+        mySqlDb: 'test-db',
+        mySqlPassword: 'password',
+        mySqlUser: 'test-user'
+      }
+    }"
+  `);
 });

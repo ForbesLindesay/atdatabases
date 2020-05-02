@@ -50,15 +50,18 @@ Object {
 test('invalid config', () => {
   expect(() => _testReadPgConfigSync(__dirname + '/fixtures/invalid.json'))
     .toThrowErrorMatchingInlineSnapshot(`
-"PgConfig.connectionStringEnvironmentVariable should be string
+    "PgConfig.connectionStringEnvironmentVariable should be string
 
-{ connectionStringEnvironmentVariable: 10,
-  test:
-   { connectTimeoutSeconds: 20,
-     containerName: 'pg-test',
-     debug: false,
-     image: 'circleci/postgres:10.6-alpine-ram',
-     pgDb: 'test-db',
-     pgUser: 'test-user' } }"
-`);
+    {
+      connectionStringEnvironmentVariable: 10,
+      test: {
+        connectTimeoutSeconds: 20,
+        containerName: 'pg-test',
+        debug: false,
+        image: 'circleci/postgres:10.6-alpine-ram',
+        pgDb: 'test-db',
+        pgUser: 'test-user'
+      }
+    }"
+  `);
 });
