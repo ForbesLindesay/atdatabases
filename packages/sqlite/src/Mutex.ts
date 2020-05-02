@@ -20,24 +20,18 @@ export default class Mutex {
     this.runningWrite = false;
     while (this.tasks.length && !this.tasks[0].write) {
       this._taskStart(false);
-      this.tasks
-        .shift()!
-        .fn()
-        .then(this._taskEnd, this._taskEnd);
+      this.tasks.shift()!.fn().then(this._taskEnd, this._taskEnd);
     }
     if (!this.running && this.tasks.length) {
       this._taskStart(true);
-      this.tasks
-        .shift()!
-        .fn()
-        .then(this._taskEnd, this._taskEnd);
+      this.tasks.shift()!.fn().then(this._taskEnd, this._taskEnd);
     }
   };
   async readLock<T>(fn: () => Promise<T>): Promise<T> {
     const now = Date.now();
     if (
       this.runningWrite ||
-      this.tasks.some(t => t.write && now - t.start > this.maxWaitTimeout)
+      this.tasks.some((t) => t.write && now - t.start > this.maxWaitTimeout)
     ) {
       return new Promise((resolve, reject) => {
         this.tasks.push({

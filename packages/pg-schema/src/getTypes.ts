@@ -162,7 +162,7 @@ export default async function getTypes(
                 await getEnumValues(connection, {
                   typeID: tr.typeID,
                 })
-              ).map(v => v.value),
+              ).map((v) => v.value),
             };
           case TypeKind.Pseudo:
             return {

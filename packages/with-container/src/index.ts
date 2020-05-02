@@ -44,7 +44,7 @@ export async function imageExists(
   const existingImages = stdout
     .trim()
     .split('\n')
-    .map(str => {
+    .map((str) => {
       try {
         return JSON.parse(str);
       } catch (ex) {
@@ -52,10 +52,10 @@ export async function imageExists(
         return null;
       }
     })
-    .filter(n => n != null);
+    .filter((n) => n != null);
   const [Repository, Tag] = options.image.split(':');
   return existingImages.some(
-    i => i.Repository === Repository && (!Tag || i.Tag === Tag),
+    (i) => i.Repository === Repository && (!Tag || i.Tag === Tag),
   );
 }
 export async function pullDockerImage(options: NormalizedOptions | Options) {
@@ -78,7 +78,7 @@ export async function pullDockerImage(options: NormalizedOptions | Options) {
 export function startDockerContainer(options: NormalizedOptions) {
   const env = options.environment || {};
   const envArgs: string[] = [];
-  Object.keys(env).forEach(key => {
+  Object.keys(env).forEach((key) => {
     envArgs.push('--env');
     envArgs.push(`${key}=${env[key]}`);
   });

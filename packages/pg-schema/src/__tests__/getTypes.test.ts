@@ -52,7 +52,7 @@ test('get built in types', async () => {
   const groupedTypes = builtInTypes.reduce<{[key: string]: Type[]}>(
     (result, ty) => {
       const category = Object.keys(TypeCateogry).find(
-        c => (TypeCateogry as any)[c] === ty.category,
+        (c) => (TypeCateogry as any)[c] === ty.category,
       )!;
       result[category] = (result[category] || []).concat([ty]);
       return result;
@@ -66,7 +66,7 @@ test('get built in types', async () => {
         return {
           ...result,
           [key]: groupedTypes[key].map(
-            ty =>
+            (ty) =>
               `${ty.typeID} = ${ty.typeName}` +
               ('subtypeName' in ty && ty.subtypeName
                 ? `<${ty.subtypeName}>`
@@ -85,7 +85,7 @@ test('get built in types', async () => {
   Object.keys(groupedTypes).forEach((groupName, i) => {
     if (i !== 0) PgDataTypeIDsEnum.push('');
     PgDataTypeIDsEnum.push(`  // === ${groupName} ===`);
-    groupedTypes[groupName].forEach(type => {
+    groupedTypes[groupName].forEach((type) => {
       PgDataTypeIDsEnum.push('');
       const commentLines = [];
       if (type.comment) {
@@ -129,17 +129,17 @@ test('get built in types', async () => {
   const typeMappingLines: string[] = [];
   mapping.forEach((parser, id) => {
     const allIDs = reverseMapping.get(parser) || [];
-    const idsWithMapping = allIDs.filter(typeID => typeID in typeMappings);
+    const idsWithMapping = allIDs.filter((typeID) => typeID in typeMappings);
     if (idsWithMapping.length === 0) {
       throw new Error(
         'There is no mapping for: ' +
-          allIDs.map(typeID => DataTypeID[typeID]).join(', '),
+          allIDs.map((typeID) => DataTypeID[typeID]).join(', '),
       );
     }
     if (idsWithMapping.length > 1) {
       throw new Error(
         'There is ambiguity between: ' +
-          idsWithMapping.map(typeID => DataTypeID[typeID]).join(', '),
+          idsWithMapping.map((typeID) => DataTypeID[typeID]).join(', '),
       );
     }
     typeMappingLines.push(
@@ -205,7 +205,7 @@ Array [
 ]
 `);
   expect(
-    (await getTypes(db, {schemaName: 'gettypes'})).map(t => {
+    (await getTypes(db, {schemaName: 'gettypes'})).map((t) => {
       const result = {
         ...t,
         schemaID: typeof t.schemaID === 'number' ? '<oid>' : t.schemaID,
@@ -221,7 +221,7 @@ Array [
         result.classID = '<oid>' as any;
       }
       if ('attributes' in result) {
-        result.attributes = result.attributes.map(a => ({
+        result.attributes = result.attributes.map((a) => ({
           ...a,
           classID: typeof a.classID === 'number' ? '<oid>' : a.classID,
           schemaID: typeof a.schemaID === 'number' ? '<oid>' : a.schemaID,

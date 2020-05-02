@@ -14,8 +14,7 @@
   },
   "devDependencies": {
     "@types/node": "^13.13.4",
-    "pg-error-constants": "^1.0.0",
-    "prettier": "^1.15.3"
+    "pg-error-constants": "^1.0.0"
   },
   "dependency-check-entries": [
     "build.js"

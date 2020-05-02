@@ -1,7 +1,7 @@
 import Mutex from '../Mutex';
 
 async function delay(ms: number) {
-  await new Promise<void>(resolve => setTimeout(resolve, ms));
+  await new Promise<void>((resolve) => setTimeout(resolve, ms));
 }
 test('Allows parallel read queries', async () => {
   const mutex = new Mutex();

@@ -54,7 +54,7 @@ test('bigint', async () => {
 });
 
 test('transaction', async () => {
-  const result = await db.tx(function*(tx) {
+  const result = await db.tx(function* (tx) {
     const a = yield tx.query(sql`SELECT 1 + ${41} as ${sql.ident('foo')}`);
     const b = yield tx.query(sql`SELECT 1 + 2 as bar;`);
     return {a, b};

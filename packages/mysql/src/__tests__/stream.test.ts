@@ -19,7 +19,7 @@ beforeAll(async () => {
     await db.query(sql`
       INSERT INTO streaming_test_values (id)
       VALUES ${sql.join(
-        batchValues.map(v => sql`(${v})`),
+        batchValues.map((v) => sql`(${v})`),
         sql`,`,
       )};
     `);
@@ -32,7 +32,7 @@ test('node streaming', async () => {
     db.queryNodeStream(sql`SELECT * FROM streaming_test_values`, {
       highWaterMark: 1,
     })
-      .on('data', data => results.push(data.id))
+      .on('data', (data) => results.push(data.id))
       .on('error', reject)
       .on('end', () => resolve(results));
   });

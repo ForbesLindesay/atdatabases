@@ -20,7 +20,7 @@ beforeAll(async () => {
     await db.query(sql`
       INSERT INTO streaming_test.values (id)
       VALUES ${sql.join(
-        batchValues.map(v => sql`(${v})`),
+        batchValues.map((v) => sql`(${v})`),
         sql`,`,
       )};
     `);
@@ -31,7 +31,7 @@ test('node streaming', async () => {
   const results = await new Promise<any[]>((resolve, reject) => {
     const results: number[] = [];
     db.queryNodeStream(sql`SELECT * FROM streaming_test.values`, {batchSize: 1})
-      .on('data', data => results.push(data.id))
+      .on('data', (data) => results.push(data.id))
       .on('error', reject)
       .on('end', () => resolve(results));
   });

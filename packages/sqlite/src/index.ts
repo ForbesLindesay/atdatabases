@@ -51,7 +51,7 @@ class DatabaseTransactionImplementation implements DatabaseTransaction {
     this._database = database;
   }
   async query(query: SQLQuery) {
-    return runQuery(query, this._database, async fn => fn());
+    return runQuery(query, this._database, async (fn) => fn());
   }
 
   /**
@@ -61,7 +61,7 @@ class DatabaseTransactionImplementation implements DatabaseTransaction {
     return this.queryStream(query);
   }
   queryStream(query: SQLQuery): AsyncIterableIterator<any> {
-    return runQueryStream(query, this._database, async fn => fn());
+    return runQueryStream(query, this._database, async (fn) => fn());
   }
 }
 
@@ -79,7 +79,7 @@ class DatabaseConnectionImplementation implements DatabaseConnection {
     }
   }
   async query(query: SQLQuery) {
-    return runQuery(query, this._database, async fn =>
+    return runQuery(query, this._database, async (fn) =>
       this._mutex.readLock(fn),
     );
   }
@@ -91,7 +91,7 @@ class DatabaseConnectionImplementation implements DatabaseConnection {
     return this.queryStream(query);
   }
   queryStream(query: SQLQuery): AsyncIterableIterator<any> {
-    return runQueryStream(query, this._database, async fn =>
+    return runQueryStream(query, this._database, async (fn) =>
       this._mutex.readLock(fn),
     );
   }
@@ -99,7 +99,7 @@ class DatabaseConnectionImplementation implements DatabaseConnection {
   async tx<T>(fn: (db: DatabaseTransaction) => Promise<T>): Promise<T> {
     return this._mutex.writeLock(async () => {
       await new Promise<void>((resolve, reject) => {
-        this._database.run('BEGIN', err => {
+        this._database.run('BEGIN', (err) => {
           if (err) reject(err);
           else resolve();
         });
@@ -109,7 +109,7 @@ class DatabaseConnectionImplementation implements DatabaseConnection {
           new DatabaseTransactionImplementation(this._database),
         );
         await new Promise<void>((resolve, reject) => {
-          this._database.run('COMMIT', err => {
+          this._database.run('COMMIT', (err) => {
             if (err) reject(err);
             else resolve();
           });
@@ -117,7 +117,7 @@ class DatabaseConnectionImplementation implements DatabaseConnection {
         return result;
       } catch (ex) {
         await new Promise<void>((resolve, reject) => {
-          this._database.run('REVERT', err => {
+          this._database.run('REVERT', (err) => {
             if (err) reject(err);
             else resolve();
           });
@@ -129,7 +129,7 @@ class DatabaseConnectionImplementation implements DatabaseConnection {
 
   async dispose() {
     await new Promise<void>((resolve, reject) => {
-      this._database.close(err => {
+      this._database.close((err) => {
         if (err) reject(err);
         else resolve();
       });
@@ -186,7 +186,7 @@ async function* runQueryStream(
   > = new Queue();
   const {text, values} = query.compileMySQL();
   lock(async () => {
-    await new Promise<void>(releaseMutex => {
+    await new Promise<void>((releaseMutex) => {
       database.each(
         text,
         values,
@@ -194,13 +194,13 @@ async function* runQueryStream(
           if (err) queue.push({done: true, err});
           else queue.push({done: false, value: row});
         },
-        err => {
+        (err) => {
           releaseMutex();
           queue.push({done: true, err});
         },
       );
     });
-  }).catch(ex => {
+  }).catch((ex) => {
     setImmediate(() => {
       throw ex;
     });

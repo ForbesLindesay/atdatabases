@@ -28,7 +28,7 @@ test('getClasses', async () => {
           ClassKind.MaterializedView,
         ],
       })
-    ).map(t => ({
+    ).map((t) => ({
       ...t,
       classID: typeof t.classID === 'number' ? '<oid>' : t.classID,
       schemaID: typeof t.schemaID === 'number' ? '<oid>' : t.schemaID,

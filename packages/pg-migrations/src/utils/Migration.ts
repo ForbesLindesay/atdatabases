@@ -38,7 +38,7 @@ export default class Migration {
       .query(
         db.sql`SELECT * FROM "atdatabases_migrations" WHERE "id"=${this.id}`,
       )
-      .then(result => {
+      .then((result) => {
         const status: MigrationStatus = {
           ...(result[0] || {
             is_applied: false,
