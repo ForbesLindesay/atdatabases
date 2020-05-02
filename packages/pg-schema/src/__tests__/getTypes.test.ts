@@ -3,6 +3,7 @@ import getTypes, {Type} from '../getTypes';
 import TypeCateogry from '../enums/TypeCategory';
 import {readFileSync, writeFileSync} from 'fs';
 import TypeKind from '../enums/TypeKind';
+const prettier = require('prettier');
 
 const db = connect();
 
@@ -36,15 +37,18 @@ const typeMappings: {[key in DataTypeID]?: string} = {
   [DataTypeID._timestamp]: 'Array<Date | null>',
 };
 
-function writeIfDifferent(filename: string, content: string) {
+async function writeIfDifferent(filename: string, content: string) {
+  const prettierOptions = (await prettier.resolveConfig(filename)) || {};
+  prettierOptions.parser = 'typescript';
+  const formatted = prettier.format(content, prettierOptions);
   try {
-    if (readFileSync(filename, 'utf8') === content) {
+    if (readFileSync(filename, 'utf8') === formatted) {
       return;
     }
   } catch (ex) {
     if (ex.code !== 'ENOENT') throw ex;
   }
-  writeFileSync(filename, content);
+  writeFileSync(filename, formatted);
 }
 
 test('get built in types', async () => {
@@ -113,7 +117,7 @@ test('get built in types', async () => {
   PgDataTypeIDsEnum.push(`module.exports = PgDataTypeID;`);
   PgDataTypeIDsEnum.push(`module.exports.default = PgDataTypeID;`);
   PgDataTypeIDsEnum.push(``);
-  writeIfDifferent(
+  await writeIfDifferent(
     __dirname + '/../../../pg-data-type-id/src/index.ts',
     PgDataTypeIDsEnum.join('\n'),
   );
@@ -159,7 +163,7 @@ test('get built in types', async () => {
     ``,
     `export default DefaultTypeScriptMapping;`,
   ];
-  writeIfDifferent(
+  await writeIfDifferent(
     __dirname + '/../DefaultTypeScriptMapping.ts',
     DefaultTypeScriptMapping.join('\n'),
   );
