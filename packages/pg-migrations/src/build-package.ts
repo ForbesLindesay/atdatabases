@@ -3,10 +3,10 @@
 import {relative, resolve, dirname} from 'path';
 import {readFileSync, writeFileSync} from 'fs';
 import readMigrationsDir from './utils/readMigrationsDir';
-const prettier = require('prettier');
 
-let prettier = null;
+let prettier: any = null;
 try {
+  // tslint:disable-next-line:no-implicit-dependencies
   prettier = require('prettier');
   if (
     typeof prettier.resolveConfig !== 'function' ||

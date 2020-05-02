@@ -6,6 +6,7 @@ import buildPackage from '../build-package';
 jest.setTimeout(30000);
 
 // for some reason prettier in jest fails if this isn't required before it is used
+// tslint:disable-next-line:no-implicit-dependencies
 require('prettier/parser-typescript');
 
 const db = connect();
