@@ -43,6 +43,10 @@ refs:
     run:
       name: Test
       command: yarn test --maxWorkers 2
+  - &prettier
+    run:
+      name: Test
+      command: yarn prettier:check
 
 jobs:
   all:
