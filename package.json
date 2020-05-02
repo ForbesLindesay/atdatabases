@@ -16,7 +16,7 @@
     "prettier:write": "prettier --write \"packages/*/src/**/*.{ts,tsx}\"",
     "pretest": "yarn build && yarn tslint",
     "test": "jest",
-    "posttest": "wsrun --parallel --exclude-missing test",
+    "posttest": "wsrun --parallel --exclude-missing test && yarn prettier:write",
     "watch:jest": "jest --watch",
     "clean": "rimraf packages/*/lib && rimraf packages/*/.last_build && rimraf packages/*/.cache && rimraf packages/*/build && rimraf packages/*/node_modules && rimraf node_modules",
     "tslint": "tslint './packages/*/src/**/*.{js,jsx,ts,tsx}' -t verbose -p ."
