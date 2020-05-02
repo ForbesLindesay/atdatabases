@@ -10,7 +10,7 @@ export interface TestConfig {
    * Optional script to run after the database
    * has been started but before running tests
    */
-  migrationsScript?: string[];
+  migrationsScript?: string | string[];
   /**
    * The docker image to use when testing
    * using @databases/mysql-test. When I

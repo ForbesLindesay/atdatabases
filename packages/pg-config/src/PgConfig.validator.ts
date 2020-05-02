@@ -26,7 +26,7 @@ export const PgConfigSchema = {
           description:
             'The timeout in seconds when waiting for the test docker image to start',
           minimum: 0,
-          type: 'integer',
+          type: 'number',
         },
         containerName: {
           default: 'pg-test',
@@ -47,12 +47,19 @@ export const PgConfigSchema = {
           type: 'string',
         },
         migrationsScript: {
+          anyOf: [
+            {
+              items: {
+                type: 'string',
+              },
+              type: 'array',
+            },
+            {
+              type: 'string',
+            },
+          ],
           description:
             'Optional script to run after the database\nhas been started but before running tests',
-          items: {
-            type: 'string',
-          },
-          type: 'array',
         },
         pgDb: {
           default: 'test-db',
@@ -70,7 +77,7 @@ export const PgConfigSchema = {
             'The port to run postgres on when running docker\nfor tests. Defaults to 5432 or the first available\nport after that.',
           maximum: 65535,
           minimum: 0,
-          type: 'integer',
+          type: 'number',
         },
       },
       required: [

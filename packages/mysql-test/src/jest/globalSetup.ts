@@ -2,7 +2,7 @@
 
 import {getMySqlConfigSync} from '@databases/mysql-config';
 import getDatabase, {Options} from '../';
-import {spawnBuffered} from 'modern-spawn';
+import {spawnBuffered, execBuffered} from 'modern-spawn';
 
 const config = getMySqlConfigSync();
 const DEFAULT_ENV_VAR =
@@ -31,10 +31,21 @@ export default async function setup(
   process.env[envVar] = databaseURL;
   if (migrationsScript) {
     console.info('Running mysql migrations');
-    await spawnBuffered(migrationsScript[0], migrationsScript.slice(1), {
-      debug:
-        opts.debug || (opts.debug === undefined && config.test.debug) || false,
-    }).getResult();
+    if (typeof migrationsScript === 'string') {
+      await execBuffered(migrationsScript, {
+        debug:
+          opts.debug ||
+          (opts.debug === undefined && config.test.debug) ||
+          false,
+      }).getResult();
+    } else {
+      await spawnBuffered(migrationsScript[0], migrationsScript.slice(1), {
+        debug:
+          opts.debug ||
+          (opts.debug === undefined && config.test.debug) ||
+          false,
+      }).getResult();
+    }
   }
   killers.push(async () => {
     delete process.env[envVar];
