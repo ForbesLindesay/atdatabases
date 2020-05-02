@@ -18,7 +18,10 @@ test('streaming', async () => {
     }
     await db.query(sql`
       INSERT INTO stream_values (id)
-      VALUES ${sql.join(batchValues.map(v => sql`(${v})`), sql`,`)};
+      VALUES ${sql.join(
+        batchValues.map(v => sql`(${v})`),
+        sql`,`,
+      )};
     `);
   }
   const results = [];

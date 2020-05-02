@@ -16,34 +16,32 @@ export interface MigrationInfo {
 
 export default function readMigrationsDir(migrationsDirectory: string) {
   const migrations = readdirSync(migrationsDirectory)
-    .map(
-      (name): MigrationInfo | null => {
-        const fullPath = join(migrationsDirectory, name);
-        const stat = statSync(fullPath);
-        if (!stat.isFile()) {
-          return null;
-        }
-        const match = /^(\d+)\-/.exec(name);
-        if (!match) {
-          return null;
-        }
-        const index = parseInt(match[1], 10);
-        const src = readFileSync(fullPath, 'utf8');
-        const match2 = /^export const id[\s\r\n]*=[\s\r\n]*['"]([0-9a-zA-Z]*)['"](?:\;|$)/m.exec(
-          src,
+    .map((name): MigrationInfo | null => {
+      const fullPath = join(migrationsDirectory, name);
+      const stat = statSync(fullPath);
+      if (!stat.isFile()) {
+        return null;
+      }
+      const match = /^(\d+)\-/.exec(name);
+      if (!match) {
+        return null;
+      }
+      const index = parseInt(match[1], 10);
+      const src = readFileSync(fullPath, 'utf8');
+      const match2 = /^export const id[\s\r\n]*=[\s\r\n]*['"]([0-9a-zA-Z]*)['"](?:\;|$)/m.exec(
+        src,
+      );
+      const id = match2 ? match2[1] : getID();
+      if (!match2) {
+        writeFileSync(
+          fullPath,
+          src +
+            `\n\n// Do not edit this unique ID\n` +
+            `export const id = '${id}';\n`,
         );
-        const id = match2 ? match2[1] : getID();
-        if (!match2) {
-          writeFileSync(
-            fullPath,
-            src +
-              `\n\n// Do not edit this unique ID\n` +
-              `export const id = '${id}';\n`,
-          );
-        }
-        return {index, fullPath, name, id};
-      },
-    )
+      }
+      return {index, fullPath, name, id};
+    })
     .filter(notNull)
     .sort((a, b) => a.index - b.index);
 

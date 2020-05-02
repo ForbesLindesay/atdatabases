@@ -19,14 +19,16 @@ test('getClasses', async () => {
   );
 
   expect(
-    (await getClasses(db, {
-      schemaName: 'getclasses',
-      kind: [
-        ClassKind.OrdinaryTable,
-        ClassKind.View,
-        ClassKind.MaterializedView,
-      ],
-    })).map(t => ({
+    (
+      await getClasses(db, {
+        schemaName: 'getclasses',
+        kind: [
+          ClassKind.OrdinaryTable,
+          ClassKind.View,
+          ClassKind.MaterializedView,
+        ],
+      })
+    ).map(t => ({
       ...t,
       classID: typeof t.classID === 'number' ? '<oid>' : t.classID,
       schemaID: typeof t.schemaID === 'number' ? '<oid>' : t.schemaID,

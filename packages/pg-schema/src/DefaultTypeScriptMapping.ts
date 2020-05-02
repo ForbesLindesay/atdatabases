@@ -39,7 +39,8 @@ const DefaultTypeScriptMapping: {[key in DataTypeID]?: string} = {
   [DataTypeID.int2]: 'number',
   [DataTypeID.int4]: 'number',
   [DataTypeID.int8]: 'number',
-  [DataTypeID.interval]: '{years: number,months: number,days: number,hours: number,minutes: number,seconds: number,milliseconds: number, toPostgres: () => string, toISO: () => string}',
+  [DataTypeID.interval]:
+    '{years: number,months: number,days: number,hours: number,minutes: number,seconds: number,milliseconds: number, toPostgres: () => string, toISO: () => string}',
   [DataTypeID.json]: 'any',
   [DataTypeID.jsonb]: 'any',
   [DataTypeID.oid]: 'number',

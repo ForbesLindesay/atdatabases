@@ -158,9 +158,11 @@ export default async function getTypes(
             return {
               ...base,
               kind: TypeKind.Enum,
-              values: (await getEnumValues(connection, {
-                typeID: tr.typeID,
-              })).map(v => v.value),
+              values: (
+                await getEnumValues(connection, {
+                  typeID: tr.typeID,
+                })
+              ).map(v => v.value),
             };
           case TypeKind.Pseudo:
             return {
