@@ -26,7 +26,7 @@ export const MySqlConfigSchema = {
           description:
             'The timeout in seconds when waiting for the test docker image to start',
           minimum: 0,
-          type: 'integer',
+          type: 'number',
         },
         containerName: {
           default: 'mysql-test',
@@ -47,12 +47,19 @@ export const MySqlConfigSchema = {
           type: 'string',
         },
         migrationsScript: {
+          anyOf: [
+            {
+              items: {
+                type: 'string',
+              },
+              type: 'array',
+            },
+            {
+              type: 'string',
+            },
+          ],
           description:
             'Optional script to run after the database\nhas been started but before running tests',
-          items: {
-            type: 'string',
-          },
-          type: 'array',
         },
         mySqlDb: {
           default: 'test-db',
@@ -75,7 +82,7 @@ export const MySqlConfigSchema = {
             'The port to run mysql on when running docker\nfor tests. Defaults to 3306 or the first available\nport after that.',
           maximum: 65535,
           minimum: 0,
-          type: 'integer',
+          type: 'number',
         },
       },
       required: [

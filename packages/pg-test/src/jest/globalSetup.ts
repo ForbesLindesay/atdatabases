@@ -2,7 +2,7 @@
 
 import getDatabase, {Options} from '../';
 import {getPgConfigSync} from '@databases/pg-config';
-import {spawnBuffered} from 'modern-spawn';
+import {spawnBuffered, execBuffered} from 'modern-spawn';
 
 const config = getPgConfigSync();
 
@@ -31,10 +31,21 @@ export default async function setup(
   process.env[envVar] = databaseURL;
   if (migrationsScript) {
     console.info('Running pg migrations');
-    await spawnBuffered(migrationsScript[0], migrationsScript.slice(1), {
-      debug:
-        opts.debug || (opts.debug === undefined && config.test.debug) || false,
-    }).getResult();
+    if (typeof migrationsScript === 'string') {
+      await execBuffered(migrationsScript, {
+        debug:
+          opts.debug ||
+          (opts.debug === undefined && config.test.debug) ||
+          false,
+      }).getResult();
+    } else {
+      await spawnBuffered(migrationsScript[0], migrationsScript.slice(1), {
+        debug:
+          opts.debug ||
+          (opts.debug === undefined && config.test.debug) ||
+          false,
+      }).getResult();
+    }
   }
   killers.push(async () => {
     delete process.env[envVar];
