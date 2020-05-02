@@ -24,10 +24,12 @@ test('getConstraints', async () => {
   );
 
   expect(
-    (await getConstraints(db, {
-      schemaName: 'getconstraints',
-      // kind: [ClassKind.OrdinaryTable, ClassKind.View],
-    })).map(t => ({
+    (
+      await getConstraints(db, {
+        schemaName: 'getconstraints',
+        // kind: [ClassKind.OrdinaryTable, ClassKind.View],
+      })
+    ).map(t => ({
       ...t,
       classID: typeof t.classID === 'number' ? '<oid>' : t.classID,
       referencedClassID:

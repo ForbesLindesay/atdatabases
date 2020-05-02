@@ -23,10 +23,12 @@ test('getAttributes', async () => {
   );
 
   expect(
-    (await getAttributes(db, {
-      className: 'table',
-      schemaName: 'getattributes',
-    })).map(c => ({
+    (
+      await getAttributes(db, {
+        className: 'table',
+        schemaName: 'getattributes',
+      })
+    ).map(c => ({
       ...c,
       schemaID: typeof c.schemaID === 'number' ? '<oid>' : c.schemaID,
       classID: typeof c.classID === 'number' ? '<oid>' : c.classID,

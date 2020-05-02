@@ -3,18 +3,9 @@ import sql from '@databases/sql';
 
 jest.setTimeout(30000);
 
-const db = connect(
-  undefined,
-  {noDuplicateDatabaseObjectsWarning: true},
-);
-const db2 = connect(
-  undefined,
-  {noDuplicateDatabaseObjectsWarning: true},
-);
-const db3 = connect(
-  undefined,
-  {noDuplicateDatabaseObjectsWarning: true},
-);
+const db = connect(undefined, {noDuplicateDatabaseObjectsWarning: true});
+const db2 = connect(undefined, {noDuplicateDatabaseObjectsWarning: true});
+const db3 = connect(undefined, {noDuplicateDatabaseObjectsWarning: true});
 
 test('error messages', async () => {
   try {
