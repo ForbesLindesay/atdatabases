@@ -10,7 +10,8 @@
   },
   "devDependencies": {
     "@types/node": "^13.13.4",
-    "pg-types": "1.13.0"
+    "pg-types": "1.13.0",
+    "prettier": "^2.0.5"
   },
   "scripts": {},
   "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/pg-schema",
