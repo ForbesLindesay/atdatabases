@@ -1,7 +1,7 @@
 import {Connection} from '@databases/pg';
 
 export default async function prepareMigrationsTable(connection: Connection) {
-  await connection.tx(async tx => {
+  await connection.tx(async (tx) => {
     await tx.query(tx.sql`
       CREATE TABLE IF NOT EXISTS "atdatabases_migrations_version" (
         "id" INTEGER NOT NULL PRIMARY KEY,

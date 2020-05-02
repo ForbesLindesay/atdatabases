@@ -144,7 +144,7 @@ class ConnectionImplementation implements Connection {
     return Object.assign(result, {
       on(event: string, cb: (...args: any[]) => void) {
         if (event !== 'error') return on.call(this, event, cb);
-        return on.call(this, event, ex => {
+        return on.call(this, event, (ex) => {
           // TODO: consider using https://github.com/Vincit/db-errors
           if (!transformedExceptions.has(ex)) {
             transformedExceptions.add(ex);
@@ -203,15 +203,15 @@ class ConnectionPoolImplemenation implements ConnectionPool {
     const stream = new PassThrough({objectMode: true, highWaterMark: 2});
     this.pool
       .getConnection()
-      .then(connection => {
+      .then((connection) => {
         const c = new ConnectionImplementation(connection);
         let released = false;
         return c
           .queryNodeStream(query, options)
-          .on('fields', fields => {
+          .on('fields', (fields) => {
             stream.emit('fields', fields);
           })
-          .on('error', err => {
+          .on('error', (err) => {
             if (!released) {
               released = true;
               connection.release();
@@ -227,7 +227,7 @@ class ConnectionPoolImplemenation implements ConnectionPool {
           })
           .pipe(stream);
       })
-      .catch(ex => stream.emit('error', ex));
+      .catch((ex) => stream.emit('error', ex));
     return stream;
   }
 

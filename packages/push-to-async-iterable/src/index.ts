@@ -22,7 +22,7 @@ export default function pushToAsyncIterable<T>(stream: PushStream<T>) {
   > = new Queue();
   let paused = false;
   let ended = false;
-  stream.onData(value => {
+  stream.onData((value) => {
     if (!ended) {
       queue.push({done: false, value});
       if (!paused && queue.length >= stream.highWaterMark) {
@@ -31,7 +31,7 @@ export default function pushToAsyncIterable<T>(stream: PushStream<T>) {
       }
     }
   });
-  stream.onError(err => {
+  stream.onError((err) => {
     if (!ended) {
       ended = true;
       queue.push({done: true, err});

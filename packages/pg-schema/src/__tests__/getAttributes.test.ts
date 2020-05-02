@@ -28,7 +28,7 @@ test('getAttributes', async () => {
         className: 'table',
         schemaName: 'getattributes',
       })
-    ).map(c => ({
+    ).map((c) => ({
       ...c,
       schemaID: typeof c.schemaID === 'number' ? '<oid>' : c.schemaID,
       classID: typeof c.classID === 'number' ? '<oid>' : c.classID,

@@ -49,8 +49,10 @@ export default async function getSchema(
     classes: classes.map(
       (cls): ClassDetails => ({
         ...cls,
-        attributes: allAttributes.filter(att => att.classID === cls.classID),
-        constraints: allConstraints.filter(con => con.classID === cls.classID),
+        attributes: allAttributes.filter((att) => att.classID === cls.classID),
+        constraints: allConstraints.filter(
+          (con) => con.classID === cls.classID,
+        ),
       }),
     ),
   };

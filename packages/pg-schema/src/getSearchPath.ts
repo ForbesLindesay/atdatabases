@@ -20,12 +20,12 @@ export default async function getSearchPath(
           sql`SELECT nspname FROM pg_catalog.pg_namespace`,
         ) as Promise<Array<{nspname: string}>>),
   ] as const);
-  const schemaNames = namespaces && namespaces.map(n => n.nspname);
+  const schemaNames = namespaces && namespaces.map((n) => n.nspname);
   const searchPath = search_path
     .split(',')
-    .map(p => p.trim())
-    .map(p => (p[0] === '"' ? (JSON.parse(p) as string) : p))
-    .map(p => (p === '$user' ? current_user : p))
-    .filter(p => !schemaNames || schemaNames.includes(p));
+    .map((p) => p.trim())
+    .map((p) => (p[0] === '"' ? (JSON.parse(p) as string) : p))
+    .map((p) => (p === '$user' ? current_user : p))
+    .filter((p) => !schemaNames || schemaNames.includes(p));
   return searchPath;
 }

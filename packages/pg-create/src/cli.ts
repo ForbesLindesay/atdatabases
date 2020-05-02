@@ -2,7 +2,7 @@
 
 import createDb from './';
 
-createDb().catch(ex => {
+createDb().catch((ex) => {
   console.error(ex);
   process.exit(1);
 });

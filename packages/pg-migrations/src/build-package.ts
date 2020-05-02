@@ -5,6 +5,19 @@ import {readFileSync, writeFileSync} from 'fs';
 import readMigrationsDir from './utils/readMigrationsDir';
 const prettier = require('prettier');
 
+let prettier = null;
+try {
+  prettier = require('prettier');
+  if (
+    typeof prettier.resolveConfig !== 'function' ||
+    typeof prettier.format !== 'function'
+  ) {
+    prettier = null;
+  }
+} catch (ex) {
+  prettier = null;
+}
+
 export interface Options {
   migrationsDirectory: string;
   outputFile: string;
@@ -15,10 +28,11 @@ export default async function buildPackage(options: Options) {
   const migrationsDirectory = resolve(options.migrationsDirectory);
   const outputFile = resolve(options.outputFile);
 
-  const prettierOptions = (await prettier.resolveConfig(outputFile)) || {};
-  prettierOptions.parser = 'typescript';
+  const prettierOptions =
+    (prettier && (await prettier.resolveConfig(outputFile))) || {};
+  if (prettierOptions) prettierOptions.parser = 'typescript';
   const writeFile = (filename: string, src: string) => {
-    const formatted = prettier.format(src, prettierOptions);
+    const formatted = prettier ? prettier.format(src, prettierOptions) : src;
     try {
       if (readFileSync(filename, 'utf8') === formatted) {
         return;
@@ -37,14 +51,15 @@ export default async function buildPackage(options: Options) {
 
     import packageMigrations, {MigrationsPackage${
       migrations.length ? ', packageOperation' : ''
-    }} from '${options.databasesDbPgMigrationsName ||
-    '@databases/pg-migrations'}';
+    }} from '${
+    options.databasesDbPgMigrationsName || '@databases/pg-migrations'
+  }';
 
     export {MigrationsPackage};
     export default packageMigrations(
       ${migrations
         .map(
-          migration =>
+          (migration) =>
             `{
               id: ${JSON.stringify(migration.id)},
               index: ${migration.index},

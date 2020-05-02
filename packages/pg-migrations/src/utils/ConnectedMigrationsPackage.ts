@@ -19,7 +19,7 @@ export enum NumberOfOperations {
 
 function isValidState(migrations: ReadonlyArray<Migration>): boolean {
   let applied = true;
-  return migrations.every(migration => {
+  return migrations.every((migration) => {
     if (!migration.is_applied) {
       applied = false;
     }
@@ -42,7 +42,7 @@ export default class ConnectedMigrationsPackage {
   ) {
     this._connection = connection;
     this._migrations = migrations;
-    this.migrations = migrations.map(m => ({
+    this.migrations = migrations.map((m) => ({
       id: m.id,
       index: m.index,
       name: m.name,
@@ -52,7 +52,7 @@ export default class ConnectedMigrationsPackage {
   private async run<T>(
     operation: (db: Connection, migrations: Migration[]) => Promise<T>,
   ): Promise<T> {
-    return await this._connection.task(async task => {
+    return await this._connection.task(async (task) => {
       await prepareMigrationsTable(task);
       const [major] = await getPgVersion(task);
       this._supportsOn = major >= 10;
@@ -64,10 +64,10 @@ export default class ConnectedMigrationsPackage {
       return await operation(
         task,
         this._migrations.map(
-          migration =>
+          (migration) =>
             new Migration(
               migration,
-              migrations.find(m => m.id === migration.id),
+              migrations.find((m) => m.id === migration.id),
               {supportsOn: this._supportsOn},
             ),
         ),
@@ -77,7 +77,7 @@ export default class ConnectedMigrationsPackage {
 
   async getState(): Promise<MigrationStatus[]> {
     return await this.run(async (_db, migrations) => {
-      return migrations.map(m => ({
+      return migrations.map((m) => ({
         id: m.id,
         index: m.index,
         name: m.name,
@@ -90,7 +90,7 @@ export default class ConnectedMigrationsPackage {
 
   async setStatus(id: string, isApplied: boolean) {
     await this.run(async (db, migrations) => {
-      const migration = migrations.find(m => m.id === id);
+      const migration = migrations.find((m) => m.id === id);
       if (!migration) {
         throw new Error(`Could not find a migration with the id "${id}"`);
       }
@@ -100,7 +100,7 @@ export default class ConnectedMigrationsPackage {
 
   async upById(id: string) {
     await this.run(async (db, migrations) => {
-      const migration = migrations.find(m => m.id === id);
+      const migration = migrations.find((m) => m.id === id);
       if (!migration) {
         throw new Error(`Could not find a migration with the id "${id}"`);
       }
@@ -109,7 +109,7 @@ export default class ConnectedMigrationsPackage {
   }
   async downById(id: string) {
     await this.run(async (db, migrations) => {
-      const migration = migrations.find(m => m.id === id);
+      const migration = migrations.find((m) => m.id === id);
       if (!migration) {
         throw new Error(`Could not find a migration with the id "${id}"`);
       }

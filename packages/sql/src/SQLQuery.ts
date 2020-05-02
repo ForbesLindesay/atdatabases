@@ -53,7 +53,7 @@ const formatter = Symbol('SQL Query Formatter');
 const DEFAULT_COMPILE_OPTIONS = {minify: true};
 
 export type MinifyFunction = (src: string) => string;
-let pgMinify: MinifyFunction = s => s;
+let pgMinify: MinifyFunction = (s) => s;
 
 export type ReadFileSync = (filename: string, format: 'utf8') => string;
 let readFileSync: ReadFileSync = () => {

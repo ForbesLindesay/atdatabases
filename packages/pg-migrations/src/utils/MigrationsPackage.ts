@@ -14,7 +14,7 @@ export default class MigrationsPackage {
   public readonly migrations: ReadonlyArray<MigrationMetadata>;
   constructor(migrations: MigrationSpec[]) {
     this._migrations = migrations;
-    this.migrations = migrations.map(m => ({
+    this.migrations = migrations.map((m) => ({
       id: m.id,
       index: m.index,
       name: m.name,
