@@ -15,7 +15,7 @@ export interface TestConfig {
    * The docker image to use when testing
    * using @databases/pg-test
    *
-   * @default "circleci/postgres:10.6-alpine-ram"
+   * @default "postgres:10.6-alpine"
    */
   image: string;
   /**

@@ -84,7 +84,7 @@ refs:
       - image: node:10
         environment:
           DATABASE_URL: 'postgres://test-user@localhost:5432/test-db'
-      - image: circleci/postgres:10.6-alpine-ram
+      - image: postgres:10.6-alpine
         environment:
           POSTGRES_USER: test-user
           POSTGRES_DB: test-db
