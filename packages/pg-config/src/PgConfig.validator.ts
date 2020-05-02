@@ -41,7 +41,7 @@ export const PgConfigSchema = {
           type: 'boolean',
         },
         image: {
-          default: 'circleci/postgres:10.6-alpine-ram',
+          default: 'postgres:10.6-alpine',
           description:
             'The docker image to use when testing\nusing @databases/pg-test',
           type: 'string',
