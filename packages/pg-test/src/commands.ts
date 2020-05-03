@@ -33,9 +33,8 @@ const params = startChain()
   .addParam(seconds(['--connectTimeout'], 'connectTimeoutSeconds'))
   .addParam(param.flag(['-r', '--refresh'], 'refreshImage'))
 
-  .addParam(param.string(['--user'], 'mysqlUser'))
-  .addParam(param.string(['--password'], 'mysqlPassword'))
-  .addParam(param.string(['--db'], 'mysqlDb'));
+  .addParam(param.string(['--user'], 'pgUser'))
+  .addParam(param.string(['--db'], 'pgDb'));
 
 async function runMigrationsAndAddToEnv(databaseURL: string, debug?: boolean) {
   const config = getMySqlConfigSync();
@@ -82,9 +81,8 @@ export async function start(args: string[]) {
         | 'externalPort'
         | 'connectTimeoutSeconds'
         | 'refreshImage'
-        | 'mysqlUser'
-        | 'mysqlPassword'
-        | 'mysqlDb'
+        | 'pgUser'
+        | 'pgDb'
       > & {environmentVariable?: string},
       typeof parseResult.parsed
     >
@@ -190,9 +188,8 @@ export function help(command?: string) {
       console.info(`                               to start. You can specify a raw number in`);
       console.info(`                               seconds, or a time string like "1 minute"`);
       console.info(`  -r, --refresh                Update the cached docker conatiner`);
-      console.info(`  -user              <string>  The mysql user`);
-      console.info(`  -password          <string>  The mysql password`);
-      console.info(`  -db                <string>  The mysql database`);
+      console.info(`  -user              <string>  The postgres user`);
+      console.info(`  -db                <string>  The postgres database`);
       console.info(`  -h, --help                   Show this help message and exit.`);
       break;
     case 'stop':

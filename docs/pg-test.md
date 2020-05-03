@@ -70,6 +70,34 @@ If you need to run migrations before your tests run, e.g. to create database tab
 
 Your migrations script will run with the `DATABASE_URL` set to the same value as for your tests.
 
+## CLI
+
+To install as a CLI:
+
+```
+npm i -g @databases/pg-test
+```
+
+To start a local Postgres database on a free port, and apply any migrations you have configured (see Jest), you can run:
+
+```
+pg-test start
+```
+
+When you're done with your database, you can dispose of it via:
+
+```
+pg-test stop
+```
+
+If you have a script (e.g. a node.js server) that you need a Postgres database for, and you're happy for that Postgres database to be disposed of as soon as your script exits, you can do that via:
+
+```
+pg-test run -- node my-server.js
+```
+
+The `--` is optional, but can be used to clarify where the `pg-test` parameters end and your script begins.
+
 ## Circle CI
 
 If the `DATABASE_URL` environment is already set, `pg-test` does nothing. This means you can use CircleCI's native support for running tests with an acompanying database to run your tests. In your `.circleci/config.yml`:

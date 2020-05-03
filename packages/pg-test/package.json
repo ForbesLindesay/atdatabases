@@ -4,10 +4,16 @@
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
+  "bin": {
+    "pg-test": "./lib/cli.js"
+  },
   "dependencies": {
     "@databases/pg-config": "^0.0.0",
     "@databases/with-container": "^0.0.0",
-    "modern-spawn": "^1.0.0"
+    "modern-spawn": "^1.0.0",
+    "ms": "^2.1.2",
+    "parameter-reducers": "^1.0.1",
+    "type-assertions": "^1.1.0"
   },
   "scripts": {},
   "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/pg-test",
@@ -16,6 +22,7 @@
     "access": "public"
   },
   "devDependencies": {
+    "@types/ms": "^0.7.31",
     "@types/node": "^13.13.4"
   },
   "bugs": "https://github.com/ForbesLindesay/atdatabases/issues",

@@ -1,5 +1,6 @@
 import startContainer, {
   Options as WithContainerOptions,
+  killOldContainers,
 } from '@databases/with-container';
 import {getPgConfigSync} from '@databases/pg-config';
 
@@ -31,6 +32,14 @@ export interface Options
   > {
   pgUser: string;
   pgDb: string;
+}
+
+export async function killDatabase(options: Partial<Options> = {}) {
+  await killOldContainers({
+    debug: DEFAULT_PG_DEBUG,
+    containerName: DEFAULT_CONTAINER_NAME,
+    ...options,
+  });
 }
 
 export default async function getDatabase(options: Partial<Options> = {}) {
