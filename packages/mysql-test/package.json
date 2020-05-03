@@ -4,12 +4,17 @@
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
+  "bin": {
+    "mysql-test": "./lib/cli.js"
+  },
   "dependencies": {
     "@databases/mysql-config": "^0.0.0",
     "@databases/with-container": "^0.0.0",
     "modern-spawn": "^1.0.0",
+    "ms": "^2.1.2",
     "mysql2": "^1.6.4",
-    "yargs": "^12.0.5"
+    "parameter-reducers": "^1.0.1",
+    "type-assertions": "^1.1.0"
   },
   "scripts": {},
   "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/mysql-test",
@@ -25,5 +30,8 @@
     "jest/globalSetup.d.ts",
     "jest/globalTeardown.js",
     "jest/globalTeardown.d.ts"
-  ]
+  ],
+  "devDependencies": {
+    "@types/ms": "^0.7.31"
+  }
 }

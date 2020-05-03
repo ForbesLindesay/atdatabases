@@ -639,6 +639,11 @@
   resolved "https://registry.yarnpkg.com/@types/minimatch/-/minimatch-3.0.3.tgz#3dca0e3f33b200fc7d1139c0cd96c1268cadfd9d"
   integrity sha512-tHq6qdbT9U1IRSGf14CL0pUlULksvY9OZ+5eEgl1N7t+OA3tGvNpxJCzuKQlsNgCVwbAs670L1vcVQi8j9HjnA==
 
+"@types/ms@^0.7.31":
+  version "0.7.31"
+  resolved "https://registry.yarnpkg.com/@types/ms/-/ms-0.7.31.tgz#31b7ca6407128a3d2bbc27fe2d21b345397f6197"
+  integrity sha512-iiUgKzV9AuaEkZqkOLDIvlQiL6ltuZd9tGcW3gwpnX8JbuiuhFlEGmmFXEXkN50Cvq7Os88IY2v0dkDqXYWVgA==
+
 "@types/mysql@^2.15.5":
   version "2.15.10"
   resolved "https://registry.yarnpkg.com/@types/mysql/-/mysql-2.15.10.tgz#225e99e16f6ed3e00091e7cd8821c9fa3cb38149"
@@ -3801,7 +3806,7 @@ ms@2.0.0:
   resolved "https://registry.yarnpkg.com/ms/-/ms-2.0.0.tgz#5608aeadfc00be6c2901df5f9861788de0d597c8"
   integrity sha1-VgiurfwAvmwpAd9fmGF4jeDVl8g=
 
-ms@^2.1.1:
+ms@^2.1.1, ms@^2.1.2:
   version "2.1.2"
   resolved "https://registry.yarnpkg.com/ms/-/ms-2.1.2.tgz#d09d1f357b443f493382a8eb3ccd183872ae6009"
   integrity sha512-sGkPx+VjMtmA6MX27oA4FBFELFCZZ4S4XqeGOXCv68tT+jb3vk/RyaKWP0PTKyWtmLSM0b+adUTEvbs1PEaH2w==
@@ -4155,6 +4160,11 @@ packet-reader@1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/packet-reader/-/packet-reader-1.0.0.tgz#9238e5480dedabacfe1fe3f2771063f164157d74"
   integrity sha512-HAKu/fG3HpHFO0AA8WE8q2g+gBJaZ9MG7fcKk+IJPLTGAD6Psw4443l+9DGRbOIh3/aXr7Phy0TjilYivJo5XQ==
+
+parameter-reducers@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/parameter-reducers/-/parameter-reducers-1.0.1.tgz#d07ecc73befbce15208ca604c76d15f6d5acad21"
+  integrity sha512-k72V6GpMC2/LNwy6gwzMZ5ivJ2RUdWhurEZ3OdXqTk9HOypPK+6Ip0w9wdopHKkCxjRFTmpYUsi0TkiJWUuQ/w==
 
 parse-json@^4.0.0:
   version "4.0.0"
@@ -5352,6 +5362,11 @@ tweetnacl@^0.14.3, tweetnacl@~0.14.0:
   version "0.14.5"
   resolved "https://registry.yarnpkg.com/tweetnacl/-/tweetnacl-0.14.5.tgz#5ae68177f192d4456269d108afa93ff8743f4f64"
   integrity sha1-WuaBd/GS1EViadEIr6k/+HQ/T2Q=
+
+type-assertions@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/type-assertions/-/type-assertions-1.1.0.tgz#51c5189fc6c1bdc1c19f48bf5ace6cc619917977"
+  integrity sha512-LJ5h6n63vxS8fSdfTPqIc6IrbCo9X3g6Se+wSikCGsqaAI3ajN0iputclNG07wdWfBoQZIrpASjBQo5BeVNrAg==
 
 type-check@~0.3.2:
   version "0.3.2"

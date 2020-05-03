@@ -59,16 +59,40 @@ If you need to run migrations before your tests run, e.g. to create database tab
 },
 "mysql": {
   "test": {
-    "migrationsScript": [
-      "yarn",
-      "run",
-      "migrations:test"
-    ]
+    "migrationsScript": "yarn run migrations:test"
   }
 }
 ```
 
 Your migrations script will run with the `DATABASE_URL` set to the same value as for your tests.
+
+## CLI
+
+To install as a CLI:
+
+```
+npm i -g @databases/mysql-test
+```
+
+To start a local MySQL database on a free port, and apply any migrations you have configured (see Jest), you can run:
+
+```
+mysql-test start
+```
+
+When you're done with your database, you can dispose of it via:
+
+```
+mysql-test stop
+```
+
+If you have a script (e.g. a node.js server) that you need a MySQL database for, and you're happy for that MySQL database to be disposed of as soon as your script exits, you can do that via:
+
+```
+mysql-test run -- node my-server.js
+```
+
+The `--` is optional, but can be used to clarify where the `mysql-test` parameters end and your script begins.
 
 ## Circle CI
 
