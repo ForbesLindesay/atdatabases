@@ -1,0 +1,5 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`integration: DATABASE_URL for atdatabases-test-volume-1 1`] = `"postgres://test-user@localhost:47936/test-db"`;
+
+exports[`integration: DATABASE_URL for atdatabases-test-volume-2 1`] = `"postgres://test-user@localhost:9833/test-db"`;

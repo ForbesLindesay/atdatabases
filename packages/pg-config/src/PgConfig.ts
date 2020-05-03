@@ -19,6 +19,14 @@ export interface TestConfig {
    */
   image: string;
   /**
+   * Set this to a volume name to automatically
+   * persist data to a docker volume of that name.
+   *
+   * N.B. this will automatically remove "-ram"
+   * from the end of any image name.
+   */
+  persistVolume?: string;
+  /**
    * The default name to give the docker
    * containers run by @database/pg-test
    *

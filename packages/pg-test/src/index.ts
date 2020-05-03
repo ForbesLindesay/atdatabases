@@ -1,5 +1,6 @@
 import startContainer, {
   Options as WithContainerOptions,
+  killOldContainers,
 } from '@databases/with-container';
 import {getPgConfigSync} from '@databases/pg-config';
 
@@ -31,10 +32,34 @@ export interface Options
   > {
   pgUser: string;
   pgDb: string;
+  persistVolume?: string;
 }
 
+export async function stopDatabase(
+  options: Partial<Pick<Options, 'debug' | 'containerName'>> = {},
+) {
+  await killOldContainers({
+    debug: options.debug !== undefined ? options.debug : DEFAULT_PG_DEBUG,
+    containerName: options.containerName || DEFAULT_CONTAINER_NAME,
+  });
+}
+function withDefaults<T>(overrides: Partial<T>, defaults: T): T {
+  const result = {...defaults};
+  Object.keys(overrides).forEach(key => {
+    if ((overrides as any)[key] !== undefined) {
+      (result as any)[key] = (overrides as any)[key];
+    }
+  });
+  return result;
+}
 export default async function getDatabase(options: Partial<Options> = {}) {
-  const {pgUser, pgDb, environment, ...rawOptions}: Options = {
+  const {
+    pgUser,
+    pgDb,
+    environment,
+    persistVolume,
+    ...rawOptions
+  }: Options = withDefaults(options, {
     debug: DEFAULT_PG_DEBUG,
     image: DEFAULT_IMAGE,
     containerName: DEFAULT_CONTAINER_NAME,
@@ -43,11 +68,32 @@ export default async function getDatabase(options: Partial<Options> = {}) {
     pgDb: DEFAULT_PG_DB,
     defaultExternalPort: DEFAULT_PG_PORT,
     externalPort: config.test.port,
-    ...options,
-  };
+    persistVolume: config.test.persistVolume,
+  });
+  if (persistVolume) {
+    rawOptions.image = rawOptions.image.replace(/\-ram$/, '');
+  }
 
+  if (options.persistVolume) {
+    console.info(`Using ${options.persistVolume} to store sql data`);
+    console.info(
+      `Run "docker volume rm ${options.persistVolume}" to clear data`,
+    );
+  }
   const {proc, externalPort, kill} = await startContainer({
     ...rawOptions,
+    mount: [
+      ...(options.mount || []),
+      ...(options.persistVolume
+        ? [
+            {
+              type: 'volume',
+              src: options.persistVolume,
+              dst: '/var/lib/postgresql/data',
+            } as const,
+          ]
+        : []),
+    ],
     internalPort: DEFAULT_PG_PORT,
     environment: {...environment, POSTGRES_USER: pgUser, POSTGRES_DB: pgDb},
   });

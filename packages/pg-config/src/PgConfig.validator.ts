@@ -61,6 +61,11 @@ export const PgConfigSchema = {
           description:
             'Optional script to run after the database\nhas been started but before running tests',
         },
+        persistVolume: {
+          description:
+            'Set this to a volume name to automatically\npersist data to a docker volume of that name.\n\nN.B. this will automatically remove "-ram"\nfrom the end of any image name.',
+          type: 'string',
+        },
         pgDb: {
           default: 'test-db',
           description: 'The db to create in the test docker container',

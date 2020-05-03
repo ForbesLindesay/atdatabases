@@ -23,6 +23,12 @@ export interface Options {
    */
   refreshImage?: boolean;
   detached?: boolean;
+  mount?: ReadonlyArray<{
+    type: 'bind' | 'volume' | 'tmpfs';
+    src: string;
+    dst: string;
+    readonly?: boolean;
+  }>;
 }
 
 export interface NormalizedOptions
@@ -83,6 +89,15 @@ export function startDockerContainer(options: NormalizedOptions) {
     envArgs.push('--env');
     envArgs.push(`${key}=${env[key]}`);
   });
+  const mounts: string[] = [];
+  (options.mount || []).forEach(mount => {
+    mounts.push('--mount');
+    mounts.push(
+      `type=${mount.type},source=${mount.src},target=${mount.dst}${
+        mount.readonly ? `,readonly` : ``
+      }`,
+    );
+  });
   return spawn(
     'docker',
     [
@@ -94,6 +109,7 @@ export function startDockerContainer(options: NormalizedOptions) {
       '-p', // forward appropriate port
       `${options.externalPort}:${options.internalPort}`,
       ...(options.detached ? ['--detach'] : []),
+      ...mounts,
       // set enviornment variables
       ...envArgs,
       options.image,
@@ -119,16 +135,32 @@ export async function waitForDatabaseToStart(options: NormalizedOptions) {
       console.warn(
         `Waiting for ${options.containerName} on port ${options.externalPort}...`,
       );
+      let currentTestFinished = false;
       const connection = connect(options.externalPort)
         .on('error', () => {
-          if (finished) return;
+          if (finished || currentTestFinished) return;
+          currentTestFinished = true;
+          setTimeout(test, 500);
+        })
+        .on('end', () => {
+          if (finished || currentTestFinished) return;
+          currentTestFinished = true;
+          setTimeout(test, 500);
+        })
+        .on('close', () => {
+          if (finished || currentTestFinished) return;
+          currentTestFinished = true;
           setTimeout(test, 500);
         })
         .on('connect', () => {
-          finished = true;
-          clearTimeout(timeout);
-          connection.end();
-          setTimeout(resolve, 1000);
+          setTimeout(() => {
+            if (finished || currentTestFinished) return;
+            finished = true;
+            currentTestFinished = true;
+            clearTimeout(timeout);
+            connection.end();
+            resolve();
+          }, 2000);
         });
     }
     test();

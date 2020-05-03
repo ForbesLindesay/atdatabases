@@ -20,7 +20,7 @@ export default async function setup(
   const migrationsScript =
     opts.migrationsScript ||
     (process.env.PG_TEST_MIGRATIONS_SCRIPT
-      ? process.env.PG_TEST_MIGRATIONS_SCRIPT.split(' ')
+      ? process.env.PG_TEST_MIGRATIONS_SCRIPT
       : config.test.migrationsScript);
   if (process.env[envVar]) {
     console.info(`Using existing pg database from: ${envVar}`);
