@@ -1,7 +1,7 @@
 import ms = require('ms');
 import {parse, startChain, param} from 'parameter-reducers';
 import * as ta from 'type-assertions';
-import {getMySqlConfigSync} from '@databases/mysql-config';
+import {getPgConfigSync} from '@databases/pg-config';
 import getDatabase, {Options, killDatabase} from '.';
 import {execBuffered, spawnBuffered} from 'modern-spawn';
 
@@ -37,7 +37,7 @@ const params = startChain()
   .addParam(param.string(['--db'], 'pgDb'));
 
 async function runMigrationsAndAddToEnv(databaseURL: string, debug?: boolean) {
-  const config = getMySqlConfigSync();
+  const config = getPgConfigSync();
 
   const DEFAULT_ENV_VAR =
     process.env.MYSQL_TEST_ENV_VAR ||
@@ -48,7 +48,7 @@ async function runMigrationsAndAddToEnv(databaseURL: string, debug?: boolean) {
     ? process.env.MYSQL_TEST_MIGRATIONS_SCRIPT.split(' ')
     : config.test.migrationsScript;
   if (migrationsScript) {
-    console.warn('Running mysql migrations');
+    console.warn('Running pg migrations');
     if (typeof migrationsScript === 'string') {
       await execBuffered(migrationsScript, {
         debug: debug || config.test.debug || false,
@@ -156,7 +156,7 @@ export async function stop(args: string[]) {
 export function help(command?: string) {
   switch (command) {
     case 'start':
-      console.info(`usage: mysql-test start [-h] ...`);
+      console.info(`usage: pg-test start [-h] ...`);
       console.info(``);
       console.info(`Start temporary databases for running tests, using docker`);
       console.info(``);
@@ -169,19 +169,19 @@ export function help(command?: string) {
       console.info(`                               to start. You can specify a raw number in`);
       console.info(`                               seconds, or a time string like "1 minute"`);
       console.info(`  -r, --refresh                Update the cached docker conatiner`);
-      console.info(`  -user              <string>  The mysql user`);
-      console.info(`  -password          <string>  The mysql password`);
-      console.info(`  -db                <string>  The mysql database`);
+      console.info(`  -user              <string>  The pg user`);
+      console.info(`  -password          <string>  The pg password`);
+      console.info(`  -db                <string>  The pg database`);
       console.info(`  -h, --help                   Show this help message and exit.`);
       break;
     case 'run':
-      console.info(`usage: mysql-test run <options> your-command`);
+      console.info(`usage: pg-test run <options> your-command`);
       console.info(``);
       console.info(`Run your command with a MySQL database that is disposed of when your command exits`);
       console.info(``);
       console.info(`Optional arguments:`);
       console.info(`  -d, --debug                  Print all the output of child commands.`);
-      console.info(`  --image            <string>  Override the MySQL docker image.`);
+      console.info(`  --image            <string>  Override the Postgres docker image.`);
       console.info(`  --containerName    <string>  Specify a custom name for the container.`);
       console.info(`  -p, --externalPort <integer> Specify the port to run on.`);
       console.info(`  --connectTimeout   <seconds> How long should we allow for the container`);
@@ -193,29 +193,29 @@ export function help(command?: string) {
       console.info(`  -h, --help                   Show this help message and exit.`);
       break;
     case 'stop':
-      console.info(`usage: mysql-test stop [-h] ...`);
+      console.info(`usage: pg-test stop [-h] ...`);
       console.info(``);
-      console.info(`Stop temporary databases created via mysql-test start`);
+      console.info(`Stop temporary databases created via pg-test start`);
       console.info(``);
       console.info(`Optional arguments:`);
       console.info(`  -d, --debug                  Print all the output of child commands.`);
       console.info(`  --containerName    <string>  Specify a custom name for the container.`);
       break;
     default:
-      console.info(`usage: mysql-test <command> [-h] ...`);
+      console.info(`usage: pg-test <command> [-h] ...`);
       console.info(``);
       console.info(`Start temporary databases for running tests using docker`);
       console.info(``);
       console.info(`Commands`);
-      console.info(`  start    Starts a MySQL database`);
-      console.info(`  run      Run a command with a MySQL database that is disposed of at the end`);
-      console.info(`  stop     Stops a MySQL database`);
+      console.info(`  start    Starts a Postgres database`);
+      console.info(`  run      Run a command with a Postgres database that is disposed of at the end`);
+      console.info(`  stop     Stops a Postgres database`);
       console.info(`  help     Print documentation for commands`);
       console.info(``);
       console.info(`Optional arguments:`);
       console.info(`  -h, --help     Show this help message and exit.`);
       console.info(``);
-      console.info(`For detailed help about a specific command, use: mysql-test help <command>`);
+      console.info(`For detailed help about a specific command, use: pg-test help <command>`);
       break;
   }
 }
