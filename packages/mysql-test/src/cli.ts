@@ -1,40 +1,62 @@
-#! /usr/bin/env nod
+#! /usr/bin/env node
 
-import getDatabase, {killDatabase} from '.';
+import * as commands from './commands';
+const command = process.argv[2];
+const args = process.argv.slice(3);
 
-// tslint:disable-next-line:no-unused-expression
-require('yargs')
-  .command(
-    'start',
-    'start the database',
-    (yargs: any) => {
-      // TODO: take options as CLI parameters
+const hasHelpFlag = args.includes('--help') || args.includes('-h');
+if (hasHelpFlag) {
+  commands.help();
+  process.exit(0);
+}
+
+switch (command) {
+  case 'start':
+    if (hasHelpFlag) {
+      commands.help('start');
+    } else {
+      handle(commands.start(args));
+    }
+    break;
+  case 'run':
+    if (hasHelpFlag) {
+      commands.help('run');
+    } else {
+      handle(commands.run(args));
+    }
+    break;
+  case 'stop':
+    if (hasHelpFlag) {
+      commands.help('stop');
+    } else {
+      handle(commands.stop(args));
+    }
+    break;
+  case 'help':
+    commands.help(args[0]);
+    break;
+  default:
+    commands.help();
+    if (!hasHelpFlag) {
+      console.error(
+        `Unexpected command ${command}, expected one of "start" or "help"`,
+      );
+      process.exit(1);
+    }
+    break;
+}
+
+function handle(v: Promise<number>) {
+  if (!v) {
+    process.exit(0);
+  }
+  v.then(
+    (value) => {
+      process.exit(value);
     },
-    async (argv: any) => {
-      try {
-        const {databaseURL} = await getDatabase({detached: true});
-        console.info(databaseURL);
-      } catch (ex) {
-        console.error(ex.stack || ex);
-        process.exit(1);
-      }
+    (ex) => {
+      console.error(ex.stack || ex);
+      process.exit(1);
     },
-  )
-  .command(
-    'kill',
-    'kill the database',
-    (yargs: any) => {
-      // TODO: take options as CLI parameters
-    },
-    async (argv: any) => {
-      try {
-        await killDatabase();
-      } catch (ex) {
-        console.error(ex.stack || ex);
-        process.exit(1);
-      }
-    },
-  )
-  .strict()
-  .demandCommand()
-  .help().argv;
+  );
+}

@@ -64,12 +64,13 @@ export async function pullDockerImage(options: NormalizedOptions | Options) {
     /.+\:.+/.test(options.image) &&
     (await imageExists(options))
   ) {
-    console.info(
-      options.image + ' already pulled (use ops.refreshImage to refresh)',
+    console.warn(
+      options.image +
+        ' already pulled (use mysql-test start --refresh or ops.refreshImage to refresh)',
     );
     return;
   }
-  console.info('Pulling Docker Image ' + options.image);
+  console.warn('Pulling Docker Image ' + options.image);
   await spawnBuffered('docker', ['pull', options.image], {
     debug: options.debug,
   }).getResult();
@@ -115,7 +116,7 @@ export async function waitForDatabaseToStart(options: NormalizedOptions) {
       );
     }, options.connectTimeoutSeconds * 1000);
     function test() {
-      console.info(
+      console.warn(
         `Waiting for ${options.containerName} on port ${options.externalPort}...`,
       );
       const connection = connect(options.externalPort)
@@ -164,7 +165,7 @@ export default async function startContainer(options: Options) {
     externalPort,
   };
 
-  console.info('Starting Docker Container ' + opts.containerName);
+  console.warn('Starting Docker Container ' + opts.containerName);
   const proc = startDockerContainer(opts);
 
   await waitForDatabaseToStart(opts);
