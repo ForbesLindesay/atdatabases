@@ -71,6 +71,16 @@ async function getUnfinishedTodos() {
     SELECT * FROM tasks WHERE completed=false;
   `);
 }
+async function eroringTransaction() {
+  return await db.tx(function*(tx) {
+    yield tx.query(sql`
+      SELECT * FROM tasks WHERE completed=false;
+    `);
+    throw new Error(
+      'This is an expected error that should abort the transaction',
+    );
+  });
+}
 
 const testResults = (async () => {
   const logs: string[] = [];
@@ -113,6 +123,17 @@ const testResults = (async () => {
       throw new Error('expected unfinished[1].id to be "c"');
     }
     logs.push('unfinished todos: ' + JSON.stringify(unfinished));
+
+    await eroringTransaction().then(
+      () => {
+        throw new Error(
+          'Expected eroringTransaction to return rejected promise',
+        );
+      },
+      err => {
+        logs.push(`${err.message}`);
+      },
+    );
   } catch (ex) {
     logs.push(`${ex.message}\n\n${ex.stack}`);
     console.error(`${ex.message}\n\n${ex.stack}`);
