@@ -596,17 +596,21 @@ export default function createConnection(
     );
   }
 
+  let requireSslForConnectionString = false;
   if (typeof connectionConfig === 'string') {
     let url;
     try {
       url = new URL(connectionConfig);
+      if (url.searchParams.get('sslmode') === 'require') {
+        requireSslForConnectionString = true;
+      }
     } catch (ex) {
       throw new Error(
         'Invalid Postgres connection string, expected a URI: ' +
           connectionConfig,
       );
     }
-    if (url.protocol !== 'postgres:') {
+    if (url.protocol !== 'postgres:' && url.protocol !== 'postgresql:') {
       throw new Error(
         'Invalid Postgres connection string, expected protocol to be "postgres": ' +
           connectionConfig,
@@ -669,7 +673,11 @@ export default function createConnection(
   const c =
     typeof connectionConfig === 'object'
       ? {...connectionConfig, ...connectOptions}
-      : {connectionString: connectionConfig, ...connectOptions};
+      : {
+          connectionString: connectionConfig,
+          ...(requireSslForConnectionString ? {ssl: true} : {}),
+          ...connectOptions,
+        };
   const connection = pgp(
     c,
     noDuplicateDatabaseObjectsWarning ? {v: Math.random()} : undefined,
