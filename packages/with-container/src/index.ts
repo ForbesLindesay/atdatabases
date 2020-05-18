@@ -11,6 +11,7 @@ export interface Options {
   image: string;
   containerName: string;
   defaultExternalPort: number;
+  host?: string;
   externalPort?: number;
   internalPort: number;
   connectTimeoutSeconds: number;
@@ -119,7 +120,7 @@ export async function waitForDatabaseToStart(options: NormalizedOptions) {
       console.warn(
         `Waiting for ${options.containerName} on port ${options.externalPort}...`,
       );
-      const connection = connect(options.externalPort)
+      const connection = connect(options.externalPort, options.host)
         .on('error', () => {
           if (finished) return;
           setTimeout(test, 500);
