@@ -108,6 +108,7 @@ export async function killDatabase(options: Partial<Options> = {}) {
     ...options,
   });
 }
+
 export default async function getDatabase(options: Partial<Options> = {}) {
   const {
     mysqlUser,
