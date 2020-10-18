@@ -75,6 +75,13 @@ export default class PrintOptions {
     return this._config.primaryKeyTypeMode;
   }
 
+  public get columnTypeOverrides() {
+    return this._config.columnTypeOverrides;
+  }
+  public get typeOverrides() {
+    return this._config.typeOverrides;
+  }
+
   isDefaultExportCandidate(fileID: TypeID): boolean {
     switch (fileID.type) {
       case 'schema':

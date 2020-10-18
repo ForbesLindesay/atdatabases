@@ -5,6 +5,7 @@ import getTypeScriptType from '../getTypeScriptType';
 import PrintOptions from '../PrintOptions';
 import printSchema from '../printers/printSchema';
 import writeFiles from '../writeFiles';
+import PgDataTypeID from '@databases/pg-data-type-id/src';
 
 const db = connect();
 
@@ -25,7 +26,8 @@ test('getClasses', async () => {
         id BIGSERIAL NOT NULL PRIMARY KEY,
         owner_user_id BIGINT NOT NULL REFERENCES print_types.users(id),
         cdn_url TEXT NOT NULL,
-        caption TEXT NULL
+        caption TEXT NULL,
+        metadata JSONB NOT NULL
       );
       CREATE MATERIALIZED VIEW print_types.view_a AS SELECT * FROM print_types.users;
       CREATE VIEW print_types.view_b AS SELECT * FROM print_types.photos;
@@ -42,7 +44,15 @@ test('getClasses', async () => {
   const printContext = new PrintContext(
     getTypeScriptType,
     schema,
-    new PrintOptions(DEFAULT_CONFIG.types),
+    new PrintOptions({
+      ...DEFAULT_CONFIG.types,
+      columnTypeOverrides: {
+        'photos.cdn_url': 'string & {__brand?: "url"}',
+      },
+      typeOverrides: {
+        [PgDataTypeID.jsonb]: 'unknown',
+      },
+    }),
   );
   printSchema(schema, printContext);
   await writeFiles(printContext, __dirname);
@@ -65,17 +75,19 @@ test('getClasses', async () => {
         "content": "import Users from './users'
 
     interface Photos {
-      caption: string | null
-      cdn_url: string
+      caption: (string) | null
+      cdn_url: string & {__brand?: \\"url\\"}
       id: number & {readonly __brand?: 'photos_id'}
+      metadata: unknown
       owner_user_id: Users['id']
     }
     export default Photos;
 
     interface Photos_InsertParameters {
-      caption?: string | null
-      cdn_url: string
+      caption?: (string) | null
+      cdn_url: string & {__brand?: \\"url\\"}
       id?: number & {readonly __brand?: 'photos_id'}
+      metadata: unknown
       owner_user_id: Users['id']
     }
     export {Photos_InsertParameters}
@@ -84,16 +96,16 @@ test('getClasses', async () => {
       },
       Object {
         "content": "interface Users {
-      age: number | null
-      bio: string | null
+      age: (number) | null
+      bio: (string) | null
       id: number & {readonly __brand?: 'users_id'}
       screen_name: string
     }
     export default Users;
 
     interface Users_InsertParameters {
-      age?: number | null
-      bio?: string | null
+      age?: (number) | null
+      bio?: (string) | null
       id?: number & {readonly __brand?: 'users_id'}
       screen_name: string
     }

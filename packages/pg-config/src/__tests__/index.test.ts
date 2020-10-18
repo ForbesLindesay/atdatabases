@@ -30,6 +30,8 @@ test('get root config', () => {
       tableInsertParametersTypeName:
         '{{ TABLE_NAME | pascal-case }}_InsertParameters',
       tableTypeName: '{{ TABLE_NAME | pascal-case }}',
+      columnTypeOverrides: {},
+      typeOverrides: {},
     },
   });
 });
@@ -64,6 +66,8 @@ test('valid config', () => {
       tableInsertParametersTypeName:
         '{{ TABLE_NAME | pascal-case }}_InsertParameters',
       tableTypeName: '{{ TABLE_NAME | pascal-case }}',
+      columnTypeOverrides: {},
+      typeOverrides: {},
     },
   });
   expect(_testReadPgConfigSync(__dirname + '/fixtures/override.json')).toEqual({

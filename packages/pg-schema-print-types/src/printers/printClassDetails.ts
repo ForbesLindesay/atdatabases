@@ -54,12 +54,32 @@ function getAttributeType(
   file: FileContext,
 ): string {
   if (!attribute.notNull) {
-    return `${getAttributeType(
+    return `(${getAttributeType(
       type,
       {...attribute, notNull: true},
       context,
       file,
-    )} | null`;
+    )}) | null`;
+  }
+
+  if (
+    context.options.columnTypeOverrides[
+      `${type.schemaName}.${type.className}.${attribute.attributeName}`
+    ]
+  ) {
+    return context.options.columnTypeOverrides[
+      `${type.schemaName}.${type.className}.${attribute.attributeName}`
+    ];
+  }
+
+  if (
+    context.options.columnTypeOverrides[
+      `${type.className}.${attribute.attributeName}`
+    ]
+  ) {
+    return context.options.columnTypeOverrides[
+      `${type.className}.${attribute.attributeName}`
+    ];
   }
 
   for (const constraint of type.constraints) {

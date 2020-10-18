@@ -93,6 +93,16 @@ export const PgConfigSchema = {
     TypesConfig: {
       defaultProperties: [],
       properties: {
+        columnTypeOverrides: {
+          additionalProperties: {
+            type: 'string',
+          },
+          default: {},
+          defaultProperties: [],
+          description:
+            'Override column types for some columns. The name can be either:\n\n- "table_name.column_name"\n- "schema_name.table_name.column_name"',
+          type: 'object',
+        },
         directory: {
           default: '__generated__',
           description:
@@ -196,8 +206,19 @@ export const PgConfigSchema = {
             'What should TypeScript types for table records be called',
           type: 'string',
         },
+        typeOverrides: {
+          additionalProperties: {
+            type: 'string',
+          },
+          default: {},
+          defaultProperties: [],
+          description:
+            'Override generated TypeScript types for some types. The name can be either:\n\n- key of @databases/pg-data-type-id (e.g. "json")\n- value of @databases/pg-data-type-id (e.g. 114)\n- "custom_type_name"\n- "schema_name.custom_type_name"',
+          type: 'object',
+        },
       },
       required: [
+        'columnTypeOverrides',
         'directory',
         'domainFileName',
         'domainTypeMode',
@@ -214,6 +235,7 @@ export const PgConfigSchema = {
         'tableInsertParametersFileName',
         'tableInsertParametersTypeName',
         'tableTypeName',
+        'typeOverrides',
       ],
       type: 'object',
     },

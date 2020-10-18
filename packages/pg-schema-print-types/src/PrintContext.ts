@@ -5,6 +5,7 @@ import FileName from './FileName';
 import TypeID, {DEFAULT_EXPORT_PRIORITY} from './TypeID';
 import DefaultTypeScriptMapping from './DefaultTypeScriptMapping';
 import IdentifierName from './IdentifierName';
+import PgDataTypeID from '@databases/pg-data-type-id/src';
 
 export interface FileContext {
   // asExport: (declaration: string[]) => string[];
@@ -158,7 +159,6 @@ export default class PrintContext {
   private readonly _files = new Map<FileName, FileContent>();
   private readonly _classes: Map<number, ClassDetails>;
   private readonly _types: Map<number, Type>;
-  private readonly _overrides: Map<string, string>;
 
   private readonly _getTypeScriptType: (
     type: Type,
@@ -183,8 +183,6 @@ export default class PrintContext {
     this._types = new Map(schema.types.map((t) => [t.typeID, t]));
 
     this.options = options;
-
-    this._overrides = overrides;
   }
 
   public getClass(id: number) {
@@ -193,13 +191,22 @@ export default class PrintContext {
 
   private _getTypeOverride(type: Type): string | null {
     return (
-      this._overrides.get(`${type.schemaName}.${type.typeName}`) ??
-      this._overrides.get(`${type.typeName}`) ??
+      this.options.typeOverrides[`${type.schemaName}.${type.typeName}`] ??
+      this.options.typeOverrides[`${type.typeName}`] ??
       null
     );
   }
 
   public getTypeScriptType(id: number, file: FileContext) {
+    if (id in this.options.typeOverrides) {
+      return this.options.typeOverrides[id];
+    }
+    if (id in PgDataTypeID) {
+      const str = PgDataTypeID[id];
+      if (str in this.options.typeOverrides) {
+        return this.options.typeOverrides[str];
+      }
+    }
     const builtin = DefaultTypeScriptMapping.get(id);
     if (builtin) return builtin;
     const type = this._types.get(id);
