@@ -106,6 +106,7 @@ export default async function getTypes(
     ${
       conditions.length ? sql`WHERE ${sql.join(conditions, sql` AND `)}` : sql``
     }
+    ORDER BY ns.nspname ASC, ty.typname ASC, subt.typname ASC, baset.typname ASC
   `)) as TypeRecord[];
 
   return Promise.all(

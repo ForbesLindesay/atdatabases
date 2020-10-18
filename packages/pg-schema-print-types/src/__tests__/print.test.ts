@@ -57,18 +57,18 @@ test('getClasses', async () => {
         "content": "import {users_DatabaseRecord} from '../users'
 
     export interface photos_DatabaseRecord {
-      id: photos_id
       caption: string | null
       cdn_url: string
+      id: photos_id
       owner_user_id: users_DatabaseRecord['id']
     }
 
     export type photos_id = number & {readonly __brand: 'photos_id'}
 
     export interface photos_InsertParameters {
-      id?: photos_id
       caption?: string | null
       cdn_url: string
+      id?: photos_id
       owner_user_id: users_DatabaseRecord['id']
     }
     ",
@@ -76,18 +76,18 @@ test('getClasses', async () => {
       },
       Object {
         "content": "export interface users_DatabaseRecord {
-      id: users_id
       age: number | null
       bio: string | null
+      id: users_id
       screen_name: string
     }
 
     export type users_id = number & {readonly __brand: 'users_id'}
 
     export interface users_InsertParameters {
-      id?: users_id
       age?: number | null
       bio?: string | null
+      id?: users_id
       screen_name: string
     }
     ",
@@ -95,34 +95,34 @@ test('getClasses', async () => {
       },
       Object {
         "content": "export interface view_a_DatabaseRecord {
-      screen_name: string | null
-      id: number | null
       age: number | null
       bio: string | null
+      id: number | null
+      screen_name: string | null
     }
 
     export interface view_a_InsertParameters {
-      screen_name?: string | null
-      id?: number | null
       age?: number | null
       bio?: string | null
+      id?: number | null
+      screen_name?: string | null
     }
     ",
         "filename": "view_a.ts",
       },
       Object {
         "content": "export interface view_b_DatabaseRecord {
-      owner_user_id: number | null
-      id: number | null
       caption: string | null
       cdn_url: string | null
+      id: number | null
+      owner_user_id: number | null
     }
 
     export interface view_b_InsertParameters {
-      owner_user_id?: number | null
-      id?: number | null
       caption?: string | null
       cdn_url?: string | null
+      id?: number | null
+      owner_user_id?: number | null
     }
     ",
         "filename": "view_b.ts",

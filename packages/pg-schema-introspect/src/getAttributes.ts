@@ -60,6 +60,7 @@ export default async function getAttributes(
     ${
       conditions.length ? sql`WHERE ${sql.join(conditions, sql` AND `)}` : sql``
     }
+    ORDER BY ns.nspname ASC, cls.relname ASC, a.attname ASC;
   `);
 
   return attributes;
