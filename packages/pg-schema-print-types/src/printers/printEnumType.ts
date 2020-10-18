@@ -13,47 +13,35 @@ export default function printEnumType(
   file: FileContext,
 ): string {
   switch (context.options.enumTypeMode) {
-    case EnumTypeMode.EnumType:
-    case EnumTypeMode.UnionAlias:
-    case EnumTypeMode.UnionAliasWithObject:
+    case 'enum':
+    case 'union_alias':
+    case 'union_alias_with_object':
       return file.getImport(
         context.pushDeclaration(
           {type: 'enum', name: type.typeName},
-          type.typeName,
-          ({isDefaultExport}) => {
+          (identifierName) => {
             const results: string[] = [];
-            const namedExportKeyword = isDefaultExport ? `` : `export `;
-            if (context.options.enumTypeMode === EnumTypeMode.EnumType) {
-              results.push(`${namedExportKeyword}enum ${type.typeName} {`);
-              for (const value of type.values) {
-                results.push(`  ${value} = '${value}',`);
-              }
-              results.push(`}`);
-            } else {
+            if (context.options.enumTypeMode === 'enum') {
               results.push(
-                `${namedExportKeyword}type ${type.typeName} = ${getUnion(
-                  type,
-                )};`,
+                `enum ${identifierName} {`,
+                ...type.values.map((value) => `  ${value} = '${value}',`),
+                `}`,
               );
-              if (
-                context.options.enumTypeMode ===
-                EnumTypeMode.UnionAliasWithObject
-              ) {
-                results.push(`${namedExportKeyword}const ${type.typeName} = {`);
-                for (const value of type.values) {
-                  results.push(`  ${value} = '${value}',`);
-                }
-                results.push(`} as const;`);
+            } else {
+              results.push(`type ${identifierName} = ${getUnion(type)};`);
+              if (context.options.enumTypeMode === 'union_alias_with_object') {
+                results.push(
+                  `const ${identifierName} = {`,
+                  ...type.values.map((value) => `  ${value}: '${value}',`),
+                  `} as const;`,
+                );
               }
-            }
-            if (isDefaultExport) {
-              results.push(`export default ${type.typeName}`);
             }
             return results;
           },
         ),
       );
-    case EnumTypeMode.Inline:
+    case 'inline':
       return getUnion(type);
   }
 }

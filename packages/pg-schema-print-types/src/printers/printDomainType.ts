@@ -13,39 +13,36 @@ export default function printDomainType(
   file: FileContext,
 ): string {
   switch (context.options.domainTypeMode) {
-    case DomainTypeMode.StrictBrand:
-    case DomainTypeMode.LooseBrand:
-    case DomainTypeMode.Alias:
+    case 'strict_brand':
+    case 'loose_brand':
+    case 'alias':
       return file.getImport(
         context.pushDeclaration(
           {type: 'domain', name: type.typeName},
-          type.typeName,
-          (file) => [
-            `${file.isDefaultExport ? `` : `export `}type ${
-              type.typeName
-            } = ${context.getTypeScriptType(type.basetypeID, file)}${getBrand(
-              type.typeName,
-              context.options.domainTypeMode,
-            )};`,
-            ...(file.isDefaultExport
-              ? [`export default ${type.typeName};`]
-              : []),
+          (identifierName, file) => [
+            `type ${identifierName} = ${context.getTypeScriptType(
+              type.basetypeID,
+              file,
+            )}${getBrand(type.typeName, context)};`,
           ],
         ),
       );
-    case DomainTypeMode.Inline:
-      return context.getTypeScriptType(type.basetypeID, file);
+    case 'inline':
+      return `${context.getTypeScriptType(type.basetypeID, file)}${getBrand(
+        type.typeName,
+        context,
+      )};`;
   }
 }
 
-function getBrand(typeName: string, mode: DomainTypeMode): string {
-  switch (mode) {
-    case DomainTypeMode.StrictBrand:
+function getBrand(typeName: string, context: PrintContext): string {
+  switch (context.options.domainTypeMode) {
+    case 'strict_brand':
       return ` & {readonly __brand: '${typeName}'}`;
-    case DomainTypeMode.LooseBrand:
+    case 'loose_brand':
       return ` & {readonly __brand?: '${typeName}'}`;
-    case DomainTypeMode.Alias:
-    case DomainTypeMode.Inline:
+    case 'alias':
+    case 'inline':
       return '';
   }
 }

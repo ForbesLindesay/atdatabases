@@ -2,28 +2,23 @@ import {
   ClassDetails,
   Attribute,
   ConstraintType,
+  ClassKind,
 } from '@databases/pg-schema-introspect';
 import PrintContext, {FileContext} from '../PrintContext';
-
-export enum PrimaryKeyMode {
-  StrictBrand,
-  LooseBrand,
-  InlineStrictBrand,
-  InlineLooseBrand,
-  InlineNoBrand,
-}
 
 export default function printClassDetails(
   type: ClassDetails,
   context: PrintContext,
 ) {
+  if (type.kind !== ClassKind.OrdinaryTable) {
+    throw new Error(
+      'printClassDetails only supports ordinary tables at the moment.',
+    );
+  }
   const DatabaseRecord = context.pushDeclaration(
     {type: 'class', name: type.className},
-    `${type.className}_DatabaseRecord`,
-    (file) => [
-      `export ${file.isDefaultExport ? `default ` : ``}interface ${
-        type.className
-      }_DatabaseRecord {`,
+    (identifierName, file) => [
+      `interface ${identifierName} {`,
       ...type.attributes.map(
         (attribute) =>
           `  ${attribute.attributeName}: ${getAttributeType(
@@ -37,12 +32,9 @@ export default function printClassDetails(
     ],
   );
   const InsertParameters = context.pushDeclaration(
-    {type: 'class', name: type.className},
-    `${type.className}_InsertParameters`,
-    (file) => [
-      `export ${file.isDefaultExport ? `default ` : ``}interface ${
-        type.className
-      }_InsertParameters {`,
+    {type: 'insert_parameters', name: type.className},
+    (identifierName, file) => [
+      `interface ${identifierName} {`,
       ...type.attributes.map(
         (attribute) =>
           `  ${attribute.attributeName}${optionalOnInsert(
@@ -98,13 +90,7 @@ function getAttributeType(
           }
         }
       } else if (constraint.constraintType === ConstraintType.PrimaryKey) {
-        return handleBrand(
-          context.options.primaryKeyMode,
-          type.className,
-          attribute,
-          context,
-          file,
-        );
+        return handleBrand(type.className, attribute, context, file);
       }
     }
   }
@@ -118,63 +104,53 @@ function optionalOnInsert(attribute: Attribute): string {
 }
 
 function handleBrand(
-  mode: PrimaryKeyMode,
   className: string,
   attribute: Attribute,
   context: PrintContext,
   file: FileContext,
 ): string {
-  switch (mode) {
-    case PrimaryKeyMode.StrictBrand:
-    case PrimaryKeyMode.LooseBrand:
+  switch (context.options.primaryKeyTypeMode) {
+    case 'strict_brand':
+    case 'loose_brand':
       return file.getImport(
         context.pushDeclaration(
-          {type: 'class', name: className},
-          `${className}_${attribute.attributeName}`,
-          ({isDefaultExport}) => [
-            `${isDefaultExport ? `` : `export `}type ${className}_${
-              attribute.attributeName
-            } = ${context.getTypeScriptType(
+          {
+            type: 'primary_key',
+            name: className,
+            columnName: attribute.attributeName,
+          },
+          (identifierName, file) => [
+            `type ${identifierName} = ${context.getTypeScriptType(
               attribute.typeID,
               file,
-            )} & ${getBrand(mode, className, attribute)}`,
+            )}${getBrand(context, className, attribute)}`,
           ],
         ),
       );
-    case PrimaryKeyMode.InlineLooseBrand:
-    case PrimaryKeyMode.InlineStrictBrand:
-      return `${context.getTypeScriptType(attribute.typeID, file)} & ${getBrand(
-        mode,
+    case 'inline_loose_brand':
+    case 'inline_strict_brand':
+    case 'inline_no_brand':
+      return `${context.getTypeScriptType(attribute.typeID, file)}${getBrand(
+        context,
         className,
         attribute,
       )}`;
-    case PrimaryKeyMode.InlineNoBrand:
-      return context.getTypeScriptType(attribute.typeID, file);
   }
 }
 
 function getBrand(
-  mode:
-    | PrimaryKeyMode.InlineLooseBrand
-    | PrimaryKeyMode.LooseBrand
-    | PrimaryKeyMode.InlineStrictBrand
-    | PrimaryKeyMode.StrictBrand,
+  context: PrintContext,
   className: string,
   attribute: Attribute,
 ): string {
-  switch (mode) {
-    case PrimaryKeyMode.InlineLooseBrand:
-    case PrimaryKeyMode.LooseBrand:
-      return `{readonly __brand?: '${className}_${attribute.attributeName}'}`;
-    case PrimaryKeyMode.InlineStrictBrand:
-    case PrimaryKeyMode.StrictBrand:
-      return `{readonly __brand: '${className}_${attribute.attributeName}'}`;
+  switch (context.options.primaryKeyTypeMode) {
+    case 'inline_loose_brand':
+    case 'loose_brand':
+      return ` & {readonly __brand?: '${className}_${attribute.attributeName}'}`;
+    case 'inline_strict_brand':
+    case 'strict_brand':
+      return ` & {readonly __brand: '${className}_${attribute.attributeName}'}`;
+    case 'inline_no_brand':
+      return '';
   }
 }
-// export enum PrimaryKeyMode {
-//   StrictBrand,
-//   LooseBrand,
-//   InlineStrictBrand,
-//   InlineLooseBrand,
-//   InlineNoBrand,
-// }

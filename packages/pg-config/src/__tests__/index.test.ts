@@ -11,6 +11,26 @@ test('get root config', () => {
       pgDb: 'test-db',
       pgUser: 'test-user',
     },
+    types: {
+      directory: '__generated__',
+      domainFileName: '_custom_types.ts',
+      domainTypeMode: 'loose_brand',
+      domainTypeName: '{{ TYPE_NAME | pascal-case }}',
+      enumFileName: '_enums.ts',
+      enumTypeMode: 'union_alias',
+      enumTypeName: '{{ TYPE_NAME | pascal-case }}',
+      primaryKeyFileName: '{{ TABLE_NAME }}.ts',
+      primaryKeyTypeMode: 'inline_loose_brand',
+      primaryKeyTypeName:
+        '{{ TABLE_NAME | pascal-case }}_{{ COLUMN_NAME | pascal-case }}',
+      schemaFileName: 'index.ts',
+      schemaTypeName: 'DatabaseSchema',
+      tableFileName: '{{ TABLE_NAME }}.ts',
+      tableInsertParametersFileName: '{{ TABLE_NAME }}.ts',
+      tableInsertParametersTypeName:
+        '{{ TABLE_NAME | pascal-case }}_InsertParameters',
+      tableTypeName: '{{ TABLE_NAME | pascal-case }}',
+    },
   });
 });
 
@@ -25,6 +45,26 @@ test('valid config', () => {
       pgDb: 'test-db',
       pgUser: 'test-user',
     },
+    types: {
+      directory: '__generated__',
+      domainFileName: '_custom_types.ts',
+      domainTypeMode: 'loose_brand',
+      domainTypeName: '{{ TYPE_NAME | pascal-case }}',
+      enumFileName: '_enums.ts',
+      enumTypeMode: 'union_alias',
+      enumTypeName: '{{ TYPE_NAME | pascal-case }}',
+      primaryKeyFileName: '{{ TABLE_NAME }}.ts',
+      primaryKeyTypeMode: 'inline_loose_brand',
+      primaryKeyTypeName:
+        '{{ TABLE_NAME | pascal-case }}_{{ COLUMN_NAME | pascal-case }}',
+      schemaFileName: 'index.ts',
+      schemaTypeName: 'DatabaseSchema',
+      tableFileName: '{{ TABLE_NAME }}.ts',
+      tableInsertParametersFileName: '{{ TABLE_NAME }}.ts',
+      tableInsertParametersTypeName:
+        '{{ TABLE_NAME | pascal-case }}_InsertParameters',
+      tableTypeName: '{{ TABLE_NAME | pascal-case }}',
+    },
   });
   expect(_testReadPgConfigSync(__dirname + '/fixtures/override.json')).toEqual({
     connectionStringEnvironmentVariable: 'PG_CONNECTION',
@@ -35,6 +75,32 @@ test('valid config', () => {
       image: 'postgres:10.6-alpine',
       pgDb: 'test-db',
       pgUser: 'test-user',
+    },
+    types: {
+      directory: '__generated__',
+      domainFileName: '_custom_types.ts',
+      domainTypeMode: 'loose_brand',
+      domainTypeName: '{{ TYPE_NAME | pascal-case }}',
+      enumFileName: '_enums.ts',
+      enumTypeMode: 'union_alias',
+      enumTypeName: '{{ TYPE_NAME | pascal-case }}',
+      primaryKeyFileName: '{{ TABLE_NAME }}.ts',
+      primaryKeyTypeMode: 'inline_loose_brand',
+      primaryKeyTypeName:
+        '{{ TABLE_NAME | pascal-case }}_{{ COLUMN_NAME | pascal-case }}',
+      schemaFileName: 'index.ts',
+      schemaTypeName: 'DatabaseSchema',
+      tableFileName: '{{ TABLE_NAME }}.ts',
+      tableInsertParametersFileName: '{{ TABLE_NAME }}.ts',
+      tableInsertParametersTypeName:
+        '{{ TABLE_NAME | pascal-case }}_InsertParameters',
+      tableTypeName: '{{ TABLE_NAME | pascal-case }}',
+      columnTypeOverrides: {
+        'my_table.my_column': "string & {__brand?: 'email'}",
+      },
+      typeOverrides: {
+        '114': 'unknown',
+      },
     },
   });
 });

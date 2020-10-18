@@ -17,4 +17,5 @@ function parseResult(result: cosmiconfig.CosmiconfigResult) {
   return validatePgConfig(result ? result.config : {});
 }
 
+export const DEFAULT_CONFIG = validatePgConfig({});
 export default PgConfig;

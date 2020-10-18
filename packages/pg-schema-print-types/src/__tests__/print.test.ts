@@ -1,9 +1,10 @@
+import {DEFAULT_CONFIG} from '@databases/pg-config/src';
 import getSchema, {connect, sql} from '@databases/pg-schema-introspect';
 import PrintContext from '../PrintContext';
 import getTypeScriptType from '../getTypeScriptType';
-import {DomainTypeMode} from '../printers/printDomainType';
-import {EnumTypeMode} from '../printers/printEnumType';
-import printClassDetails, {PrimaryKeyMode} from '../printers/printClassDetails';
+import PrintOptions from '../PrintOptions';
+import printSchema from '../printers/printSchema';
+import writeFiles from '../writeFiles';
 
 const db = connect();
 
@@ -38,94 +39,67 @@ test('getClasses', async () => {
     schemaName: 'print_types',
   });
 
-  const printContext = new PrintContext(getTypeScriptType, schema, {
-    domainTypeMode: DomainTypeMode.StrictBrand,
-    enumTypeMode: EnumTypeMode.UnionAlias,
-    primaryKeyMode: PrimaryKeyMode.StrictBrand,
-    resolveFilename(file) {
-      return `${file.name}.ts`;
-    },
-  });
-
-  for (const cls of schema.classes) {
-    printClassDetails(cls, printContext);
-  }
+  const printContext = new PrintContext(
+    getTypeScriptType,
+    schema,
+    new PrintOptions(DEFAULT_CONFIG.types),
+  );
+  printSchema(schema, printContext);
+  await writeFiles(printContext, __dirname);
 
   expect(printContext.getFiles()).toMatchInlineSnapshot(`
     Array [
       Object {
-        "content": "import {users_DatabaseRecord} from '../users'
+        "content": "import Photos, {Photos_InsertParameters} from './photos'
+    import Users, {Users_InsertParameters} from './users'
 
-    export interface photos_DatabaseRecord {
+    interface DatabaseSchema {
+      photos: {record: Photos, insert: Photos_InsertParameters};
+      users: {record: Users, insert: Users_InsertParameters};
+    }
+    export default DatabaseSchema;
+    ",
+        "filename": "index.ts",
+      },
+      Object {
+        "content": "import Users from './users'
+
+    interface Photos {
       caption: string | null
       cdn_url: string
-      id: photos_id
-      owner_user_id: users_DatabaseRecord['id']
+      id: number & {readonly __brand?: 'photos_id'}
+      owner_user_id: Users['id']
     }
+    export default Photos;
 
-    export type photos_id = number & {readonly __brand: 'photos_id'}
-
-    export interface photos_InsertParameters {
+    interface Photos_InsertParameters {
       caption?: string | null
       cdn_url: string
-      id?: photos_id
-      owner_user_id: users_DatabaseRecord['id']
+      id?: number & {readonly __brand?: 'photos_id'}
+      owner_user_id: Users['id']
     }
+    export {Photos_InsertParameters}
     ",
         "filename": "photos.ts",
       },
       Object {
-        "content": "export interface users_DatabaseRecord {
+        "content": "interface Users {
       age: number | null
       bio: string | null
-      id: users_id
+      id: number & {readonly __brand?: 'users_id'}
       screen_name: string
     }
+    export default Users;
 
-    export type users_id = number & {readonly __brand: 'users_id'}
-
-    export interface users_InsertParameters {
+    interface Users_InsertParameters {
       age?: number | null
       bio?: string | null
-      id?: users_id
+      id?: number & {readonly __brand?: 'users_id'}
       screen_name: string
     }
+    export {Users_InsertParameters}
     ",
         "filename": "users.ts",
-      },
-      Object {
-        "content": "export interface view_a_DatabaseRecord {
-      age: number | null
-      bio: string | null
-      id: number | null
-      screen_name: string | null
-    }
-
-    export interface view_a_InsertParameters {
-      age?: number | null
-      bio?: string | null
-      id?: number | null
-      screen_name?: string | null
-    }
-    ",
-        "filename": "view_a.ts",
-      },
-      Object {
-        "content": "export interface view_b_DatabaseRecord {
-      caption: string | null
-      cdn_url: string | null
-      id: number | null
-      owner_user_id: number | null
-    }
-
-    export interface view_b_InsertParameters {
-      caption?: string | null
-      cdn_url?: string | null
-      id?: number | null
-      owner_user_id?: number | null
-    }
-    ",
-        "filename": "view_b.ts",
       },
     ]
   `);

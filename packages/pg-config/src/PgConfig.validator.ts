@@ -90,6 +90,133 @@ export const PgConfigSchema = {
       ],
       type: 'object',
     },
+    TypesConfig: {
+      defaultProperties: [],
+      properties: {
+        directory: {
+          default: '__generated__',
+          description:
+            'The directory (relative to this config) to put the generated code in',
+          type: 'string',
+        },
+        domainFileName: {
+          default: '_custom_types.ts',
+          description:
+            'Where should generated types for domains be put (ignored for domainTypeMode="inline")',
+          type: 'string',
+        },
+        domainTypeMode: {
+          default: 'loose_brand',
+          description:
+            'What should be generated for custom types with constraints?',
+          enum: ['alias', 'inline', 'loose_brand', 'strict_brand'],
+          type: 'string',
+        },
+        domainTypeName: {
+          default: '{{ TYPE_NAME | pascal-case }}',
+          description:
+            'What should custom types be called (ignored for domainTypeMode="inline")',
+          type: 'string',
+        },
+        enumFileName: {
+          default: '_enums.ts',
+          description:
+            'Where should generated types for enums be put (ignored for enumTypeMode="inline")',
+          type: 'string',
+        },
+        enumTypeMode: {
+          default: 'union_alias',
+          description:
+            'How should Postgres enums be represented in TypeScript?',
+          enum: ['enum', 'inline', 'union_alias', 'union_alias_with_object'],
+          type: 'string',
+        },
+        enumTypeName: {
+          default: '{{ TYPE_NAME | pascal-case }}',
+          description:
+            'What should enums be called (ignored for enumTypeMode="inline")',
+          type: 'string',
+        },
+        primaryKeyFileName: {
+          default: '{{ TABLE_NAME }}.ts',
+          description:
+            'Where should generated types for primary keys be put (ignored for primaryKeyMode="inline")',
+          type: 'string',
+        },
+        primaryKeyTypeMode: {
+          default: 'inline_loose_brand',
+          description: 'Do you want to use branded types for primary keys?',
+          enum: [
+            'inline_loose_brand',
+            'inline_no_brand',
+            'inline_strict_brand',
+            'loose_brand',
+            'strict_brand',
+          ],
+          type: 'string',
+        },
+        primaryKeyTypeName: {
+          default:
+            '{{ TABLE_NAME | pascal-case }}_{{ COLUMN_NAME | pascal-case }}',
+          description:
+            'What should types for primary keys be called (ignored for primaryKeyMode="inline_*")',
+          type: 'string',
+        },
+        schemaFileName: {
+          default: 'index.ts',
+          description:
+            'What filename do you want to use for the main generated "schema" type',
+          type: 'string',
+        },
+        schemaTypeName: {
+          default: 'DatabaseSchema',
+          description: 'What should the main generated "schema" type be called',
+          type: 'string',
+        },
+        tableFileName: {
+          default: '{{ TABLE_NAME }}.ts',
+          description: 'What filename do you want to use for tables',
+          type: 'string',
+        },
+        tableInsertParametersFileName: {
+          default: '{{ TABLE_NAME }}.ts',
+          description:
+            'What filename do you want to use for tables insert parameters',
+          type: 'string',
+        },
+        tableInsertParametersTypeName: {
+          default: '{{ TABLE_NAME | pascal-case }}_InsertParameters',
+          description:
+            'What should TypeScript types for table insert parameters be called',
+          type: 'string',
+        },
+        tableTypeName: {
+          default: '{{ TABLE_NAME | pascal-case }}',
+          description:
+            'What should TypeScript types for table records be called',
+          type: 'string',
+        },
+      },
+      required: [
+        'directory',
+        'domainFileName',
+        'domainTypeMode',
+        'domainTypeName',
+        'enumFileName',
+        'enumTypeMode',
+        'enumTypeName',
+        'primaryKeyFileName',
+        'primaryKeyTypeMode',
+        'primaryKeyTypeName',
+        'schemaFileName',
+        'schemaTypeName',
+        'tableFileName',
+        'tableInsertParametersFileName',
+        'tableInsertParametersTypeName',
+        'tableTypeName',
+      ],
+      type: 'object',
+    },
   },
   properties: {
     connectionStringEnvironmentVariable: {
@@ -103,8 +230,13 @@ export const PgConfigSchema = {
       default: {},
       description: 'Config for pg-test',
     },
+    types: {
+      $ref: '#/definitions/TypesConfig',
+      default: {},
+      description: 'Config for pg-schema-print-types',
+    },
   },
-  required: ['connectionStringEnvironmentVariable', 'test'],
+  required: ['connectionStringEnvironmentVariable', 'test', 'types'],
   type: 'object',
 };
 export type ValidateFunction<T> = ((data: unknown) => data is T) &
