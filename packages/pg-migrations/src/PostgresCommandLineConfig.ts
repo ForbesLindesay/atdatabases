@@ -6,8 +6,10 @@ import {
   CommandLineInterfaceConfig,
   parameters,
 } from '@databases/migrations-base';
-import {Migration, MigrationsConfig} from './PostgresDatabaseEngine';
-import {PostgresDatabaseEngine} from '.';
+import PostgresDatabaseEngine, {
+  Migration,
+  MigrationsConfig,
+} from './PostgresDatabaseEngine';
 import chalk from 'chalk';
 
 const {connectionStringEnvironmentVariable} = getPgConfigSync();
