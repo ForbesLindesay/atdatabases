@@ -9,17 +9,17 @@
 // tslint:disable
 
 interface Users {
-  age: (number) | null
-  bio: (string) | null
-  id: number & {readonly __brand?: 'users_id'}
-  screen_name: string
+  age: number | null;
+  bio: string | null;
+  id: number & {readonly __brand?: 'users_id'};
+  screen_name: string;
 }
 export default Users;
 
 interface Users_InsertParameters {
-  age?: (number) | null
-  bio?: (string) | null
-  id?: number & {readonly __brand?: 'users_id'}
-  screen_name: string
+  age?: number | null;
+  bio?: string | null;
+  id?: number & {readonly __brand?: 'users_id'};
+  screen_name: string;
 }
-export {Users_InsertParameters}
+export {Users_InsertParameters};

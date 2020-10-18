@@ -8,22 +8,22 @@
 // eslint:disable
 // tslint:disable
 
-import Users from './users'
+import Users from './users';
 
 interface Photos {
-  caption: (string) | null
-  cdn_url: string & {__brand?: "url"}
-  id: number & {readonly __brand?: 'photos_id'}
-  metadata: unknown
-  owner_user_id: Users['id']
+  caption: string | null;
+  cdn_url: string & {__brand?: 'url'};
+  id: number & {readonly __brand?: 'photos_id'};
+  metadata: unknown;
+  owner_user_id: Users['id'];
 }
 export default Photos;
 
 interface Photos_InsertParameters {
-  caption?: (string) | null
-  cdn_url: string & {__brand?: "url"}
-  id?: number & {readonly __brand?: 'photos_id'}
-  metadata: unknown
-  owner_user_id: Users['id']
+  caption?: string | null;
+  cdn_url: string & {__brand?: 'url'};
+  id?: number & {readonly __brand?: 'photos_id'};
+  metadata: unknown;
+  owner_user_id: Users['id'];
 }
-export {Photos_InsertParameters}
+export {Photos_InsertParameters};

@@ -8,11 +8,11 @@
 // eslint:disable
 // tslint:disable
 
-import Photos, {Photos_InsertParameters} from './photos'
-import Users, {Users_InsertParameters} from './users'
+import Photos, {Photos_InsertParameters} from './photos';
+import Users, {Users_InsertParameters} from './users';
 
 interface DatabaseSchema {
-  photos: {record: Photos, insert: Photos_InsertParameters};
-  users: {record: Users, insert: Users_InsertParameters};
+  photos: {record: Photos; insert: Photos_InsertParameters};
+  users: {record: Users; insert: Users_InsertParameters};
 }
 export default DatabaseSchema;
