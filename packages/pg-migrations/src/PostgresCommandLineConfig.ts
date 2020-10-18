@@ -74,7 +74,9 @@ const PostgresCommandLineConfig: CommandLineInterfaceConfig<
       );
       console.error('');
       console.error(
-        ` - The "migrationsDirectory" config value using @databases/pg-config`,
+        ` - The ${chalk.cyan(
+          'migrationsDirectory',
+        )} config value using @databases/pg-config`,
       );
       console.error(
         ` - The ${chalk.cyan(
@@ -121,7 +123,7 @@ const PostgresCommandLineConfig: CommandLineInterfaceConfig<
     if (!connection) {
       process.exit(1);
     }
-    return new PostgresDatabaseEngine(connect(database, {poolSize: 1}), {
+    return new PostgresDatabaseEngine(connection, {
       versionTableName,
       appliedMigrationsTableName,
       migrationsDirectory,

@@ -7,15 +7,12 @@ exports[`apply - after already appying: stdout 1`] = `
 "
 `;
 
-exports[`apply - directory that does not exist: stderr 1`] = `
-"[36m/Users/fplindesay/Documents/GitHub/atdatabases/packages/pg-migrations/src/__tests__/this-directory-does-not-exist[39m is not a valid directory
-"
-`;
-
-exports[`apply - directory that does not exist: stdout 1`] = `""`;
-
 exports[`apply - missing directory: stderr 1`] = `
-"You must specify the directory that contains your migrations
+"You must supply a directory path for your migrations. You can supply it as either:
+
+ - The [36mmigrationsDirectory[39m config value using @databases/pg-config
+ - The [36m--directory[39m paramter when calling @databases/pg-migrations
+
 "
 `;
 
@@ -57,10 +54,11 @@ exports[`help apply: stderr 1`] = `""`;
 exports[`help apply: stdout 1`] = `
 "[36mApply Migrations[39m
 
-Usage: pg-migrations apply [options] <MIGRATIONS_DIRECTORY>
+Usage: pg-migrations apply [options]
 
 Parameters:
--c --database         A connection string for the database you want to connect to.
+-c --database         A connection string for the database you want to connect to (can also be supplied as the environment variable PG_URL).
+-D --directory        The directory containing migrations (can also be supplied via the \\"migrationsDirectory\\" config option).
    --version-table    A table to store the version of @databases used. Defaults to \\"atdatabases_migrations_version\\".
    --migrations-table A table to store the applied migrations. Defaults to \\"atdatabases_migrations_applied\\".
 -e --ignore-error     Error code to ignore (can use multiple times to ignore multiple errors)

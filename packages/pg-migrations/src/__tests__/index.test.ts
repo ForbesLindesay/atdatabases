@@ -42,24 +42,6 @@ test('help apply', async () => {
   expect(status).toBe(0);
 });
 
-test('apply - directory that does not exist', async () => {
-  const {status, stderr, stdout} = spawnSync(
-    'node',
-    [
-      '--require',
-      'sucrase/register',
-      'cli',
-      'apply',
-      `-D`,
-      `${__dirname}/this-directory-does-not-exist`,
-    ],
-    {cwd: `${__dirname}/..`, env: {...process.env, CI: 'true'}},
-  );
-  expect(stdout?.toString('utf8')).toMatchSnapshot('stdout');
-  expect(stderr?.toString('utf8')).toMatchSnapshot('stderr');
-  expect(status).toBe(1);
-});
-
 test('apply - missing directory', async () => {
   const {status, stderr, stdout} = spawnSync(
     'node',
