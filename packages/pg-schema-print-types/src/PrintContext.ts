@@ -5,7 +5,7 @@ import FileName from './FileName';
 import TypeID, {DEFAULT_EXPORT_PRIORITY} from './TypeID';
 import DefaultTypeScriptMapping from './DefaultTypeScriptMapping';
 import IdentifierName from './IdentifierName';
-import PgDataTypeID from '@databases/pg-data-type-id/src';
+import PgDataTypeID from '@databases/pg-data-type-id';
 
 export interface FileContext {
   // asExport: (declaration: string[]) => string[];
