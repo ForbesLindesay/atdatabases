@@ -1,4 +1,4 @@
-import {getPgConfigSync, _testReadPgConfigSync} from '..';
+import {getPgConfigSync, readPgConfigSync} from '..';
 
 test('get root config', () => {
   expect(getPgConfigSync()).toEqual({
@@ -37,7 +37,7 @@ test('get root config', () => {
 });
 
 test('valid config', () => {
-  expect(_testReadPgConfigSync(__dirname + '/fixtures/empty.json')).toEqual({
+  expect(readPgConfigSync(__dirname + '/fixtures/empty.json')).toEqual({
     connectionStringEnvironmentVariable: 'DATABASE_URL',
     test: {
       connectTimeoutSeconds: 20,
@@ -70,7 +70,7 @@ test('valid config', () => {
       typeOverrides: {},
     },
   });
-  expect(_testReadPgConfigSync(__dirname + '/fixtures/override.json')).toEqual({
+  expect(readPgConfigSync(__dirname + '/fixtures/override.json')).toEqual({
     connectionStringEnvironmentVariable: 'PG_CONNECTION',
     test: {
       connectTimeoutSeconds: 20,
@@ -111,7 +111,7 @@ test('valid config', () => {
 
 test('invalid config', () => {
   expect(() =>
-    _testReadPgConfigSync(__dirname + '/fixtures/invalid.json'),
+    readPgConfigSync(__dirname + '/fixtures/invalid.json'),
   ).toThrowError(
     /PgConfig.connectionStringEnvironmentVariable should be string/,
   );

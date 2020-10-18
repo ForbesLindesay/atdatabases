@@ -1,4 +1,4 @@
-import connect, {Connection, sql} from '@databases/pg';
+import connect, {Connection, ConnectionPool, sql} from '@databases/pg';
 import ClassKind from './enums/ClassKind';
 import getAttributes, {Attribute} from './getAttributes';
 import getClasses, {Class} from './getClasses';
@@ -7,7 +7,7 @@ import getSchemaName from './getSchemaName';
 import getSearchPath from './getSearchPath';
 import getTypes, {Type} from './getTypes';
 
-export {connect, Connection, sql};
+export {connect, Connection, ConnectionPool, sql};
 export interface SchemaQuery {
   schemaID?: number;
   schemaName?: string;

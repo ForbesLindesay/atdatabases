@@ -1,11 +1,10 @@
-import {DEFAULT_CONFIG} from '@databases/pg-config/src';
+import PgDataTypeID from '@databases/pg-data-type-id';
 import getSchema, {connect, sql} from '@databases/pg-schema-introspect';
 import PrintContext from '../PrintContext';
 import getTypeScriptType from '../getTypeScriptType';
 import PrintOptions from '../PrintOptions';
 import printSchema from '../printers/printSchema';
 import writeFiles from '../writeFiles';
-import PgDataTypeID from '@databases/pg-data-type-id/src';
 
 const db = connect();
 
@@ -45,7 +44,6 @@ test('getClasses', async () => {
     getTypeScriptType,
     schema,
     new PrintOptions({
-      ...DEFAULT_CONFIG.types,
       columnTypeOverrides: {
         'photos.cdn_url': 'string & {__brand?: "url"}',
       },
@@ -55,7 +53,7 @@ test('getClasses', async () => {
     }),
   );
   printSchema(schema, printContext);
-  await writeFiles(printContext, __dirname);
+  await writeFiles(printContext, `${__dirname}/__generated__`);
 
   expect(printContext.getFiles()).toMatchInlineSnapshot(`
     Array [

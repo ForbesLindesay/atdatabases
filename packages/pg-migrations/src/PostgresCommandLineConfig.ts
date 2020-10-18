@@ -2,6 +2,7 @@ import connect from '@databases/pg';
 import {getPgConfigSync} from '@databases/pg-config';
 import isInteractive = require('is-interactive');
 import * as interrogator from 'interrogator';
+import chalk from 'chalk';
 import {
   CommandLineInterfaceConfig,
   parameters,
@@ -10,7 +11,6 @@ import PostgresDatabaseEngine, {
   Migration,
   MigrationsConfig,
 } from './PostgresDatabaseEngine';
-import chalk from 'chalk';
 
 const {connectionStringEnvironmentVariable} = getPgConfigSync();
 
