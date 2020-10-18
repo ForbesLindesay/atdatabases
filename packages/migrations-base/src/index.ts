@@ -24,6 +24,7 @@ export {default as markMigrationAsApplied} from './commands/markMigrationAsAppli
 export {default as markMigrationAsUnapplied} from './commands/markMigrationAsUnapplied';
 export {default as restoreMigrationFromDatabase} from './commands/restoreMigrationFromDatabase';
 
+export {default as getPublicApi} from './getPublicApi';
 export {
   default as getCommandLineInterface,
   commands,

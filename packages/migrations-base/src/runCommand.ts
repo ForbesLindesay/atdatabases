@@ -19,6 +19,17 @@ export type Command<TResult, TError> = (
   ctx: MigrationsContext,
 ) => Result<TResult, TError>;
 
+export interface RunCommandOptions<TError> {
+  dryRun?: boolean;
+  handleError?: (
+    error: TError,
+    ctx: MigrationsContext,
+  ) => Promise<Result<void, TError>>;
+  beforeOperation?: (
+    operation: Operation,
+  ) => Promise<void | 'stop' | 'rollback'>;
+  afterOperation?: (operation: Operation) => Promise<void>;
+}
 export default async function runCommand<TMigration, TResult, TError>(
   engine: DatabaseEngine<TMigration>,
   directory: IDirectoryContext,
