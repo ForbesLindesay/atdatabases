@@ -1,5 +1,5 @@
 {
-  "name": "@databases/pg-schema",
+  "name": "@databases/pg-schema-introspect",
   "private": true,
   "version": "0.0.0",
   "description": "",
@@ -14,7 +14,7 @@
     "prettier": "^2.0.5"
   },
   "scripts": {},
-  "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/pg-schema",
+  "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/pg-schema-introspect",
   "license": "MIT",
   "publishConfig": {
     "access": "public"

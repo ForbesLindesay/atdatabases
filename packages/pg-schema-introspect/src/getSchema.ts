@@ -1,12 +1,13 @@
-import {Connection} from '@databases/pg';
+import connect, {Connection, sql} from '@databases/pg';
 import ClassKind from './enums/ClassKind';
 import getAttributes, {Attribute} from './getAttributes';
 import getClasses, {Class} from './getClasses';
 import getConstraints, {Constraint} from './getConstraints';
 import getSchemaName from './getSchemaName';
 import getSearchPath from './getSearchPath';
-import getTypes from './getTypes';
+import getTypes, {Type} from './getTypes';
 
+export {connect, Connection, sql};
 export interface SchemaQuery {
   schemaID?: number;
   schemaName?: string;
@@ -17,10 +18,14 @@ export interface ClassDetails extends Class {
   constraints: Constraint[];
 }
 
+export interface Schema {
+  types: Type[];
+  classes: ClassDetails[];
+}
 export default async function getSchema(
   connection: Connection,
   query: SchemaQuery = {},
-) {
+): Promise<Schema> {
   const schemaName = query.schemaName
     ? query.schemaName
     : query.schemaID
