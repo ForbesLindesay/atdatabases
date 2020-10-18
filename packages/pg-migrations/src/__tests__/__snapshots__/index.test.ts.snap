@@ -7,6 +7,13 @@ exports[`apply - after already appying: stdout 1`] = `
 "
 `;
 
+exports[`apply - directory that does not exist: stderr 1`] = `
+"[36m/Users/fplindesay/Documents/GitHub/atdatabases/packages/pg-migrations/src/__tests__/this-directory-does-not-exist[39m is not a valid directory
+"
+`;
+
+exports[`apply - directory that does not exist: stdout 1`] = `""`;
+
 exports[`apply - missing directory: stderr 1`] = `
 "You must specify the directory that contains your migrations
 "

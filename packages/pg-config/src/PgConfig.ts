@@ -200,6 +200,11 @@ interface PgConfig {
   connectionStringEnvironmentVariable: string;
 
   /**
+   * The directory containing migrations (when using @databases/pg-migrations)
+   */
+  migrationsDirectory?: string;
+
+  /**
    * Config for pg-test
    *
    * @default {}

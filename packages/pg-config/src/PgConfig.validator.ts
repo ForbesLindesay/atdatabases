@@ -247,6 +247,11 @@ export const PgConfigSchema = {
         'The environment variable containing the\nconnection string to the postgres database',
       type: 'string',
     },
+    migrationsDirectory: {
+      description:
+        'The directory containing migrations (when using @databases/pg-migrations)',
+      type: 'string',
+    },
     test: {
       $ref: '#/definitions/TestConfig',
       default: {},

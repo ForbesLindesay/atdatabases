@@ -4,6 +4,7 @@ import {
   DatabaseVersionError,
   MigrationWithNoValidExport,
 } from './MigrationError';
+import {IDirectoryContext} from '../DirectoryContext';
 
 export interface DatabaseEngineTransaction<TMigration> {
   getVersion(): Promise<string>;
@@ -38,6 +39,8 @@ export default interface DatabaseEngine<TMigration> extends DatabaseEngineBase {
   loadMigration(
     migrationFileName: string,
   ): Result<TMigration, MigrationWithNoValidExport>;
+
+  directory: IDirectoryContext<TMigration>;
 
   dispose(): Promise<void>;
 }

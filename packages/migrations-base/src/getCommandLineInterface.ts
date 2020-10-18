@@ -1,5 +1,3 @@
-import {statSync} from 'fs';
-import {resolve} from 'path';
 import {
   parse,
   startChain,
@@ -20,7 +18,6 @@ import markMigrationAsUnapplied from './commands/markMigrationAsUnapplied';
 import restoreMigrationFromDatabase from './commands/restoreMigrationFromDatabase';
 import printError from './methods/printError';
 import DatabaseEngine from './types/DatabaseEngine';
-import DirectoryContext from './DirectoryContext';
 
 const GLOBAL_PARAMETERS: {
   short?: string;
@@ -85,54 +82,38 @@ function prepareCommand(
         startChain()
           .addParam(parameterParser)
           .addParam(config.parameterParser)
-          .addParam(param.flag(['-d', '--dry-run'], 'dryRun'))
-          .addParam(param.positionalString('migrationsDirectory')),
+          .addParam(param.flag(['-d', '--dry-run'], 'dryRun')),
         args,
       ).extract();
-      if (!parsedArgs.migrationsDirectory) {
-        console.error(
-          'You must specify the directory that contains your migrations',
-        );
-        process.exit(1);
-      }
-      const directory = new DirectoryContext(
-        assertIsDirectory(parsedArgs.migrationsDirectory),
-      );
       const engine = await config.getEngine(parsedArgs);
       try {
         let appliedMigrationsCount = 0;
-        const runResult = await runCommand(
-          engine,
-          directory,
-          command,
-          parsedArgs,
-          {
-            dryRun: parsedArgs.dryRun || false,
-            handleError,
-            async beforeOperation(op) {
-              if (op.kind === 'apply') {
-                console.info(
-                  `${chalk.cyan(`Applying`)} ${op.value.name}${
-                    parsedArgs.dryRun ? chalk.cyan(` (dry run only)`) : ``
-                  }`,
-                );
-                // TODO: interactive mode could stop for confirmation?
-              }
-            },
-            async afterOperation(op) {
-              if (op.kind === 'apply') {
-                appliedMigrationsCount++;
-                console.info(
-                  `${chalk.green(`Applied`)} ${op.value.name}${
-                    parsedArgs.dryRun
-                      ? chalk.cyan(` (dry run only, not actually applied)`)
-                      : ``
-                  }`,
-                );
-              }
-            },
+        const runResult = await runCommand(engine, command, parsedArgs, {
+          dryRun: parsedArgs.dryRun || false,
+          handleError,
+          async beforeOperation(op) {
+            if (op.kind === 'apply') {
+              console.info(
+                `${chalk.cyan(`Applying`)} ${op.value.name}${
+                  parsedArgs.dryRun ? chalk.cyan(` (dry run only)`) : ``
+                }`,
+              );
+              // TODO: interactive mode could stop for confirmation?
+            }
           },
-        );
+          async afterOperation(op) {
+            if (op.kind === 'apply') {
+              appliedMigrationsCount++;
+              console.info(
+                `${chalk.green(`Applied`)} ${op.value.name}${
+                  parsedArgs.dryRun
+                    ? chalk.cyan(` (dry run only, not actually applied)`)
+                    : ``
+                }`,
+              );
+            }
+          },
+        });
         if (!runResult.ok) {
           printError(runResult.reason, engine);
           if (
@@ -177,9 +158,7 @@ export const commands = {
     (config) => {
       console.info(chalk.cyan('Apply Migrations'));
       console.info('');
-      console.info(
-        `Usage: ${config.cliName} apply [options] <MIGRATIONS_DIRECTORY>`,
-      );
+      console.info(`Usage: ${config.cliName} apply [options]`);
       console.info('');
       console.info('Parameters:');
       printParameters([
@@ -220,7 +199,7 @@ export const commands = {
       console.info(chalk.cyan('Permanently ignore an error for a migration'));
       console.info('');
       console.info(
-        `Usage: ${config.cliName} ignore-error -e ERROR_CODE -m MIGRATION_INDEX <MIGRATIONS_DIRECTORY>`,
+        `Usage: ${config.cliName} ignore-error -e ERROR_CODE -m MIGRATION_INDEX`,
       );
       console.info('');
       console.info('Parameters:');
@@ -266,9 +245,7 @@ export const commands = {
         chalk.cyan('Mark migration as applied (without applying it)'),
       );
       console.info('');
-      console.info(
-        `Usage: ${config.cliName} mark-applied -m MIGRATION_INDEX <MIGRATIONS_DIRECTORY>`,
-      );
+      console.info(`Usage: ${config.cliName} mark-applied -m MIGRATION_INDEX`);
       console.info('');
       console.info('Parameters:');
       printParameters([
@@ -294,7 +271,7 @@ export const commands = {
       );
       console.info('');
       console.info(
-        `Usage: ${config.cliName} mark-unapplied -m MIGRATION_INDEX <MIGRATIONS_DIRECTORY>`,
+        `Usage: ${config.cliName} mark-unapplied -m MIGRATION_INDEX`,
       );
       console.info('');
       console.info('Parameters:');
@@ -321,7 +298,7 @@ export const commands = {
       );
       console.info('');
       console.info(
-        `Usage: ${config.cliName} restore-from-db -m MIGRATION_INDEX <MIGRATIONS_DIRECTORY>`,
+        `Usage: ${config.cliName} restore-from-db -m MIGRATION_INDEX`,
       );
       console.info('');
       console.info('Parameters:');
@@ -414,15 +391,4 @@ export default function getCommandLineInterface<TMigration, TParameters>(
       process.exit(1);
     }
   };
-}
-
-function assertIsDirectory(path: string): string {
-  try {
-    if (statSync(path).isDirectory()) return resolve(path);
-  } catch (ex) {
-    // treat errors the same as non-directories
-  }
-
-  console.error(`${chalk.cyan(path)} is not a valid directory`);
-  process.exit(1);
 }
