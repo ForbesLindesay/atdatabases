@@ -7,14 +7,16 @@
   "dependencies": {
     "@databases/pg-config": "^0.0.0",
     "@databases/pg-data-type-id": "^0.0.0",
-    "@types/mkdirp": "^1.0.1",
     "camelcase": "^6.1.0",
     "mkdirp": "^1.0.4",
+    "pluralize": "^8.0.0",
     "uppercamelcase": "^3.0.0"
   },
   "devDependencies": {
     "@databases/pg-schema-introspect": "^0.0.0",
     "@types/camelcase": "^5.2.0",
+    "@types/mkdirp": "^1.0.1",
+    "@types/pluralize": "^0.0.29",
     "@types/uppercamelcase": "^3.0.0"
   },
   "peerDependencies": {

@@ -44,6 +44,7 @@ test('getClasses', async () => {
     getTypeScriptType,
     schema,
     new PrintOptions({
+      tableTypeName: '{{ TABLE_NAME | singular | pascal-case }}',
       columnTypeOverrides: {
         'photos.cdn_url': 'string & {__brand?: "url"}',
       },
@@ -58,48 +59,48 @@ test('getClasses', async () => {
   expect(printContext.getFiles()).toMatchInlineSnapshot(`
     Array [
       Object {
-        "content": "import Photos, {Photos_InsertParameters} from './photos'
-    import Users, {Users_InsertParameters} from './users'
+        "content": "import Photo, {Photos_InsertParameters} from './photos'
+    import User, {Users_InsertParameters} from './users'
 
     interface DatabaseSchema {
-      photos: {record: Photos, insert: Photos_InsertParameters};
-      users: {record: Users, insert: Users_InsertParameters};
+      photos: {record: Photo, insert: Photos_InsertParameters};
+      users: {record: User, insert: Users_InsertParameters};
     }
     export default DatabaseSchema;
     ",
         "filename": "index.ts",
       },
       Object {
-        "content": "import Users from './users'
+        "content": "import User from './users'
 
-    interface Photos {
+    interface Photo {
       caption: (string) | null
       cdn_url: string & {__brand?: \\"url\\"}
       id: number & {readonly __brand?: 'photos_id'}
       metadata: unknown
-      owner_user_id: Users['id']
+      owner_user_id: User['id']
     }
-    export default Photos;
+    export default Photo;
 
     interface Photos_InsertParameters {
       caption?: (string) | null
       cdn_url: string & {__brand?: \\"url\\"}
       id?: number & {readonly __brand?: 'photos_id'}
       metadata: unknown
-      owner_user_id: Users['id']
+      owner_user_id: User['id']
     }
     export {Photos_InsertParameters}
     ",
         "filename": "photos.ts",
       },
       Object {
-        "content": "interface Users {
+        "content": "interface User {
       age: (number) | null
       bio: (string) | null
       id: number & {readonly __brand?: 'users_id'}
       screen_name: string
     }
-    export default Users;
+    export default User;
 
     interface Users_InsertParameters {
       age?: (number) | null

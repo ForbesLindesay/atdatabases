@@ -1,6 +1,7 @@
 import PgConfig, {DEFAULT_CONFIG} from '@databases/pg-config';
 import camelcase = require('camelcase');
 import pascalcase = require('uppercamelcase');
+import {plural, singular} from 'pluralize';
 import FileName from './FileName';
 import TypeID from './TypeID';
 import IdentifierName from './IdentifierName';
@@ -30,6 +31,10 @@ function parseTemplate(str: string) {
               return pascalcase(value);
             case 'camel-case':
               return camelcase(value);
+            case 'plural':
+              return plural(value);
+            case 'singular':
+              return singular(value);
             default:
               throw new Error(
                 `Unrecognized filter in type generation config, "${filter}" in: ${str}`,
