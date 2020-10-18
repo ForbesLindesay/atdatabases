@@ -36,7 +36,7 @@ export default async function getClasses(
     ${
       conditions.length ? sql`WHERE ${sql.join(conditions, sql` AND `)}` : sql``
     }
-    ORDER BY cls.relname;
+    ORDER BY ns.nspname ASC, cls.relname ASC;
   `);
 
   return tables;

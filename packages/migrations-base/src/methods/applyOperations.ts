@@ -2,7 +2,6 @@ import assertNever from 'assert-never';
 import deepEqual = require('deep-equal');
 import MigrationsContext, {sortMigrations} from '../MigrationContext';
 import DatabaseEngine from '../types/DatabaseEngine';
-import {IDirectoryContext} from '../DirectoryContext';
 import Result from '../types/Result';
 import {
   MigrationWithNoValidExport,
@@ -13,7 +12,6 @@ import Operation from '../types/Operation';
 export default async function applyOperations<TMigration>(
   ctx: MigrationsContext,
   engine: DatabaseEngine<TMigration>,
-  directory: IDirectoryContext,
   logging: {
     beforeOperation: (
       operation: Operation,
@@ -49,9 +47,10 @@ export default async function applyOperations<TMigration>(
         }
         switch (op.kind) {
           case 'apply':
-            const migrationLoadResult = engine.loadMigration(
-              directory.resolve(op.value.name),
+            const migrationLoadResult = engine.directory.loadMigration(
+              op.value.name,
             );
+
             if (!migrationLoadResult.ok) {
               await rollback();
               return migrationLoadResult;
@@ -71,7 +70,7 @@ export default async function applyOperations<TMigration>(
           case 'write': {
             let exists = false;
             try {
-              await directory.read(op.value.name);
+              await engine.directory.read(op.value.name);
               exists = true;
             } catch (ex) {
               exists = false;
@@ -79,23 +78,26 @@ export default async function applyOperations<TMigration>(
             if (exists) {
               throw new Error('refusing to overwrite existing file');
             }
-            await directory.write(op.value.name, op.value.script);
+            await engine.directory.write(op.value.name, op.value.script);
             rolllbackSteps.push(async () => {
-              await directory.delete(op.value.name);
+              await engine.directory.delete(op.value.name);
             });
             break;
           }
           case 'rename':
-            await directory.rename(op.value.from.name, op.value.to.name);
+            await engine.directory.rename(op.value.from.name, op.value.to.name);
             rolllbackSteps.push(async () => {
-              await directory.rename(op.value.to.name, op.value.from.name);
+              await engine.directory.rename(
+                op.value.to.name,
+                op.value.from.name,
+              );
             });
             break;
           case 'delete': {
-            const originalSource = await directory.read(op.value.name);
-            await directory.delete(op.value.name);
+            const originalSource = await engine.directory.read(op.value.name);
+            await engine.directory.delete(op.value.name);
             rolllbackSteps.push(async () => {
-              await directory.write(op.value.name, originalSource);
+              await engine.directory.write(op.value.name, originalSource);
             });
             break;
           }

@@ -6,10 +6,13 @@ import {
   Result,
   DatabaseVersionError,
   MigrationWithNoValidExport,
+  DirectoryContext,
+  IDirectoryContext,
 } from '@databases/migrations-base';
 import {Connection, ConnectionPool} from '@databases/pg';
 
 export interface MigrationsConfig {
+  migrationsDirectory: string;
   /**
    * @default "atdatabases_migrations_version"
    */
@@ -25,9 +28,35 @@ export default class PostgresDatabaseEngine
   implements DatabaseEngine<Migration> {
   private readonly _connection: ConnectionPool;
   private readonly _config: MigrationsConfig;
+  public readonly directory: IDirectoryContext<Migration>;
   constructor(connection: ConnectionPool, config: MigrationsConfig) {
     this._connection = connection;
     this._config = config;
+    this.directory = new DirectoryContext(
+      config.migrationsDirectory,
+      // load migration:
+      (
+        migrationFileName: string,
+      ): Result<Migration, MigrationWithNoValidExport> => {
+        switch (extname(migrationFileName)) {
+          case '.sql':
+            return Result.ok(async (db: Connection) => {
+              await db.query([db.sql.file(migrationFileName)]);
+            });
+          case '.js':
+          case '.mjs':
+          case '.jsx':
+            return getExport(require(migrationFileName), migrationFileName);
+          case '.ts':
+          case '.tsx':
+            return getExport(require(migrationFileName), migrationFileName);
+          default:
+            throw new Error(
+              `Unsupported extension "${extname(migrationFileName)}"`,
+            );
+        }
+      },
+    );
   }
 
   readonly databaseName = 'Postgres';

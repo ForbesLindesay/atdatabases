@@ -1,5 +1,4 @@
 import * as semver from 'semver';
-import {IDirectoryContext} from './DirectoryContext';
 import DatabaseEngine from './types/DatabaseEngine';
 import {
   DatabaseVersionError,
@@ -32,7 +31,6 @@ export interface RunCommandOptions<TError> {
 }
 export default async function runCommand<TMigration, TResult, TError>(
   engine: DatabaseEngine<TMigration>,
-  directory: IDirectoryContext,
   command: (ctx: MigrationsContext) => Result<TResult, TError>,
   parameters: MigrationCommandParameters,
   {
@@ -93,7 +91,7 @@ export default async function runCommand<TMigration, TResult, TError>(
 
   if (!schemaVersionResult.ok) return schemaVersionResult;
 
-  const migrationFilesResult = await readMigrationsDir(directory);
+  const migrationFilesResult = await readMigrationsDir(engine.directory);
   if (!migrationFilesResult.ok) return migrationFilesResult;
 
   const appliedMigrations = await engine.tx(
@@ -118,7 +116,7 @@ export default async function runCommand<TMigration, TResult, TError>(
       await afterOperation(operation);
     }
   } else {
-    await applyOperations(ctx, engine, directory, {
+    await applyOperations(ctx, engine, {
       beforeOperation,
       afterOperation,
     });

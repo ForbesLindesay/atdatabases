@@ -9,7 +9,7 @@ export function getPgConfigSync(searchFrom?: string) {
   return parseResult(explorer.searchSync(searchFrom));
 }
 
-export function _testReadPgConfigSync(filename: string) {
+export function readPgConfigSync(filename: string) {
   return parseResult(explorer.loadSync(filename));
 }
 
@@ -17,4 +17,5 @@ function parseResult(result: cosmiconfig.CosmiconfigResult) {
   return validatePgConfig(result ? result.config : {});
 }
 
+export const DEFAULT_CONFIG = validatePgConfig({});
 export default PgConfig;

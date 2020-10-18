@@ -57,6 +57,7 @@ export default async function getConstraints(
     ${
       conditions.length ? sql`WHERE ${sql.join(conditions, sql` AND `)}` : sql``
     }
+    ORDER BY ns.nspname ASC, c.conname ASC
   `);
 
   return constraints;

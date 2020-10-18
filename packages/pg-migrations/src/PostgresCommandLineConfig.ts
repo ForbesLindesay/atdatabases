@@ -2,6 +2,7 @@ import connect from '@databases/pg';
 import {getPgConfigSync} from '@databases/pg-config';
 import isInteractive = require('is-interactive');
 import * as interrogator from 'interrogator';
+import chalk from 'chalk';
 import {
   CommandLineInterfaceConfig,
   parameters,
@@ -10,12 +11,16 @@ import PostgresDatabaseEngine, {
   Migration,
   MigrationsConfig,
 } from './PostgresDatabaseEngine';
-import chalk from 'chalk';
+import assertIsDirectory from './assertIsDirectory';
 
-const {connectionStringEnvironmentVariable} = getPgConfigSync();
+const {
+  connectionStringEnvironmentVariable,
+  migrationsDirectory,
+} = getPgConfigSync();
 
 export interface Parameters extends MigrationsConfig {
   database: string;
+  directory: string;
 }
 const PostgresCommandLineConfig: CommandLineInterfaceConfig<
   Migration,
@@ -26,8 +31,13 @@ const PostgresCommandLineConfig: CommandLineInterfaceConfig<
     {
       short: '-c',
       long: '--database',
+      description: `A connection string for the database you want to connect to (can also be supplied as the environment variable ${connectionStringEnvironmentVariable}).`,
+    },
+    {
+      short: '-D',
+      long: '--directory',
       description:
-        'A connection string for the database you want to connect to.',
+        'The directory containing migrations (can also be supplied via the "migrationsDirectory" config option).',
     },
     {
       long: '--version-table',
@@ -43,6 +53,7 @@ const PostgresCommandLineConfig: CommandLineInterfaceConfig<
   parameterParser: parameters
     .startChain()
     .addParam(parameters.param.string(['-c', '--database'], 'database'))
+    .addParam(parameters.param.string(['-D', '--directory'], 'directory'))
     .addParam(parameters.param.string(['--version-table'], 'versionTableName'))
     .addParam(
       parameters.param.string(
@@ -54,8 +65,38 @@ const PostgresCommandLineConfig: CommandLineInterfaceConfig<
     database = process.env[connectionStringEnvironmentVariable],
     versionTableName = 'atdatabases_migrations_version',
     appliedMigrationsTableName = 'atdatabases_migrations_applied',
+    directory = migrationsDirectory,
   }) => {
-    if (!database) {
+    let migrationsDirectory = directory;
+    if (!migrationsDirectory) {
+      console.error(
+        'You must supply a directory path for your migrations. You can supply it as either:',
+      );
+      console.error('');
+      console.error(
+        ` - The ${chalk.cyan(
+          'migrationsDirectory',
+        )} config value using @databases/pg-config`,
+      );
+      console.error(
+        ` - The ${chalk.cyan(
+          '--directory',
+        )} paramter when calling @databases/pg-migrations`,
+      );
+      console.error('');
+      if (isInteractive()) {
+        migrationsDirectory = await interrogator.input(
+          'Please enter a directory:',
+        );
+      }
+    }
+    if (!migrationsDirectory) {
+      process.exit(1);
+    }
+    migrationsDirectory = assertIsDirectory(migrationsDirectory, 'exit');
+
+    let connection = database && connect(database, {poolSize: 1});
+    if (!connection) {
       console.error(
         'You must supply a connection string for the database. You can supply it as either:',
       );
@@ -75,19 +116,17 @@ const PostgresCommandLineConfig: CommandLineInterfaceConfig<
         const connectionString = await interrogator.input(
           'Please enter a connection string:',
         );
-        return new PostgresDatabaseEngine(
-          connect(connectionString, {poolSize: 1}),
-          {
-            versionTableName,
-            appliedMigrationsTableName,
-          },
-        );
+        connection =
+          connectionString && connect(connectionString, {poolSize: 1});
       }
+    }
+    if (!connection) {
       process.exit(1);
     }
-    return new PostgresDatabaseEngine(connect(database, {poolSize: 1}), {
+    return new PostgresDatabaseEngine(connection, {
       versionTableName,
       appliedMigrationsTableName,
+      migrationsDirectory,
     });
   },
 };

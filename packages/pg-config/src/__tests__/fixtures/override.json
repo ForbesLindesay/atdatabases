@@ -1,3 +1,11 @@
 {
-  "connectionStringEnvironmentVariable": "PG_CONNECTION"
+  "connectionStringEnvironmentVariable": "PG_CONNECTION",
+  "types": {
+    "columnTypeOverrides": {
+      "my_table.my_column": "string & {__brand?: 'email'}"
+    },
+    "typeOverrides": {
+      "114": "unknown"
+    }
+  }
 }

@@ -10,7 +10,10 @@ export type {
 } from './types/MigrationError';
 export {default as Result} from './types/Result';
 
-export {default as DirectoryContext} from './DirectoryContext';
+export {
+  default as DirectoryContext,
+  IDirectoryContext,
+} from './DirectoryContext';
 export {
   default as MigrationContext,
   MigrationCommandParameters,

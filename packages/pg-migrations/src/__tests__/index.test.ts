@@ -62,6 +62,7 @@ test('apply --dry-run', async () => {
       'cli',
       'apply',
       '--dry-run',
+      `-D`,
       `${__dirname}/migrations`,
     ],
     {cwd: `${__dirname}/..`, env: {...process.env, CI: 'true'}},
@@ -79,6 +80,7 @@ test('apply', async () => {
       'sucrase/register',
       'cli',
       'apply',
+      `-D`,
       `${__dirname}/migrations`,
     ],
     {cwd: `${__dirname}/..`, env: {...process.env, CI: 'true'}},
@@ -96,6 +98,7 @@ test('apply - after already appying', async () => {
       'sucrase/register',
       'cli',
       'apply',
+      `-D`,
       `${__dirname}/migrations`,
     ],
     {cwd: `${__dirname}/..`, env: {...process.env, CI: 'true'}},
@@ -114,6 +117,7 @@ test('apply --dry-run - after already appying', async () => {
       'cli',
       'apply',
       '--dry-run',
+      `-D`,
       `${__dirname}/migrations`,
     ],
     {cwd: `${__dirname}/..`, env: {...process.env, CI: 'true'}},
@@ -139,81 +143,3 @@ test('migrations applied', async () => {
     },
   ]);
 });
-// test('apply migrations (dry run)', async () => {
-//   spawnSync('node', ['--require', 'sucrase/register', 'cli'], {
-//     cwd: `${__dirname}/..`,
-//     stdio: 'inherit',
-//   });
-
-//   const onApplying = jest.fn();
-//   const onApplied = jest.fn();
-//   const count = await applyMigrations(
-//     db,
-//     `${__dirname}/migrations`,
-//     {
-//       onApplying,
-//       onApplied,
-//       onAppliedMigrationAfterUnappliedMigrations: expectNotCalled(
-//         'onAppliedMigrationAfterUnappliedMigrations',
-//       ),
-//       onMigrationDeleted: expectNotCalled('onMigrationDeleted'),
-//       onMigrationEdited: expectNotCalled('onMigrationEdited'),
-//     },
-//     {dryRun: true},
-//   );
-//   expect(onApplying).toBeCalledTimes(3);
-//   expect(onApplied).toBeCalledTimes(3);
-//   expect(count).toBe(3);
-
-//   await expect(db.query(sql`SELECT * FROM users`)).rejects.toHaveProperty(
-//     'message',
-//     expect.stringContaining('relation "users" does not exist'),
-//   );
-// });
-
-// // test('upAll', async () => {
-// //   await output.upAll({silent: true});
-// //   expect(await db.query(sql`SELECT * FROM users`)).toMatchSnapshot();
-// // });
-// // test('downLast', async () => {
-// //   await output.downLast({silent: true});
-// //   expect(await db.query(sql`SELECT * FROM users`)).toMatchSnapshot();
-// //   await output.downLast({silent: true});
-// //   expect(await db.query(sql`SELECT * FROM users`)).toMatchSnapshot();
-// //   await output.upAll({silent: true});
-// // });
-// // async function getError(fn: () => any) {
-// //   try {
-// //     await fn();
-// //   } catch (ex) {
-// //     return ex;
-// //   }
-// // }
-// // test('downOne', async () => {
-// //   await output.downOne({silent: true});
-// //   expect(await db.query(sql`SELECT * FROM users`)).toMatchSnapshot();
-// //   await output.downOne({silent: true});
-// //   const err = await getError(
-// //     async () => await db.query(sql`SELECT * FROM users`),
-// //   );
-// //   expect(() => {
-// //     if (err) throw err;
-// //   }).toThrowErrorMatchingSnapshot();
-// //   await output.upAll({silent: true});
-// // });
-// // test('downAll', async () => {
-// //   await output.downAll({silent: true});
-// //   const err = await getError(
-// //     async () => await db.query(sql`SELECT * FROM users`),
-// //   );
-// //   expect(() => {
-// //     if (err) throw err;
-// //   }).toThrowErrorMatchingSnapshot();
-// // });
-
-// // test('upOne', async () => {
-// //   await output.upOne({silent: true});
-// //   expect(await db.query(sql`SELECT * FROM users`)).toMatchSnapshot();
-// //   await output.upOne({silent: true});
-// //   expect(await db.query(sql`SELECT * FROM users`)).toMatchSnapshot();
-// // });

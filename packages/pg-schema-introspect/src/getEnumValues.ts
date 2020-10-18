@@ -31,6 +31,7 @@ export default async function getEnumValues(
     ${
       conditions.length ? sql`WHERE ${sql.join(conditions, sql` AND `)}` : sql``
     }
+    ORDER BY ns.nspname ASC, ty.typname ASC, e.enumlabel ASC
   `);
 
   return enumValues;
