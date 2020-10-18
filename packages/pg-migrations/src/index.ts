@@ -1,43 +1,38 @@
-import Migration from './utils/Migration';
-import Operation from './utils/Operation';
-import MigrationSpec from './utils/MigrationSpec';
-import MigrationStatus from './utils/MigrationStatus';
-import ConnectedMigrationsPackage, {
-  OperationOptions,
-  Direction,
-  NumberOfOperations,
-} from './utils/ConnectedMigrationsPackage';
-import MigrationMetadata from './utils/MigrationMetadata';
-import MigrationsPackage from './utils/MigrationsPackage';
-import {Connection, sql} from '@databases/pg';
+import {getPublicApi} from '@databases/migrations-base';
+import connect, {ConnectionPool, Connection, sql} from '@databases/pg';
+import PostgresDatabaseEngine, {
+  Migration,
+  MigrationsConfig,
+} from './PostgresDatabaseEngine';
+
+export type {Migration};
+export type {ConnectionPool, Connection};
+export {connect, sql};
+
+const {
+  applyMigrations,
+  ignoreError,
+  markMigrationAsApplied,
+  markMigrationAsUnapplied,
+  restoreMigrationFromDatabase,
+} = getPublicApi<Migration, ConnectionPool, MigrationsConfig>(
+  (
+    connection,
+    {
+      versionTableName = 'atdatabases_migrations_version',
+      appliedMigrationsTableName = 'atdatabases_migrations_applied',
+    },
+  ) =>
+    new PostgresDatabaseEngine(connection, {
+      versionTableName,
+      appliedMigrationsTableName,
+    }),
+);
 
 export {
-  Migration,
-  MigrationSpec,
-  Operation,
-  MigrationsPackage,
-  ConnectedMigrationsPackage,
-  OperationOptions,
-  Direction,
-  NumberOfOperations,
-  MigrationStatus,
-  MigrationMetadata,
-  Connection,
-  sql,
+  applyMigrations,
+  ignoreError,
+  markMigrationAsApplied,
+  markMigrationAsUnapplied,
+  restoreMigrationFromDatabase,
 };
-
-export function packageOperation(op: Operation): Operation {
-  return op;
-}
-
-export default function packageMigrations(
-  ...migrations: MigrationSpec[]
-): MigrationsPackage {
-  const pkg = new MigrationsPackage(migrations);
-  const AUTO_RUN_DB_MIGRATION_PROCESS: any = (global as any)
-    .AUTO_RUN_DB_MIGRATION_PROCESS;
-  if (AUTO_RUN_DB_MIGRATION_PROCESS) {
-    AUTO_RUN_DB_MIGRATION_PROCESS(pkg);
-  }
-  return pkg;
-}

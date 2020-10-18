@@ -13,7 +13,7 @@
     "modern-spawn": "^1.0.0",
     "ms": "^2.1.2",
     "mysql2": "^1.6.4",
-    "parameter-reducers": "^1.0.1",
+    "parameter-reducers": "^2.0.0",
     "type-assertions": "^1.1.0"
   },
   "scripts": {},
