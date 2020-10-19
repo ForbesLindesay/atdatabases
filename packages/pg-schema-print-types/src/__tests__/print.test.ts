@@ -76,9 +76,9 @@ test('getClasses', async () => {
       Object {
         "content": "import User from './users'
 
-      /**
-       * This is a great table
-       */
+    /**
+     * This is a great table
+     */
     interface Photo {
       caption: (string) | null
       cdn_url: string & {__brand?: \\"url\\"}
@@ -91,9 +91,9 @@ test('getClasses', async () => {
     }
     export default Photo;
 
-      /**
-       * This is a great table
-       */
+    /**
+     * This is a great table
+     */
     interface Photos_InsertParameters {
       caption?: (string) | null
       cdn_url: string & {__brand?: \\"url\\"}
