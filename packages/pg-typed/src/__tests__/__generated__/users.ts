@@ -9,23 +9,23 @@
 // tslint:disable
 
 interface User {
-  age: (number) | null
-  bio: (string) | null
+  age: number | null;
+  bio: string | null;
   /**
    * @default nextval('print_types.users_id_seq'::regclass)
    */
-  id: number & {readonly __brand?: 'users_id'}
-  screen_name: string
+  id: number & {readonly __brand?: 'users_id'};
+  screen_name: string;
 }
 export default User;
 
 interface Users_InsertParameters {
-  age?: (number) | null
-  bio?: (string) | null
+  age?: number | null;
+  bio?: string | null;
   /**
    * @default nextval('print_types.users_id_seq'::regclass)
    */
-  id?: number & {readonly __brand?: 'users_id'}
-  screen_name: string
+  id?: number & {readonly __brand?: 'users_id'};
+  screen_name: string;
 }
-export {Users_InsertParameters}
+export {Users_InsertParameters};

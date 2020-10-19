@@ -59,7 +59,7 @@ function getClassComment(cls: ClassDetails): string[] {
     commentLines.push(...cls.comment.trim().split('\n'));
   }
   if (commentLines.length) {
-    return [`  /**`, ...commentLines.map((l) => `   * ${l}`), `   */`];
+    return [`/**`, ...commentLines.map((l) => ` * ${l}`), ` */`];
   } else {
     return [];
   }
