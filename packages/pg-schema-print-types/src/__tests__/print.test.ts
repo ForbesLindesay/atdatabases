@@ -54,7 +54,10 @@ test('getClasses', async () => {
     }),
   );
   printSchema(schema, printContext);
-  await writeFiles(printContext, `${__dirname}/__generated__`);
+  await writeFiles(
+    printContext,
+    `${__dirname}/../../../pg-typed/src/__tests__/__generated__`,
+  );
 
   expect(printContext.getFiles()).toMatchInlineSnapshot(`
     Array [

@@ -22,7 +22,24 @@ export interface TransactionOptions {
   readOnly?: boolean;
   deferrable?: boolean;
 }
-export interface Connection {
+
+export enum QueryableType {
+  Transaction = 'transaction',
+  Connection = 'connection',
+  ConnectionPool = 'connection_pool',
+}
+
+/**
+ * A Queryable can represent any of:
+ *
+ *  - a Transaction
+ *  - a single Connection to the database (aka a "Task")
+ *  - a ConnectionPool
+ *
+ * All share a similar API, allowing you to write methods that can
+ * easily be used both inside and outside of transactions.
+ */
+export interface Queryable {
   readonly sql: SQL;
   query(query: SQLQuery): Promise<any[]>;
   query(query: SQLQuery[]): Promise<any[][]>;
@@ -51,15 +68,51 @@ export interface Connection {
     },
   ): Readable;
   task<T>(
-    fn: (connection: Connection) => Promise<T>,
+    fn: (connection: Task | Transaction) => Promise<T>,
     options?: {tag?: string | number},
   ): Promise<T>;
   tx<T>(
-    fn: (connection: Connection) => Promise<T>,
+    fn: (connection: Transaction) => Promise<T>,
     options?: TransactionOptions,
   ): Promise<T>;
 }
-export interface ConnectionPool extends Connection {
+
+/**
+ * Will be deprecated in the next major version, use the "Queryable" type instead, eventually Connection will become an alias for "Task"
+ */
+export type Connection = Queryable;
+
+/**
+ * A "Transaction" on the database will be committed once
+ * the async function returns, and will be aborted if any
+ * queries fail or if the function throws an exception.
+ */
+export interface Transaction extends Queryable {
+  readonly type: QueryableType.Transaction;
+}
+
+/**
+ * A "Task" represents a single connection to the database,
+ * although you can send queries in parallel, if they share
+ * one "Task" they will actually be run one at a time on the
+ * underlying database.
+ *
+ * Most of the time you can ignore these and just focus on
+ * Transactions and ConnectionPools.
+ */
+export interface Task extends Queryable {
+  readonly type: QueryableType.Connection;
+}
+
+/**
+ * A "ConnectionPool" represents a collection of database
+ * connections that are managed for you automatically. You can
+ * query this directly without worrying about allocating connections.
+ * You can also use a Transaction to provide better guarantees about
+ * behaviour when running many operations in parallel.
+ */
+export interface ConnectionPool extends Queryable {
+  readonly type: QueryableType.ConnectionPool;
   dispose(): Promise<void>;
   registerTypeParser<T>(
     type: number | string,
@@ -81,11 +134,14 @@ export interface ConnectionPool extends Connection {
    */
   parseComposite(value: string): string[];
 }
-class ConnectionImplementation {
+
+class ConnectionImplementation<TQueryableType extends QueryableType> {
+  public readonly type: TQueryableType;
   public readonly sql = sql;
   protected connection: pg.IBaseProtocol<unknown>;
-  constructor(connection: pg.IBaseProtocol<unknown>) {
+  constructor(connection: pg.IBaseProtocol<unknown>, type: TQueryableType) {
     this.connection = connection;
+    this.type = type;
   }
   async query(query: SQLQuery): Promise<any[]>;
   async query(query: SQLQuery[]): Promise<any[][]>;
@@ -207,20 +263,24 @@ class ConnectionImplementation {
     return stream;
   }
   async task<T>(
-    fn: (connection: ConnectionImplementation) => Promise<T>,
+    fn: (connection: Task | Transaction) => Promise<T>,
     options?: {tag?: string | number},
   ): Promise<T> {
+    const type =
+      this.type === QueryableType.Transaction
+        ? QueryableType.Transaction
+        : QueryableType.Connection;
     if (options) {
       return await this.connection.task(options, (t) => {
-        return fn(new ConnectionImplementation(t)) as any;
+        return fn(new ConnectionImplementation(t, type)) as any;
       });
     }
     return await this.connection.task((t) => {
-      return fn(new ConnectionImplementation(t)) as any;
+      return fn(new ConnectionImplementation(t, type)) as any;
     });
   }
   async tx<T>(
-    fn: (connection: ConnectionImplementation) => Promise<T>,
+    fn: (connection: Transaction) => Promise<T>,
     options?: TransactionOptions,
   ): Promise<T> {
     if (options) {
@@ -237,21 +297,27 @@ class ConnectionImplementation {
         );
       }
       return await this.connection.tx(opts, (t) => {
-        return fn(new ConnectionImplementation(t)) as any;
+        return fn(
+          new ConnectionImplementation(t, QueryableType.Transaction),
+        ) as any;
       });
     }
     return await this.connection.tx((t) => {
-      return fn(new ConnectionImplementation(t)) as any;
+      return fn(
+        new ConnectionImplementation(t, QueryableType.Transaction),
+      ) as any;
     });
   }
 }
 
-class ConnectionPoolImplementation extends ConnectionImplementation {
+class ConnectionPoolImplementation extends ConnectionImplementation<
+  QueryableType.ConnectionPool
+> {
   public readonly sql = sql;
   public readonly dispose: () => Promise<void>;
   private readonly pgp: pg.IMain;
   constructor(connection: pg.IDatabase<unknown>, pgp: pg.IMain) {
-    super(connection);
+    super(connection, QueryableType.ConnectionPool);
     this.dispose = () => connection.$pool.end();
     this.pgp = pgp;
   }
@@ -375,7 +441,7 @@ class ConnectionPoolImplementation extends ConnectionImplementation {
 }
 
 export function isConnectionPool(
-  c: Connection | ConnectionPool,
+  c: Queryable | Transaction | Task | ConnectionPool,
 ): c is ConnectionPool {
   return c instanceof ConnectionPoolImplementation;
 }
