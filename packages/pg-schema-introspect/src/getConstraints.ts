@@ -24,7 +24,7 @@ export interface Constraint {
   foreignKeyDeletionAction: ForeignKeyAction;
   foreignKeyMatchType: ForeignKeyMatchType;
 
-  checkConstraint: string;
+  constraintDescription: string;
 
   // 	pg_attribute.attnum
   tableAttributeNumbers: number[];
@@ -48,7 +48,7 @@ export default async function getConstraints(
       confmatchtype AS "foreignKeyMatchType",
       conkey AS "tableAttributeNumbers",
       confkey AS "referencedAttributeNumbers",
-      consrc AS "checkConstraint"
+      pg_get_constraintdef(c.oid, true) AS "constraintDescription"
     FROM pg_catalog.pg_constraint c
     INNER JOIN pg_catalog.pg_class cls
       ON (c.conindid = cls.oid)

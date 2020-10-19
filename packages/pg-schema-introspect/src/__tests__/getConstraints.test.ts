@@ -38,8 +38,8 @@ test('getConstraints', async () => {
   ).toMatchInlineSnapshot(`
     Array [
       Object {
-        "checkConstraint": null,
         "classID": "<oid>",
+        "constraintDescription": "PRIMARY KEY (id)",
         "constraintName": "table_a_pkey",
         "constraintType": "p",
         "foreignKeyDeletionAction": " ",
@@ -52,8 +52,8 @@ test('getConstraints', async () => {
         ],
       },
       Object {
-        "checkConstraint": null,
         "classID": "<oid>",
+        "constraintDescription": "FOREIGN KEY (a_id) REFERENCES getconstraints.table_a(id)",
         "constraintName": "table_b_a_id_fkey",
         "constraintType": "f",
         "foreignKeyDeletionAction": "a",
@@ -68,8 +68,8 @@ test('getConstraints', async () => {
         ],
       },
       Object {
-        "checkConstraint": null,
         "classID": "<oid>",
+        "constraintDescription": "PRIMARY KEY (id)",
         "constraintName": "table_b_pkey",
         "constraintType": "p",
         "foreignKeyDeletionAction": " ",
@@ -82,8 +82,8 @@ test('getConstraints', async () => {
         ],
       },
       Object {
-        "checkConstraint": null,
         "classID": "<oid>",
+        "constraintDescription": "PRIMARY KEY (a, b)",
         "constraintName": "table_c_pkey",
         "constraintType": "p",
         "foreignKeyDeletionAction": " ",

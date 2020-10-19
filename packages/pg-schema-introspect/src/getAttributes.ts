@@ -45,7 +45,7 @@ export default async function getAttributes(
 
       a.attnotnull AS "notNull",
       a.atthasdef AS "hasDefault",
-      def.adsrc AS "default",
+      pg_get_expr(def.adbin, def.adrelid, true) AS "default",
       col_description(a.attrelid, a.attnum) AS "comment",
 
       a.atttypid AS "typeID",

@@ -76,18 +76,30 @@ test('getClasses', async () => {
       Object {
         "content": "import User from './users'
 
+    /**
+     * This is a great table
+     */
     interface Photo {
       caption: (string) | null
       cdn_url: string & {__brand?: \\"url\\"}
+      /**
+       * @default nextval('print_types.photos_id_seq'::regclass)
+       */
       id: number & {readonly __brand?: 'photos_id'}
       metadata: unknown
       owner_user_id: User['id']
     }
     export default Photo;
 
+    /**
+     * This is a great table
+     */
     interface Photos_InsertParameters {
       caption?: (string) | null
       cdn_url: string & {__brand?: \\"url\\"}
+      /**
+       * @default nextval('print_types.photos_id_seq'::regclass)
+       */
       id?: number & {readonly __brand?: 'photos_id'}
       metadata: unknown
       owner_user_id: User['id']
@@ -100,6 +112,9 @@ test('getClasses', async () => {
         "content": "interface User {
       age: (number) | null
       bio: (string) | null
+      /**
+       * @default nextval('print_types.users_id_seq'::regclass)
+       */
       id: number & {readonly __brand?: 'users_id'}
       screen_name: string
     }
@@ -108,6 +123,9 @@ test('getClasses', async () => {
     interface Users_InsertParameters {
       age?: (number) | null
       bio?: (string) | null
+      /**
+       * @default nextval('print_types.users_id_seq'::regclass)
+       */
       id?: number & {readonly __brand?: 'users_id'}
       screen_name: string
     }
