@@ -1,13 +1,13 @@
 import type {sql, SQLQuery, Queryable} from '@databases/pg';
 import invariant from 'tiny-invariant';
 
-interface SelectQuery<TRecord> {
+export interface SelectQuery<TRecord> {
   all(): Promise<TRecord[]>;
   orderByAsc(key: keyof TRecord): OrderedSelectQuery<TRecord>;
   orderByDesc(key: keyof TRecord): OrderedSelectQuery<TRecord>;
 }
 
-interface OrderedSelectQuery<TRecord> extends SelectQuery<TRecord> {
+export interface OrderedSelectQuery<TRecord> extends SelectQuery<TRecord> {
   first(): Promise<TRecord | null>;
   limit(count: number): Promise<TRecord[]>;
 }
@@ -218,6 +218,7 @@ function getTable<TRecord, TInsertParameters>(
     );
   };
 }
+export type {Table};
 
 type PropertyOf<T, TProp extends string> = T extends {
   [k in TProp]: infer TValue;
