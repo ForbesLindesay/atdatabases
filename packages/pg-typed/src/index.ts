@@ -118,7 +118,7 @@ class Table<TRecord, TInsertParameters> {
         );
         const query = sql`INSERT INTO ${this._tableID} (${columnNames}) VALUES (${values})`;
         if (onConflict) {
-          return sql`${query} ON CONFLICT DO ${onConflict(row)} RETURNING *`;
+          return sql`${query} ${onConflict(row)} RETURNING *`;
         } else {
           return sql`${query} RETURNING *`;
         }
@@ -134,14 +134,18 @@ class Table<TRecord, TInsertParameters> {
   }
 
   async insertOrUpdate<TRecordsToInsert extends readonly TInsertParameters[]>(
+    conflictKeys: [keyof TRecord, ...(keyof TRecord)[]],
     ...rows: TRecordsToInsert
   ): Promise<{[key in keyof TRecordsToInsert]: TRecord}> {
     const {sql} = this._underlyingDb;
     return this._insert(
       (row) =>
-        sql`UPDATE ${sql.join(
+        sql`ON CONFLICT (${sql.join(
+          conflictKeys.map((k) => sql.ident(k)),
+          sql`, `,
+        )}) DO UPDATE SET ${sql.join(
           Object.keys(row).map(
-            (key) => sql`${sql.ident(key)}=${sql.ident('EXCLUDED.', key)}`,
+            (key) => sql`${sql.ident(key)}=EXCLUDED.${sql.ident(key)}`,
           ),
           sql`, `,
         )}`,
@@ -151,9 +155,11 @@ class Table<TRecord, TInsertParameters> {
 
   async insertOrIgnore<TRecordsToInsert extends readonly TInsertParameters[]>(
     ...rows: TRecordsToInsert
-  ): Promise<TRecord[]> {
+  ): Promise<{[key in keyof TRecordsToInsert]: TRecord | null}> {
     const {sql} = this._underlyingDb;
-    return this._insert(() => sql`NOTHING`, ...rows);
+    return (await this._insert(() => sql`ON CONFLICT DO NOTHING`, ...rows)).map(
+      (row) => row ?? null,
+    ) as any;
   }
 
   async update(
@@ -169,7 +175,7 @@ class Table<TRecord, TInsertParameters> {
       sql`, `,
     );
     return await this.untypedQuery(
-      sql`UPDATE ${this._tableID} ${where} SET ${setClause} RETURNING *`,
+      sql`UPDATE ${this._tableID} SET ${setClause} ${where} RETURNING *`,
     );
   }
 
