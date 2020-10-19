@@ -18,33 +18,66 @@ export default function printClassDetails(
   const DatabaseRecord = context.pushDeclaration(
     {type: 'class', name: type.className},
     (identifierName, file) => [
+      ...getClassComment(type),
       `interface ${identifierName} {`,
-      ...type.attributes.map(
-        (attribute) =>
+      ...type.attributes
+        .map((attribute) => [
+          ...getAttributeComment(attribute),
           `  ${attribute.attributeName}: ${getAttributeType(
             type,
             attribute,
             context,
             file,
           )}`,
-      ),
+        ])
+        .reduce((a, b) => [...a, ...b], []),
       `}`,
     ],
   );
   const InsertParameters = context.pushDeclaration(
     {type: 'insert_parameters', name: type.className},
     (identifierName, file) => [
+      ...getClassComment(type),
       `interface ${identifierName} {`,
-      ...type.attributes.map(
-        (attribute) =>
+      ...type.attributes
+        .map((attribute) => [
+          ...getAttributeComment(attribute),
           `  ${attribute.attributeName}${optionalOnInsert(
             attribute,
           )}: ${getAttributeType(type, attribute, context, file)}`,
-      ),
+        ])
+        .reduce((a, b) => [...a, ...b], []),
       `}`,
     ],
   );
   return {DatabaseRecord, InsertParameters};
+}
+
+function getClassComment(cls: ClassDetails): string[] {
+  const commentLines = [];
+  if (cls.comment?.trim()) {
+    commentLines.push(...cls.comment.trim().split('\n'));
+  }
+  if (commentLines.length) {
+    return [`  /**`, ...commentLines.map((l) => `   * ${l}`), `   */`];
+  } else {
+    return [];
+  }
+}
+function getAttributeComment(attribute: Attribute): string[] {
+  const commentLines = [];
+  if (attribute.comment?.trim()) {
+    commentLines.push(...attribute.comment.trim().split('\n'));
+  }
+  if (attribute.default) {
+    if (commentLines.length) commentLines.push(``);
+    commentLines.push(`@default ${attribute.default}`);
+  }
+  if (commentLines.length) {
+    return [`  /**`, ...commentLines.map((l) => `   * ${l}`), `   */`];
+  } else {
+    return [];
+  }
 }
 
 function getAttributeType(
