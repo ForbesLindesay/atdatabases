@@ -410,7 +410,7 @@ function escapePGIdentifier(str: string): string {
   }
   if (!/^[A-Za-z0-9_]*$/.test(str)) {
     throw new Error(
-      '@database/sql restricts postgres identifiers to alphanumeric characers and underscores.',
+      `@database/sql restricts postgres identifiers to alphanumeric characers and underscores. "${str}" is not allowed`,
     );
   }
 

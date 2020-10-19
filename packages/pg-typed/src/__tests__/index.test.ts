@@ -80,4 +80,89 @@ test('create users', async () => {
     ]
   `);
   expect(await users(db).selectOne({id: ellie.id})).toEqual(ellie);
+
+  const updated = await photos(db).update(
+    {cdn_url: 'http://example.com/1'},
+    {
+      metadata: {rating: 5},
+    },
+  );
+  expect(updated.map((u) => [u.cdn_url, u.metadata])).toMatchInlineSnapshot(`
+    Array [
+      Array [
+        "http://example.com/1",
+        Object {
+          "rating": 5,
+        },
+      ],
+    ]
+  `);
+
+  const [forbes2, john] = await users(db).insertOrUpdate(
+    ['screen_name'],
+    {screen_name: 'Forbes', bio: 'Author of @databases'},
+    {screen_name: 'John', bio: 'Just a random name'},
+  );
+  expect(forbes2.id).toBe(forbes.id);
+  expect([forbes2.bio, john.bio]).toMatchInlineSnapshot(`
+    Array [
+      "Author of @databases",
+      "Just a random name",
+    ]
+  `);
+
+  await photos(db).delete({cdn_url: 'http://example.com/2'});
+
+  expect(
+    (await photos(db).select().orderByAsc('cdn_url').all()).map(
+      (u) => u.cdn_url,
+    ),
+  ).toMatchInlineSnapshot(`
+    Array [
+      "http://example.com/1",
+      "http://example.com/3",
+      "http://example.com/4",
+    ]
+  `);
+
+  const [john2, martin] = await users(db).insertOrIgnore(
+    {screen_name: 'John', bio: 'Updated bio'},
+    {screen_name: 'Martin', bio: 'Updated bio'},
+  );
+  expect(john2).toBe(null);
+  expect(martin!.screen_name).toBe('Martin');
+  expect(martin!.bio).toBe('Updated bio');
+
+  expect(
+    (await users(db).select().orderByAsc('screen_name').first())?.screen_name,
+  ).toMatchInlineSnapshot(`"Ellie"`);
+  expect(
+    (await users(db).select().orderByDesc('screen_name').first())?.screen_name,
+  ).toMatchInlineSnapshot(`"Martin"`);
+
+  expect(
+    (await users(db).select().orderByAsc('screen_name').all()).map((u) => [
+      u.screen_name,
+      u.bio,
+    ]),
+  ).toMatchInlineSnapshot(`
+    Array [
+      Array [
+        "Ellie",
+        null,
+      ],
+      Array [
+        "Forbes",
+        "Author of @databases",
+      ],
+      Array [
+        "John",
+        "Just a random name",
+      ],
+      Array [
+        "Martin",
+        "Updated bio",
+      ],
+    ]
+  `);
 });
