@@ -15,7 +15,7 @@ export default function printClassDetails(
       'printClassDetails only supports ordinary tables at the moment.',
     );
   }
-  const DatabaseRecord = context.pushDeclaration(
+  const DatabaseRecord = context.pushTypeDeclaration(
     {type: 'class', name: type.className},
     (identifierName, file) => [
       ...getClassComment(type),
@@ -34,7 +34,7 @@ export default function printClassDetails(
       `}`,
     ],
   );
-  const InsertParameters = context.pushDeclaration(
+  const InsertParameters = context.pushTypeDeclaration(
     {type: 'insert_parameters', name: type.className},
     (identifierName, file) => [
       ...getClassComment(type),
@@ -166,7 +166,7 @@ function handleBrand(
     case 'strict_brand':
     case 'loose_brand':
       return file.getImport(
-        context.pushDeclaration(
+        context.pushTypeDeclaration(
           {
             type: 'primary_key',
             name: className,

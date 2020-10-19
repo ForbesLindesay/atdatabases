@@ -3,7 +3,7 @@ import PrintContext from '../PrintContext';
 import printClassDetails from './printClassDetails';
 
 export default function printSchema(type: Schema, context: PrintContext) {
-  context.pushDeclaration({type: 'schema'}, (identifier, {getImport}) => [
+  context.pushTypeDeclaration({type: 'schema'}, (identifier, {getImport}) => [
     `interface ${identifier} {`,
     ...type.classes
       .filter((cls) => cls.kind === ClassKind.OrdinaryTable)

@@ -14,31 +14,33 @@ export default function printEnumType(
 ): string {
   switch (context.options.enumTypeMode) {
     case 'enum':
+      return file.getImport(
+        context.pushValueDeclaration(
+          {type: 'enum', name: type.typeName},
+          (identifierName) => [
+            `enum ${identifierName} {`,
+            ...type.values.map((value) => `  ${value} = '${value}',`),
+            `}`,
+          ],
+        ),
+      );
     case 'union_alias':
+      return file.getImport(
+        context.pushTypeDeclaration(
+          {type: 'enum', name: type.typeName},
+          (identifierName) => [`type ${identifierName} = ${getUnion(type)};`],
+        ),
+      );
     case 'union_alias_with_object':
       return file.getImport(
-        context.pushDeclaration(
+        context.pushValueDeclaration(
           {type: 'enum', name: type.typeName},
-          (identifierName) => {
-            const results: string[] = [];
-            if (context.options.enumTypeMode === 'enum') {
-              results.push(
-                `enum ${identifierName} {`,
-                ...type.values.map((value) => `  ${value} = '${value}',`),
-                `}`,
-              );
-            } else {
-              results.push(`type ${identifierName} = ${getUnion(type)};`);
-              if (context.options.enumTypeMode === 'union_alias_with_object') {
-                results.push(
-                  `const ${identifierName} = {`,
-                  ...type.values.map((value) => `  ${value}: '${value}',`),
-                  `} as const;`,
-                );
-              }
-            }
-            return results;
-          },
+          (identifierName) => [
+            `type ${identifierName} = ${getUnion(type)};`,
+            `const ${identifierName} = {`,
+            ...type.values.map((value) => `  ${value}: '${value}',`),
+            `} as const;`,
+          ],
         ),
       );
     case 'inline':
