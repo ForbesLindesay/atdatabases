@@ -104,7 +104,7 @@ test('getClasses', async () => {
       metadata: unknown
       owner_user_id: User['id']
     }
-    export {Photos_InsertParameters}
+    export type {Photos_InsertParameters}
     ",
         "filename": "photos.ts",
       },
@@ -129,7 +129,7 @@ test('getClasses', async () => {
       id?: number & {readonly __brand?: 'users_id'}
       screen_name: string
     }
-    export {Users_InsertParameters}
+    export type {Users_InsertParameters}
     ",
         "filename": "users.ts",
       },

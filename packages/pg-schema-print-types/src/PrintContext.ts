@@ -91,6 +91,7 @@ class FileContent {
 
   public pushDeclaration(
     typeID: TypeID,
+    mode: 'type' | 'value',
     declaration: (identifier: IdentifierName, imp: FileContext) => string[],
   ): FileExport {
     const identifierName = this._options.resolveExportName(typeID);
@@ -121,7 +122,7 @@ class FileContent {
         ...declarationLines,
         this.getDefaultName() === identifierName
           ? `export default ${identifierName};`
-          : `export {${identifierName}}`,
+          : `export ${mode === 'type' ? 'type ' : ''}{${identifierName}}`,
       ]);
     }
     return {
@@ -216,8 +217,9 @@ export default class PrintContext {
     );
   }
 
-  public pushDeclaration(
+  private _pushDeclaration(
     fileID: TypeID,
+    mode: 'type' | 'value',
     declaration: (identifier: IdentifierName, imp: FileContext) => string[],
   ): FileExport {
     const file = this.options.resolveFilename(fileID);
@@ -226,7 +228,21 @@ export default class PrintContext {
       file,
       () => new FileContent(file, this.options),
     );
-    return fileContent.pushDeclaration(fileID, declaration);
+    return fileContent.pushDeclaration(fileID, mode, declaration);
+  }
+
+  public pushTypeDeclaration(
+    fileID: TypeID,
+    declaration: (identifier: IdentifierName, imp: FileContext) => string[],
+  ): FileExport {
+    return this._pushDeclaration(fileID, 'type', declaration);
+  }
+
+  public pushValueDeclaration(
+    fileID: TypeID,
+    declaration: (identifier: IdentifierName, imp: FileContext) => string[],
+  ): FileExport {
+    return this._pushDeclaration(fileID, 'value', declaration);
   }
 
   public getFiles() {

@@ -17,7 +17,7 @@ export default function printDomainType(
     case 'loose_brand':
     case 'alias':
       return file.getImport(
-        context.pushDeclaration(
+        context.pushTypeDeclaration(
           {type: 'domain', name: type.typeName},
           (identifierName, file) => [
             `type ${identifierName} = ${context.getTypeScriptType(
