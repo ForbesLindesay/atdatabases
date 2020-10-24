@@ -120,13 +120,22 @@ export default createWorkflow(({setWorkflowName, addTrigger, addJob}) => {
 
     add(loadOutput(buildOutput, 'packages/'));
 
-    run('yarn build');
+    run('yarn test');
   });
-  addJob('prettier', ({addDependencies, add, run, use}) => {
+
+  addJob('prettier', ({addDependencies, add, run}) => {
     addDependencies(build);
 
     add(setup());
 
     run('yarn prettier:check');
+  });
+
+  addJob('lint', ({addDependencies, add, run}) => {
+    addDependencies(build);
+
+    add(setup());
+
+    run('yarn tslint');
   });
 });
