@@ -15,7 +15,7 @@
     "prerelease": "yarn build:all",
     "prettier:check": "prettier --list-different \"packages/*/src/**/*.{ts,tsx}\"",
     "prettier:write": "prettier --write \"packages/*/src/**/*.{ts,tsx}\"",
-    "pretest": "yarn build && yarn tslint",
+    "pretest": "yarn build",
     "test": "jest",
     "posttest": "wsrun --parallel --exclude-missing test",
     "watch:jest": "jest --watch",
