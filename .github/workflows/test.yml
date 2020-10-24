@@ -243,6 +243,7 @@ jobs:
           - 11.9-alpine
           - 12.4-alpine
           - 13.0-alpine
+      fail-fast: false
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
