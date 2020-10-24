@@ -1,14 +1,14 @@
+import {readdirSync, statSync} from 'fs';
 import createWorkflow, {Job, Steps} from 'github-actions-workflow-builder';
 import {runner} from 'github-actions-workflow-builder/context';
 import {
   Expression,
   hashFiles,
   interpolate,
-  neq,
 } from 'github-actions-workflow-builder/expression';
 
 export function yarnInstallWithCache(nodeVersion: Expression<string>): Steps {
-  return ({use, run, when}) => {
+  return ({use, run}) => {
     const {
       outputs: {dir: yarnCacheDir},
     } = run<{dir: string}>(
@@ -28,6 +28,35 @@ export function yarnInstallWithCache(nodeVersion: Expression<string>): Steps {
       },
     });
     run('yarn install --prefer-offline');
+  };
+}
+
+export function buildCache(): Steps {
+  return ({use}) => {
+    for (const packageName of readdirSync(`${__dirname}/../../packages`)) {
+      try {
+        if (
+          !statSync(
+            `${__dirname}/../../packages/${packageName}/src`,
+          ).isDirectory()
+        ) {
+          continue;
+        }
+      } catch (ex) {
+        continue;
+      }
+      use(`Enable Cache for ${packageName}`, 'actions/cache@v2', {
+        with: {
+          path: [
+            `packages/${packageName}/lib`,
+            `packages/${packageName}/.last_build`,
+          ].join('\n'),
+          key: interpolate`build-output-${hashFiles(
+            `packages/${packageName}/src`,
+          )}`,
+        },
+      });
+    }
   };
 }
 
@@ -58,8 +87,9 @@ export function buildJob(): Job<{output: string}> {
     });
 
     add(yarnInstallWithCache('14.x'));
+    add(buildCache());
 
-    run('yarn build:all');
+    run('yarn build');
 
     const output = add(
       saveOutput('build', ['packages/*/lib', 'packages/*/.last_build']),
