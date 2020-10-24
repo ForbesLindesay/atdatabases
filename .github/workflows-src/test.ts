@@ -165,9 +165,9 @@ export default createWorkflow(({setWorkflowName, addTrigger, addJob}) => {
       outputs: {output: buildOutput},
     } = addDependencies(build);
 
-    add(loadOutput(buildOutput, 'packages/'));
-
     add(setup());
+
+    add(loadOutput(buildOutput, 'packages/'));
 
     run('yarn tslint');
   });

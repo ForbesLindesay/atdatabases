@@ -313,11 +313,6 @@ jobs:
       - build
     runs-on: ubuntu-latest
     steps:
-      - name: "Load output: ${{needs.build.outputs.output}}"
-        uses: actions/download-artifact@v2
-        with:
-          name: ${{ needs.build.outputs.output }}
-          path: packages/
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
         with:
@@ -325,14 +320,19 @@ jobs:
           registry-url: https://registry.npmjs.org
       - name: Get yarn cache directory path
         run: echo "::set-output name=dir::$(yarn cache dir)"
-        id: step_4
+        id: step_3
       - name: Enable Cache
         uses: actions/cache@v2
         with:
           path: |-
-            ${{steps.step_4.outputs.dir}}
+            ${{steps.step_3.outputs.dir}}
             node_modules
             packages/*/node_modules
           key: ${{runner.os}}-14.x-${{hashFiles('yarn.lock')}}-2
       - run: yarn install --prefer-offline
+      - name: "Load output: ${{needs.build.outputs.output}}"
+        uses: actions/download-artifact@v2
+        with:
+          name: ${{ needs.build.outputs.output }}
+          path: packages/
       - run: yarn tslint
