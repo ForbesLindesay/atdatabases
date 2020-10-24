@@ -135,11 +135,11 @@ export default createWorkflow(({setWorkflowName, addTrigger, addJob}) => {
 
     const {pg} = setBuildMatrix({
       pg: [
-        '9.6.19-alpine',
+        // '9.6.19-alpine',
         '10.14-alpine',
-        '11.9-alpine',
-        '12.4-alpine',
-        '13.0-alpine',
+        // '11.9-alpine',
+        // '12.4-alpine',
+        // '13.0-alpine',
       ],
     });
 
@@ -148,7 +148,7 @@ export default createWorkflow(({setWorkflowName, addTrigger, addJob}) => {
     add(loadOutput(buildOutput, 'packages/'));
 
     run('yarn test:pg', {
-      env: {PG_TEST_IMAGE: interpolate`postgres:${pg}`},
+      env: {PG_TEST_IMAGE: interpolate`postgres:${pg}`, PG_TEST_DEBUG: 'TRUE'},
     });
   });
 
