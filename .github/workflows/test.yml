@@ -224,3 +224,26 @@ jobs:
           name: ${{ needs.build.outputs.output }}
           path: packages/
       - run: yarn build
+  prettier:
+    needs:
+      - build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 14.x
+          registry-url: https://registry.npmjs.org
+      - name: Get yarn cache directory path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+        id: step_3
+      - name: Enable Cache
+        uses: actions/cache@v2
+        with:
+          path: |-
+            ${{steps.step_3.outputs.dir}}
+            node_modules
+            packages/*/node_modules
+          key: ${{runner.os}}-14.x-${{hashFiles('yarn.lock')}}-2
+      - run: yarn install --prefer-offline
+      - run: yarn prettier:check

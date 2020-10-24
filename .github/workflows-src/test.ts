@@ -30,6 +30,19 @@ export function yarnInstallWithCache(nodeVersion: Expression<string>): Steps {
     run('yarn install --prefer-offline');
   };
 }
+export function setup(nodeVersion: Expression<string> = '14.x'): Steps {
+  return ({use, add}) => {
+    use('actions/checkout@v2');
+    use('actions/setup-node@v1', {
+      with: {
+        'node-version': nodeVersion,
+        'registry-url': 'https://registry.npmjs.org',
+      },
+    });
+
+    add(yarnInstallWithCache(nodeVersion));
+  };
+}
 
 export function buildCache(): Steps {
   return ({use}) => {
@@ -77,16 +90,9 @@ export function loadOutput(name: Expression<string>, path: string): Steps {
 }
 
 export function buildJob(): Job<{output: string}> {
-  return ({add, use, run}) => {
-    use('actions/checkout@v2');
-    use('actions/setup-node@v1', {
-      with: {
-        'node-version': '14.x',
-        'registry-url': 'https://registry.npmjs.org',
-      },
-    });
+  return ({add, run}) => {
+    add(setup());
 
-    add(yarnInstallWithCache('14.x'));
     add(buildCache());
 
     run('yarn build');
@@ -110,18 +116,17 @@ export default createWorkflow(({setWorkflowName, addTrigger, addJob}) => {
       outputs: {output: buildOutput},
     } = addDependencies(build);
 
-    use('actions/checkout@v2');
-    use('actions/setup-node@v1', {
-      with: {
-        'node-version': '14.x',
-        'registry-url': 'https://registry.npmjs.org',
-      },
-    });
-
-    add(yarnInstallWithCache('14.x'));
+    add(setup());
 
     add(loadOutput(buildOutput, 'packages/'));
 
     run('yarn build');
+  });
+  addJob('prettier', ({addDependencies, add, run, use}) => {
+    addDependencies(build);
+
+    add(setup());
+
+    run('yarn prettier:check');
   });
 });
