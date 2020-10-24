@@ -1,0 +1,72 @@
+# !!! This file is auto-generated, do not edit by hand !!!
+# To make changes, edit .github/workflows-src/test.ts and then run:
+#
+#   github-actions-workflow-builder --directory ".github/workflows-src""
+
+name: Test
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 14.x
+          registry-url: https://registry.npmjs.org
+      - name: Enable Cache
+        uses: actions/cache@v2
+        with:
+          path: |-
+            node_modules
+            packages/*/node_modules
+          key:
+            ${{runner.os}}-14.x-${{hashFiles('packages/*/package.json', 'package.json',
+            'yarn.lock')}}
+        id: step_3
+      - if: ${{ steps.step_3.outputs.cache-hit != 'true' }}
+        run: yarn install --frozen-lockfile
+      - run: yarn build:all
+      - name: 'Save output: build'
+        uses: actions/upload-artifact@v2
+        with:
+          name: build
+          path: |-
+            packages/*/lib
+            packages/*/.last_build
+    outputs:
+      output: build
+  test:
+    needs:
+      - build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 14.x
+          registry-url: https://registry.npmjs.org
+      - name: Enable Cache
+        uses: actions/cache@v2
+        with:
+          path: |-
+            node_modules
+            packages/*/node_modules
+          key:
+            ${{runner.os}}-14.x-${{hashFiles('packages/*/package.json', 'package.json',
+            'yarn.lock')}}
+        id: step_3
+      - if: ${{ steps.step_3.outputs.cache-hit != 'true' }}
+        run: yarn install --frozen-lockfile
+      - name: 'Load output: ${{needs.build.output}}'
+        uses: actions/download-artifact@v2
+        with:
+          name: ${{ needs.build.output }}
+          path: packages/
+      - run: yarn build

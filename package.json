@@ -6,6 +6,7 @@
     "packages/*"
   ],
   "scripts": {
+    "update-workflows": "github-actions-workflow-builder --cleanup --directory .github/workflows-src",
     "postinstall": "node scripts/postinstall",
     "prebuild": "wsrun --stages --exclude-missing build",
     "prebuild:all": "wsrun --stages --exclude-missing build",
@@ -49,6 +50,7 @@
     "@types/jest": "^25.2.1",
     "babel-core": "^6.26.3",
     "cross-spawn": "^7.0.2",
+    "github-actions-workflow-builder": "^1.0.1",
     "jest": "^25.5.4",
     "lsr": "^2.0.0",
     "mkdirp": "^1.0.4",

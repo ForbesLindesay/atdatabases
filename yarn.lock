@@ -2774,6 +2774,11 @@ getpass@^0.1.1:
   dependencies:
     assert-plus "^1.0.0"
 
+github-actions-workflow-builder@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/github-actions-workflow-builder/-/github-actions-workflow-builder-1.0.1.tgz#3f7dc854a4e0f44b54702ad27fd723256e0933bc"
+  integrity sha512-iblikTSuWAI3KT+2CU39ppY+EwMg08LvRKgSDDyGrFgpOGMZLL6767iLstQVycHbSV1lDk1qaAfnp4RiciIbuQ==
+
 glob@7.1.6, glob@^7.1.1, glob@^7.1.2, glob@^7.1.3, glob@^7.1.4, glob@~7.1.2:
   version "7.1.6"
   resolved "https://registry.yarnpkg.com/glob/-/glob-7.1.6.tgz#141f33b81a7c2492e125594307480c46679278a6"
