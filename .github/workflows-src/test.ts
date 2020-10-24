@@ -140,11 +140,11 @@ export default createWorkflow(({setWorkflowName, addTrigger, addJob}) => {
           // '14.x'
         ],
         pg: [
-          // '9.6.19-alpine',
+          '9.6.19-alpine',
           '10.14-alpine',
-          // '11.9-alpine',
-          // '12.4-alpine',
-          // '13.0-alpine',
+          '11.9-alpine',
+          '12.4-alpine',
+          '13.0-alpine',
         ],
       },
       {failFast: false},
