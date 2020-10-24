@@ -112,12 +112,16 @@ export default createWorkflow(({setWorkflowName, addTrigger, addJob}) => {
 
   const build = addJob('build', buildJob());
 
-  addJob('test_node', ({addDependencies, add, run}) => {
+  addJob('test_node', ({setBuildMatrix, addDependencies, add, run}) => {
     const {
       outputs: {output: buildOutput},
     } = addDependencies(build);
 
-    add(setup());
+    const {node} = setBuildMatrix({
+      node: ['12.x', '14.x'],
+    });
+
+    add(setup(node));
 
     add(loadOutput(buildOutput, 'packages/'));
 
@@ -157,7 +161,11 @@ export default createWorkflow(({setWorkflowName, addTrigger, addJob}) => {
   });
 
   addJob('lint', ({addDependencies, add, run}) => {
-    addDependencies(build);
+    const {
+      outputs: {output: buildOutput},
+    } = addDependencies(build);
+
+    add(loadOutput(buildOutput, 'packages/'));
 
     add(setup());
 

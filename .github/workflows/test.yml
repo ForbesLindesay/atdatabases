@@ -200,11 +200,16 @@ jobs:
     needs:
       - build
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node:
+          - 12.x
+          - 14.x
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
         with:
-          node-version: 14.x
+          node-version: ${{ matrix.node }}
           registry-url: https://registry.npmjs.org
       - name: Get yarn cache directory path
         run: echo "::set-output name=dir::$(yarn cache dir)"
@@ -216,7 +221,7 @@ jobs:
             ${{steps.step_3.outputs.dir}}
             node_modules
             packages/*/node_modules
-          key: ${{runner.os}}-14.x-${{hashFiles('yarn.lock')}}-2
+          key: ${{runner.os}}-${{matrix.node}}-${{hashFiles('yarn.lock')}}-2
       - run: yarn install --prefer-offline
       - name: "Load output: ${{needs.build.outputs.output}}"
         uses: actions/download-artifact@v2
@@ -308,6 +313,11 @@ jobs:
       - build
     runs-on: ubuntu-latest
     steps:
+      - name: "Load output: ${{needs.build.outputs.output}}"
+        uses: actions/download-artifact@v2
+        with:
+          name: ${{ needs.build.outputs.output }}
+          path: packages/
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
         with:
@@ -315,12 +325,12 @@ jobs:
           registry-url: https://registry.npmjs.org
       - name: Get yarn cache directory path
         run: echo "::set-output name=dir::$(yarn cache dir)"
-        id: step_3
+        id: step_4
       - name: Enable Cache
         uses: actions/cache@v2
         with:
           path: |-
-            ${{steps.step_3.outputs.dir}}
+            ${{steps.step_4.outputs.dir}}
             node_modules
             packages/*/node_modules
           key: ${{runner.os}}-14.x-${{hashFiles('yarn.lock')}}-2
