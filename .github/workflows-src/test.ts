@@ -137,19 +137,26 @@ export default createWorkflow(({setWorkflowName, addTrigger, addJob}) => {
 
     add(loadOutput(buildOutput, 'packages/'));
 
-    run('yarn test:pg');
+    run('yarn test:pg', {env: {PG_TEST_DEBUG: 'true'}});
   });
 
-  addJob('test_mysql', ({addDependencies, add, run}) => {
+  addJob('test_mysql', ({setBuildMatrix, addDependencies, add, run}) => {
     const {
       outputs: {output: buildOutput},
     } = addDependencies(build);
 
-    add(setup());
+    const {node, mysql} = setBuildMatrix({
+      node: ['12.x', '14.x'],
+      mysql: ['5.6.50', '5.7.32', '8.0.22'],
+    });
+
+    add(setup(node));
 
     add(loadOutput(buildOutput, 'packages/'));
 
-    run('yarn test:mysql');
+    run('yarn test:mysql', {
+      env: {MYSQL_TEST_IMAGE: interpolate`mysql:${mysql}`},
+    });
   });
 
   addJob('prettier', ({addDependencies, add, run}) => {
