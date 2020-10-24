@@ -1,4 +1,4 @@
-import connect from '../';
+import connect from '..';
 import sql from '@databases/sql';
 
 jest.setTimeout(30000);

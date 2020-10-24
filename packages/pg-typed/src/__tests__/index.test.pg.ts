@@ -1,6 +1,6 @@
 import connect, {sql} from '@databases/pg';
 import Schema from './__generated__';
-import tables from '../';
+import tables from '..';
 
 const {users, photos} = tables<Schema>({schemaName: 'typed_queries_tests'});
 
