@@ -10,8 +10,8 @@ exports[`apply - after already appying: stdout 1`] = `
 exports[`apply - missing directory: stderr 1`] = `
 "You must supply a directory path for your migrations. You can supply it as either:
 
- - The [36mmigrationsDirectory[39m config value using @databases/pg-config
- - The [36m--directory[39m paramter when calling @databases/pg-migrations
+ - The migrationsDirectory config value using @databases/pg-config
+ - The --directory paramter when calling @databases/pg-migrations
 
 "
 `;
@@ -26,7 +26,7 @@ exports[`apply --dry-run - after already appying: stdout 1`] = `
 `;
 
 exports[`apply --dry-run: stderr 1`] = `
-"This database has not been migrated using @databases/pg-migrations version [36m2.0.0[39m before.
+"This database has not been migrated using @databases/pg-migrations version 2.0.0 before.
 Version updates cannot be automaticaly applied when --dry-run is enabled.
 "
 `;
@@ -39,12 +39,12 @@ exports[`apply --dry-run: stdout 1`] = `
 exports[`apply: stderr 1`] = `""`;
 
 exports[`apply: stdout 1`] = `
-"[36mApplying[39m 00001-init.ts
-[32mApplied[39m 00001-init.ts
-[36mApplying[39m 00002-update.ts
-[32mApplied[39m 00002-update.ts
-[36mApplying[39m 00003-update2.sql
-[32mApplied[39m 00003-update2.sql
+"Applying 00001-init.ts
+Applied 00001-init.ts
+Applying 00002-update.ts
+Applied 00002-update.ts
+Applying 00003-update2.sql
+Applied 00003-update2.sql
 3 migrations applied
 "
 `;
@@ -52,7 +52,7 @@ exports[`apply: stdout 1`] = `
 exports[`help apply: stderr 1`] = `""`;
 
 exports[`help apply: stdout 1`] = `
-"[36mApply Migrations[39m
+"Apply Migrations
 
 Usage: pg-migrations apply [options]
 

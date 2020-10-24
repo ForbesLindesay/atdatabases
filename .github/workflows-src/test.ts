@@ -133,19 +133,22 @@ export default createWorkflow(({setWorkflowName, addTrigger, addJob}) => {
       outputs: {output: buildOutput},
     } = addDependencies(build);
 
-    const {node, pg} = setBuildMatrix({
-      node: [
-        '12.x',
-        // '14.x'
-      ],
-      pg: [
-        // '9.6.19-alpine',
-        '10.14-alpine',
-        // '11.9-alpine',
-        // '12.4-alpine',
-        // '13.0-alpine',
-      ],
-    });
+    const {node, pg} = setBuildMatrix(
+      {
+        node: [
+          '12.x',
+          // '14.x'
+        ],
+        pg: [
+          // '9.6.19-alpine',
+          '10.14-alpine',
+          // '11.9-alpine',
+          // '12.4-alpine',
+          // '13.0-alpine',
+        ],
+      },
+      {failFast: false},
+    );
 
     add(setup(node));
 

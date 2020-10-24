@@ -6,7 +6,7 @@ import {
   ParameterReducer,
   param,
 } from 'parameter-reducers';
-import chalk from 'chalk';
+import chalk = require('chalk');
 import runCommand, {Command} from './runCommand';
 import applyMigrations from './commands/applyMigrations';
 import ignoreError from './commands/ignoreError';
