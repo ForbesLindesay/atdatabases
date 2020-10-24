@@ -233,11 +233,19 @@ jobs:
     needs:
       - build
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        pg:
+          - 9.6.19-alpine
+          - 10.14-alpine
+          - 11.9-alpine
+          - 12.4-alpine
+          - 13.0-alpine
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
         with:
-          node-version: 14.x
+          node-version: 12.x
           registry-url: https://registry.npmjs.org
       - name: Get yarn cache directory path
         run: echo "::set-output name=dir::$(yarn cache dir)"
@@ -249,7 +257,7 @@ jobs:
             ${{steps.step_3.outputs.dir}}
             node_modules
             packages/*/node_modules
-          key: ${{runner.os}}-14.x-${{hashFiles('yarn.lock')}}-2
+          key: ${{runner.os}}-12.x-${{hashFiles('yarn.lock')}}-2
       - run: yarn install --prefer-offline
       - name: "Load output: ${{needs.build.outputs.output}}"
         uses: actions/download-artifact@v2
@@ -258,8 +266,7 @@ jobs:
           path: packages/
       - run: yarn test:pg
         env:
-          PG_TEST_DEBUG: "true"
-          PGCONNECT_TIMEOUT: "10"
+          PG_TEST_IMAGE: postgres:${{matrix.pg}}
   test_mysql:
     needs:
       - build
