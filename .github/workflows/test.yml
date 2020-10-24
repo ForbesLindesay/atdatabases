@@ -259,6 +259,7 @@ jobs:
       - run: yarn test:pg
         env:
           PG_TEST_DEBUG: "true"
+          PGCONNECT_TIMEOUT: "10"
   test_mysql:
     needs:
       - build
@@ -271,7 +272,6 @@ jobs:
         mysql:
           - 5.6.50
           - 5.7.32
-          - 8.0.22
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1

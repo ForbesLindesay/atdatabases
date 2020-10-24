@@ -137,7 +137,9 @@ export default createWorkflow(({setWorkflowName, addTrigger, addJob}) => {
 
     add(loadOutput(buildOutput, 'packages/'));
 
-    run('yarn test:pg', {env: {PG_TEST_DEBUG: 'true'}});
+    run('yarn test:pg', {
+      env: {PG_TEST_DEBUG: 'true', PGCONNECT_TIMEOUT: '10'},
+    });
   });
 
   addJob('test_mysql', ({setBuildMatrix, addDependencies, add, run}) => {
@@ -147,7 +149,11 @@ export default createWorkflow(({setWorkflowName, addTrigger, addJob}) => {
 
     const {node, mysql} = setBuildMatrix({
       node: ['12.x', '14.x'],
-      mysql: ['5.6.50', '5.7.32', '8.0.22'],
+      mysql: [
+        '5.6.50',
+        '5.7.32',
+        // '8.0.22',
+      ],
     });
 
     add(setup(node));
