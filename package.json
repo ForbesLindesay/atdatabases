@@ -50,7 +50,7 @@
     "@types/jest": "^25.2.1",
     "babel-core": "^6.26.3",
     "cross-spawn": "^7.0.2",
-    "github-actions-workflow-builder": "^1.0.1",
+    "github-actions-workflow-builder": "^1.0.2",
     "jest": "^25.5.4",
     "lsr": "^2.0.0",
     "mkdirp": "^1.0.4",

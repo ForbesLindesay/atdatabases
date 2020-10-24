@@ -70,7 +70,9 @@ export default createWorkflow(({setWorkflowName, addTrigger, addJob}) => {
 
   const build = addJob('build', buildJob());
   addJob('test', ({addDependencies, add, run, use}) => {
-    const {output} = addDependencies(build);
+    const {
+      outputs: {output: buildOutput},
+    } = addDependencies(build);
 
     use('actions/checkout@v2');
     use('actions/setup-node@v1', {
@@ -82,7 +84,7 @@ export default createWorkflow(({setWorkflowName, addTrigger, addJob}) => {
 
     add(yarnInstallWithCache('14.x'));
 
-    add(loadOutput(output, 'packages/'));
+    add(loadOutput(buildOutput, 'packages/'));
 
     run('yarn build');
   });
