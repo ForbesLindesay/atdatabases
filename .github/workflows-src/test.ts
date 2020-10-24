@@ -10,21 +10,18 @@ import {
 export function yarnInstallWithCache(nodeVersion: Expression<string>): Steps {
   return ({use, run, when}) => {
     const {
-      outputs: {'cache-hit': cacheHit},
-    } = use<{'cache-hit': 'true' | null}>('Enable Cache', 'actions/cache@v2', {
+      outputs: {dir: yarnCacheDir},
+    } = run<{dir: string}>(
+      `Get yarn cache directory path`,
+      `echo "::set-output name=dir::$(yarn cache dir)"`,
+    );
+    use('Enable Cache', 'actions/cache@v2', {
       with: {
-        path: ['node_modules', 'packages/*/node_modules'].join('\n'),
-        key: interpolate`${runner.os}-${nodeVersion}-${hashFiles(
-          'packages/*/package.json',
-          'package.json',
-          'yarn.lock',
-        )}`,
+        path: yarnCacheDir,
+        key: interpolate`${runner.os}-${nodeVersion}-${hashFiles('yarn.lock')}`,
       },
     });
-
-    when(neq(cacheHit, 'true'), () => {
-      run('yarn install --frozen-lockfile');
-    });
+    run('yarn install --prefer-offline');
   };
 }
 
