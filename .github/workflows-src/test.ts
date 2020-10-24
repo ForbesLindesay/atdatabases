@@ -111,7 +111,8 @@ export default createWorkflow(({setWorkflowName, addTrigger, addJob}) => {
   addTrigger('pull_request', {branches: ['master']});
 
   const build = addJob('build', buildJob());
-  addJob('test', ({addDependencies, add, run, use}) => {
+
+  addJob('test_node', ({addDependencies, add, run}) => {
     const {
       outputs: {output: buildOutput},
     } = addDependencies(build);
@@ -120,7 +121,31 @@ export default createWorkflow(({setWorkflowName, addTrigger, addJob}) => {
 
     add(loadOutput(buildOutput, 'packages/'));
 
-    run('yarn test');
+    run('yarn test:node');
+  });
+
+  addJob('test_pg', ({addDependencies, add, run}) => {
+    const {
+      outputs: {output: buildOutput},
+    } = addDependencies(build);
+
+    add(setup());
+
+    add(loadOutput(buildOutput, 'packages/'));
+
+    run('yarn test:pg');
+  });
+
+  addJob('test_mysql', ({addDependencies, add, run}) => {
+    const {
+      outputs: {output: buildOutput},
+    } = addDependencies(build);
+
+    add(setup());
+
+    add(loadOutput(buildOutput, 'packages/'));
+
+    run('yarn test:mysql');
   });
 
   addJob('prettier', ({addDependencies, add, run}) => {

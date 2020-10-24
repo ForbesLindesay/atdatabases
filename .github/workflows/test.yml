@@ -196,7 +196,7 @@ jobs:
             packages/*/.last_build
     outputs:
       output: build
-  test:
+  test_node:
     needs:
       - build
     runs-on: ubuntu-latest
@@ -223,7 +223,63 @@ jobs:
         with:
           name: ${{ needs.build.outputs.output }}
           path: packages/
-      - run: yarn test
+      - run: yarn test:node
+  test_pg:
+    needs:
+      - build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 14.x
+          registry-url: https://registry.npmjs.org
+      - name: Get yarn cache directory path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+        id: step_3
+      - name: Enable Cache
+        uses: actions/cache@v2
+        with:
+          path: |-
+            ${{steps.step_3.outputs.dir}}
+            node_modules
+            packages/*/node_modules
+          key: ${{runner.os}}-14.x-${{hashFiles('yarn.lock')}}-2
+      - run: yarn install --prefer-offline
+      - name: "Load output: ${{needs.build.outputs.output}}"
+        uses: actions/download-artifact@v2
+        with:
+          name: ${{ needs.build.outputs.output }}
+          path: packages/
+      - run: yarn test:pg
+  test_mysql:
+    needs:
+      - build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 14.x
+          registry-url: https://registry.npmjs.org
+      - name: Get yarn cache directory path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+        id: step_3
+      - name: Enable Cache
+        uses: actions/cache@v2
+        with:
+          path: |-
+            ${{steps.step_3.outputs.dir}}
+            node_modules
+            packages/*/node_modules
+          key: ${{runner.os}}-14.x-${{hashFiles('yarn.lock')}}-2
+      - run: yarn install --prefer-offline
+      - name: "Load output: ${{needs.build.outputs.output}}"
+        uses: actions/download-artifact@v2
+        with:
+          name: ${{ needs.build.outputs.output }}
+          path: packages/
+      - run: yarn test:mysql
   prettier:
     needs:
       - build
