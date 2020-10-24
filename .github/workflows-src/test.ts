@@ -17,8 +17,14 @@ export function yarnInstallWithCache(nodeVersion: Expression<string>): Steps {
     );
     use('Enable Cache', 'actions/cache@v2', {
       with: {
-        path: yarnCacheDir,
-        key: interpolate`${runner.os}-${nodeVersion}-${hashFiles('yarn.lock')}`,
+        path: [
+          interpolate`${yarnCacheDir}`,
+          'node_modules',
+          'packages/*/node_modules',
+        ].join('\n'),
+        key: interpolate`${runner.os}-${nodeVersion}-${hashFiles(
+          'yarn.lock',
+        )}-2`,
       },
     });
     run('yarn install --prefer-offline');
