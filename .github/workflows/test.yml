@@ -26,8 +26,11 @@ jobs:
       - name: Enable Cache
         uses: actions/cache@v2
         with:
-          path: ${{ steps.step_3.outputs.dir }}
-          key: ${{runner.os}}-14.x-${{hashFiles('yarn.lock')}}
+          path: |-
+            ${{steps.step_3.outputs.dir}}
+            node_modules
+            packages/*/node_modules
+          key: ${{runner.os}}-14.x-${{hashFiles('yarn.lock')}}-2
       - run: yarn install --prefer-offline
       - run: yarn build:all
       - name: "Save output: build"
@@ -55,8 +58,11 @@ jobs:
       - name: Enable Cache
         uses: actions/cache@v2
         with:
-          path: ${{ steps.step_3.outputs.dir }}
-          key: ${{runner.os}}-14.x-${{hashFiles('yarn.lock')}}
+          path: |-
+            ${{steps.step_3.outputs.dir}}
+            node_modules
+            packages/*/node_modules
+          key: ${{runner.os}}-14.x-${{hashFiles('yarn.lock')}}-2
       - run: yarn install --prefer-offline
       - name: "Load output: ${{needs.build.outputs.output}}"
         uses: actions/download-artifact@v2
