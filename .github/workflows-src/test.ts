@@ -128,17 +128,27 @@ export default createWorkflow(({setWorkflowName, addTrigger, addJob}) => {
     run('yarn test:node');
   });
 
-  addJob('test_pg', ({addDependencies, add, run}) => {
+  addJob('test_pg', ({setBuildMatrix, addDependencies, add, run}) => {
     const {
       outputs: {output: buildOutput},
     } = addDependencies(build);
 
-    add(setup());
+    const {pg} = setBuildMatrix({
+      pg: [
+        '9.6.19-alpine',
+        '10.14-alpine',
+        '11.9-alpine',
+        '12.4-alpine',
+        '13.0-alpine',
+      ],
+    });
+
+    add(setup('12.x'));
 
     add(loadOutput(buildOutput, 'packages/'));
 
     run('yarn test:pg', {
-      env: {PG_TEST_DEBUG: 'true', PGCONNECT_TIMEOUT: '10'},
+      env: {PG_TEST_IMAGE: interpolate`postgres:${pg}`},
     });
   });
 
