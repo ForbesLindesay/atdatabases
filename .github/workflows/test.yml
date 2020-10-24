@@ -235,13 +235,15 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
+        node:
+          - 12.x
         pg:
           - 10.14-alpine
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
         with:
-          node-version: 12.x
+          node-version: ${{ matrix.node }}
           registry-url: https://registry.npmjs.org
       - name: Get yarn cache directory path
         run: echo "::set-output name=dir::$(yarn cache dir)"
@@ -253,7 +255,7 @@ jobs:
             ${{steps.step_3.outputs.dir}}
             node_modules
             packages/*/node_modules
-          key: ${{runner.os}}-12.x-${{hashFiles('yarn.lock')}}-2
+          key: ${{runner.os}}-${{matrix.node}}-${{hashFiles('yarn.lock')}}-2
       - run: yarn install --prefer-offline
       - name: "Load output: ${{needs.build.outputs.output}}"
         uses: actions/download-artifact@v2
