@@ -64,10 +64,9 @@ async function writeIfDifferent(filename: string, content: string) {
 }
 
 test('get built in types', async () => {
-  const builtInTypes = await getTypes(db, {schemaName: 'pg_catalog'});
-  // .filter(
-  //   (t) => !t.typeName.startsWith('pg_'),
-  // );
+  const builtInTypes = (await getTypes(db, {schemaName: 'pg_catalog'})).filter(
+    (t) => !t.typeName.startsWith('pg_'),
+  );
   const groupedTypes = builtInTypes.reduce<{[key: string]: Type[]}>(
     (result, ty) => {
       const category = Object.keys(TypeCateogry).find(
