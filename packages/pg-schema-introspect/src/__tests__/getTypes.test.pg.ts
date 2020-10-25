@@ -219,31 +219,37 @@ test('get custom types', async () => {
     ]
   `);
   expect(
-    (await getTypes(db, {schemaName: 'gettypes'})).map((t) => {
-      const result = {
-        ...t,
-        schemaID: typeof t.schemaID === 'number' ? '<oid>' : t.schemaID,
-        typeID: typeof t.typeID === 'number' ? '<oid>' : t.typeID,
-      };
-      if ('subtypeID' in result && typeof result.subtypeID === 'number') {
-        result.subtypeID = '<oid>' as any;
-      }
-      if ('basetypeID' in result && typeof result.basetypeID === 'number') {
-        result.basetypeID = '<oid>' as any;
-      }
-      if ('classID' in result && typeof result.classID === 'number') {
-        result.classID = '<oid>' as any;
-      }
-      if ('attributes' in result) {
-        result.attributes = result.attributes.map((a) => ({
-          ...a,
-          classID: typeof a.classID === 'number' ? '<oid>' : a.classID,
-          schemaID: typeof a.schemaID === 'number' ? '<oid>' : a.schemaID,
-          typeID: typeof a.typeID === 'number' ? '<oid>' : a.typeID,
-        })) as any[];
-      }
-      return result;
-    }),
+    (await getTypes(db, {schemaName: 'gettypes'}))
+      .map((t) => {
+        const result = {
+          ...t,
+          schemaID: typeof t.schemaID === 'number' ? '<oid>' : t.schemaID,
+          typeID: typeof t.typeID === 'number' ? '<oid>' : t.typeID,
+        };
+        if ('subtypeID' in result && typeof result.subtypeID === 'number') {
+          result.subtypeID = '<oid>' as any;
+        }
+        if ('basetypeID' in result && typeof result.basetypeID === 'number') {
+          result.basetypeID = '<oid>' as any;
+        }
+        if ('classID' in result && typeof result.classID === 'number') {
+          result.classID = '<oid>' as any;
+        }
+        if ('attributes' in result) {
+          result.attributes = result.attributes.map((a) => ({
+            ...a,
+            classID: typeof a.classID === 'number' ? '<oid>' : a.classID,
+            schemaID: typeof a.schemaID === 'number' ? '<oid>' : a.schemaID,
+            typeID: typeof a.typeID === 'number' ? '<oid>' : a.typeID,
+          })) as any[];
+        }
+        return result;
+      })
+      .filter((t) => {
+        // newer versions of postgres include this, but we need the tests to continue
+        // passing on postgres 10.14 for now.
+        return t.typeName !== '_email';
+      }),
   ).toMatchInlineSnapshot(`
     Array [
       Object {
