@@ -310,8 +310,6 @@ jobs:
         env:
           MYSQL_TEST_IMAGE: mysql:${{matrix.mysql}}
   prettier:
-    needs:
-      - build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2

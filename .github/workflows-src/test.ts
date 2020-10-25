@@ -183,8 +183,6 @@ export default createWorkflow(({setWorkflowName, addTrigger, addJob}) => {
   });
 
   addJob('prettier', ({addDependencies, add, run}) => {
-    addDependencies(build);
-
     add(setup());
 
     run('yarn prettier:check');
