@@ -139,6 +139,11 @@ enum PgDataTypeID {
   _jsonb = 3807,
 
   /**
+   * Array<jsonpath>
+   */
+  _jsonpath = 4073,
+
+  /**
    * Array<line>
    */
   _line = 629,
@@ -194,11 +199,6 @@ enum PgDataTypeID {
   _path = 1019,
 
   /**
-   * Array<pg_lsn>
-   */
-  _pg_lsn = 3221,
-
-  /**
    * Array<point>
    */
   _point = 1017,
@@ -217,6 +217,11 @@ enum PgDataTypeID {
    * Array<regclass>
    */
   _regclass = 2210,
+
+  /**
+   * Array<regcollation>
+   */
+  _regcollation = 4192,
 
   /**
    * Array<regconfig>
@@ -349,6 +354,11 @@ enum PgDataTypeID {
   _xid = 1011,
 
   /**
+   * Array<xid8>
+   */
+  _xid8 = 271,
+
+  /**
    * Array<xml>
    */
   _xml = 143,
@@ -375,6 +385,14 @@ enum PgDataTypeID {
 
   anyarray = 2277,
 
+  anycompatible = 5077,
+
+  anycompatiblearray = 5078,
+
+  anycompatiblenonarray = 5079,
+
+  anycompatiblerange = 5080,
+
   anyelement = 2283,
 
   anyenum = 3500,
@@ -398,6 +416,8 @@ enum PgDataTypeID {
   opaque = 2282,
 
   record = 2249,
+
+  table_am_handler = 269,
 
   trigger = 2279,
 
@@ -466,6 +486,8 @@ enum PgDataTypeID {
    */
   jsonb = 3802,
 
+  jsonpath = 4072,
+
   /**
    * XX:XX:XX:XX:XX:XX, MAC address
    */
@@ -515,6 +537,8 @@ enum PgDataTypeID {
    * transaction id
    */
   xid = 28,
+
+  xid8 = 5069,
 
   /**
    * XML content

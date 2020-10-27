@@ -1,5 +1,5 @@
 import connect, {sql, DataTypeID} from '@databases/pg';
-import getTypes, {Type} from '../getTypes';
+import getTypes from '../getTypes';
 import TypeCateogry from '../enums/TypeCategory';
 import {readFileSync, writeFileSync} from 'fs';
 import TypeKind from '../enums/TypeKind';
@@ -64,19 +64,186 @@ async function writeIfDifferent(filename: string, content: string) {
 }
 
 test('get built in types', async () => {
-  const builtInTypes = (await getTypes(db, {schemaName: 'pg_catalog'})).filter(
-    (t) => !t.typeName.startsWith('pg_'),
-  );
-  const groupedTypes = builtInTypes.reduce<{[key: string]: Type[]}>(
-    (result, ty) => {
-      const category = Object.keys(TypeCateogry).find(
-        (c) => (TypeCateogry as any)[c] === ty.category,
-      )!;
-      result[category] = (result[category] || []).concat([ty]);
-      return result;
+  const builtInTypes = (await getTypes(db, {schemaName: 'pg_catalog'}))
+    .filter(
+      (t) => !t.typeName.startsWith('pg_') && !t.typeName.startsWith('_pg_'),
+    )
+    .map((t) => ({
+      kind: t.kind,
+      typeID: t.typeID,
+      typeName: t.typeName,
+      category: t.category,
+      comment: t.comment,
+      ...('subtypeName' in t ? {subtypeName: t.subtypeName} : {}),
+    }));
+  for (const t of [
+    {
+      kind: TypeKind.Array,
+      typeID: 1023,
+      typeName: '_abstime',
+      subtypeName: 'abstime',
+      category: TypeCateogry.Array,
+      comment: null,
     },
-    {},
-  );
+    {
+      kind: TypeKind.Array,
+      typeID: 4073,
+      typeName: '_jsonpath',
+      subtypeName: 'jsonpath',
+      category: TypeCateogry.Array,
+      comment: null,
+    },
+    {
+      kind: TypeKind.Array,
+      typeID: 4192,
+      typeName: '_regcollation',
+      subtypeName: 'regcollation',
+      category: TypeCateogry.Array,
+      comment: null,
+    },
+    {
+      kind: TypeKind.Array,
+      typeID: 1024,
+      typeName: '_reltime',
+      subtypeName: 'reltime',
+      category: TypeCateogry.Array,
+      comment: null,
+    },
+    {
+      kind: TypeKind.Array,
+      typeID: 1025,
+      typeName: '_tinterval',
+      subtypeName: 'tinterval',
+      category: TypeCateogry.Array,
+      comment: null,
+    },
+    {
+      kind: TypeKind.Array,
+      typeID: 271,
+      typeName: '_xid8',
+      subtypeName: 'xid8',
+      category: TypeCateogry.Array,
+      comment: null,
+    },
+    {
+      kind: TypeKind.Base,
+      typeID: 702,
+      typeName: 'abstime',
+      category: TypeCateogry.DateTime,
+      comment: null,
+    },
+    {
+      kind: TypeKind.Pseudo,
+      typeID: 5077,
+      typeName: 'anycompatible',
+      category: TypeCateogry.PseudoTypes,
+      comment: null,
+    },
+    {
+      kind: TypeKind.Pseudo,
+      typeID: 5078,
+      typeName: 'anycompatiblearray',
+      category: TypeCateogry.PseudoTypes,
+      comment: null,
+    },
+    {
+      kind: TypeKind.Pseudo,
+      typeID: 5079,
+      typeName: 'anycompatiblenonarray',
+      category: TypeCateogry.PseudoTypes,
+      comment: null,
+    },
+    {
+      kind: TypeKind.Pseudo,
+      typeID: 5080,
+      typeName: 'anycompatiblerange',
+      category: TypeCateogry.PseudoTypes,
+      comment: null,
+    },
+    {
+      kind: TypeKind.Pseudo,
+      typeID: 2282,
+      typeName: 'opaque',
+      category: TypeCateogry.PseudoTypes,
+      comment: null,
+    },
+    {
+      kind: TypeKind.Pseudo,
+      typeID: 269,
+      typeName: 'table_am_handler',
+      category: TypeCateogry.PseudoTypes,
+      comment: null,
+    },
+    {
+      kind: TypeKind.Base,
+      typeID: 703,
+      typeName: 'reltime',
+      category: TypeCateogry.Timespan,
+      comment: null,
+    },
+    {
+      kind: TypeKind.Base,
+      typeID: 704,
+      typeName: 'tinterval',
+      category: TypeCateogry.Timespan,
+      comment: null,
+    },
+    {
+      kind: TypeKind.Base,
+      typeID: 4072,
+      typeName: 'jsonpath',
+      category: TypeCateogry.UserDefined,
+      comment: null,
+    },
+    {
+      kind: TypeKind.Base,
+      typeID: 210,
+      typeName: 'smgr',
+      category: TypeCateogry.UserDefined,
+      comment: null,
+    },
+    {
+      kind: TypeKind.Base,
+      typeID: 5069,
+      typeName: 'xid8',
+      category: TypeCateogry.UserDefined,
+      comment: null,
+    },
+  ]) {
+    if (
+      !builtInTypes.some((existingT) => {
+        if (existingT.typeID === t.typeID) {
+          expect({
+            kind: t.kind,
+            typeID: t.typeID,
+            typeName: t.typeName,
+            category: t.category,
+          }).toEqual({
+            kind: existingT.kind,
+            typeID: existingT.typeID,
+            typeName: existingT.typeName,
+            category: existingT.category,
+          });
+          return true;
+        }
+        return false;
+      })
+    ) {
+      builtInTypes.push(t);
+    }
+  }
+
+  builtInTypes.sort((a, b) => (a.typeName > b.typeName ? 1 : -1));
+
+  const groupedTypes = builtInTypes.reduce<{
+    [key: string]: typeof builtInTypes[number][];
+  }>((result, ty) => {
+    const category = Object.keys(TypeCateogry).find(
+      (c) => (TypeCateogry as any)[c] === ty.category,
+    )!;
+    result[category] = (result[category] || []).concat([ty]);
+    return result;
+  }, {});
   expect(
     Object.keys(groupedTypes)
       .sort()
