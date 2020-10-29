@@ -133,7 +133,7 @@ test('get built in types', async () => {
         );
         if (typeFromFile) {
           if (typeFromPg.pgVersion[0] >= typeFromFile.pgVersion[0]) {
-            expect(typeFromFile).toBe(typeFromPg);
+            expect(typeFromFile).toEqual(typeFromPg);
           }
         } else {
           expect(builtInTypesFromFile).toContainEqual(typeFromPg);
