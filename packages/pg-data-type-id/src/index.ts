@@ -903,36 +903,6 @@ enum PgDataTypeID {
    */
   tinterval = 704,
 
-  // === Composite ===
-
-  pg_attribute = 75,
-
-  pg_auth_members = 2843,
-
-  pg_authid = 2842,
-
-  pg_class = 83,
-
-  pg_database = 1248,
-
-  pg_proc = 81,
-
-  pg_shmem_allocations = 12186,
-
-  pg_shseclabel = 4066,
-
-  pg_stat_progress_analyze = 12299,
-
-  pg_stat_progress_basebackup = 12315,
-
-  pg_stat_slru = 12259,
-
-  pg_statistic_ext_data = 12015,
-
-  pg_subscription = 6101,
-
-  pg_type = 71,
-
   // === Unknown ===
 
   /**

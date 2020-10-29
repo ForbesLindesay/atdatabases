@@ -107,17 +107,17 @@ async function writeJsonIfDifferent(
 
 test('get built in types', async () => {
   const pgVersion = await getPgVersion();
-  const builtInTypesFromPg = (
-    await getTypes(db, {schemaName: 'pg_catalog'})
-  ).map((t) => ({
-    pgVersion,
-    kind: t.kind,
-    typeID: t.typeID,
-    typeName: t.typeName,
-    category: t.category,
-    comment: t.comment,
-    ...('subtypeName' in t ? {subtypeName: t.subtypeName} : {}),
-  }));
+  const builtInTypesFromPg = (await getTypes(db, {schemaName: 'pg_catalog'}))
+    .filter((t) => t.kind !== TypeKind.Composite)
+    .map((t) => ({
+      pgVersion,
+      kind: t.kind,
+      typeID: t.typeID,
+      typeName: t.typeName,
+      category: t.category,
+      comment: t.comment,
+      ...('subtypeName' in t ? {subtypeName: t.subtypeName} : {}),
+    }));
 
   const oldState: BuiltinTypesState = JSON.parse(
     readFileSync(`${__dirname}/builtinTypes.json`, 'utf8'),

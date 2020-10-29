@@ -87,22 +87,6 @@ Object {
   "Boolean": Array [
     "16 = bool",
   ],
-  "Composite": Array [
-    "75 = pg_attribute",
-    "2843 = pg_auth_members",
-    "2842 = pg_authid",
-    "83 = pg_class",
-    "1248 = pg_database",
-    "81 = pg_proc",
-    "12186 = pg_shmem_allocations",
-    "4066 = pg_shseclabel",
-    "12299 = pg_stat_progress_analyze",
-    "12315 = pg_stat_progress_basebackup",
-    "12259 = pg_stat_slru",
-    "12015 = pg_statistic_ext_data",
-    "6101 = pg_subscription",
-    "71 = pg_type",
-  ],
   "DateTime": Array [
     "702 = abstime",
     "1082 = date",
