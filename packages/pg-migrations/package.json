@@ -25,9 +25,6 @@
   "publishConfig": {
     "access": "public"
   },
-  "peerDependencies": {
-    "prettier": "*"
-  },
   "devDependencies": {
     "@types/node": "^13.13.4",
     "@types/semver": "^7.3.4",
