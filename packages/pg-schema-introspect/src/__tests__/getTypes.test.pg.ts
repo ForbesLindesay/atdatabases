@@ -81,19 +81,17 @@ async function writeJsonIfDifferent(filename: string, content: unknown) {
 
 test('get built in types', async () => {
   const pgVersion = await getPgVersion();
-  const builtInTypesFromPg = (await getTypes(db, {schemaName: 'pg_catalog'}))
-    .filter(
-      (t) => !t.typeName.startsWith('pg_') && !t.typeName.startsWith('_pg_'),
-    )
-    .map((t) => ({
-      pgVersion,
-      kind: t.kind,
-      typeID: t.typeID,
-      typeName: t.typeName,
-      category: t.category,
-      comment: t.comment,
-      ...('subtypeName' in t ? {subtypeName: t.subtypeName} : {}),
-    }));
+  const builtInTypesFromPg = (
+    await getTypes(db, {schemaName: 'pg_catalog'})
+  ).map((t) => ({
+    pgVersion,
+    kind: t.kind,
+    typeID: t.typeID,
+    typeName: t.typeName,
+    category: t.category,
+    comment: t.comment,
+    ...('subtypeName' in t ? {subtypeName: t.subtypeName} : {}),
+  }));
 
   let builtInTypesFromFile: typeof builtInTypesFromPg = JSON.parse(
     readFileSync(`${__dirname}/builtinTypes.json`, 'utf8'),
@@ -104,7 +102,7 @@ test('get built in types', async () => {
         (typeFromFile) => typeFromFile.typeID === typeFromPg.typeID,
       );
       if (typeFromFile) {
-        if (!lt(typeFromPg.pgVersion, typeFromFile.pgVersion)) {
+        if (typeFromPg.pgVersion[0] >= typeFromFile.pgVersion[0]) {
           expect(typeFromFile).toBe(typeFromPg);
         }
       } else {
@@ -475,10 +473,6 @@ async function getPgVersion(): Promise<[number, number]> {
   return [0, 0];
 }
 
-function lt(a: [number, number], b: [number, number]) {
-  return a[0] < b[0] || (a[0] === b[0] && a[1] < b[1]);
-}
-
 function lte(a: [number, number], b: [number, number]) {
-  return (a[0] === b[0] && a[1] === b[1]) || lt(a, b);
+  return a[0] < b[0] || (a[0] === b[0] && (a[1] === b[1] || a[1] < b[1]));
 }

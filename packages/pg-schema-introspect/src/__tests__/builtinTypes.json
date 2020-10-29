@@ -13,8 +13,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 1034,
@@ -25,8 +25,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 1561,
@@ -37,8 +37,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 1000,
@@ -49,8 +49,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 1020,
@@ -61,8 +61,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 1014,
@@ -73,8 +73,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 1001,
@@ -85,8 +85,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 1002,
@@ -97,8 +97,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 1012,
@@ -109,8 +109,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 651,
@@ -121,8 +121,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 719,
@@ -133,8 +133,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 1263,
@@ -145,8 +145,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 1182,
@@ -157,8 +157,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 3913,
@@ -169,8 +169,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 1021,
@@ -181,8 +181,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 1022,
@@ -193,8 +193,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 3644,
@@ -205,8 +205,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 1041,
@@ -217,8 +217,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 1005,
@@ -229,8 +229,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 1006,
@@ -241,8 +241,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 1007,
@@ -253,8 +253,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 3905,
@@ -265,8 +265,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 1016,
@@ -277,8 +277,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 3927,
@@ -289,8 +289,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 1187,
@@ -301,8 +301,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 199,
@@ -313,8 +313,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 3807,
@@ -325,8 +325,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 4073,
@@ -337,8 +337,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 629,
@@ -349,8 +349,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 1018,
@@ -361,8 +361,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 1040,
@@ -373,8 +373,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 775,
@@ -385,8 +385,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 791,
@@ -397,8 +397,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 1003,
@@ -409,8 +409,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 1231,
@@ -421,8 +421,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 3907,
@@ -433,8 +433,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 1028,
@@ -445,8 +445,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 1013,
@@ -457,8 +457,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 1019,
@@ -469,8 +469,32 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
+    ],
+    "kind": "array",
+    "typeID": 3221,
+    "typeName": "_pg_lsn",
+    "category": "A",
+    "comment": null,
+    "subtypeName": "pg_lsn"
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "array",
+    "typeID": 5039,
+    "typeName": "_pg_snapshot",
+    "category": "A",
+    "comment": null,
+    "subtypeName": "pg_snapshot"
+  },
+  {
+    "pgVersion": [
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 1017,
@@ -481,8 +505,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 1027,
@@ -493,8 +517,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "p",
     "typeID": 2287,
@@ -504,8 +528,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 2201,
@@ -516,8 +540,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 2210,
@@ -528,8 +552,20 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
+    ],
+    "kind": "array",
+    "typeID": 4192,
+    "typeName": "_regcollation",
+    "category": "A",
+    "comment": null,
+    "subtypeName": "regcollation"
+  },
+  {
+    "pgVersion": [
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 3735,
@@ -540,8 +576,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 3770,
@@ -552,8 +588,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 4090,
@@ -564,8 +600,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 2208,
@@ -576,8 +612,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 2209,
@@ -588,8 +624,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 1008,
@@ -600,8 +636,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 2207,
@@ -612,8 +648,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 4097,
@@ -624,8 +660,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 2211,
@@ -648,8 +684,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 1009,
@@ -660,8 +696,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 1010,
@@ -672,8 +708,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 1183,
@@ -684,8 +720,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 1115,
@@ -696,8 +732,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 1185,
@@ -708,8 +744,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 1270,
@@ -732,8 +768,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 3645,
@@ -744,8 +780,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 3909,
@@ -756,8 +792,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 3911,
@@ -768,8 +804,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 3643,
@@ -780,8 +816,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 2949,
@@ -792,8 +828,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 2951,
@@ -804,8 +840,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 1563,
@@ -816,8 +852,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 1015,
@@ -828,8 +864,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 1011,
@@ -840,8 +876,20 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
+    ],
+    "kind": "array",
+    "typeID": 271,
+    "typeName": "_xid8",
+    "category": "A",
+    "comment": null,
+    "subtypeName": "xid8"
+  },
+  {
+    "pgVersion": [
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 143,
@@ -864,8 +912,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "b",
     "typeID": 1033,
@@ -876,8 +924,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "p",
     "typeID": 2276,
@@ -887,8 +935,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "p",
     "typeID": 2277,
@@ -898,8 +946,52 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
+    ],
+    "kind": "p",
+    "typeID": 5077,
+    "typeName": "anycompatible",
+    "category": "P",
+    "comment": "pseudo-type representing a polymorphic common type"
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "p",
+    "typeID": 5078,
+    "typeName": "anycompatiblearray",
+    "category": "P",
+    "comment": "pseudo-type representing an array of polymorphic common type elements"
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "p",
+    "typeID": 5079,
+    "typeName": "anycompatiblenonarray",
+    "category": "P",
+    "comment": "pseudo-type representing a polymorphic common type that is not an array"
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "p",
+    "typeID": 5080,
+    "typeName": "anycompatiblerange",
+    "category": "P",
+    "comment": "pseudo-type representing a range over a polymorphic common type"
+  },
+  {
+    "pgVersion": [
+      13,
+      0
     ],
     "kind": "p",
     "typeID": 2283,
@@ -909,8 +1001,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "p",
     "typeID": 3500,
@@ -920,8 +1012,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "p",
     "typeID": 2776,
@@ -931,19 +1023,19 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "p",
     "typeID": 3831,
     "typeName": "anyrange",
     "category": "P",
-    "comment": "pseudo-type representing a polymorphic base type that is a range"
+    "comment": "pseudo-type representing a range over a polymorphic base type"
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "b",
     "typeID": 1560,
@@ -954,8 +1046,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "b",
     "typeID": 16,
@@ -966,8 +1058,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "b",
     "typeID": 603,
@@ -978,8 +1070,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "b",
     "typeID": 1042,
@@ -990,8 +1082,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "b",
     "typeID": 17,
@@ -1002,8 +1094,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "b",
     "typeID": 18,
@@ -1014,8 +1106,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "b",
     "typeID": 29,
@@ -1026,8 +1118,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "b",
     "typeID": 650,
@@ -1038,8 +1130,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "b",
     "typeID": 718,
@@ -1050,8 +1142,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "p",
     "typeID": 2275,
@@ -1061,8 +1153,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "b",
     "typeID": 1082,
@@ -1073,8 +1165,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "r",
     "typeID": 3912,
@@ -1084,8 +1176,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "p",
     "typeID": 3838,
@@ -1095,8 +1187,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "p",
     "typeID": 3115,
@@ -1106,8 +1198,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "b",
     "typeID": 700,
@@ -1118,8 +1210,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "b",
     "typeID": 701,
@@ -1130,8 +1222,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "b",
     "typeID": 3642,
@@ -1142,8 +1234,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "p",
     "typeID": 325,
@@ -1153,8 +1245,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "b",
     "typeID": 869,
@@ -1165,8 +1257,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "b",
     "typeID": 21,
@@ -1177,8 +1269,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 22,
@@ -1189,8 +1281,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "b",
     "typeID": 23,
@@ -1201,8 +1293,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "r",
     "typeID": 3904,
@@ -1212,8 +1304,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "b",
     "typeID": 20,
@@ -1224,8 +1316,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "r",
     "typeID": 3926,
@@ -1235,8 +1327,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "p",
     "typeID": 2281,
@@ -1246,8 +1338,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "b",
     "typeID": 1186,
@@ -1258,8 +1350,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "b",
     "typeID": 114,
@@ -1270,8 +1362,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "b",
     "typeID": 3802,
@@ -1282,8 +1374,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "b",
     "typeID": 4072,
@@ -1294,8 +1386,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "p",
     "typeID": 2280,
@@ -1305,8 +1397,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "b",
     "typeID": 628,
@@ -1317,8 +1409,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "b",
     "typeID": 601,
@@ -1329,8 +1421,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "b",
     "typeID": 829,
@@ -1341,8 +1433,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "b",
     "typeID": 774,
@@ -1353,8 +1445,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "b",
     "typeID": 790,
@@ -1365,8 +1457,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "b",
     "typeID": 19,
@@ -1377,8 +1469,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "b",
     "typeID": 1700,
@@ -1389,8 +1481,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "r",
     "typeID": 3906,
@@ -1400,8 +1492,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "b",
     "typeID": 26,
@@ -1412,8 +1504,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "array",
     "typeID": 30,
@@ -1435,8 +1527,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "b",
     "typeID": 602,
@@ -1447,8 +1539,2214 @@
   },
   {
     "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12013,
+    "typeName": "pg_aggregate",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12007,
+    "typeName": "pg_am",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12008,
+    "typeName": "pg_amop",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12009,
+    "typeName": "pg_amproc",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12000,
+    "typeName": "pg_attrdef",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 75,
+    "typeName": "pg_attribute",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 2843,
+    "typeName": "pg_auth_members",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 2842,
+    "typeName": "pg_authid",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12151,
+    "typeName": "pg_available_extension_versions",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
       12,
       4
+    ],
+    "kind": "c",
+    "typeID": 12153,
+    "typeName": "pg_available_extension_versions",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12148,
+    "typeName": "pg_available_extensions",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
+    ],
+    "kind": "c",
+    "typeID": 12150,
+    "typeName": "pg_available_extensions",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12021,
+    "typeName": "pg_cast",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 83,
+    "typeName": "pg_class",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12045,
+    "typeName": "pg_collation",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12183,
+    "typeName": "pg_config",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
+    ],
+    "kind": "c",
+    "typeID": 12184,
+    "typeName": "pg_config",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12001,
+    "typeName": "pg_constraint",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12024,
+    "typeName": "pg_conversion",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12145,
+    "typeName": "pg_cursors",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
+    ],
+    "kind": "c",
+    "typeID": 12147,
+    "typeName": "pg_cursors",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 1248,
+    "typeName": "pg_database",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12026,
+    "typeName": "pg_db_role_setting",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "p",
+    "typeID": 32,
+    "typeName": "pg_ddl_command",
+    "category": "P",
+    "comment": "internal type for passing CollectedCommand"
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12042,
+    "typeName": "pg_default_acl",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12025,
+    "typeName": "pg_depend",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "b",
+    "typeID": 3402,
+    "typeName": "pg_dependencies",
+    "category": "S",
+    "comment": "multivariate dependencies",
+    "subtypeName": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12020,
+    "typeName": "pg_description",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12022,
+    "typeName": "pg_enum",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12019,
+    "typeName": "pg_event_trigger",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12035,
+    "typeName": "pg_extension",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12171,
+    "typeName": "pg_file_settings",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
+    ],
+    "kind": "c",
+    "typeID": 12172,
+    "typeName": "pg_file_settings",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12036,
+    "typeName": "pg_foreign_data_wrapper",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12037,
+    "typeName": "pg_foreign_server",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12039,
+    "typeName": "pg_foreign_table",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12096,
+    "typeName": "pg_group",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
+    ],
+    "kind": "c",
+    "typeID": 12098,
+    "typeName": "pg_group",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12174,
+    "typeName": "pg_hba_file_rules",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
+    ],
+    "kind": "c",
+    "typeID": 12175,
+    "typeName": "pg_hba_file_rules",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12003,
+    "typeName": "pg_index",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12122,
+    "typeName": "pg_indexes",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
+    ],
+    "kind": "c",
+    "typeID": 12124,
+    "typeName": "pg_indexes",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12002,
+    "typeName": "pg_inherits",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12043,
+    "typeName": "pg_init_privs",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12010,
+    "typeName": "pg_language",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12012,
+    "typeName": "pg_largeobject",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12011,
+    "typeName": "pg_largeobject_metadata",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12142,
+    "typeName": "pg_locks",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
+    ],
+    "kind": "c",
+    "typeID": 12144,
+    "typeName": "pg_locks",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "b",
+    "typeID": 3220,
+    "typeName": "pg_lsn",
+    "category": "U",
+    "comment": "PostgreSQL LSN datatype",
+    "subtypeName": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12118,
+    "typeName": "pg_matviews",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
+    ],
+    "kind": "c",
+    "typeID": 12120,
+    "typeName": "pg_matviews",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "b",
+    "typeID": 5017,
+    "typeName": "pg_mcv_list",
+    "category": "S",
+    "comment": "multivariate MCV list",
+    "subtypeName": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12023,
+    "typeName": "pg_namespace",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "b",
+    "typeID": 3361,
+    "typeName": "pg_ndistinct",
+    "category": "S",
+    "comment": "multivariate ndistinct coefficients",
+    "subtypeName": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "b",
+    "typeID": 194,
+    "typeName": "pg_node_tree",
+    "category": "S",
+    "comment": "string representing an internal node tree",
+    "subtypeName": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12006,
+    "typeName": "pg_opclass",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12004,
+    "typeName": "pg_operator",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12005,
+    "typeName": "pg_opfamily",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12046,
+    "typeName": "pg_partitioned_table",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12102,
+    "typeName": "pg_policies",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
+    ],
+    "kind": "c",
+    "typeID": 12104,
+    "typeName": "pg_policies",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12040,
+    "typeName": "pg_policy",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12159,
+    "typeName": "pg_prepared_statements",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
+    ],
+    "kind": "c",
+    "typeID": 12160,
+    "typeName": "pg_prepared_statements",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12155,
+    "typeName": "pg_prepared_xacts",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
+    ],
+    "kind": "c",
+    "typeID": 12156,
+    "typeName": "pg_prepared_xacts",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 81,
+    "typeName": "pg_proc",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12050,
+    "typeName": "pg_publication",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12051,
+    "typeName": "pg_publication_rel",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12138,
+    "typeName": "pg_publication_tables",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
+    ],
+    "kind": "c",
+    "typeID": 12140,
+    "typeName": "pg_publication_tables",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12047,
+    "typeName": "pg_range",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12041,
+    "typeName": "pg_replication_origin",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12323,
+    "typeName": "pg_replication_origin_status",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
+    ],
+    "kind": "c",
+    "typeID": 12310,
+    "typeName": "pg_replication_origin_status",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12274,
+    "typeName": "pg_replication_slots",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
+    ],
+    "kind": "c",
+    "typeID": 12269,
+    "typeName": "pg_replication_slots",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12017,
+    "typeName": "pg_rewrite",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12088,
+    "typeName": "pg_roles",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
+    ],
+    "kind": "c",
+    "typeID": 12090,
+    "typeName": "pg_roles",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12106,
+    "typeName": "pg_rules",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
+    ],
+    "kind": "c",
+    "typeID": 12108,
+    "typeName": "pg_rules",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12044,
+    "typeName": "pg_seclabel",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12162,
+    "typeName": "pg_seclabels",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
+    ],
+    "kind": "c",
+    "typeID": 12163,
+    "typeName": "pg_seclabels",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12049,
+    "typeName": "pg_sequence",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12126,
+    "typeName": "pg_sequences",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
+    ],
+    "kind": "c",
+    "typeID": 12128,
+    "typeName": "pg_sequences",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12166,
+    "typeName": "pg_settings",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
+    ],
+    "kind": "c",
+    "typeID": 12167,
+    "typeName": "pg_settings",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12092,
+    "typeName": "pg_shadow",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
+    ],
+    "kind": "c",
+    "typeID": 12094,
+    "typeName": "pg_shadow",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12028,
+    "typeName": "pg_shdepend",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12029,
+    "typeName": "pg_shdescription",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12186,
+    "typeName": "pg_shmem_allocations",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 4066,
+    "typeName": "pg_shseclabel",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "b",
+    "typeID": 5038,
+    "typeName": "pg_snapshot",
+    "category": "U",
+    "comment": "snapshot",
+    "subtypeName": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12251,
+    "typeName": "pg_stat_activity",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
+    ],
+    "kind": "c",
+    "typeID": 12249,
+    "typeName": "pg_stat_activity",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12221,
+    "typeName": "pg_stat_all_indexes",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
+    ],
+    "kind": "c",
+    "typeID": 12219,
+    "typeName": "pg_stat_all_indexes",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12189,
+    "typeName": "pg_stat_all_tables",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
+    ],
+    "kind": "c",
+    "typeID": 12187,
+    "typeName": "pg_stat_all_tables",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12293,
+    "typeName": "pg_stat_archiver",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
+    ],
+    "kind": "c",
+    "typeID": 12288,
+    "typeName": "pg_stat_archiver",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12296,
+    "typeName": "pg_stat_bgwriter",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
+    ],
+    "kind": "c",
+    "typeID": 12291,
+    "typeName": "pg_stat_bgwriter",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12278,
+    "typeName": "pg_stat_database",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
+    ],
+    "kind": "c",
+    "typeID": 12273,
+    "typeName": "pg_stat_database",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12282,
+    "typeName": "pg_stat_database_conflicts",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
+    ],
+    "kind": "c",
+    "typeID": 12277,
+    "typeName": "pg_stat_database_conflicts",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12271,
+    "typeName": "pg_stat_gssapi",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
+    ],
+    "kind": "c",
+    "typeID": 12266,
+    "typeName": "pg_stat_gssapi",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12299,
+    "typeName": "pg_stat_progress_analyze",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12315,
+    "typeName": "pg_stat_progress_basebackup",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12307,
+    "typeName": "pg_stat_progress_cluster",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
+    ],
+    "kind": "c",
+    "typeID": 12298,
+    "typeName": "pg_stat_progress_cluster",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12311,
+    "typeName": "pg_stat_progress_create_index",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
+    ],
+    "kind": "c",
+    "typeID": 12302,
+    "typeName": "pg_stat_progress_create_index",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12303,
+    "typeName": "pg_stat_progress_vacuum",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
+    ],
+    "kind": "c",
+    "typeID": 12294,
+    "typeName": "pg_stat_progress_vacuum",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12255,
+    "typeName": "pg_stat_replication",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
+    ],
+    "kind": "c",
+    "typeID": 12253,
+    "typeName": "pg_stat_replication",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12259,
+    "typeName": "pg_stat_slru",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12268,
+    "typeName": "pg_stat_ssl",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
+    ],
+    "kind": "c",
+    "typeID": 12263,
+    "typeName": "pg_stat_ssl",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12265,
+    "typeName": "pg_stat_subscription",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
+    ],
+    "kind": "c",
+    "typeID": 12260,
+    "typeName": "pg_stat_subscription",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12225,
+    "typeName": "pg_stat_sys_indexes",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
+    ],
+    "kind": "c",
+    "typeID": 12223,
+    "typeName": "pg_stat_sys_indexes",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12197,
+    "typeName": "pg_stat_sys_tables",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
+    ],
+    "kind": "c",
+    "typeID": 12195,
+    "typeName": "pg_stat_sys_tables",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12285,
+    "typeName": "pg_stat_user_functions",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
+    ],
+    "kind": "c",
+    "typeID": 12280,
+    "typeName": "pg_stat_user_functions",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12228,
+    "typeName": "pg_stat_user_indexes",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
+    ],
+    "kind": "c",
+    "typeID": 12226,
+    "typeName": "pg_stat_user_indexes",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12204,
+    "typeName": "pg_stat_user_tables",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
+    ],
+    "kind": "c",
+    "typeID": 12202,
+    "typeName": "pg_stat_user_tables",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12262,
+    "typeName": "pg_stat_wal_receiver",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
+    ],
+    "kind": "c",
+    "typeID": 12257,
+    "typeName": "pg_stat_wal_receiver",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12193,
+    "typeName": "pg_stat_xact_all_tables",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
+    ],
+    "kind": "c",
+    "typeID": 12191,
+    "typeName": "pg_stat_xact_all_tables",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12201,
+    "typeName": "pg_stat_xact_sys_tables",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
+    ],
+    "kind": "c",
+    "typeID": 12199,
+    "typeName": "pg_stat_xact_sys_tables",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12289,
+    "typeName": "pg_stat_xact_user_functions",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
+    ],
+    "kind": "c",
+    "typeID": 12284,
+    "typeName": "pg_stat_xact_user_functions",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12208,
+    "typeName": "pg_stat_xact_user_tables",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
+    ],
+    "kind": "c",
+    "typeID": 12206,
+    "typeName": "pg_stat_xact_user_tables",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12231,
+    "typeName": "pg_statio_all_indexes",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
+    ],
+    "kind": "c",
+    "typeID": 12229,
+    "typeName": "pg_statio_all_indexes",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12241,
+    "typeName": "pg_statio_all_sequences",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
+    ],
+    "kind": "c",
+    "typeID": 12239,
+    "typeName": "pg_statio_all_sequences",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12211,
+    "typeName": "pg_statio_all_tables",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
+    ],
+    "kind": "c",
+    "typeID": 12209,
+    "typeName": "pg_statio_all_tables",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12235,
+    "typeName": "pg_statio_sys_indexes",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
+    ],
+    "kind": "c",
+    "typeID": 12233,
+    "typeName": "pg_statio_sys_indexes",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12245,
+    "typeName": "pg_statio_sys_sequences",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
+    ],
+    "kind": "c",
+    "typeID": 12243,
+    "typeName": "pg_statio_sys_sequences",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12215,
+    "typeName": "pg_statio_sys_tables",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
+    ],
+    "kind": "c",
+    "typeID": 12213,
+    "typeName": "pg_statio_sys_tables",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12238,
+    "typeName": "pg_statio_user_indexes",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
+    ],
+    "kind": "c",
+    "typeID": 12236,
+    "typeName": "pg_statio_user_indexes",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12248,
+    "typeName": "pg_statio_user_sequences",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
+    ],
+    "kind": "c",
+    "typeID": 12246,
+    "typeName": "pg_statio_user_sequences",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12218,
+    "typeName": "pg_statio_user_tables",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
+    ],
+    "kind": "c",
+    "typeID": 12216,
+    "typeName": "pg_statio_user_tables",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12016,
+    "typeName": "pg_statistic",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12014,
+    "typeName": "pg_statistic_ext",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12015,
+    "typeName": "pg_statistic_ext_data",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12130,
+    "typeName": "pg_stats",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
+    ],
+    "kind": "c",
+    "typeID": 12132,
+    "typeName": "pg_stats",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12134,
+    "typeName": "pg_stats_ext",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
+    ],
+    "kind": "c",
+    "typeID": 12136,
+    "typeName": "pg_stats_ext",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 6101,
+    "typeName": "pg_subscription",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12052,
+    "typeName": "pg_subscription_rel",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
+    ],
+    "kind": "c",
+    "typeID": 12053,
+    "typeName": "pg_subscription_rel",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12114,
+    "typeName": "pg_tables",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
+    ],
+    "kind": "c",
+    "typeID": 12116,
+    "typeName": "pg_tables",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12027,
+    "typeName": "pg_tablespace",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12177,
+    "typeName": "pg_timezone_abbrevs",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
+    ],
+    "kind": "c",
+    "typeID": 12178,
+    "typeName": "pg_timezone_abbrevs",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12180,
+    "typeName": "pg_timezone_names",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
+    ],
+    "kind": "c",
+    "typeID": 12181,
+    "typeName": "pg_timezone_names",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12048,
+    "typeName": "pg_transform",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12018,
+    "typeName": "pg_trigger",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12030,
+    "typeName": "pg_ts_config",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12031,
+    "typeName": "pg_ts_config_map",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12032,
+    "typeName": "pg_ts_dict",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12033,
+    "typeName": "pg_ts_parser",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12034,
+    "typeName": "pg_ts_template",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 71,
+    "typeName": "pg_type",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12099,
+    "typeName": "pg_user",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
+    ],
+    "kind": "c",
+    "typeID": 12101,
+    "typeName": "pg_user",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12038,
+    "typeName": "pg_user_mapping",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12319,
+    "typeName": "pg_user_mappings",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
+    ],
+    "kind": "c",
+    "typeID": 12306,
+    "typeName": "pg_user_mappings",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
+    ],
+    "kind": "c",
+    "typeID": 12110,
+    "typeName": "pg_views",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
+    ],
+    "kind": "c",
+    "typeID": 12112,
+    "typeName": "pg_views",
+    "category": "C",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
     ],
     "kind": "b",
     "typeID": 600,
@@ -1459,8 +3757,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "b",
     "typeID": 604,
@@ -1471,8 +3769,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "p",
     "typeID": 2249,
@@ -1482,8 +3780,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "b",
     "typeID": 1790,
@@ -1494,8 +3792,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "b",
     "typeID": 2205,
@@ -1506,8 +3804,20 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
+    ],
+    "kind": "b",
+    "typeID": 4191,
+    "typeName": "regcollation",
+    "category": "N",
+    "comment": "registered collation",
+    "subtypeName": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
     ],
     "kind": "b",
     "typeID": 3734,
@@ -1518,8 +3828,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "b",
     "typeID": 3769,
@@ -1530,8 +3840,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "b",
     "typeID": 4089,
@@ -1542,8 +3852,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "b",
     "typeID": 2203,
@@ -1554,8 +3864,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "b",
     "typeID": 2204,
@@ -1566,8 +3876,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "b",
     "typeID": 24,
@@ -1578,8 +3888,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "b",
     "typeID": 2202,
@@ -1590,8 +3900,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "b",
     "typeID": 4096,
@@ -1602,8 +3912,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "b",
     "typeID": 2206,
@@ -1638,8 +3948,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "p",
     "typeID": 269,
@@ -1649,8 +3959,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "b",
     "typeID": 25,
@@ -1661,8 +3971,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "b",
     "typeID": 27,
@@ -1673,8 +3983,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "b",
     "typeID": 1083,
@@ -1685,8 +3995,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "b",
     "typeID": 1114,
@@ -1697,8 +4007,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "b",
     "typeID": 1184,
@@ -1709,8 +4019,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "b",
     "typeID": 1266,
@@ -1733,8 +4043,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "p",
     "typeID": 2279,
@@ -1744,8 +4054,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "p",
     "typeID": 3310,
@@ -1755,8 +4065,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "b",
     "typeID": 3615,
@@ -1767,8 +4077,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "r",
     "typeID": 3908,
@@ -1778,8 +4088,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "r",
     "typeID": 3910,
@@ -1789,8 +4099,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "b",
     "typeID": 3614,
@@ -1801,8 +4111,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "b",
     "typeID": 2970,
@@ -1813,8 +4123,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "p",
     "typeID": 705,
@@ -1824,8 +4134,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "b",
     "typeID": 2950,
@@ -1836,8 +4146,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "b",
     "typeID": 1562,
@@ -1848,8 +4158,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "b",
     "typeID": 1043,
@@ -1860,8 +4170,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "p",
     "typeID": 2278,
@@ -1871,8 +4181,8 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
     ],
     "kind": "b",
     "typeID": 28,
@@ -1883,8 +4193,20 @@
   },
   {
     "pgVersion": [
-      12,
-      4
+      13,
+      0
+    ],
+    "kind": "b",
+    "typeID": 5069,
+    "typeName": "xid8",
+    "category": "U",
+    "comment": "full transaction id",
+    "subtypeName": null
+  },
+  {
+    "pgVersion": [
+      13,
+      0
     ],
     "kind": "b",
     "typeID": 142,
