@@ -1,8 +1,8 @@
 [
   {
     "pgVersion": [
-      10,
-      6
+      11,
+      9
     ],
     "kind": "array",
     "typeID": 1023,
@@ -13,8 +13,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 1034,
@@ -25,8 +25,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 1561,
@@ -37,8 +37,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 1000,
@@ -49,8 +49,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 1020,
@@ -61,8 +61,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 1014,
@@ -73,8 +73,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 1001,
@@ -85,8 +85,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 1002,
@@ -97,8 +97,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 1012,
@@ -109,8 +109,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 651,
@@ -121,8 +121,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 719,
@@ -133,8 +133,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 1263,
@@ -145,8 +145,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 1182,
@@ -157,8 +157,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 3913,
@@ -169,8 +169,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 1021,
@@ -181,8 +181,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 1022,
@@ -193,8 +193,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 3644,
@@ -205,8 +205,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 1041,
@@ -217,8 +217,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 1005,
@@ -229,8 +229,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 1006,
@@ -241,8 +241,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 1007,
@@ -253,8 +253,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 3905,
@@ -265,8 +265,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 1016,
@@ -277,8 +277,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 3927,
@@ -289,8 +289,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 1187,
@@ -301,8 +301,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 199,
@@ -313,8 +313,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 3807,
@@ -325,8 +325,20 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
+    ],
+    "kind": "array",
+    "typeID": 4073,
+    "typeName": "_jsonpath",
+    "category": "A",
+    "comment": null,
+    "subtypeName": "jsonpath"
+  },
+  {
+    "pgVersion": [
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 629,
@@ -337,8 +349,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 1018,
@@ -349,8 +361,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 1040,
@@ -361,8 +373,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 775,
@@ -373,8 +385,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 791,
@@ -385,8 +397,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 1003,
@@ -397,8 +409,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 1231,
@@ -409,8 +421,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 3907,
@@ -421,8 +433,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 1028,
@@ -433,8 +445,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 1013,
@@ -445,8 +457,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 1019,
@@ -457,8 +469,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 1017,
@@ -469,8 +481,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 1027,
@@ -481,8 +493,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "p",
     "typeID": 2287,
@@ -492,8 +504,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 2201,
@@ -504,8 +516,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 2210,
@@ -516,8 +528,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 3735,
@@ -528,8 +540,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 3770,
@@ -540,8 +552,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 4090,
@@ -552,8 +564,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 2208,
@@ -564,8 +576,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 2209,
@@ -576,8 +588,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 1008,
@@ -588,8 +600,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 2207,
@@ -600,8 +612,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 4097,
@@ -612,8 +624,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 2211,
@@ -624,8 +636,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      11,
+      9
     ],
     "kind": "array",
     "typeID": 1024,
@@ -636,8 +648,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 1009,
@@ -648,8 +660,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 1010,
@@ -660,8 +672,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 1183,
@@ -672,8 +684,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 1115,
@@ -684,8 +696,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 1185,
@@ -696,8 +708,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 1270,
@@ -708,8 +720,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      11,
+      9
     ],
     "kind": "array",
     "typeID": 1025,
@@ -720,8 +732,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 3645,
@@ -732,8 +744,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 3909,
@@ -744,8 +756,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 3911,
@@ -756,8 +768,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 3643,
@@ -768,8 +780,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 2949,
@@ -780,8 +792,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 2951,
@@ -792,8 +804,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 1563,
@@ -804,8 +816,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 1015,
@@ -816,8 +828,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 1011,
@@ -828,8 +840,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 143,
@@ -840,8 +852,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      11,
+      9
     ],
     "kind": "b",
     "typeID": 702,
@@ -852,8 +864,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "b",
     "typeID": 1033,
@@ -864,74 +876,74 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "p",
     "typeID": 2276,
     "typeName": "any",
     "category": "P",
-    "comment": null
+    "comment": "pseudo-type representing any type"
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "p",
     "typeID": 2277,
     "typeName": "anyarray",
     "category": "P",
-    "comment": null
+    "comment": "pseudo-type representing a polymorphic array type"
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "p",
     "typeID": 2283,
     "typeName": "anyelement",
     "category": "P",
-    "comment": null
+    "comment": "pseudo-type representing a polymorphic base type"
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "p",
     "typeID": 3500,
     "typeName": "anyenum",
     "category": "P",
-    "comment": null
+    "comment": "pseudo-type representing a polymorphic base type that is an enum"
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "p",
     "typeID": 2776,
     "typeName": "anynonarray",
     "category": "P",
-    "comment": null
+    "comment": "pseudo-type representing a polymorphic base type that is not an array"
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "p",
     "typeID": 3831,
     "typeName": "anyrange",
     "category": "P",
-    "comment": null
+    "comment": "pseudo-type representing a polymorphic base type that is a range"
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "b",
     "typeID": 1560,
@@ -942,8 +954,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "b",
     "typeID": 16,
@@ -954,8 +966,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "b",
     "typeID": 603,
@@ -966,8 +978,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "b",
     "typeID": 1042,
@@ -978,8 +990,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "b",
     "typeID": 17,
@@ -990,8 +1002,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "b",
     "typeID": 18,
@@ -1002,8 +1014,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "b",
     "typeID": 29,
@@ -1014,8 +1026,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "b",
     "typeID": 650,
@@ -1026,8 +1038,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "b",
     "typeID": 718,
@@ -1038,19 +1050,19 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "p",
     "typeID": 2275,
     "typeName": "cstring",
     "category": "P",
-    "comment": null
+    "comment": "C-style string"
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "b",
     "typeID": 1082,
@@ -1061,8 +1073,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "r",
     "typeID": 3912,
@@ -1072,30 +1084,30 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "p",
     "typeID": 3838,
     "typeName": "event_trigger",
     "category": "P",
-    "comment": null
+    "comment": "pseudo-type for the result of an event trigger function"
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "p",
     "typeID": 3115,
     "typeName": "fdw_handler",
     "category": "P",
-    "comment": null
+    "comment": "pseudo-type for the result of an FDW handler function"
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "b",
     "typeID": 700,
@@ -1106,8 +1118,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "b",
     "typeID": 701,
@@ -1118,8 +1130,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "b",
     "typeID": 3642,
@@ -1130,19 +1142,19 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "p",
     "typeID": 325,
     "typeName": "index_am_handler",
     "category": "P",
-    "comment": null
+    "comment": "pseudo-type for the result of an index AM handler function"
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "b",
     "typeID": 869,
@@ -1153,8 +1165,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "b",
     "typeID": 21,
@@ -1165,8 +1177,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 22,
@@ -1177,8 +1189,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "b",
     "typeID": 23,
@@ -1189,8 +1201,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "r",
     "typeID": 3904,
@@ -1200,8 +1212,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "b",
     "typeID": 20,
@@ -1212,8 +1224,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "r",
     "typeID": 3926,
@@ -1223,19 +1235,19 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "p",
     "typeID": 2281,
     "typeName": "internal",
     "category": "P",
-    "comment": null
+    "comment": "pseudo-type representing an internal data structure"
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "b",
     "typeID": 1186,
@@ -1246,20 +1258,20 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "b",
     "typeID": 114,
     "typeName": "json",
     "category": "U",
-    "comment": null,
+    "comment": "JSON stored as text",
     "subtypeName": null
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "b",
     "typeID": 3802,
@@ -1270,19 +1282,31 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
+    ],
+    "kind": "b",
+    "typeID": 4072,
+    "typeName": "jsonpath",
+    "category": "U",
+    "comment": "JSON path",
+    "subtypeName": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
     ],
     "kind": "p",
     "typeID": 2280,
     "typeName": "language_handler",
     "category": "P",
-    "comment": null
+    "comment": "pseudo-type for the result of a language handler function"
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "b",
     "typeID": 628,
@@ -1293,8 +1317,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "b",
     "typeID": 601,
@@ -1305,8 +1329,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "b",
     "typeID": 829,
@@ -1317,8 +1341,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "b",
     "typeID": 774,
@@ -1329,8 +1353,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "b",
     "typeID": 790,
@@ -1341,8 +1365,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "b",
     "typeID": 19,
@@ -1353,8 +1377,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "b",
     "typeID": 1700,
@@ -1365,8 +1389,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "r",
     "typeID": 3906,
@@ -1376,8 +1400,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "b",
     "typeID": 26,
@@ -1388,8 +1412,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "array",
     "typeID": 30,
@@ -1400,19 +1424,19 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "p",
     "typeID": 2282,
     "typeName": "opaque",
     "category": "P",
-    "comment": null
+    "comment": "obsolete, deprecated pseudo-type"
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "b",
     "typeID": 602,
@@ -1423,8 +1447,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "b",
     "typeID": 600,
@@ -1435,8 +1459,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "b",
     "typeID": 604,
@@ -1447,19 +1471,19 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "p",
     "typeID": 2249,
     "typeName": "record",
     "category": "P",
-    "comment": null
+    "comment": "pseudo-type representing any composite type"
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "b",
     "typeID": 1790,
@@ -1470,8 +1494,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "b",
     "typeID": 2205,
@@ -1482,8 +1506,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "b",
     "typeID": 3734,
@@ -1494,8 +1518,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "b",
     "typeID": 3769,
@@ -1506,8 +1530,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "b",
     "typeID": 4089,
@@ -1518,8 +1542,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "b",
     "typeID": 2203,
@@ -1530,8 +1554,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "b",
     "typeID": 2204,
@@ -1542,8 +1566,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "b",
     "typeID": 24,
@@ -1554,8 +1578,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "b",
     "typeID": 2202,
@@ -1566,8 +1590,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "b",
     "typeID": 4096,
@@ -1578,8 +1602,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "b",
     "typeID": 2206,
@@ -1590,8 +1614,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      11,
+      9
     ],
     "kind": "b",
     "typeID": 703,
@@ -1602,8 +1626,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      11,
+      9
     ],
     "kind": "b",
     "typeID": 210,
@@ -1614,8 +1638,19 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
+    ],
+    "kind": "p",
+    "typeID": 269,
+    "typeName": "table_am_handler",
+    "category": "P",
+    "comment": null
+  },
+  {
+    "pgVersion": [
+      12,
+      4
     ],
     "kind": "b",
     "typeID": 25,
@@ -1626,8 +1661,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "b",
     "typeID": 27,
@@ -1638,8 +1673,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "b",
     "typeID": 1083,
@@ -1650,8 +1685,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "b",
     "typeID": 1114,
@@ -1662,8 +1697,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "b",
     "typeID": 1184,
@@ -1674,8 +1709,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "b",
     "typeID": 1266,
@@ -1686,8 +1721,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      11,
+      9
     ],
     "kind": "b",
     "typeID": 704,
@@ -1698,30 +1733,30 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "p",
     "typeID": 2279,
     "typeName": "trigger",
     "category": "P",
-    "comment": null
+    "comment": "pseudo-type for the result of a trigger function"
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "p",
     "typeID": 3310,
     "typeName": "tsm_handler",
     "category": "P",
-    "comment": null
+    "comment": "pseudo-type for the result of a tablesample method function"
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "b",
     "typeID": 3615,
@@ -1732,8 +1767,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "r",
     "typeID": 3908,
@@ -1743,8 +1778,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "r",
     "typeID": 3910,
@@ -1754,8 +1789,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "b",
     "typeID": 3614,
@@ -1766,8 +1801,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "b",
     "typeID": 2970,
@@ -1778,19 +1813,19 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "p",
     "typeID": 705,
     "typeName": "unknown",
     "category": "X",
-    "comment": null
+    "comment": "pseudo-type representing an undetermined type"
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "b",
     "typeID": 2950,
@@ -1801,8 +1836,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "b",
     "typeID": 1562,
@@ -1813,8 +1848,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "b",
     "typeID": 1043,
@@ -1825,19 +1860,19 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "p",
     "typeID": 2278,
     "typeName": "void",
     "category": "P",
-    "comment": null
+    "comment": "pseudo-type for the result of a function with no real result"
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "b",
     "typeID": 28,
@@ -1848,8 +1883,8 @@
   },
   {
     "pgVersion": [
-      10,
-      6
+      12,
+      4
     ],
     "kind": "b",
     "typeID": 142,
