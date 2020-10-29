@@ -64,11 +64,13 @@ async function writeIfDifferent(filename: string, content: string) {
 }
 
 test('get built in types', async () => {
-  const builtInTypes = (await getTypes(db, {schemaName: 'pg_catalog'}))
+  const pgVersion = await getPgVersion();
+  const builtInTypesFromPg = (await getTypes(db, {schemaName: 'pg_catalog'}))
     .filter(
       (t) => !t.typeName.startsWith('pg_') && !t.typeName.startsWith('_pg_'),
     )
     .map((t) => ({
+      pgVersion,
       kind: t.kind,
       typeID: t.typeID,
       typeName: t.typeName,
@@ -76,179 +78,46 @@ test('get built in types', async () => {
       comment: t.comment,
       ...('subtypeName' in t ? {subtypeName: t.subtypeName} : {}),
     }));
-  for (const t of [
-    {
-      kind: TypeKind.Array,
-      typeID: 1023,
-      typeName: '_abstime',
-      subtypeName: 'abstime',
-      category: TypeCateogry.Array,
-      comment: null,
-    },
-    {
-      kind: TypeKind.Array,
-      typeID: 4073,
-      typeName: '_jsonpath',
-      subtypeName: 'jsonpath',
-      category: TypeCateogry.Array,
-      comment: null,
-    },
-    {
-      kind: TypeKind.Array,
-      typeID: 4192,
-      typeName: '_regcollation',
-      subtypeName: 'regcollation',
-      category: TypeCateogry.Array,
-      comment: null,
-    },
-    {
-      kind: TypeKind.Array,
-      typeID: 1024,
-      typeName: '_reltime',
-      subtypeName: 'reltime',
-      category: TypeCateogry.Array,
-      comment: null,
-    },
-    {
-      kind: TypeKind.Array,
-      typeID: 1025,
-      typeName: '_tinterval',
-      subtypeName: 'tinterval',
-      category: TypeCateogry.Array,
-      comment: null,
-    },
-    {
-      kind: TypeKind.Array,
-      typeID: 271,
-      typeName: '_xid8',
-      subtypeName: 'xid8',
-      category: TypeCateogry.Array,
-      comment: null,
-    },
-    {
-      kind: TypeKind.Base,
-      typeID: 702,
-      typeName: 'abstime',
-      category: TypeCateogry.DateTime,
-      comment: 'absolute, limited-range date and time (Unix system time)',
-    },
-    {
-      kind: TypeKind.Pseudo,
-      typeID: 5077,
-      typeName: 'anycompatible',
-      category: TypeCateogry.PseudoTypes,
-      comment: 'pseudo-type representing a polymorphic common type',
-    },
-    {
-      kind: TypeKind.Pseudo,
-      typeID: 5078,
-      typeName: 'anycompatiblearray',
-      category: TypeCateogry.PseudoTypes,
-      comment:
-        'pseudo-type representing an array of polymorphic common type elements',
-    },
-    {
-      kind: TypeKind.Pseudo,
-      typeID: 5079,
-      typeName: 'anycompatiblenonarray',
-      category: TypeCateogry.PseudoTypes,
-      comment:
-        'pseudo-type representing a polymorphic common type that is not an array',
-    },
-    {
-      kind: TypeKind.Pseudo,
-      typeID: 5080,
-      typeName: 'anycompatiblerange',
-      category: TypeCateogry.PseudoTypes,
-      comment:
-        'pseudo-type representing a range over a polymorphic common type',
-    },
-    {
-      kind: TypeKind.Pseudo,
-      typeID: 2282,
-      typeName: 'opaque',
-      category: TypeCateogry.PseudoTypes,
-      comment: null,
-    },
-    {
-      kind: TypeKind.Pseudo,
-      typeID: 269,
-      typeName: 'table_am_handler',
-      category: TypeCateogry.PseudoTypes,
-      comment: null,
-    },
-    {
-      kind: TypeKind.Base,
-      typeID: 703,
-      typeName: 'reltime',
-      category: TypeCateogry.Timespan,
-      comment: 'relative, limited-range time interval (Unix delta time)',
-    },
-    {
-      kind: TypeKind.Base,
-      typeID: 704,
-      typeName: 'tinterval',
-      category: TypeCateogry.Timespan,
-      comment: '(abstime,abstime), time interval',
-    },
-    {
-      kind: TypeKind.Base,
-      typeID: 4072,
-      typeName: 'jsonpath',
-      category: TypeCateogry.UserDefined,
-      comment: 'JSON path',
-    },
-    {
-      kind: TypeKind.Base,
-      typeID: 210,
-      typeName: 'smgr',
-      category: TypeCateogry.UserDefined,
-      comment: 'storage manager',
-    },
-    {
-      kind: TypeKind.Base,
-      typeID: 5069,
-      typeName: 'xid8',
-      category: TypeCateogry.UserDefined,
-      comment: 'full transaction id',
-    },
-    {
-      kind: TypeKind.Base,
-      typeID: 4191,
-      typeName: 'regcollation',
-      category: TypeCateogry.Numeric,
-      comment: 'registered collation',
-    },
-  ]) {
-    if (
-      !builtInTypes.some((existingT) => {
-        if (existingT.typeID === t.typeID) {
-          expect({
-            kind: t.kind,
-            typeID: t.typeID,
-            typeName: t.typeName,
-            category: t.category,
-            comment: t.comment || '',
-          }).toEqual({
-            kind: existingT.kind,
-            typeID: existingT.typeID,
-            typeName: existingT.typeName,
-            category: existingT.category,
-            comment: existingT.comment || '',
-          });
-          return true;
+
+  let builtInTypesFromFile: typeof builtInTypesFromPg = JSON.parse(
+    readFileSync(`${__dirname}/builtinTypes.json`, 'utf8'),
+  );
+  for (const typeFromPg of builtInTypesFromPg) {
+    if (process.env.CI) {
+      const typeFromFile = builtInTypesFromFile.find(
+        (typeFromFile) => typeFromFile.typeID === typeFromPg.typeID,
+      );
+      if (typeFromFile) {
+        if (!lt(typeFromPg.pgVersion, typeFromFile.pgVersion)) {
+          expect(typeFromFile).toBe(typeFromPg);
         }
-        return false;
-      })
-    ) {
-      builtInTypes.push(t);
+      } else {
+        expect(builtInTypesFromFile).toContainEqual(typeFromPg);
+      }
+    } else {
+      // if there are missing types, you can add them by running
+      // with PG_TEST_IMAGE=postgres:10.14-alpine (replacing with the relevant version)
+      let found = false;
+      builtInTypesFromFile = builtInTypesFromFile.filter((typeFromFile) => {
+        if (typeFromFile.typeID === typeFromPg.typeID) {
+          if (lte(typeFromFile.pgVersion, pgVersion)) {
+            return false;
+          } else {
+            found = true;
+          }
+        }
+        return true;
+      });
+      if (!found) {
+        builtInTypesFromFile.push(typeFromPg);
+      }
     }
   }
 
-  builtInTypes.sort((a, b) => (a.typeName > b.typeName ? 1 : -1));
+  builtInTypesFromFile.sort((a, b) => (a.typeName > b.typeName ? 1 : -1));
 
-  const groupedTypes = builtInTypes.reduce<{
-    [key: string]: typeof builtInTypes[number][];
+  const groupedTypes = builtInTypesFromFile.reduce<{
+    [key: string]: typeof builtInTypesFromFile[number][];
   }>((result, ty) => {
     const category = Object.keys(TypeCateogry).find(
       (c) => (TypeCateogry as any)[c] === ty.category,
@@ -571,3 +440,24 @@ test('get custom types', async () => {
     ]
   `);
 });
+
+async function getPgVersion(): Promise<[number, number]> {
+  // e.g. PostgreSQL 10.1 on x86_64-apple-darwin16.7.0, compiled by Apple LLVM version 9.0.0 (clang-900.0.38), 64-bit
+  const [{version: sqlVersionString}] = await db.query(
+    db.sql`SELECT version();`,
+  );
+  const match = /PostgreSQL (\d+).(\d+)/.exec(sqlVersionString);
+  if (match) {
+    const [, major, minor] = match;
+    return [parseInt(major, 10), parseInt(minor, 10)];
+  }
+  return [0, 0];
+}
+
+function lt(a: [number, number], b: [number, number]) {
+  return a[0] < b[0] || (a[0] === b[0] && a[1] < b[1]);
+}
+
+function lte(a: [number, number], b: [number, number]) {
+  return (a[0] === b[0] && a[1] === b[1]) || lt(a, b);
+}
