@@ -62,6 +62,22 @@ async function writeIfDifferent(filename: string, content: string) {
   }
   writeFileSync(filename, formatted);
 }
+async function writeJsonIfDifferent(filename: string, content: unknown) {
+  const formatted = JSON.stringify(content, null, '  ');
+  let currentContent = '';
+  try {
+    currentContent = readFileSync(filename, 'utf8');
+    if (currentContent === formatted) {
+      return;
+    }
+  } catch (ex) {
+    if (ex.code !== 'ENOENT') throw ex;
+  }
+  if (process.env.CI) {
+    expect(formatted).toEqual(currentContent);
+  }
+  writeFileSync(filename, formatted);
+}
 
 test('get built in types', async () => {
   const pgVersion = await getPgVersion();
@@ -115,6 +131,11 @@ test('get built in types', async () => {
   }
 
   builtInTypesFromFile.sort((a, b) => (a.typeName > b.typeName ? 1 : -1));
+
+  await writeJsonIfDifferent(
+    `${__dirname}/builtinTypes.json`,
+    builtInTypesFromFile,
+  );
 
   const groupedTypes = builtInTypesFromFile.reduce<{
     [key: string]: typeof builtInTypesFromFile[number][];
