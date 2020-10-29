@@ -1,5 +1,5 @@
 import assertNever from 'assert-never';
-import chalk from 'chalk';
+import chalk = require('chalk');
 import isInteractive = require('is-interactive');
 import * as interrogator from 'interrogator';
 import MigrationError from './types/MigrationError';

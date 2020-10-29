@@ -139,6 +139,11 @@ enum PgDataTypeID {
   _jsonb = 3807,
 
   /**
+   * Array<jsonpath>
+   */
+  _jsonpath = 4073,
+
+  /**
    * Array<line>
    */
   _line = 629,
@@ -199,6 +204,11 @@ enum PgDataTypeID {
   _pg_lsn = 3221,
 
   /**
+   * Array<pg_snapshot>
+   */
+  _pg_snapshot = 5039,
+
+  /**
    * Array<point>
    */
   _point = 1017,
@@ -217,6 +227,11 @@ enum PgDataTypeID {
    * Array<regclass>
    */
   _regclass = 2210,
+
+  /**
+   * Array<regcollation>
+   */
+  _regcollation = 4192,
 
   /**
    * Array<regconfig>
@@ -349,6 +364,11 @@ enum PgDataTypeID {
   _xid = 1011,
 
   /**
+   * Array<xid8>
+   */
+  _xid8 = 271,
+
+  /**
    * Array<xml>
    */
   _xml = 143,
@@ -371,30 +391,89 @@ enum PgDataTypeID {
 
   _record = 2287,
 
+  /**
+   * pseudo-type representing any type
+   */
   any = 2276,
 
+  /**
+   * pseudo-type representing a polymorphic array type
+   */
   anyarray = 2277,
 
+  /**
+   * pseudo-type representing a polymorphic common type
+   */
+  anycompatible = 5077,
+
+  /**
+   * pseudo-type representing an array of polymorphic common type elements
+   */
+  anycompatiblearray = 5078,
+
+  /**
+   * pseudo-type representing a polymorphic common type that is not an array
+   */
+  anycompatiblenonarray = 5079,
+
+  /**
+   * pseudo-type representing a range over a polymorphic common type
+   */
+  anycompatiblerange = 5080,
+
+  /**
+   * pseudo-type representing a polymorphic base type
+   */
   anyelement = 2283,
 
+  /**
+   * pseudo-type representing a polymorphic base type that is an enum
+   */
   anyenum = 3500,
 
+  /**
+   * pseudo-type representing a polymorphic base type that is not an array
+   */
   anynonarray = 2776,
 
+  /**
+   * pseudo-type representing a range over a polymorphic base type
+   */
   anyrange = 3831,
 
+  /**
+   * C-style string
+   */
   cstring = 2275,
 
+  /**
+   * pseudo-type for the result of an event trigger function
+   */
   event_trigger = 3838,
 
+  /**
+   * pseudo-type for the result of an FDW handler function
+   */
   fdw_handler = 3115,
 
+  /**
+   * pseudo-type for the result of an index AM handler function
+   */
   index_am_handler = 325,
 
+  /**
+   * pseudo-type representing an internal data structure
+   */
   internal = 2281,
 
+  /**
+   * pseudo-type for the result of a language handler function
+   */
   language_handler = 2280,
 
+  /**
+   * obsolete, deprecated pseudo-type
+   */
   opaque = 2282,
 
   /**
@@ -402,12 +481,26 @@ enum PgDataTypeID {
    */
   pg_ddl_command = 32,
 
+  /**
+   * pseudo-type representing any composite type
+   */
   record = 2249,
 
+  table_am_handler = 269,
+
+  /**
+   * pseudo-type for the result of a trigger function
+   */
   trigger = 2279,
 
+  /**
+   * pseudo-type for the result of a tablesample method function
+   */
   tsm_handler = 3310,
 
+  /**
+   * pseudo-type for the result of a function with no real result
+   */
   void = 2278,
 
   // === DateTime ===
@@ -464,12 +557,20 @@ enum PgDataTypeID {
    */
   gtsvector = 3642,
 
+  /**
+   * JSON stored as text
+   */
   json = 114,
 
   /**
    * Binary JSON
    */
   jsonb = 3802,
+
+  /**
+   * JSON path
+   */
+  jsonpath = 4072,
 
   /**
    * XX:XX:XX:XX:XX:XX, MAC address
@@ -485,6 +586,11 @@ enum PgDataTypeID {
    * PostgreSQL LSN datatype
    */
   pg_lsn = 3220,
+
+  /**
+   * snapshot
+   */
+  pg_snapshot = 5038,
 
   /**
    * reference to cursor (portal name)
@@ -525,6 +631,11 @@ enum PgDataTypeID {
    * transaction id
    */
   xid = 28,
+
+  /**
+   * full transaction id
+   */
+  xid8 = 5069,
 
   /**
    * XML content
@@ -608,6 +719,11 @@ enum PgDataTypeID {
    * multivariate dependencies
    */
   pg_dependencies = 3402,
+
+  /**
+   * multivariate MCV list
+   */
+  pg_mcv_list = 5017,
 
   /**
    * multivariate ndistinct coefficients
@@ -721,6 +837,11 @@ enum PgDataTypeID {
   regclass = 2205,
 
   /**
+   * registered collation
+   */
+  regcollation = 4191,
+
+  /**
    * registered text search configuration
    */
   regconfig = 3734,
@@ -782,252 +903,11 @@ enum PgDataTypeID {
    */
   tinterval = 704,
 
-  // === Composite ===
-
-  pg_aggregate = 11256,
-
-  pg_am = 10130,
-
-  pg_amop = 10131,
-
-  pg_amproc = 10841,
-
-  pg_attrdef = 10000,
-
-  pg_attribute = 75,
-
-  pg_auth_members = 2843,
-
-  pg_authid = 2842,
-
-  pg_available_extension_versions = 11587,
-
-  pg_available_extensions = 11584,
-
-  pg_cast = 11263,
-
-  pg_class = 83,
-
-  pg_collation = 11507,
-
-  pg_config = 11618,
-
-  pg_constraint = 10001,
-
-  pg_conversion = 11485,
-
-  pg_cursors = 11581,
-
-  pg_database = 1248,
-
-  pg_db_role_setting = 11487,
-
-  pg_default_acl = 11504,
-
-  pg_depend = 11486,
-
-  pg_description = 11262,
-
-  pg_enum = 11483,
-
-  pg_event_trigger = 11261,
-
-  pg_extension = 11497,
-
-  pg_file_settings = 11606,
-
-  pg_foreign_data_wrapper = 11498,
-
-  pg_foreign_server = 11499,
-
-  pg_foreign_table = 11501,
-
-  pg_group = 11536,
-
-  pg_hba_file_rules = 11609,
-
-  pg_index = 10003,
-
-  pg_indexes = 11562,
-
-  pg_inherits = 10002,
-
-  pg_init_privs = 11505,
-
-  pg_language = 11253,
-
-  pg_largeobject = 11255,
-
-  pg_largeobject_metadata = 11254,
-
-  pg_locks = 11578,
-
-  pg_matviews = 11558,
-
-  pg_namespace = 11484,
-
-  pg_opclass = 10006,
-
-  pg_operator = 10004,
-
-  pg_opfamily = 10005,
-
-  pg_partitioned_table = 11508,
-
-  pg_pltemplate = 11489,
-
-  pg_policies = 11542,
-
-  pg_policy = 11502,
-
-  pg_prepared_statements = 11594,
-
-  pg_prepared_xacts = 11590,
-
-  pg_proc = 81,
-
-  pg_publication = 11512,
-
-  pg_publication_rel = 11513,
-
-  pg_publication_tables = 11574,
-
-  pg_range = 11509,
-
-  pg_replication_origin = 11503,
-
-  pg_replication_origin_status = 11732,
-
-  pg_replication_slots = 11700,
-
-  pg_rewrite = 11259,
-
-  pg_roles = 11528,
-
-  pg_rules = 11546,
-
-  pg_seclabel = 11506,
-
-  pg_seclabels = 11597,
-
-  pg_sequence = 11511,
-
-  pg_sequences = 11566,
-
-  pg_settings = 11601,
-
-  pg_shadow = 11532,
-
-  pg_shdepend = 11490,
-
-  pg_shdescription = 11491,
-
-  pg_shseclabel = 4066,
-
-  pg_stat_activity = 11683,
-
-  pg_stat_all_indexes = 11653,
-
-  pg_stat_all_tables = 11621,
-
-  pg_stat_archiver = 11718,
-
-  pg_stat_bgwriter = 11721,
-
-  pg_stat_database = 11704,
-
-  pg_stat_database_conflicts = 11707,
-
-  pg_stat_progress_vacuum = 11724,
-
-  pg_stat_replication = 11687,
-
-  pg_stat_ssl = 11697,
-
-  pg_stat_subscription = 11694,
-
-  pg_stat_sys_indexes = 11657,
-
-  pg_stat_sys_tables = 11629,
-
-  pg_stat_user_functions = 11710,
-
-  pg_stat_user_indexes = 11660,
-
-  pg_stat_user_tables = 11636,
-
-  pg_stat_wal_receiver = 11691,
-
-  pg_stat_xact_all_tables = 11625,
-
-  pg_stat_xact_sys_tables = 11633,
-
-  pg_stat_xact_user_functions = 11714,
-
-  pg_stat_xact_user_tables = 11640,
-
-  pg_statio_all_indexes = 11663,
-
-  pg_statio_all_sequences = 11673,
-
-  pg_statio_all_tables = 11643,
-
-  pg_statio_sys_indexes = 11667,
-
-  pg_statio_sys_sequences = 11677,
-
-  pg_statio_sys_tables = 11647,
-
-  pg_statio_user_indexes = 11670,
-
-  pg_statio_user_sequences = 11680,
-
-  pg_statio_user_tables = 11650,
-
-  pg_statistic = 11258,
-
-  pg_statistic_ext = 11257,
-
-  pg_stats = 11570,
-
-  pg_subscription = 6101,
-
-  pg_subscription_rel = 11514,
-
-  pg_tables = 11554,
-
-  pg_tablespace = 11488,
-
-  pg_timezone_abbrevs = 11612,
-
-  pg_timezone_names = 11615,
-
-  pg_transform = 11510,
-
-  pg_trigger = 11260,
-
-  pg_ts_config = 11492,
-
-  pg_ts_config_map = 11493,
-
-  pg_ts_dict = 11494,
-
-  pg_ts_parser = 11495,
-
-  pg_ts_template = 11496,
-
-  pg_type = 71,
-
-  pg_user = 11539,
-
-  pg_user_mapping = 11500,
-
-  pg_user_mappings = 11728,
-
-  pg_views = 11550,
-
   // === Unknown ===
 
+  /**
+   * pseudo-type representing an undetermined type
+   */
   unknown = 705,
 }
 

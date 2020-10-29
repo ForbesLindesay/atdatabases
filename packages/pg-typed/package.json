@@ -12,7 +12,7 @@
     "@databases/pg-schema-print-types": "^0.0.0"
   },
   "peerDependencies": {
-    "@databases/pg": "^0.0.0"
+    "@databases/pg": "*"
   },
   "scripts": {},
   "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/pg-typed",

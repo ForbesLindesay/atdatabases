@@ -1,4 +1,4 @@
-import connect, {sql} from '../';
+import connect, {sql} from '..';
 
 jest.setTimeout(30000);
 
@@ -6,8 +6,9 @@ const db = connect();
 
 const allValues: number[] = [];
 beforeAll(async () => {
+  await db.query(sql`CREATE SCHEMA streaming_test`);
   await db.query(
-    sql`CREATE TABLE streaming_test_values (id BIGINT NOT NULL PRIMARY KEY);`,
+    sql`CREATE TABLE streaming_test.values (id BIGINT NOT NULL PRIMARY KEY);`,
   );
   for (let batch = 0; batch < 10; batch++) {
     const batchValues = [];
@@ -17,7 +18,7 @@ beforeAll(async () => {
       allValues.push(value);
     }
     await db.query(sql`
-      INSERT INTO streaming_test_values (id)
+      INSERT INTO streaming_test.values (id)
       VALUES ${sql.join(
         batchValues.map((v) => sql`(${v})`),
         sql`,`,
@@ -29,9 +30,7 @@ beforeAll(async () => {
 test('node streaming', async () => {
   const results = await new Promise<any[]>((resolve, reject) => {
     const results: number[] = [];
-    db.queryNodeStream(sql`SELECT * FROM streaming_test_values`, {
-      highWaterMark: 1,
-    })
+    db.queryNodeStream(sql`SELECT * FROM streaming_test.values`, {batchSize: 1})
       .on('data', (data) => results.push(data.id))
       .on('error', reject)
       .on('end', () => resolve(results));
@@ -42,9 +41,9 @@ test('node streaming', async () => {
 test('await streaming', async () => {
   const results: number[] = [];
   for await (const {id} of db.queryStream(
-    sql`SELECT * FROM streaming_test_values`,
+    sql`SELECT * FROM streaming_test.values`,
     {
-      highWaterMark: 1,
+      batchSize: 1,
     },
   )) {
     results.push(id);

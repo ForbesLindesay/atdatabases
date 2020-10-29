@@ -58,7 +58,12 @@ export default async function getDatabase(options: Partial<Options> = {}) {
   const {proc, externalPort, kill} = await startContainer({
     ...rawOptions,
     internalPort: DEFAULT_PG_PORT,
-    environment: {...environment, POSTGRES_USER: pgUser, POSTGRES_DB: pgDb},
+    environment: {
+      POSTGRES_HOST_AUTH_METHOD: 'trust',
+      ...environment,
+      POSTGRES_USER: pgUser,
+      POSTGRES_DB: pgDb,
+    },
   });
 
   const databaseURL = `postgres://${pgUser}@localhost:${externalPort}/${pgDb}`;

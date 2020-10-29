@@ -1,6 +1,6 @@
 import {statSync} from 'fs';
 import {resolve} from 'path';
-import chalk from 'chalk';
+import chalk = require('chalk');
 
 export default function assertIsDirectory(
   path: string,

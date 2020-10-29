@@ -1,5 +1,5 @@
 import assertNever from 'assert-never';
-import chalk from 'chalk';
+import chalk = require('chalk');
 import MigrationError from '../types/MigrationError';
 import {DatabaseEngineBase} from '../types/DatabaseEngine';
 

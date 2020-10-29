@@ -8,6 +8,17 @@ import connect, {sql} from '@databases/pg';
 jest.setTimeout(30000);
 const db = connect();
 
+const env = {...process.env, FORCE_COLOR: 'false'};
+
+function output(proc: ReturnType<typeof spawnSync>) {
+  return [
+    `stdout:`,
+    proc.stdout?.toString('utf8').replace(/^/gm, '  '),
+    `stderr:`,
+    proc.stderr?.toString('utf8').replace(/^/gm, '  '),
+  ].join('\n');
+}
+
 afterAll(async () => {
   await db.dispose();
 });
@@ -21,40 +32,37 @@ test('clean database', async () => {
 });
 
 test('help', async () => {
-  const {status, stderr, stdout} = spawnSync(
+  const proc = spawnSync(
     'node',
     ['--require', 'sucrase/register', 'cli', 'help'],
-    {cwd: `${__dirname}/..`},
+    {cwd: `${__dirname}/..`, env},
   );
-  expect(stdout?.toString('utf8')).toMatchSnapshot('stdout');
-  expect(stderr?.toString('utf8')).toMatchSnapshot('stderr');
-  expect(status).toBe(0);
+  expect(output(proc)).toMatchSnapshot();
+  expect(proc.status).toBe(0);
 });
 
 test('help apply', async () => {
-  const {status, stderr, stdout} = spawnSync(
+  const proc = spawnSync(
     'node',
     ['--require', 'sucrase/register', 'cli', 'help', 'apply'],
-    {cwd: `${__dirname}/..`},
+    {cwd: `${__dirname}/..`, env},
   );
-  expect(stdout?.toString('utf8')).toMatchSnapshot('stdout');
-  expect(stderr?.toString('utf8')).toMatchSnapshot('stderr');
-  expect(status).toBe(0);
+  expect(output(proc)).toMatchSnapshot();
+  expect(proc.status).toBe(0);
 });
 
 test('apply - missing directory', async () => {
-  const {status, stderr, stdout} = spawnSync(
+  const proc = spawnSync(
     'node',
     ['--require', 'sucrase/register', 'cli', 'apply'],
-    {cwd: `${__dirname}/..`, env: {...process.env, CI: 'true'}},
+    {cwd: `${__dirname}/..`, env: {...env, CI: 'true'}},
   );
-  expect(stdout?.toString('utf8')).toMatchSnapshot('stdout');
-  expect(stderr?.toString('utf8')).toMatchSnapshot('stderr');
-  expect(status).toBe(1);
+  expect(output(proc)).toMatchSnapshot();
+  expect(proc.status).toBe(1);
 });
 
 test('apply --dry-run', async () => {
-  const {status, stderr, stdout} = spawnSync(
+  const proc = spawnSync(
     'node',
     [
       '--require',
@@ -65,15 +73,14 @@ test('apply --dry-run', async () => {
       `-D`,
       `${__dirname}/migrations`,
     ],
-    {cwd: `${__dirname}/..`, env: {...process.env, CI: 'true'}},
+    {cwd: `${__dirname}/..`, env: {...env, CI: 'true'}},
   );
-  expect(stdout?.toString('utf8')).toMatchSnapshot('stdout');
-  expect(stderr?.toString('utf8')).toMatchSnapshot('stderr');
-  expect(status).toBe(0);
+  expect(output(proc)).toMatchSnapshot();
+  expect(proc.status).toBe(0);
 });
 
 test('apply', async () => {
-  const {status, stderr, stdout} = spawnSync(
+  const proc = spawnSync(
     'node',
     [
       '--require',
@@ -83,15 +90,14 @@ test('apply', async () => {
       `-D`,
       `${__dirname}/migrations`,
     ],
-    {cwd: `${__dirname}/..`, env: {...process.env, CI: 'true'}},
+    {cwd: `${__dirname}/..`, env: {...env, CI: 'true'}},
   );
-  expect(stdout?.toString('utf8')).toMatchSnapshot('stdout');
-  expect(stderr?.toString('utf8')).toMatchSnapshot('stderr');
-  expect(status).toBe(0);
+  expect(output(proc)).toMatchSnapshot();
+  expect(proc.status).toBe(0);
 });
 
 test('apply - after already appying', async () => {
-  const {status, stderr, stdout} = spawnSync(
+  const proc = spawnSync(
     'node',
     [
       '--require',
@@ -101,15 +107,14 @@ test('apply - after already appying', async () => {
       `-D`,
       `${__dirname}/migrations`,
     ],
-    {cwd: `${__dirname}/..`, env: {...process.env, CI: 'true'}},
+    {cwd: `${__dirname}/..`, env: {...env, CI: 'true'}},
   );
-  expect(stdout?.toString('utf8')).toMatchSnapshot('stdout');
-  expect(stderr?.toString('utf8')).toMatchSnapshot('stderr');
-  expect(status).toBe(0);
+  expect(output(proc)).toMatchSnapshot();
+  expect(proc.status).toBe(0);
 });
 
 test('apply --dry-run - after already appying', async () => {
-  const {status, stderr, stdout} = spawnSync(
+  const proc = spawnSync(
     'node',
     [
       '--require',
@@ -120,11 +125,10 @@ test('apply --dry-run - after already appying', async () => {
       `-D`,
       `${__dirname}/migrations`,
     ],
-    {cwd: `${__dirname}/..`, env: {...process.env, CI: 'true'}},
+    {cwd: `${__dirname}/..`, env: {...env, CI: 'true'}},
   );
-  expect(stdout?.toString('utf8')).toMatchSnapshot('stdout');
-  expect(stderr?.toString('utf8')).toMatchSnapshot('stderr');
-  expect(status).toBe(0);
+  expect(output(proc)).toMatchSnapshot();
+  expect(proc.status).toBe(0);
 });
 
 test('migrations applied', async () => {

@@ -1,0 +1,2098 @@
+{
+  "ambiguousTypes": {},
+  "types": [
+    {
+      "pgVersion": [
+        11,
+        9
+      ],
+      "kind": "array",
+      "typeID": 1023,
+      "typeName": "_abstime",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "abstime"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 1034,
+      "typeName": "_aclitem",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "aclitem"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 1561,
+      "typeName": "_bit",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "bit"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 1000,
+      "typeName": "_bool",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "bool"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 1020,
+      "typeName": "_box",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "box"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 1014,
+      "typeName": "_bpchar",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "bpchar"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 1001,
+      "typeName": "_bytea",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "bytea"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 1002,
+      "typeName": "_char",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "char"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 1012,
+      "typeName": "_cid",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "cid"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 651,
+      "typeName": "_cidr",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "cidr"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 719,
+      "typeName": "_circle",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "circle"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 1263,
+      "typeName": "_cstring",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "cstring"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 1182,
+      "typeName": "_date",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "date"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 3913,
+      "typeName": "_daterange",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "daterange"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 1021,
+      "typeName": "_float4",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "float4"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 1022,
+      "typeName": "_float8",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "float8"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 3644,
+      "typeName": "_gtsvector",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "gtsvector"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 1041,
+      "typeName": "_inet",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "inet"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 1005,
+      "typeName": "_int2",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "int2"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 1006,
+      "typeName": "_int2vector",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "int2vector"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 1007,
+      "typeName": "_int4",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "int4"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 3905,
+      "typeName": "_int4range",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "int4range"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 1016,
+      "typeName": "_int8",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "int8"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 3927,
+      "typeName": "_int8range",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "int8range"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 1187,
+      "typeName": "_interval",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "interval"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 199,
+      "typeName": "_json",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "json"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 3807,
+      "typeName": "_jsonb",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "jsonb"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 4073,
+      "typeName": "_jsonpath",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "jsonpath"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 629,
+      "typeName": "_line",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "line"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 1018,
+      "typeName": "_lseg",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "lseg"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 1040,
+      "typeName": "_macaddr",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "macaddr"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 775,
+      "typeName": "_macaddr8",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "macaddr8"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 791,
+      "typeName": "_money",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "money"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 1003,
+      "typeName": "_name",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "name"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 1231,
+      "typeName": "_numeric",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "numeric"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 3907,
+      "typeName": "_numrange",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "numrange"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 1028,
+      "typeName": "_oid",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "oid"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 1013,
+      "typeName": "_oidvector",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "oidvector"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 1019,
+      "typeName": "_path",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "path"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 3221,
+      "typeName": "_pg_lsn",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "pg_lsn"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 5039,
+      "typeName": "_pg_snapshot",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "pg_snapshot"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 1017,
+      "typeName": "_point",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "point"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 1027,
+      "typeName": "_polygon",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "polygon"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "p",
+      "typeID": 2287,
+      "typeName": "_record",
+      "category": "P",
+      "comment": null
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 2201,
+      "typeName": "_refcursor",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "refcursor"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 2210,
+      "typeName": "_regclass",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "regclass"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 4192,
+      "typeName": "_regcollation",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "regcollation"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 3735,
+      "typeName": "_regconfig",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "regconfig"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 3770,
+      "typeName": "_regdictionary",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "regdictionary"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 4090,
+      "typeName": "_regnamespace",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "regnamespace"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 2208,
+      "typeName": "_regoper",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "regoper"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 2209,
+      "typeName": "_regoperator",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "regoperator"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 1008,
+      "typeName": "_regproc",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "regproc"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 2207,
+      "typeName": "_regprocedure",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "regprocedure"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 4097,
+      "typeName": "_regrole",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "regrole"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 2211,
+      "typeName": "_regtype",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "regtype"
+    },
+    {
+      "pgVersion": [
+        11,
+        9
+      ],
+      "kind": "array",
+      "typeID": 1024,
+      "typeName": "_reltime",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "reltime"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 1009,
+      "typeName": "_text",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "text"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 1010,
+      "typeName": "_tid",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "tid"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 1183,
+      "typeName": "_time",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "time"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 1115,
+      "typeName": "_timestamp",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "timestamp"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 1185,
+      "typeName": "_timestamptz",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "timestamptz"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 1270,
+      "typeName": "_timetz",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "timetz"
+    },
+    {
+      "pgVersion": [
+        11,
+        9
+      ],
+      "kind": "array",
+      "typeID": 1025,
+      "typeName": "_tinterval",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "tinterval"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 3645,
+      "typeName": "_tsquery",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "tsquery"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 3909,
+      "typeName": "_tsrange",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "tsrange"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 3911,
+      "typeName": "_tstzrange",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "tstzrange"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 3643,
+      "typeName": "_tsvector",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "tsvector"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 2949,
+      "typeName": "_txid_snapshot",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "txid_snapshot"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 2951,
+      "typeName": "_uuid",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "uuid"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 1563,
+      "typeName": "_varbit",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "varbit"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 1015,
+      "typeName": "_varchar",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "varchar"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 1011,
+      "typeName": "_xid",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "xid"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 271,
+      "typeName": "_xid8",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "xid8"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 143,
+      "typeName": "_xml",
+      "category": "A",
+      "comment": null,
+      "subtypeName": "xml"
+    },
+    {
+      "pgVersion": [
+        11,
+        9
+      ],
+      "kind": "b",
+      "typeID": 702,
+      "typeName": "abstime",
+      "category": "D",
+      "comment": "absolute, limited-range date and time (Unix system time)",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 1033,
+      "typeName": "aclitem",
+      "category": "U",
+      "comment": "access control list",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "p",
+      "typeID": 2276,
+      "typeName": "any",
+      "category": "P",
+      "comment": "pseudo-type representing any type"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "p",
+      "typeID": 2277,
+      "typeName": "anyarray",
+      "category": "P",
+      "comment": "pseudo-type representing a polymorphic array type"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "p",
+      "typeID": 5077,
+      "typeName": "anycompatible",
+      "category": "P",
+      "comment": "pseudo-type representing a polymorphic common type"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "p",
+      "typeID": 5078,
+      "typeName": "anycompatiblearray",
+      "category": "P",
+      "comment": "pseudo-type representing an array of polymorphic common type elements"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "p",
+      "typeID": 5079,
+      "typeName": "anycompatiblenonarray",
+      "category": "P",
+      "comment": "pseudo-type representing a polymorphic common type that is not an array"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "p",
+      "typeID": 5080,
+      "typeName": "anycompatiblerange",
+      "category": "P",
+      "comment": "pseudo-type representing a range over a polymorphic common type"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "p",
+      "typeID": 2283,
+      "typeName": "anyelement",
+      "category": "P",
+      "comment": "pseudo-type representing a polymorphic base type"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "p",
+      "typeID": 3500,
+      "typeName": "anyenum",
+      "category": "P",
+      "comment": "pseudo-type representing a polymorphic base type that is an enum"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "p",
+      "typeID": 2776,
+      "typeName": "anynonarray",
+      "category": "P",
+      "comment": "pseudo-type representing a polymorphic base type that is not an array"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "p",
+      "typeID": 3831,
+      "typeName": "anyrange",
+      "category": "P",
+      "comment": "pseudo-type representing a range over a polymorphic base type"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 1560,
+      "typeName": "bit",
+      "category": "V",
+      "comment": "fixed-length bit string",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 16,
+      "typeName": "bool",
+      "category": "B",
+      "comment": "boolean, 'true'/'false'",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 603,
+      "typeName": "box",
+      "category": "G",
+      "comment": "geometric box '(lower left,upper right)'",
+      "subtypeName": "point"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 1042,
+      "typeName": "bpchar",
+      "category": "S",
+      "comment": "char(length), blank-padded string, fixed storage length",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 17,
+      "typeName": "bytea",
+      "category": "U",
+      "comment": "variable-length string, binary values escaped",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 18,
+      "typeName": "char",
+      "category": "S",
+      "comment": "single character",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 29,
+      "typeName": "cid",
+      "category": "U",
+      "comment": "command identifier type, sequence in transaction id",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 650,
+      "typeName": "cidr",
+      "category": "I",
+      "comment": "network IP address/netmask, network address",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 718,
+      "typeName": "circle",
+      "category": "G",
+      "comment": "geometric circle '(center,radius)'",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "p",
+      "typeID": 2275,
+      "typeName": "cstring",
+      "category": "P",
+      "comment": "C-style string"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 1082,
+      "typeName": "date",
+      "category": "D",
+      "comment": "date",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "r",
+      "typeID": 3912,
+      "typeName": "daterange",
+      "category": "R",
+      "comment": "range of dates"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "p",
+      "typeID": 3838,
+      "typeName": "event_trigger",
+      "category": "P",
+      "comment": "pseudo-type for the result of an event trigger function"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "p",
+      "typeID": 3115,
+      "typeName": "fdw_handler",
+      "category": "P",
+      "comment": "pseudo-type for the result of an FDW handler function"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 700,
+      "typeName": "float4",
+      "category": "N",
+      "comment": "single-precision floating point number, 4-byte storage",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 701,
+      "typeName": "float8",
+      "category": "N",
+      "comment": "double-precision floating point number, 8-byte storage",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 3642,
+      "typeName": "gtsvector",
+      "category": "U",
+      "comment": "GiST index internal text representation for text search",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "p",
+      "typeID": 325,
+      "typeName": "index_am_handler",
+      "category": "P",
+      "comment": "pseudo-type for the result of an index AM handler function"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 869,
+      "typeName": "inet",
+      "category": "I",
+      "comment": "IP address/netmask, host address, netmask optional",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 21,
+      "typeName": "int2",
+      "category": "N",
+      "comment": "-32 thousand to 32 thousand, 2-byte storage",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 22,
+      "typeName": "int2vector",
+      "category": "A",
+      "comment": "array of int2, used in system tables",
+      "subtypeName": "int2"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 23,
+      "typeName": "int4",
+      "category": "N",
+      "comment": "-2 billion to 2 billion integer, 4-byte storage",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "r",
+      "typeID": 3904,
+      "typeName": "int4range",
+      "category": "R",
+      "comment": "range of integers"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 20,
+      "typeName": "int8",
+      "category": "N",
+      "comment": "~18 digit integer, 8-byte storage",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "r",
+      "typeID": 3926,
+      "typeName": "int8range",
+      "category": "R",
+      "comment": "range of bigints"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "p",
+      "typeID": 2281,
+      "typeName": "internal",
+      "category": "P",
+      "comment": "pseudo-type representing an internal data structure"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 1186,
+      "typeName": "interval",
+      "category": "T",
+      "comment": "@ <number> <units>, time interval",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 114,
+      "typeName": "json",
+      "category": "U",
+      "comment": "JSON stored as text",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 3802,
+      "typeName": "jsonb",
+      "category": "U",
+      "comment": "Binary JSON",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 4072,
+      "typeName": "jsonpath",
+      "category": "U",
+      "comment": "JSON path",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "p",
+      "typeID": 2280,
+      "typeName": "language_handler",
+      "category": "P",
+      "comment": "pseudo-type for the result of a language handler function"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 628,
+      "typeName": "line",
+      "category": "G",
+      "comment": "geometric line",
+      "subtypeName": "float8"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 601,
+      "typeName": "lseg",
+      "category": "G",
+      "comment": "geometric line segment '(pt1,pt2)'",
+      "subtypeName": "point"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 829,
+      "typeName": "macaddr",
+      "category": "U",
+      "comment": "XX:XX:XX:XX:XX:XX, MAC address",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 774,
+      "typeName": "macaddr8",
+      "category": "U",
+      "comment": "XX:XX:XX:XX:XX:XX:XX:XX, MAC address",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 790,
+      "typeName": "money",
+      "category": "N",
+      "comment": "monetary amounts, $d,ddd.cc",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 19,
+      "typeName": "name",
+      "category": "S",
+      "comment": "63-byte type for storing system identifiers",
+      "subtypeName": "char"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 1700,
+      "typeName": "numeric",
+      "category": "N",
+      "comment": "numeric(precision, decimal), arbitrary precision number",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "r",
+      "typeID": 3906,
+      "typeName": "numrange",
+      "category": "R",
+      "comment": "range of numerics"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 26,
+      "typeName": "oid",
+      "category": "N",
+      "comment": "object identifier(oid), maximum 4 billion",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "array",
+      "typeID": 30,
+      "typeName": "oidvector",
+      "category": "A",
+      "comment": "array of oids, used in system tables",
+      "subtypeName": "oid"
+    },
+    {
+      "pgVersion": [
+        12,
+        4
+      ],
+      "kind": "p",
+      "typeID": 2282,
+      "typeName": "opaque",
+      "category": "P",
+      "comment": "obsolete, deprecated pseudo-type"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 602,
+      "typeName": "path",
+      "category": "G",
+      "comment": "geometric path '(pt1,...)'",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "p",
+      "typeID": 32,
+      "typeName": "pg_ddl_command",
+      "category": "P",
+      "comment": "internal type for passing CollectedCommand"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 3402,
+      "typeName": "pg_dependencies",
+      "category": "S",
+      "comment": "multivariate dependencies",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 3220,
+      "typeName": "pg_lsn",
+      "category": "U",
+      "comment": "PostgreSQL LSN datatype",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 5017,
+      "typeName": "pg_mcv_list",
+      "category": "S",
+      "comment": "multivariate MCV list",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 3361,
+      "typeName": "pg_ndistinct",
+      "category": "S",
+      "comment": "multivariate ndistinct coefficients",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 194,
+      "typeName": "pg_node_tree",
+      "category": "S",
+      "comment": "string representing an internal node tree",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 5038,
+      "typeName": "pg_snapshot",
+      "category": "U",
+      "comment": "snapshot",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 600,
+      "typeName": "point",
+      "category": "G",
+      "comment": "geometric point '(x, y)'",
+      "subtypeName": "float8"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 604,
+      "typeName": "polygon",
+      "category": "G",
+      "comment": "geometric polygon '(pt1,...)'",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "p",
+      "typeID": 2249,
+      "typeName": "record",
+      "category": "P",
+      "comment": "pseudo-type representing any composite type"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 1790,
+      "typeName": "refcursor",
+      "category": "U",
+      "comment": "reference to cursor (portal name)",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 2205,
+      "typeName": "regclass",
+      "category": "N",
+      "comment": "registered class",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 4191,
+      "typeName": "regcollation",
+      "category": "N",
+      "comment": "registered collation",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 3734,
+      "typeName": "regconfig",
+      "category": "N",
+      "comment": "registered text search configuration",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 3769,
+      "typeName": "regdictionary",
+      "category": "N",
+      "comment": "registered text search dictionary",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 4089,
+      "typeName": "regnamespace",
+      "category": "N",
+      "comment": "registered namespace",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 2203,
+      "typeName": "regoper",
+      "category": "N",
+      "comment": "registered operator",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 2204,
+      "typeName": "regoperator",
+      "category": "N",
+      "comment": "registered operator (with args)",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 24,
+      "typeName": "regproc",
+      "category": "N",
+      "comment": "registered procedure",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 2202,
+      "typeName": "regprocedure",
+      "category": "N",
+      "comment": "registered procedure (with args)",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 4096,
+      "typeName": "regrole",
+      "category": "N",
+      "comment": "registered role",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 2206,
+      "typeName": "regtype",
+      "category": "N",
+      "comment": "registered type",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        11,
+        9
+      ],
+      "kind": "b",
+      "typeID": 703,
+      "typeName": "reltime",
+      "category": "T",
+      "comment": "relative, limited-range time interval (Unix delta time)",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        11,
+        9
+      ],
+      "kind": "b",
+      "typeID": 210,
+      "typeName": "smgr",
+      "category": "U",
+      "comment": "storage manager",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "p",
+      "typeID": 269,
+      "typeName": "table_am_handler",
+      "category": "P",
+      "comment": null
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 25,
+      "typeName": "text",
+      "category": "S",
+      "comment": "variable-length string, no limit specified",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 27,
+      "typeName": "tid",
+      "category": "U",
+      "comment": "(block, offset), physical location of tuple",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 1083,
+      "typeName": "time",
+      "category": "D",
+      "comment": "time of day",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 1114,
+      "typeName": "timestamp",
+      "category": "D",
+      "comment": "date and time",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 1184,
+      "typeName": "timestamptz",
+      "category": "D",
+      "comment": "date and time with time zone",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 1266,
+      "typeName": "timetz",
+      "category": "D",
+      "comment": "time of day with time zone",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        11,
+        9
+      ],
+      "kind": "b",
+      "typeID": 704,
+      "typeName": "tinterval",
+      "category": "T",
+      "comment": "(abstime,abstime), time interval",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "p",
+      "typeID": 2279,
+      "typeName": "trigger",
+      "category": "P",
+      "comment": "pseudo-type for the result of a trigger function"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "p",
+      "typeID": 3310,
+      "typeName": "tsm_handler",
+      "category": "P",
+      "comment": "pseudo-type for the result of a tablesample method function"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 3615,
+      "typeName": "tsquery",
+      "category": "U",
+      "comment": "query representation for text search",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "r",
+      "typeID": 3908,
+      "typeName": "tsrange",
+      "category": "R",
+      "comment": "range of timestamps without time zone"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "r",
+      "typeID": 3910,
+      "typeName": "tstzrange",
+      "category": "R",
+      "comment": "range of timestamps with time zone"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 3614,
+      "typeName": "tsvector",
+      "category": "U",
+      "comment": "text representation for text search",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 2970,
+      "typeName": "txid_snapshot",
+      "category": "U",
+      "comment": "txid snapshot",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "p",
+      "typeID": 705,
+      "typeName": "unknown",
+      "category": "X",
+      "comment": "pseudo-type representing an undetermined type"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 2950,
+      "typeName": "uuid",
+      "category": "U",
+      "comment": "UUID datatype",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 1562,
+      "typeName": "varbit",
+      "category": "V",
+      "comment": "variable-length bit string",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 1043,
+      "typeName": "varchar",
+      "category": "S",
+      "comment": "varchar(length), non-blank-padded string, variable storage length",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "p",
+      "typeID": 2278,
+      "typeName": "void",
+      "category": "P",
+      "comment": "pseudo-type for the result of a function with no real result"
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 28,
+      "typeName": "xid",
+      "category": "U",
+      "comment": "transaction id",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 5069,
+      "typeName": "xid8",
+      "category": "U",
+      "comment": "full transaction id",
+      "subtypeName": null
+    },
+    {
+      "pgVersion": [
+        13,
+        0
+      ],
+      "kind": "b",
+      "typeID": 142,
+      "typeName": "xml",
+      "category": "U",
+      "comment": "XML content",
+      "subtypeName": null
+    }
+  ]
+}

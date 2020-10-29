@@ -6,6 +6,7 @@
     "packages/*"
   ],
   "scripts": {
+    "update-workflows": "github-actions-workflow-builder --cleanup --directory .github/workflows-src",
     "postinstall": "node scripts/postinstall",
     "prebuild": "wsrun --stages --exclude-missing build",
     "prebuild:all": "wsrun --stages --exclude-missing build",
@@ -14,46 +15,50 @@
     "prerelease": "yarn build:all",
     "prettier:check": "prettier --list-different \"packages/*/src/**/*.{ts,tsx}\"",
     "prettier:write": "prettier --write \"packages/*/src/**/*.{ts,tsx}\"",
-    "pretest": "yarn build && yarn tslint",
+    "pretest": "yarn build",
     "test": "jest",
+    "test:node": "jest --selectProjects node",
+    "test:pg": "jest --selectProjects pg",
+    "test:mysql": "jest --selectProjects mysql",
     "posttest": "wsrun --parallel --exclude-missing test",
     "watch:jest": "jest --watch",
     "clean": "rimraf packages/*/lib && rimraf packages/*/.last_build && rimraf packages/*/.cache && rimraf packages/*/build && rimraf packages/*/node_modules && rimraf node_modules",
     "tslint": "tslint './packages/*/src/**/*.{js,jsx,ts,tsx}' -t verbose -p ."
   },
   "jest": {
-    "globals": {
-      "mysql": {
-        "environmentVariable": "MYSQL_CONNECTION"
+    "projects": [
+      {
+        "displayName": "node",
+        "testRegex": "/__tests__/.+\\.test\\.(tsx?)$",
+        "preset": "ts-jest"
+      },
+      {
+        "displayName": "pg",
+        "testRegex": "/__tests__/.+\\.test\\.pg\\.(tsx?)$",
+        "globalSetup": "./packages/pg-test/jest/globalSetup.js",
+        "globalTeardown": "./packages/pg-test/jest/globalTeardown.js",
+        "preset": "ts-jest"
+      },
+      {
+        "displayName": "mysql",
+        "testRegex": "/__tests__/.+\\.test\\.mysql\\.(tsx?)$",
+        "globalSetup": "./packages/mysql-test/jest/globalSetup.js",
+        "globalTeardown": "./packages/mysql-test/jest/globalTeardown.js",
+        "preset": "ts-jest"
       }
-    },
-    "globalSetup": "./scripts/jest/globalSetup.js",
-    "globalTeardown": "./scripts/jest/globalTeardown.js",
-    "transformIgnorePatterns": [
-      "<rootDir>.*(node_modules)(?!.*databases.*).*$"
-    ],
-    "transform": {
-      "^.+\\.tsx?$": "ts-jest"
-    },
-    "testRegex": "/__tests__/.+\\.test\\.(tsx?)$",
-    "moduleFileExtensions": [
-      "ts",
-      "tsx",
-      "js",
-      "jsx",
-      "json"
     ]
   },
   "dependencies": {
     "@moped/babel-preset": "^0.0.8",
-    "@types/jest": "^25.2.1",
+    "@types/jest": "^26.0.15",
     "babel-core": "^6.26.3",
     "cross-spawn": "^7.0.2",
-    "jest": "^25.5.4",
+    "github-actions-workflow-builder": "^1.0.3",
+    "jest": "^26.6.1",
     "lsr": "^2.0.0",
     "mkdirp": "^1.0.4",
     "prettier": "^2.0.5",
-    "ts-jest": "^25.4.0",
+    "ts-jest": "^26.4.2",
     "tslint": "^6.1.1",
     "typescript": "^3.8.3",
     "wsrun": "^5.2.0"
