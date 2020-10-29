@@ -62,7 +62,33 @@ async function writeIfDifferent(filename: string, content: string) {
   }
   writeFileSync(filename, formatted);
 }
-async function writeJsonIfDifferent(filename: string, content: unknown) {
+
+interface BuiltinTypesState {
+  types: {
+    subtypeName?: string | undefined;
+    pgVersion: [number, number];
+    kind: TypeKind;
+    typeID: number;
+    typeName: string;
+    category: TypeCateogry;
+    comment: string | null;
+  }[];
+  ambiguousTypes: {
+    [name: string]: {
+      subtypeName?: string | undefined;
+      pgVersion: [number, number];
+      kind: TypeKind;
+      typeID: number;
+      typeName: string;
+      category: TypeCateogry;
+      comment: string | null;
+    }[];
+  };
+}
+async function writeJsonIfDifferent(
+  filename: string,
+  content: BuiltinTypesState,
+) {
   const formatted = JSON.stringify(content, null, '  ');
   let currentContent = '';
   try {
@@ -93,28 +119,58 @@ test('get built in types', async () => {
     ...('subtypeName' in t ? {subtypeName: t.subtypeName} : {}),
   }));
 
-  let builtInTypesFromFile: typeof builtInTypesFromPg = JSON.parse(
+  const oldState: BuiltinTypesState = JSON.parse(
     readFileSync(`${__dirname}/builtinTypes.json`, 'utf8'),
   );
+  let {types: builtInTypesFromFile} = oldState;
+  const {ambiguousTypes} = oldState;
   for (const typeFromPg of builtInTypesFromPg) {
+    const ambiguousType = ambiguousTypes[typeFromPg.typeName] || [];
     if (process.env.CI) {
-      const typeFromFile = builtInTypesFromFile.find(
-        (typeFromFile) => typeFromFile.typeID === typeFromPg.typeID,
-      );
-      if (typeFromFile) {
-        if (typeFromPg.pgVersion[0] >= typeFromFile.pgVersion[0]) {
-          expect(typeFromFile).toBe(typeFromPg);
+      if (!ambiguousType.length) {
+        const typeFromFile = builtInTypesFromFile.find(
+          (typeFromFile) => typeFromFile.typeID === typeFromPg.typeID,
+        );
+        if (typeFromFile) {
+          if (typeFromPg.pgVersion[0] >= typeFromFile.pgVersion[0]) {
+            expect(typeFromFile).toBe(typeFromPg);
+          }
+        } else {
+          expect(builtInTypesFromFile).toContainEqual(typeFromPg);
         }
-      } else {
-        expect(builtInTypesFromFile).toContainEqual(typeFromPg);
+      }
+    } else if (ambiguousType.length) {
+      let found = false;
+      const existingTypes = ambiguousType.filter((t) => {
+        if (t.typeID === typeFromPg.typeID) {
+          if (lte(t.pgVersion, typeFromPg.pgVersion)) {
+            return false;
+          } else {
+            found = true;
+          }
+        }
+        return true;
+      });
+      if (!found) {
+        ambiguousTypes[typeFromPg.typeName] = sortByPostgresVersion([
+          ...existingTypes,
+          typeFromPg,
+        ]);
       }
     } else {
       // if there are missing types, you can add them by running
       // with PG_TEST_IMAGE=postgres:10.14-alpine (replacing with the relevant version)
       let found = false;
       builtInTypesFromFile = builtInTypesFromFile.filter((typeFromFile) => {
-        if (typeFromFile.typeID === typeFromPg.typeID) {
-          if (lte(typeFromFile.pgVersion, pgVersion)) {
+        if (typeFromFile.typeName === typeFromPg.typeName) {
+          if (typeFromFile.typeID !== typeFromPg.typeID) {
+            found = true;
+            ambiguousTypes[typeFromFile.typeName] = sortByPostgresVersion([
+              typeFromFile,
+              typeFromPg,
+            ]);
+            return false;
+          } else if (lte(typeFromFile.pgVersion, typeFromPg.pgVersion)) {
             return false;
           } else {
             found = true;
@@ -130,10 +186,10 @@ test('get built in types', async () => {
 
   builtInTypesFromFile.sort((a, b) => (a.typeName > b.typeName ? 1 : -1));
 
-  await writeJsonIfDifferent(
-    `${__dirname}/builtinTypes.json`,
-    builtInTypesFromFile,
-  );
+  await writeJsonIfDifferent(`${__dirname}/builtinTypes.json`, {
+    ambiguousTypes,
+    types: builtInTypesFromFile,
+  });
 
   const groupedTypes = builtInTypesFromFile.reduce<{
     [key: string]: typeof builtInTypesFromFile[number][];
@@ -475,4 +531,15 @@ async function getPgVersion(): Promise<[number, number]> {
 
 function lte(a: [number, number], b: [number, number]) {
   return a[0] < b[0] || (a[0] === b[0] && (a[1] === b[1] || a[1] < b[1]));
+}
+
+function sortByPostgresVersion<T extends {pgVersion: [number, number]}>(
+  records: readonly T[],
+) {
+  return records
+    .slice()
+    .sort(
+      (a, b) =>
+        a.pgVersion[0] - b.pgVersion[0] || a.pgVersion[1] - b.pgVersion[1],
+    );
 }
