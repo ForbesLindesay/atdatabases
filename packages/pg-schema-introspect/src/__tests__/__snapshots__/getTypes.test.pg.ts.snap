@@ -116,6 +116,7 @@ Object {
     "1700 = numeric",
     "26 = oid",
     "2205 = regclass",
+    "4191 = regcollation",
     "3734 = regconfig",
     "3769 = regdictionary",
     "4089 = regnamespace",

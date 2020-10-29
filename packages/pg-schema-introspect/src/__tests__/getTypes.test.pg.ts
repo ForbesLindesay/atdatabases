@@ -130,35 +130,38 @@ test('get built in types', async () => {
       typeID: 702,
       typeName: 'abstime',
       category: TypeCateogry.DateTime,
-      comment: null,
+      comment: 'absolute, limited-range date and time (Unix system time)',
     },
     {
       kind: TypeKind.Pseudo,
       typeID: 5077,
       typeName: 'anycompatible',
       category: TypeCateogry.PseudoTypes,
-      comment: null,
+      comment: 'pseudo-type representing a polymorphic common type',
     },
     {
       kind: TypeKind.Pseudo,
       typeID: 5078,
       typeName: 'anycompatiblearray',
       category: TypeCateogry.PseudoTypes,
-      comment: null,
+      comment:
+        'pseudo-type representing an array of polymorphic common type elements',
     },
     {
       kind: TypeKind.Pseudo,
       typeID: 5079,
       typeName: 'anycompatiblenonarray',
       category: TypeCateogry.PseudoTypes,
-      comment: null,
+      comment:
+        'pseudo-type representing a polymorphic common type that is not an array',
     },
     {
       kind: TypeKind.Pseudo,
       typeID: 5080,
       typeName: 'anycompatiblerange',
       category: TypeCateogry.PseudoTypes,
-      comment: null,
+      comment:
+        'pseudo-type representing a range over a polymorphic common type',
     },
     {
       kind: TypeKind.Pseudo,
@@ -179,35 +182,42 @@ test('get built in types', async () => {
       typeID: 703,
       typeName: 'reltime',
       category: TypeCateogry.Timespan,
-      comment: null,
+      comment: 'relative, limited-range time interval (Unix delta time)',
     },
     {
       kind: TypeKind.Base,
       typeID: 704,
       typeName: 'tinterval',
       category: TypeCateogry.Timespan,
-      comment: null,
+      comment: '(abstime,abstime), time interval',
     },
     {
       kind: TypeKind.Base,
       typeID: 4072,
       typeName: 'jsonpath',
       category: TypeCateogry.UserDefined,
-      comment: null,
+      comment: 'JSON path',
     },
     {
       kind: TypeKind.Base,
       typeID: 210,
       typeName: 'smgr',
       category: TypeCateogry.UserDefined,
-      comment: null,
+      comment: 'storage manager',
     },
     {
       kind: TypeKind.Base,
       typeID: 5069,
       typeName: 'xid8',
       category: TypeCateogry.UserDefined,
-      comment: null,
+      comment: 'full transaction id',
+    },
+    {
+      kind: TypeKind.Base,
+      typeID: 4191,
+      typeName: 'regcollation',
+      category: TypeCateogry.Numeric,
+      comment: 'registered collation',
     },
   ]) {
     if (
@@ -218,11 +228,13 @@ test('get built in types', async () => {
             typeID: t.typeID,
             typeName: t.typeName,
             category: t.category,
+            comment: t.comment || '',
           }).toEqual({
             kind: existingT.kind,
             typeID: existingT.typeID,
             typeName: existingT.typeName,
             category: existingT.category,
+            comment: existingT.comment || '',
           });
           return true;
         }

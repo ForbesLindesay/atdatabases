@@ -381,48 +381,108 @@ enum PgDataTypeID {
 
   _record = 2287,
 
+  /**
+   * pseudo-type representing any type
+   */
   any = 2276,
 
+  /**
+   * pseudo-type representing a polymorphic array type
+   */
   anyarray = 2277,
 
+  /**
+   * pseudo-type representing a polymorphic common type
+   */
   anycompatible = 5077,
 
+  /**
+   * pseudo-type representing an array of polymorphic common type elements
+   */
   anycompatiblearray = 5078,
 
+  /**
+   * pseudo-type representing a polymorphic common type that is not an array
+   */
   anycompatiblenonarray = 5079,
 
+  /**
+   * pseudo-type representing a range over a polymorphic common type
+   */
   anycompatiblerange = 5080,
 
+  /**
+   * pseudo-type representing a polymorphic base type
+   */
   anyelement = 2283,
 
+  /**
+   * pseudo-type representing a polymorphic base type that is an enum
+   */
   anyenum = 3500,
 
+  /**
+   * pseudo-type representing a polymorphic base type that is not an array
+   */
   anynonarray = 2776,
 
+  /**
+   * pseudo-type representing a range over a polymorphic base type
+   */
   anyrange = 3831,
 
+  /**
+   * C-style string
+   */
   cstring = 2275,
 
+  /**
+   * pseudo-type for the result of an event trigger function
+   */
   event_trigger = 3838,
 
+  /**
+   * pseudo-type for the result of an FDW handler function
+   */
   fdw_handler = 3115,
 
+  /**
+   * pseudo-type for the result of an index AM handler function
+   */
   index_am_handler = 325,
 
+  /**
+   * pseudo-type representing an internal data structure
+   */
   internal = 2281,
 
+  /**
+   * pseudo-type for the result of a language handler function
+   */
   language_handler = 2280,
 
   opaque = 2282,
 
+  /**
+   * pseudo-type representing any composite type
+   */
   record = 2249,
 
   table_am_handler = 269,
 
+  /**
+   * pseudo-type for the result of a trigger function
+   */
   trigger = 2279,
 
+  /**
+   * pseudo-type for the result of a tablesample method function
+   */
   tsm_handler = 3310,
 
+  /**
+   * pseudo-type for the result of a function with no real result
+   */
   void = 2278,
 
   // === DateTime ===
@@ -479,6 +539,9 @@ enum PgDataTypeID {
    */
   gtsvector = 3642,
 
+  /**
+   * JSON stored as text
+   */
   json = 114,
 
   /**
@@ -486,6 +549,9 @@ enum PgDataTypeID {
    */
   jsonb = 3802,
 
+  /**
+   * JSON path
+   */
   jsonpath = 4072,
 
   /**
@@ -538,6 +604,9 @@ enum PgDataTypeID {
    */
   xid = 28,
 
+  /**
+   * full transaction id
+   */
   xid8 = 5069,
 
   /**
@@ -720,6 +789,11 @@ enum PgDataTypeID {
   regclass = 2205,
 
   /**
+   * registered collation
+   */
+  regcollation = 4191,
+
+  /**
    * registered text search configuration
    */
   regconfig = 3734,
@@ -783,6 +857,9 @@ enum PgDataTypeID {
 
   // === Unknown ===
 
+  /**
+   * pseudo-type representing an undetermined type
+   */
   unknown = 705,
 }
 
