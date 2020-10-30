@@ -166,3 +166,43 @@ test('create users', async () => {
     ]
   `);
 });
+
+test('use a default connection', async () => {
+  const {users} = tables<Schema>({
+    schemaName: 'typed_queries_tests',
+    defaultConnection: db,
+  });
+  const [inserted] = await users().insert({
+    screen_name: 'Inserted with default connection',
+  });
+  expect(inserted.screen_name).toBe('Inserted with default connection');
+  const defaultConnectionQuery = jest.fn().mockResolvedValue([]);
+  const transactionQuery = jest.fn().mockResolvedValue([]);
+  const {users: mockUsers} = tables<Schema>({
+    schemaName: 'typed_queries_tests',
+    defaultConnection: {
+      query: defaultConnectionQuery,
+      sql,
+    } as any,
+  });
+  await mockUsers().selectOne({id: 10});
+  expect(defaultConnectionQuery).toBeCalledTimes(1);
+  expect(transactionQuery).toBeCalledTimes(0);
+
+  await mockUsers({
+    query: transactionQuery,
+    sql,
+  } as any).selectOne({id: 10});
+  expect(defaultConnectionQuery).toBeCalledTimes(1);
+  expect(transactionQuery).toBeCalledTimes(1);
+
+  const {users: unconnectedUsers} = tables<Schema>({
+    schemaName: 'typed_queries_tests',
+  });
+
+  expect(() =>
+    unconnectedUsers(undefined as any),
+  ).toThrowErrorMatchingInlineSnapshot(
+    `"You must either provide a \\"defaultConnection\\" to pg-typed, or specify a connection when accessing the table."`,
+  );
+});

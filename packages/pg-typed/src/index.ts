@@ -213,9 +213,16 @@ class Table<TRecord, TInsertParameters> {
 
 function getTable<TRecord, TInsertParameters>(
   tableName: string,
-  schemaName?: string,
+  {schemaName, defaultConnection}: Partial<PgTypedOptionsWithDefaultConnection>,
 ) {
-  return (queryable: Queryable): Table<TRecord, TInsertParameters> => {
+  return (
+    queryable: Queryable | undefined = defaultConnection,
+  ): Table<TRecord, TInsertParameters> => {
+    if (!queryable) {
+      throw new Error(
+        'You must either provide a "defaultConnection" to pg-typed, or specify a connection when accessing the table.',
+      );
+    }
     return new Table<TRecord, TInsertParameters>(
       queryable,
       schemaName
@@ -226,16 +233,38 @@ function getTable<TRecord, TInsertParameters>(
 }
 export type {Table};
 
-type PropertyOf<T, TProp extends string> = T extends {
-  [k in TProp]: infer TValue;
+export interface PgTypedOptions {
+  schemaName?: string;
 }
-  ? TValue
-  : never;
-export default function tables<TTables>({
-  schemaName,
-}: {schemaName?: string} = {}): {
+export interface PgTypedOptionsWithDefaultConnection extends PgTypedOptions {
+  defaultConnection: Queryable;
+}
+
+export default function tables<TTables>(
+  options: PgTypedOptionsWithDefaultConnection,
+): {
+  [TTableName in keyof TTables]: (
+    connectionOrTransaction?: Queryable,
+  ) => Table<
+    PropertyOf<TTables[TTableName], 'record'>,
+    PropertyOf<TTables[TTableName], 'insert'>
+  >;
+};
+export default function tables<TTables>(
+  options?: PgTypedOptions,
+): {
   [TTableName in keyof TTables]: (
     connectionOrTransaction: Queryable,
+  ) => Table<
+    PropertyOf<TTables[TTableName], 'record'>,
+    PropertyOf<TTables[TTableName], 'insert'>
+  >;
+};
+export default function tables<TTables>(
+  options: Partial<PgTypedOptionsWithDefaultConnection> = {},
+): {
+  [TTableName in keyof TTables]: (
+    connectionOrTransaction?: Queryable,
   ) => Table<
     PropertyOf<TTables[TTableName], 'record'>,
     PropertyOf<TTables[TTableName], 'insert'>
@@ -248,8 +277,14 @@ export default function tables<TTables>({
         if (prop === 'then') {
           return undefined;
         }
-        return getTable(String(prop), schemaName);
+        return getTable(String(prop), options);
       },
     },
   ) as any;
 }
+
+type PropertyOf<T, TProp extends string> = T extends {
+  [k in TProp]: infer TValue;
+}
+  ? TValue
+  : never;
