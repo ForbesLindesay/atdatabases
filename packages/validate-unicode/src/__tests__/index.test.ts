@@ -39,8 +39,8 @@ test('isValidUnicode', () => {
   expect(isValidUnicode(pairUnescaped[1])).toBe(false);
 
   expect(isValidUnicode(`hello😀world`)).toBe(true);
-  expect(removeInvalidUnicode(`hello😀`)).toBe(true);
-  expect(removeInvalidUnicode(`😀world`)).toBe(true);
+  expect(isValidUnicode(`hello😀`)).toBe(true);
+  expect(isValidUnicode(`😀world`)).toBe(true);
   expect(isValidUnicode(`hello${pairUnescaped[0]}world`)).toBe(false);
   expect(isValidUnicode(`hello${pairUnescaped[1]}world`)).toBe(false);
   expect(isValidUnicode(`${pairUnescaped[0]}world`)).toBe(false);

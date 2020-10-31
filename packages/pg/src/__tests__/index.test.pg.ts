@@ -17,16 +17,15 @@ test('error messages', async () => {
     `);
   } catch (ex) {
     expect(ex.message).toMatchInlineSnapshot(`
-"syntax error at or near \\"FRM\\"
+      "syntax error at or near \\"FRM\\"
 
-  2 |       SELECT * FROM foo;
-  3 |       SELECT * FROM bar WHERE id = $1;
-> 4 |       SELECT * FRM baz;
-    |                ^^^
-  5 |       SELECT * FROM bing;
-  6 |     
-"
-`);
+        1 | SELECT * FROM foo;
+        2 | SELECT * FROM bar WHERE id = $1;
+      > 3 | SELECT * FRM baz;
+          |          ^^^
+        4 | SELECT * FROM bing;
+      "
+    `);
     return;
   }
   expect(false).toBe(true);

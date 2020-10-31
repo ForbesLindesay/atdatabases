@@ -242,10 +242,18 @@ function formatStandard(
     }
   }
 
-  return {
-    text: text.trim(),
-    values,
-  };
+  if (text.trim()) {
+    const lines = text.split('\n');
+    const min = Math.min(
+      ...lines
+        .filter((l) => l.trim() !== '')
+        .map((l) => /^\s*/.exec(l)![0].length),
+    );
+    if (min) {
+      text = lines.map((line) => line.substr(min)).join('\n');
+    }
+  }
+  return {text: text.trim(), values};
 }
 
 /**

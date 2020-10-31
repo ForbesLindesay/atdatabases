@@ -15,14 +15,17 @@ test('correctly renders sql', () => {
       formatValue: (value) => ({placeholder: '?', value}),
     }),
   ).toMatchInlineSnapshot(`
-Object {
-  "text": "SELECT * FROM foo WHERE id = ? AND created_at > ?;",
-  "values": Array [
-    10,
-    2018-12-19T16:53:20.939Z,
-  ],
-}
-`);
+    Object {
+      "text": "SELECT *
+    FROM foo
+    WHERE id = ?
+    AND created_at > ?;",
+      "values": Array [
+        10,
+        2018-12-19T16:53:20.939Z,
+      ],
+    }
+  `);
 });
 
 test('can join parts of query', () => {
@@ -43,14 +46,16 @@ test('can join parts of query', () => {
       formatValue: (value) => ({placeholder: '?', value}),
     }),
   ).toMatchInlineSnapshot(`
-Object {
-  "text": "SELECT * FROM foo WHERE id = ? AND created_at > ?;",
-  "values": Array [
-    10,
-    2018-12-19T16:53:20.939Z,
-  ],
-}
-`);
+    Object {
+      "text": "SELECT *
+    FROM foo
+    WHERE id = ? AND created_at > ?;",
+      "values": Array [
+        10,
+        2018-12-19T16:53:20.939Z,
+      ],
+    }
+  `);
 });
 
 test('can read in a file', () => {
@@ -63,9 +68,9 @@ test('can read in a file', () => {
       formatValue: (value) => ({placeholder: '?', value}),
     }),
   ).toMatchInlineSnapshot(`
-Object {
-  "text": "SELECT * FROM my_table;",
-  "values": Array [],
-}
-`);
+    Object {
+      "text": "SELECT * FROM my_table;",
+      "values": Array [],
+    }
+  `);
 });
