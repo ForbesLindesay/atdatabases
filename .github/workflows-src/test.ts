@@ -64,7 +64,7 @@ export function buildCache(): Steps {
             `packages/${packageName}/lib`,
             `packages/${packageName}/.last_build`,
           ].join('\n'),
-          key: interpolate`build-output-${hashFiles(
+          key: interpolate`v2-build-output-${hashFiles(
             `packages/${packageName}/src`,
           )}`,
         },
