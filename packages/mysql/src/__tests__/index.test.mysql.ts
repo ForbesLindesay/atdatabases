@@ -19,16 +19,16 @@ test('error messages', async () => {
     `);
   } catch (ex) {
     expect(ex.message).toMatchInlineSnapshot(`
-"You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near:
+      "You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near:
 
-  1 | SELECT 1 + ? as foo;
-  2 |       SELECT 1 + 42 as bar;
-> 3 |       SELECT * FRM 'baz;
-    |                ^^^^^^^^^
-> 4 |       SELECT * FROM bing;
-    | ^^^^^^^^^^^^^^^^^^^^^^^^^
-"
-`);
+        1 | SELECT 1 + ? as foo;
+        2 | SELECT 1 + 42 as bar;
+      > 3 | SELECT * FRM 'baz;
+          |          ^^^^^^^^^
+      > 4 | SELECT * FROM bing;
+          | ^^^^^^^^^^^^^^^^^^^
+      "
+    `);
     return;
   }
   expect(false).toBe(true);

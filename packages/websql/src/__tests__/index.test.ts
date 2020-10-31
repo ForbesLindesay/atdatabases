@@ -16,14 +16,12 @@ test('error messages', async () => {
     `);
   } catch (ex) {
     expect(ex.message).toMatchInlineSnapshot(`
-"SQLITE_ERROR: near \\"FRM\\": syntax error
+      "SQLITE_ERROR: near \\"FRM\\": syntax error
 
-  1 | 
-> 2 |       SELECT * FRM 'baz;
-    |                ^^^
-  3 |     
-"
-`);
+      > 1 | SELECT * FRM 'baz;
+          |          ^^^
+      "
+    `);
     return;
   }
   expect(false).toBe(true);
@@ -60,17 +58,17 @@ test('transaction', async () => {
     return {a, b};
   });
   expect(result).toMatchInlineSnapshot(`
-Object {
-  "a": Array [
     Object {
-      "foo": 42,
-    },
-  ],
-  "b": Array [
-    Object {
-      "bar": 3,
-    },
-  ],
-}
-`);
+      "a": Array [
+        Object {
+          "foo": 42,
+        },
+      ],
+      "b": Array [
+        Object {
+          "bar": 3,
+        },
+      ],
+    }
+  `);
 });
