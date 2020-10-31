@@ -20,14 +20,16 @@ const tsconfig = `{
 }`;
 
 const dependencies = require('../package.json').devDependencies;
-readdirSync(__dirname + '/../packages').forEach(directory => {
+readdirSync(__dirname + '/../packages').forEach((directory) => {
   if (!statSync(__dirname + '/../packages/' + directory).isDirectory()) {
     return;
   }
-  writeFileSync(
-    __dirname + '/../packages/' + directory + '/LICENSE.md',
-    LICENSE,
-  );
+  if (directory !== 'validate-unicode') {
+    writeFileSync(
+      __dirname + '/../packages/' + directory + '/LICENSE.md',
+      LICENSE,
+    );
+  }
   writeFileSync(
     __dirname + '/../packages/' + directory + '/tsconfig.json',
     tsconfig,

@@ -4,9 +4,7 @@
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
-  "dependencies": {
-    "pg-minify": "^0.5.5"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@types/node": "^13.13.4"
   },

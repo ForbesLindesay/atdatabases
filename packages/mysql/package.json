@@ -6,6 +6,7 @@
   "types": "./lib/index.d.ts",
   "dependencies": {
     "@babel/code-frame": "^7.0.0",
+    "@databases/escape-identifier": "^0.0.0",
     "@databases/mysql-config": "^0.0.0",
     "@databases/push-to-async-iterable": "^0.0.0",
     "@databases/sql": "^0.0.0",

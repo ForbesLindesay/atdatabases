@@ -1,6 +1,7 @@
 import {URL} from 'url';
+import {escapePostgresIdentifier} from '@databases/escape-identifier';
 import {isSQLError, SQLError, SQLErrorCode} from '@databases/pg-errors';
-import sql, {SQLQuery, SQL} from '@databases/sql';
+import sql, {SQLQuery, SQL, isSqlQuery, FormatConfig} from '@databases/sql';
 import pg = require('pg-promise');
 import {TConfig, IOptions} from 'pg-promise';
 import DataTypeID from '@databases/pg-data-type-id';
@@ -12,7 +13,13 @@ const {codeFrameColumns} = require('@babel/code-frame');
 
 const {connectionStringEnvironmentVariable} = getPgConfigSync();
 
-export {sql, SQLQuery, isSQLError, SQLError, SQLErrorCode, DataTypeID};
+export type {SQLQuery, SQLError};
+export {sql, isSqlQuery, isSQLError, SQLErrorCode, DataTypeID};
+
+const pgFormat: FormatConfig = {
+  escapeIdentifier: (str) => escapePostgresIdentifier(str),
+  formatValue: (value, index) => ({placholder: `$${index + 1}`, value}),
+};
 
 export type IsolationLevel = pg.isolationLevel;
 export const IsolationLevel = pg.isolationLevel;
@@ -148,19 +155,19 @@ class ConnectionImplementation<TQueryableType extends QueryableType> {
   async query(query: SQLQuery | SQLQuery[]): Promise<any[]> {
     if (Array.isArray(query)) {
       for (const el of query) {
-        if (!(el instanceof SQLQuery)) {
+        if (!isSqlQuery(el)) {
           throw new Error(
             'Invalid query, you must use @databases/sql to create your queries.',
           );
         }
       }
-    } else if (!(query instanceof SQLQuery)) {
+    } else if (!isSqlQuery(query)) {
       throw new Error(
         'Invalid query, you must use @databases/sql to create your queries.',
       );
     }
-    const q = (Array.isArray(query) ? sql.join(query, sql`;`) : query).compile(
-      process.env.NODE_ENV !== 'production' ? {minify: false} : undefined,
+    const q = (Array.isArray(query) ? sql.join(query, sql`;`) : query).format(
+      pgFormat,
     );
     try {
       return await (Array.isArray(query)
@@ -244,14 +251,12 @@ class ConnectionImplementation<TQueryableType extends QueryableType> {
       batchSize?: number;
     } = {},
   ): Readable {
-    if (!(query instanceof SQLQuery)) {
+    if (!isSqlQuery(query)) {
       throw new Error(
         'Invalid query, you must use @databases/sql to create your queries.',
       );
     }
-    const {text, values} = query.compile(
-      process.env.NODE_ENV !== 'production' ? {minify: false} : undefined,
-    );
+    const {text, values} = query.format(pgFormat);
     const qs = new QueryStream(text, values, options);
     const stream = new PassThrough({objectMode: true});
     this.connection
@@ -752,10 +757,12 @@ export default function createConnection(
   return new ConnectionPoolImplementation(connection, pgp);
 }
 
-module.exports = createConnection;
-module.exports.default = createConnection;
-module.exports.sql = sql;
-module.exports.SQLQuery = SQLQuery;
-module.exports.isSQLError = isSQLError;
-module.exports.SQLErrorCode = SQLErrorCode;
-module.exports.DataTypeID = DataTypeID;
+module.exports = Object.assign(createConnection, {
+  sql,
+  isSqlQuery,
+  isSQLError,
+  SQLErrorCode,
+  DataTypeID,
+  IsolationLevel,
+  isConnectionPool,
+});

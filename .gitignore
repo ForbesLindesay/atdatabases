@@ -24,6 +24,7 @@ node_modules
 packages/*/build
 packages/*/lib
 packages/*/LICENSE.md
+!packages/validate-unicode/LICENSE.md
 packages/*/tsconfig.build.json
 packages/*/tsconfig.json
 packages/*/.cache
