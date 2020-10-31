@@ -19,7 +19,7 @@ export interface FormatConfig {
   formatValue: (
     value: unknown,
     index: number,
-  ) => {readonly placholder: string; readonly value: unknown};
+  ) => {readonly placeholder: string; readonly value: unknown};
 }
 
 const formatter = Symbol('SQL Query Formatter');
@@ -177,8 +177,8 @@ class SQLQuery {
     this._items = items;
   }
 
-  public format<T>(formatter: (items: readonly SQLItem[]) => T): T;
   public format(config: FormatConfig): {text: string; values: unknown[]};
+  public format<T>(formatter: (items: readonly SQLItem[]) => T): T;
   public format<T>(
     formatter: FormatConfig | ((items: readonly SQLItem[]) => T),
   ): T | {text: string; values: unknown[]} {
@@ -218,8 +218,8 @@ function formatStandard(
       // If we got a value SQL item, add a placeholder and add the value to our
       // placeholder values array.
       case SQLItemType.VALUE: {
-        const {placholder, value} = formatValue(item.value, values.length);
-        text += placholder;
+        const {placeholder, value} = formatValue(item.value, values.length);
+        text += placeholder;
         values.push(value);
         break;
       }

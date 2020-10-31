@@ -18,7 +18,7 @@ export {sql, isSqlQuery, isSQLError, SQLErrorCode, DataTypeID};
 
 const pgFormat: FormatConfig = {
   escapeIdentifier: (str) => escapePostgresIdentifier(str),
-  formatValue: (value, index) => ({placholder: `$${index + 1}`, value}),
+  formatValue: (value, index) => ({placeholder: `$${index + 1}`, value}),
 };
 
 export type IsolationLevel = pg.isolationLevel;

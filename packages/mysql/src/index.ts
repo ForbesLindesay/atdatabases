@@ -14,7 +14,7 @@ const {connectionStringEnvironmentVariable} = getMySqlConfigSync();
 
 const mysqlFormat: FormatConfig = {
   escapeIdentifier: (str) => escapeMySqlIdentifier(str),
-  formatValue: (value) => ({placholder: '?', value}),
+  formatValue: (value) => ({placeholder: '?', value}),
 };
 
 function transformError(text: string, ex: any) {

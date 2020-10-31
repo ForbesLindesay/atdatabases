@@ -1,8 +1,15 @@
-import {websql, Database, sql, SQLQuery} from '@databases/websql-core';
+import {
+  websql,
+  Database,
+  sql,
+  SQLQuery,
+  isSqlQuery,
+} from '@databases/websql-core';
 
 const openDatabase: websql.OpenDatabase = require('expo-sqlite').openDatabase;
 
-export {sql, SQLQuery};
+export type {SQLQuery};
+export {sql, isSqlQuery};
 
 export default function connect(name: string) {
   return new Database(

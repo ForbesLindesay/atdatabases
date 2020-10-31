@@ -9,7 +9,7 @@ export {sql, isSqlQuery};
 
 const sqliteFormat: FormatConfig = {
   escapeIdentifier: (str) => escapeSQLiteIdentifier(str),
-  formatValue: (value) => ({placholder: '?', value}),
+  formatValue: (value) => ({placeholder: '?', value}),
 };
 
 export enum DatabaseConnectionMode {

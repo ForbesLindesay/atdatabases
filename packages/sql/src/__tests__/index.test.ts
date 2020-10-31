@@ -7,9 +7,16 @@ test('correctly renders sql', () => {
       WHERE id = ${10}
       AND created_at > ${new Date(1545238400939)};
   `;
-  expect(query.compile()).toMatchInlineSnapshot(`
+  expect(
+    query.format({
+      escapeIdentifier: () => {
+        throw new Error('not implemented');
+      },
+      formatValue: (value) => ({placeholder: '?', value}),
+    }),
+  ).toMatchInlineSnapshot(`
 Object {
-  "text": "SELECT * FROM foo WHERE id = $1 AND created_at > $2;",
+  "text": "SELECT * FROM foo WHERE id = ? AND created_at > ?;",
   "values": Array [
     10,
     2018-12-19T16:53:20.939Z,
@@ -28,9 +35,16 @@ test('can join parts of query', () => {
       FROM foo
       WHERE ${sql.join(conditions, sql` AND `)};
   `;
-  expect(query.compile()).toMatchInlineSnapshot(`
+  expect(
+    query.format({
+      escapeIdentifier: () => {
+        throw new Error('not implemented');
+      },
+      formatValue: (value) => ({placeholder: '?', value}),
+    }),
+  ).toMatchInlineSnapshot(`
 Object {
-  "text": "SELECT * FROM foo WHERE id = $1 AND created_at > $2;",
+  "text": "SELECT * FROM foo WHERE id = ? AND created_at > ?;",
   "values": Array [
     10,
     2018-12-19T16:53:20.939Z,
@@ -41,7 +55,14 @@ Object {
 
 test('can read in a file', () => {
   const query = sql.file(`${__dirname}/fixture.sql`);
-  expect(query.compile()).toMatchInlineSnapshot(`
+  expect(
+    query.format({
+      escapeIdentifier: () => {
+        throw new Error('not implemented');
+      },
+      formatValue: (value) => ({placeholder: '?', value}),
+    }),
+  ).toMatchInlineSnapshot(`
 Object {
   "text": "SELECT * FROM my_table;",
   "values": Array [],

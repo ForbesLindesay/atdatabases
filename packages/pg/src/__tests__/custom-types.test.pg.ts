@@ -101,10 +101,14 @@ test('custom types', async () => {
       );
   `;
 
-  expect({
-    text: insert.text,
-    values: insert.values,
-  }).toMatchInlineSnapshot(`
+  expect(
+    insert.format({
+      escapeIdentifier: () => {
+        throw new Error('Not implemented');
+      },
+      formatValue: (value, index) => ({placeholder: `$${index + 1}`, value}),
+    }),
+  ).toMatchInlineSnapshot(`
 Object {
   "text": "INSERT INTO custom_types.accounts (email, balance) VALUES ( $1, ROW ($2, $3, $4) ), ( $5, ROW ($6, $7, $8) );",
   "values": Array [
