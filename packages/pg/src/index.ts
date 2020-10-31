@@ -1,6 +1,7 @@
 import {URL} from 'url';
+import {escapePostgresIdentifier} from '@databases/escape-identifier';
 import {isSQLError, SQLError, SQLErrorCode} from '@databases/pg-errors';
-import sql, {SQLQuery, SQL, isSqlQuery} from '@databases/sql';
+import sql, {SQLQuery, SQL, isSqlQuery, FormatConfig} from '@databases/sql';
 import pg = require('pg-promise');
 import {TConfig, IOptions} from 'pg-promise';
 import DataTypeID from '@databases/pg-data-type-id';
@@ -8,10 +9,14 @@ import {getPgConfigSync} from '@databases/pg-config';
 import pushToAsyncIterable from '@databases/push-to-async-iterable';
 import QueryStream = require('pg-query-stream');
 import {PassThrough, Readable} from 'stream';
-import formatQuery from './formatQuery';
 const {codeFrameColumns} = require('@babel/code-frame');
 
 const {connectionStringEnvironmentVariable} = getPgConfigSync();
+
+const pgFormat: FormatConfig = {
+  escapeIdentifier: (str) => escapePostgresIdentifier(str),
+  formatValue: (value, index) => ({placeholder: `$${index + 1}`, value}),
+};
 
 export type {SQLQuery, SQLError};
 export {sql, isSqlQuery, isSQLError, SQLErrorCode, DataTypeID};
@@ -161,8 +166,8 @@ class ConnectionImplementation<TQueryableType extends QueryableType> {
         'Invalid query, you must use @databases/sql to create your queries.',
       );
     }
-    const q = formatQuery(
-      Array.isArray(query) ? sql.join(query, sql`;`) : query,
+    const q = (Array.isArray(query) ? sql.join(query, sql`;`) : query).format(
+      pgFormat,
     );
     try {
       return await (Array.isArray(query)
@@ -251,7 +256,7 @@ class ConnectionImplementation<TQueryableType extends QueryableType> {
         'Invalid query, you must use @databases/sql to create your queries.',
       );
     }
-    const {text, values} = formatQuery(query);
+    const {text, values} = query.format(pgFormat);
     const qs = new QueryStream(text, values, options);
     const stream = new PassThrough({objectMode: true});
     this.connection

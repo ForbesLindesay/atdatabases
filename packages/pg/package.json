@@ -13,7 +13,6 @@
     "@databases/push-to-async-iterable": "^0.0.0",
     "@databases/sql": "^0.0.0",
     "@types/pg-query-stream": "^1.0.2",
-    "pg-minify": "^0.5.5",
     "pg-promise": "^8.6.0",
     "pg-query-stream": "1.1.2"
   },

@@ -1,6 +1,6 @@
 import connect from '..';
 import sql from '@databases/sql';
-import formatQuery from '../formatQuery';
+import {escapePostgresIdentifier} from '@databases/escape-identifier';
 
 jest.setTimeout(30000);
 
@@ -102,7 +102,12 @@ test('custom types', async () => {
       );
   `;
 
-  expect(formatQuery(insert)).toMatchInlineSnapshot(`
+  expect(
+    insert.format({
+      escapeIdentifier: (str) => escapePostgresIdentifier(str),
+      formatValue: (value, index) => ({placeholder: `$${index + 1}`, value}),
+    }),
+  ).toMatchInlineSnapshot(`
     Object {
       "text": "INSERT INTO custom_types.accounts (email, balance)
     VALUES
