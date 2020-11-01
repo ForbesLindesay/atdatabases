@@ -1,0 +1,24 @@
+{
+  "name": "@databases/split-sql-query",
+  "version": "0.0.0",
+  "description": "",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "devDependencies": {
+    "@databases/sql": "^0.0.0"
+  },
+  "peerDependencies": {
+    "@databases/sql": "*"
+  },
+  "scripts": {},
+  "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/split-sql-query",
+  "bugs": "https://github.com/ForbesLindesay/atdatabases/issues",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "lib/"
+  ],
+  "dependencies": {}
+}

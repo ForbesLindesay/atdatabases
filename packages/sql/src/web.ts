@@ -150,6 +150,15 @@ class SQLQuery {
   }
 
   /**
+   * Creates a new query from the array of `SQLItem` parts
+   */
+  public static __dangerous__constructFromParts(
+    items: readonly SQLItem[],
+  ): SQLQuery {
+    return new SQLQuery(items);
+  }
+
+  /**
    * Creates a new query with the value. This value will be turned into a
    * placeholder when the query gets compiled.
    */
@@ -262,6 +271,7 @@ function formatStandard(
 export type SQL = typeof SQLQuery.query & {
   readonly join: typeof SQLQuery.join;
   readonly __dangerous__rawValue: typeof SQLQuery.__dangerous__rawValue;
+  readonly __dangerous__constructFromParts: typeof SQLQuery.__dangerous__constructFromParts;
   readonly value: typeof SQLQuery.value;
   readonly ident: typeof SQLQuery.ident;
   readonly registerFormatter: typeof SQLQuery.registerFormatter;
@@ -272,6 +282,7 @@ export type SQL = typeof SQLQuery.query & {
 const sql: SQL = Object.assign(SQLQuery.query, {
   join: SQLQuery.join,
   __dangerous__rawValue: SQLQuery.__dangerous__rawValue,
+  __dangerous__constructFromParts: SQLQuery.__dangerous__constructFromParts,
   value: SQLQuery.value,
   ident: SQLQuery.ident,
   registerFormatter: SQLQuery.registerFormatter,
