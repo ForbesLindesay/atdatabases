@@ -1,664 +1,142 @@
-import {URL} from 'url';
-import {escapePostgresIdentifier} from '@databases/escape-identifier';
+import parseConnectionString, {
+  Configuration as ParsedConnectionString,
+} from '@databases/pg-connection-string';
 import {isSQLError, SQLError, SQLErrorCode} from '@databases/pg-errors';
-import sql, {SQLQuery, SQL, isSqlQuery, FormatConfig} from '@databases/sql';
-import pg = require('pg-promise');
-import {TConfig, IOptions} from 'pg-promise';
+import sql, {SQLQuery, isSqlQuery} from '@databases/sql';
+import type {ConnectionOptions} from 'tls';
 import DataTypeID from '@databases/pg-data-type-id';
 import {getPgConfigSync} from '@databases/pg-config';
-import pushToAsyncIterable from '@databases/push-to-async-iterable';
-import QueryStream = require('pg-query-stream');
-import {PassThrough, Readable} from 'stream';
-const {codeFrameColumns} = require('@babel/code-frame');
+import ConnectionPool from './ConnectionPool';
+import {readFileSync} from 'fs';
+import TransactionIsolationLevel from './types/TransactionIsolationLevel';
+import TypeOverrides from './TypeOverrides';
 
 const {connectionStringEnvironmentVariable} = getPgConfigSync();
-
-const pgFormat: FormatConfig = {
-  escapeIdentifier: (str) => escapePostgresIdentifier(str),
-  formatValue: (value, index) => ({placeholder: `$${index + 1}`, value}),
-};
 
 export type {SQLQuery, SQLError};
 export {sql, isSqlQuery, isSQLError, SQLErrorCode, DataTypeID};
 
-export type IsolationLevel = pg.isolationLevel;
-export const IsolationLevel = pg.isolationLevel;
-export interface TransactionOptions {
-  tag?: string | number;
-  isolationLevel?: IsolationLevel;
-  readOnly?: boolean;
-  deferrable?: boolean;
-}
-
-export enum QueryableType {
-  Transaction = 'transaction',
-  Connection = 'connection',
-  ConnectionPool = 'connection_pool',
-}
-
-/**
- * A Queryable can represent any of:
- *
- *  - a Transaction
- *  - a single Connection to the database (aka a "Task")
- *  - a ConnectionPool
- *
- * All share a similar API, allowing you to write methods that can
- * easily be used both inside and outside of transactions.
- */
-export interface Queryable {
-  readonly sql: SQL;
-  query(query: SQLQuery): Promise<any[]>;
-  query(query: SQLQuery[]): Promise<any[][]>;
-  queryStream(
-    query: SQLQuery,
-    options?: {
-      highWaterMark?: number;
-      batchSize?: number;
-    },
-  ): AsyncIterable<any>;
+// TODO: not all of these options really make sense
+export interface ClientConfig {
+  bigIntMode?: 'string' | 'number' | 'bigint';
   /**
-   * @deprecated use queryNodeStream
-   */
-  stream(
-    query: SQLQuery,
-    options?: {
-      highWaterMark?: number;
-      batchSize?: number;
-    },
-  ): Readable;
-  queryNodeStream(
-    query: SQLQuery,
-    options?: {
-      highWaterMark?: number;
-      batchSize?: number;
-    },
-  ): Readable;
-  task<T>(
-    fn: (connection: Task | Transaction) => Promise<T>,
-    options?: {tag?: string | number},
-  ): Promise<T>;
-  tx<T>(
-    fn: (connection: Transaction) => Promise<T>,
-    options?: TransactionOptions,
-  ): Promise<T>;
-}
-
-/**
- * Will be deprecated in the next major version, use the "Queryable" type instead, eventually Connection will become an alias for "Task"
- */
-export type Connection = Queryable;
-
-/**
- * A "Transaction" on the database will be committed once
- * the async function returns, and will be aborted if any
- * queries fail or if the function throws an exception.
- */
-export interface Transaction extends Queryable {
-  readonly type: QueryableType.Transaction;
-}
-
-/**
- * A "Task" represents a single connection to the database,
- * although you can send queries in parallel, if they share
- * one "Task" they will actually be run one at a time on the
- * underlying database.
- *
- * Most of the time you can ignore these and just focus on
- * Transactions and ConnectionPools.
- */
-export interface Task extends Queryable {
-  readonly type: QueryableType.Connection;
-}
-
-/**
- * A "ConnectionPool" represents a collection of database
- * connections that are managed for you automatically. You can
- * query this directly without worrying about allocating connections.
- * You can also use a Transaction to provide better guarantees about
- * behaviour when running many operations in parallel.
- */
-export interface ConnectionPool extends Queryable {
-  readonly type: QueryableType.ConnectionPool;
-  dispose(): Promise<void>;
-  registerTypeParser<T>(
-    type: number | string,
-    parser: (value: string) => T,
-  ): Promise<(value: string) => T>;
-  getTypeParser(type: number | string): Promise<(value: string) => any>;
-  /**
-   * Parses an n-dimensional array
-   *
-   * @param value The string value from the database
-   * @param entryParser A transform function to apply to each string
-   */
-  parseArray(value: string, entryParser?: (entry: string | null) => any): any[];
-  /**
-   * Parse a composite value and get a tuple of strings where
-   * each string represents one attribute.
-   *
-   * @param value The raw string.
-   */
-  parseComposite(value: string): string[];
-}
-
-class ConnectionImplementation<TQueryableType extends QueryableType> {
-  public readonly type: TQueryableType;
-  public readonly sql = sql;
-  protected connection: pg.IBaseProtocol<unknown>;
-  constructor(connection: pg.IBaseProtocol<unknown>, type: TQueryableType) {
-    this.connection = connection;
-    this.type = type;
-  }
-  async query(query: SQLQuery): Promise<any[]>;
-  async query(query: SQLQuery[]): Promise<any[][]>;
-  async query(query: SQLQuery | SQLQuery[]): Promise<any[]> {
-    if (Array.isArray(query)) {
-      for (const el of query) {
-        if (!isSqlQuery(el)) {
-          throw new Error(
-            'Invalid query, you must use @databases/sql to create your queries.',
-          );
-        }
-      }
-    } else if (!isSqlQuery(query)) {
-      throw new Error(
-        'Invalid query, you must use @databases/sql to create your queries.',
-      );
-    }
-    const q = (Array.isArray(query) ? sql.join(query, sql`;`) : query).format(
-      pgFormat,
-    );
-    try {
-      return await (Array.isArray(query)
-        ? this.connection.multi(q.text, q.values)
-        : this.connection.query(q));
-    } catch (ex) {
-      if (isSQLError(ex) && ex.position) {
-        const position = parseInt(ex.position, 10);
-        const match =
-          /syntax error at or near \"([^\"\n]+)\"/.exec(ex.message) ||
-          /relation \"([^\"\n]+)\" does not exist/.exec(ex.message);
-        let column = 0;
-        let line = 1;
-        for (let i = 0; i < position; i++) {
-          if (q.text[i] === '\n') {
-            line++;
-            column = 0;
-          } else {
-            column++;
-          }
-        }
-
-        const start = {line, column};
-        let end: undefined | {line: number; column: number};
-        if (match) {
-          end = {line, column: column + match[1].length};
-        }
-
-        ex.message += `\n\n${codeFrameColumns(q.text, {start, end})}\n`;
-      }
-      throw ex;
-    }
-  }
-
-  queryStream(
-    query: SQLQuery,
-    options: {
-      highWaterMark?: number;
-      batchSize?: number;
-    } = {},
-  ): AsyncIterableIterator<any> {
-    const stream = this.queryNodeStream(query, options);
-    return pushToAsyncIterable<any>({
-      onData(fn) {
-        stream.on('data', fn);
-      },
-      onError(fn) {
-        stream.on('error', fn);
-      },
-      onEnd(fn) {
-        stream.on('end', fn);
-      },
-      pause() {
-        stream.pause();
-      },
-      resume() {
-        stream.resume();
-      },
-      /**
-       * Rely mainly on high water mark of the underlying node stream
-       */
-      highWaterMark: 2,
-    });
-  }
-  /**
-   * @deprecated use queryNodeStream
-   */
-  stream(
-    query: SQLQuery,
-    options: {
-      highWaterMark?: number;
-      batchSize?: number;
-    } = {},
-  ) {
-    return this.queryNodeStream(query, options);
-  }
-  queryNodeStream(
-    query: SQLQuery,
-    options: {
-      highWaterMark?: number;
-      batchSize?: number;
-    } = {},
-  ): Readable {
-    if (!isSqlQuery(query)) {
-      throw new Error(
-        'Invalid query, you must use @databases/sql to create your queries.',
-      );
-    }
-    const {text, values} = query.format(pgFormat);
-    const qs = new QueryStream(text, values, options);
-    const stream = new PassThrough({objectMode: true});
-    this.connection
-      .stream(qs, (results) => {
-        results.pipe(stream);
-        results.on('error', (err) => stream.emit('error', err));
-      })
-      .catch((err) => stream.emit('error', err));
-    return stream;
-  }
-  async task<T>(
-    fn: (connection: Task | Transaction) => Promise<T>,
-    options?: {tag?: string | number},
-  ): Promise<T> {
-    const type =
-      this.type === QueryableType.Transaction
-        ? QueryableType.Transaction
-        : QueryableType.Connection;
-    if (options) {
-      return await this.connection.task(options, (t) => {
-        return fn(new ConnectionImplementation(t, type)) as any;
-      });
-    }
-    return await this.connection.task((t) => {
-      return fn(new ConnectionImplementation(t, type)) as any;
-    });
-  }
-  async tx<T>(
-    fn: (connection: Transaction) => Promise<T>,
-    options?: TransactionOptions,
-  ): Promise<T> {
-    if (options) {
-      const {tag, ...txMode} = options;
-      const opts: {tag?: any; mode?: pg.TransactionMode} = {};
-      if (tag) {
-        opts.tag = tag;
-      }
-      if (Object.keys(txMode).length) {
-        opts.mode = new pg.TransactionMode(
-          txMode.isolationLevel,
-          txMode.readOnly,
-          txMode.deferrable,
-        );
-      }
-      return await this.connection.tx(opts, (t) => {
-        return fn(
-          new ConnectionImplementation(t, QueryableType.Transaction),
-        ) as any;
-      });
-    }
-    return await this.connection.tx((t) => {
-      return fn(
-        new ConnectionImplementation(t, QueryableType.Transaction),
-      ) as any;
-    });
-  }
-}
-
-class ConnectionPoolImplementation extends ConnectionImplementation<
-  QueryableType.ConnectionPool
-> {
-  public readonly sql = sql;
-  public readonly dispose: () => Promise<void>;
-  private readonly pgp: pg.IMain;
-  constructor(connection: pg.IDatabase<unknown>, pgp: pg.IMain) {
-    super(connection, QueryableType.ConnectionPool);
-    this.dispose = () => connection.$pool.end();
-    this.pgp = pgp;
-  }
-  private async _getTypeID(type: number | string): Promise<number> {
-    if (typeof type === 'number') {
-      return type;
-    }
-    const ts = type.split('.');
-    let results;
-    if (ts.length === 1) {
-      results = await this.query(sql`
-        SELECT
-          ty.oid as "typeID",
-          ns.nspname AS "schemaName",
-          ty.typname AS "typeName"
-        FROM pg_catalog.pg_type ty
-        INNER JOIN pg_catalog.pg_namespace ns
-          ON (ty.typnamespace = ns.oid)
-        WHERE lower(ty.typname) = ${type.toLowerCase()};
-      `);
-    } else if (ts.length === 2) {
-      results = await this.query(sql`
-        SELECT
-          ty.oid as "typeID",
-          ns.nspname AS "schemaName",
-          ty.typname AS "typeName"
-        FROM pg_catalog.pg_type ty
-        INNER JOIN pg_catalog.pg_namespace ns
-          ON (ty.typnamespace = ns.oid)
-        WHERE lower(ty.typname) = ${ts[1].toLowerCase()} AND lower(ns.nspname) = ${ts[0].toLowerCase()};
-      `);
-    } else {
-      throw new Error('Type Name should only have one "." in it');
-    }
-    if (results.length === 0) {
-      throw new Error('Could not find the type ' + type);
-    }
-    if (results.length > 1) {
-      throw new Error(
-        'The type name ' +
-          type +
-          ' was found in multiple schemas: ' +
-          results.map((r) => r.schemaName).join(', '),
-      );
-    }
-    return results[0].typeID;
-  }
-  async registerTypeParser<T>(
-    type: number | string,
-    parser: (value: string) => T,
-  ): Promise<(value: string) => T> {
-    const typeID = await this._getTypeID(type);
-    this.pgp.pg.types.setTypeParser(typeID, parser);
-    return parser;
-  }
-  async getTypeParser(type: number | string): Promise<(value: string) => any> {
-    const typeID = await this._getTypeID(type);
-    return this.pgp.pg.types.getTypeParser(typeID);
-  }
-  /**
-   * Parses an n-dimensional array
-   *
-   * @param value The string value from the database
-   * @param entryParser A transform function to apply to each string
-   */
-  parseArray(
-    value: string,
-    entryParser?: (entry: string | null) => any,
-  ): any[] {
-    return (this.pgp.pg.types.arrayParser as any)
-      .create(value, entryParser)
-      .parse();
-  }
-
-  /**
-   * Parse a composite value and get a tuple of strings where
-   * each string represents one attribute.
-   *
-   * @param value The raw string.
-   */
-  parseComposite(value: string): string[] {
-    if (value[0] !== '(') {
-      throw new Error('composite values should start with (');
-    }
-    const values = [];
-    let currentValue = '';
-    let quoted = false;
-    for (let i = 1; i < value.length; i++) {
-      if (!quoted && value[i] === ',') {
-        values.push(currentValue);
-        currentValue = '';
-        continue;
-      } else if (!quoted && value[i] === ')') {
-        values.push(currentValue);
-        currentValue = '';
-        if (i !== value.length - 1) {
-          throw new Error('Got ")" before end of value');
-        }
-        continue;
-      } else if (quoted && value[i] === '"') {
-        if (value[i + 1] === '"') {
-          // if the next value is also a quote, that means we
-          // are looking at an escaped quote. Skip this char
-          // and insert the quote
-          i++;
-        } else {
-          quoted = false;
-          continue;
-        }
-      } else if (value[i] === '"') {
-        quoted = true;
-        continue;
-      }
-      currentValue += value[i];
-    }
-    if (currentValue) {
-      throw new Error('Got to end of value with no ")"');
-    }
-    return values;
-  }
-}
-
-export function isConnectionPool(
-  c: Queryable | Transaction | Task | ConnectionPool,
-): c is ConnectionPool {
-  return c instanceof ConnectionPoolImplementation;
-}
-
-export type ConnectionParamNames =
-  | 'database'
-  | 'user'
-  | 'password'
-  | 'port'
-  | 'host'
-  | 'ssl';
-export const ConnectionParamNames = [
-  'database',
-  'user',
-  'password',
-  'port',
-  'host',
-  'ssl',
-];
-
-export type ConnectionParams = Pick<TConfig, ConnectionParamNames>;
-
-export interface ConnectionOptions
-  extends Pick<
-    TConfig,
-    Exclude<
-      keyof TConfig,
-      | ConnectionParamNames
-      | 'connectionString'
-      | 'poolSize'
-      | 'max'
-      | 'min'
-      | 'reapIntervalMillis'
-      | 'returnToHead'
-      | 'poolLog'
-    >
-  > {
-  /**
-   * Disable the warning:
-   *
-   * Creating a duplicate database object for the same connection.
-   */
-  noDuplicateDatabaseObjectsWarning?: boolean;
-
-  /**
-   * By default, @databases/pg represents big ints as numbers,
-   * and throws an error for numbers greater than Number.MAX_SAFE_INTEGER.
-   *
-   * Setting this option to `true` allows you to use strings,
-   * which work for much larger numbers.
+   * @deprecated use bigIntMode
    */
   bigIntAsString?: boolean;
 
   /**
-   * The maximum number of connections in the connection pool.
-   * Defaults to 10.
+   * Defaults to process.env.DATABASE_URL
+   */
+  connectionString?: string;
+
+  /**
+   * Application name to provide to postgres when connecting.
+   * This can be useful when diagnosing performance issues on
+   * the Postgres database server.
+   *
+   * Can also be specified via the connection string, or using
+   * the "PGAPPNAME" environment variable.
+   */
+  applicationName?: string;
+
+  /**
+   * Fallback value to use as "applicationName" if no "applicationName"
+   * was provided via the connection string or environment variables.
+   */
+  fallbackApplicationName?: string;
+
+  user?: string;
+  password?: string;
+  host?: string | string[];
+  database?: string;
+  port?: number | (number | null)[];
+
+  /**
+   * SSL Mode, defaults to "prefer"
+   *
+   * false is equivalent to "disable"
+   * true is equivalent to "require"
+   */
+  ssl?:
+    | false
+    | true
+    | 'disable'
+    | 'prefer'
+    | 'require'
+    | 'no-verify'
+    | ConnectionOptions;
+
+  // TODO: types
+
+  /**
+   * number of milliseconds before a statement in query will time out,
+   *
+   * default is no timeout
+   */
+  statementTimeoutMilliseconds?: number;
+
+  /**
+   * number of milliseconds before a query call will timeout,
+   *
+   * default is no timeout
+   */
+  queryTimeoutMilliseconds?: number;
+
+  /**
+   * number of milliseconds before terminating any session with
+   * an open idle transaction,
+   *
+   * default is no timeout
+   */
+  idleInTransactionSessionTimeoutMilliseconds?: number;
+
+  /**
+   * Passed to `new Connection(...)`,
+   * defaults to false
+   */
+  keepAlive?: boolean;
+
+  /**
+   * Passed to `new Connection(...)`,
+   * defaults to 0
+   */
+  keepAliveInitialDelayMilliseconds?: number;
+
+  /**
+   * Maximum times to use a single connection from a connection pool before
+   * discarding it and requesting a fresh connection.
+   * defaults to Infinity
+   */
+  maxUses?: number;
+}
+
+export interface ConnectionPoolConfig extends ClientConfig {
+  /**
+   * maximum number of clients the pool should contain
+   * by default this is set to 10.
    */
   poolSize?: number;
 
   /**
-   * Redirects all query formatting to the pg driver.
+   * number of milliseconds a client must sit idle in the pool and not be checked out
+   * before it is disconnected from the backend and discarded
+   *
+   * default is 10000 (10 seconds) - set to 0 to disable auto-disconnection of idle clients
    */
-  pgFormatting?: boolean;
+  idleTimeoutMilliseconds?: number;
 
   /**
-   * Use Native Bindings. Library pg-native must be
-   * included and installed independently, or else
-   * there will be an error thrown:
-   * Failed to initialize Native Bindings.
+   * Number of milliseconds to wait before timing out when connecting a new client
+   * by default this is 15 seconds. Set this to 0 to disable the timeout altogether.
    */
-  pgNative?: boolean;
-
-  /**
-   * Overrides the default (ES6 Promise) promise library
-   * for its internal use.
-   */
-  promiseLib?: any;
-
-  /**
-   * Prevents protocol locking.
-   */
-  noLocking?: boolean;
-
-  /**
-   * Capitalizes any SQL generated by pg-promise
-   */
-  capSQL?: boolean;
-
-  /**
-   * Forces change of the default database schema(s)
-   * for every fresh connection, i.e. the library will
-   * execute SET search_path TO schema_1, schema_2, ...
-   * in the background whenever a fresh physical connection
-   * is allocated.
-   */
-  schema?: string | ReadonlyArray<string>;
-
-  /**
-   * Disables all diagnostic warnings in the library (it is ill-advised).
-   */
-  noWarnings?: boolean;
-
-  /**
-   * [connect](http://vitaly-t.github.io/pg-promise/global.html#event:connect)
-   * event handler.
-   */
-  connect?: IOptions<{}>['connect'];
-
-  /**
-   * [disconnect](http://vitaly-t.github.io/pg-promise/global.html#event:disconnect)
-   * event handler.
-   */
-  disconnect?: IOptions<{}>['disconnect'];
-
-  /**
-   * [query](http://vitaly-t.github.io/pg-promise/global.html#event:query)
-   * event handler.
-   */
-  query?: IOptions<{}>['query'];
-
-  /**
-   * [receive](http://vitaly-t.github.io/pg-promise/global.html#event:receive)
-   * event handler.
-   */
-  receive?: IOptions<{}>['receive'];
-
-  /**
-   * [task](http://vitaly-t.github.io/pg-promise/global.html#event:task)
-   * event handler.
-   */
-  task?: IOptions<{}>['task'];
-
-  /**
-   * [transact](http://vitaly-t.github.io/pg-promise/global.html#event:transact)
-   * event handler.
-   */
-  transact?: IOptions<{}>['transact'];
-
-  /**
-   * [error](http://vitaly-t.github.io/pg-promise/global.html#event:error)
-   * event handler.
-   */
-  error?: IOptions<{}>['error'];
-
-  /**
-   * [extend](http://vitaly-t.github.io/pg-promise/global.html#event:extend)
-   * event handler.
-   */
-  extend?: IOptions<{}>['extend'];
+  connectionTimeoutMilliseconds?: number;
 }
 
-const INIT_OPTIONS = new Set<keyof IOptions<{}>>([
-  'pgFormatting',
-  'pgNative',
-  'promiseLib',
-  'noLocking',
-  'capSQL',
-  'schema',
-  'noWarnings',
-  'connect',
-  'disconnect',
-  'query',
-  'receive',
-  'task',
-  'transact',
-  'error',
-  'extend',
-]);
-function splitOptions(
-  raw: ConnectionOptions,
-): {
-  noDuplicateDatabaseObjectsWarning: boolean;
-  bigIntAsString: boolean;
-  connectOptions: TConfig;
-  initOptions: IOptions<{}>;
-} {
-  let noDuplicateDatabaseObjectsWarning = false;
-  let bigIntAsString = false;
-  const connectOptions: TConfig = {};
-  const initOptions: IOptions<{}> = {};
-
-  Object.keys(raw).forEach((key) => {
-    if (key === 'noDuplicateDatabaseObjectsWarning') {
-      noDuplicateDatabaseObjectsWarning =
-        raw.noDuplicateDatabaseObjectsWarning || false;
-    } else if (key === 'bigIntAsString') {
-      bigIntAsString = raw.bigIntAsString || false;
-    } else if (key === 'poolSize') {
-      connectOptions.max = raw.poolSize;
-    } else if (INIT_OPTIONS.has(key as keyof IOptions<{}>)) {
-      initOptions[key as keyof IOptions<{}>] =
-        raw[key as keyof ConnectionOptions];
-    } else {
-      connectOptions[key as keyof TConfig] =
-        raw[key as keyof ConnectionOptions];
-    }
-  });
-
-  return {
-    noDuplicateDatabaseObjectsWarning,
-    bigIntAsString,
-    connectOptions,
-    initOptions,
-  };
-}
-
-export default function createConnection(
-  connectionConfig: string | ConnectionParams | undefined = process.env[
+export default function createConnectionPool(
+  connectionConfig: string | ConnectionPoolConfig | undefined = process.env[
     connectionStringEnvironmentVariable
   ],
-  options: ConnectionOptions = {},
-): ConnectionPool {
+) {
   if (!connectionConfig) {
     throw new Error(
       'You must provide a connection string for @databases/pg. You can ' +
@@ -666,104 +144,228 @@ export default function createConnection(
         `the ${connectionStringEnvironmentVariable} environment variable.`,
     );
   }
-
-  let requireSslForConnectionString = false;
-  if (typeof connectionConfig === 'string') {
-    let url;
-    try {
-      url = new URL(connectionConfig);
-      if (url.searchParams.get('sslmode') === 'require') {
-        requireSslForConnectionString = true;
-      }
-    } catch (ex) {
-      throw new Error(
-        'Invalid Postgres connection string, expected a URI: ' +
-          connectionConfig,
-      );
-    }
-    if (url.protocol !== 'postgres:' && url.protocol !== 'postgresql:') {
-      throw new Error(
-        'Invalid Postgres connection string, expected protocol to be "postgres": ' +
-          connectionConfig,
-      );
-    }
-  }
-
-  if (typeof connectionConfig === 'object') {
-    Object.keys(connectionConfig).forEach((key) => {
-      if (!ConnectionParamNames.includes(key)) {
-        throw new Error(`${key} is not a supported key for ConnectionConfig`);
-      }
-    });
-  }
-
-  const {
-    noDuplicateDatabaseObjectsWarning,
-    bigIntAsString,
-    connectOptions,
-    initOptions,
-  } = splitOptions(options);
-
-  const pgp = pg(initOptions);
-
-  // By default we force BIG_INTEGER to return as a JavaScript number because
-  // we never expect to handle integers larger than 2^52, but want to allow
-  // numbers greater than 2^32 in the database
-
-  if (!bigIntAsString) {
-    // BIGINT -> INT
-    const parseInteger = pgp.pg.types.getTypeParser(DataTypeID.int4);
-    const MAX_SAFE_INTEGER = `${Number.MAX_SAFE_INTEGER}`;
-    pgp.pg.types.setTypeParser(DataTypeID.int8, (str) => {
-      if (
-        (str && str.length > MAX_SAFE_INTEGER.length) ||
-        (str.length === MAX_SAFE_INTEGER.length && str > MAX_SAFE_INTEGER)
-      ) {
-        throw new Error(
-          `JavaScript cannot handle integers great than: ${Number.MAX_SAFE_INTEGER}`,
-        );
-      }
-      return parseInteger(str);
-    });
-
-    // BIGINT ARRAY -> INT ARRAY
-    const parseIntegerArray = pgp.pg.types.getTypeParser(DataTypeID.int4);
-    pgp.pg.types.setTypeParser(DataTypeID._int8, (str) => {
-      const result = parseIntegerArray(str);
-      if (
-        result &&
-        result.some((val: number) => val && val > Number.MAX_SAFE_INTEGER)
-      ) {
-        throw new Error(
-          `JavaScript cannot handle integers great than: ${Number.MAX_SAFE_INTEGER}`,
-        );
-      }
-    });
-  }
-
-  const c =
+  const {connectionString = process.env[connectionStringEnvironmentVariable]} =
     typeof connectionConfig === 'object'
-      ? {...connectionConfig, ...connectOptions}
-      : {
-          connectionString: connectionConfig,
-          ...(requireSslForConnectionString ? {ssl: true} : {}),
-          ...connectOptions,
-        };
-  const connection = pgp(
-    c,
-    noDuplicateDatabaseObjectsWarning ? {v: Math.random()} : undefined,
+      ? connectionConfig
+      : {connectionString: connectionConfig};
+  const parsedConnectionString = parseConnectionString(connectionString);
+  const {
+    user = parsedConnectionString.user,
+    password = parsedConnectionString.password,
+    host = parsedConnectionString.host,
+    database = parsedConnectionString.dbname,
+    port = parsedConnectionString.port,
+    connectionTimeoutMilliseconds = 15_000,
+    idleTimeoutMilliseconds = 10_000,
+    poolSize = 10,
+    statementTimeoutMilliseconds = 0,
+    queryTimeoutMilliseconds = 0,
+    idleInTransactionSessionTimeoutMilliseconds = 0,
+    applicationName = parsedConnectionString.application_name,
+    keepAlive = false,
+    keepAliveInitialDelayMilliseconds = 0,
+    maxUses = Infinity,
+    bigIntMode = null,
+    // tslint:disable-next-line:deprecation
+    bigIntAsString = false,
+  } = typeof connectionConfig === 'object' ? connectionConfig : {};
+
+  if (bigIntAsString) {
+    console.warn(
+      'bigIntAsString is deprecated and will be removed in the next major version of @databases/pg, use `bigIntMode: "string"` instead',
+    );
+  } else if (bigIntMode === null) {
+    console.warn(
+      'bigIntMode currently deafults to "number" but will default to "bigint" in the next major version of @databases/pg. Set it explicitly to disable this warning.',
+    );
+  }
+  const types = new TypeOverrides({
+    bigIntMode: bigIntMode ?? (bigIntAsString ? 'string' : 'number'),
+  });
+  const sslConfig = getSSLConfig(
+    typeof connectionConfig === 'object' ? connectionConfig : {},
+    parsedConnectionString,
   );
 
-  return new ConnectionPoolImplementation(connection, pgp);
+  const hostList = Array.isArray(host) ? host : [host];
+  const portList = Array.isArray(port) ? port : [port];
+
+  if (portList.length > 1 && hostList.length !== portList.length) {
+    throw new Error(
+      'If you provide more than port, you must provide exactly the same number of hosts and port',
+    );
+  }
+
+  const pgOptions = {
+    user,
+    password,
+    database,
+    connectionTimeoutMillis: connectionTimeoutMilliseconds,
+    idleTimeoutMillis: idleTimeoutMilliseconds,
+    max: poolSize,
+    ...(statementTimeoutMilliseconds
+      ? {statement_timeout: statementTimeoutMilliseconds}
+      : {}),
+    ...(queryTimeoutMilliseconds
+      ? {query_timeout: queryTimeoutMilliseconds}
+      : {}),
+    ...(idleInTransactionSessionTimeoutMilliseconds
+      ? {
+          idle_in_transaction_session_timeout: idleInTransactionSessionTimeoutMilliseconds,
+        }
+      : {}),
+    application_name:
+      applicationName ||
+      (typeof connectionConfig === 'object' ? connectionConfig : {})
+        .fallbackApplicationName ||
+      parsedConnectionString.fallback_application_name,
+    keepAlive,
+    keepAliveInitialDelayMillis: keepAliveInitialDelayMilliseconds,
+    maxUses,
+    types,
+  };
+
+  return new ConnectionPool(
+    pgOptions,
+    (hostList.length === 0 ? ['localhost'] : hostList).map((host, i) => {
+      const port =
+        portList.length === 0
+          ? undefined
+          : portList.length === 1
+          ? portList[0]
+          : portList[i];
+      return {
+        host,
+        port: port ?? undefined,
+      };
+    }),
+    sslConfig,
+  );
 }
 
-module.exports = Object.assign(createConnection, {
-  default: createConnection,
+function getSSLConfig(
+  config: ClientConfig,
+  parsedConnectionString: ParsedConnectionString,
+) {
+  if (
+    config.ssl === false ||
+    config.ssl === 'disable' ||
+    (!config.ssl && parsedConnectionString.sslmode === 'disable')
+  ) {
+    return null;
+  }
+  if (config.ssl && typeof config.ssl === 'object') {
+    return {allowFallback: false, ssl: config.ssl};
+  }
+
+  const ssl: ConnectionOptions = {};
+  if (parsedConnectionString.sslcert) {
+    ssl.cert = readFileSync(parsedConnectionString.sslcert, 'utf8');
+  }
+  if (parsedConnectionString.sslkey) {
+    ssl.key = readFileSync(parsedConnectionString.sslkey, 'utf8');
+  }
+  if (parsedConnectionString.sslrootcert) {
+    ssl.ca = readFileSync(parsedConnectionString.sslrootcert, 'utf8');
+  }
+  if (
+    config.ssl === 'no-verify' ||
+    (parsedConnectionString.sslmode === 'no-verify' && !config.ssl)
+  ) {
+    ssl.rejectUnauthorized = false;
+  }
+
+  const mode = config.ssl || parsedConnectionString.sslmode;
+  if (mode === 'prefer' || mode === undefined) {
+    ssl.rejectUnauthorized = false;
+    return {allowFallback: true, ssl};
+  } else {
+    return {allowFallback: false, ssl};
+  }
+}
+
+module.exports = Object.assign(createConnectionPool, {
+  default: createConnectionPool,
   sql,
   isSqlQuery,
   isSQLError,
   SQLErrorCode,
   DataTypeID,
-  IsolationLevel,
-  isConnectionPool,
+  TransactionIsolationLevel,
+  // isConnectionPool,
 });
+
+// interface UndocumentedPgOptions {
+//   /**
+//    * Use binary mode for pg communication,
+//    * defaults to false
+//    */
+//   binary: boolean;
+//   /**
+//    * Override the "Promise" used within pg
+//    */
+//   Promise: typeof Promise;
+
+//   /**
+//    * Passed to `new ConnectionParameters(...)` and used in Client.getStartupConf()
+//    * Defaults to fallback_application_name
+//    */
+//   application_name: string;
+//   /**
+//    * Passed to `new ConnectionParameters(...)` and used in Client.getStartupConf()
+//    */
+//   fallback_application_name: string;
+//   /**
+//    * Passed to `new ConnectionParameters(...)` and used in Client.getStartupConf()
+//    *
+//    * This changes the protocol that's used, which would almost certainly just break the library
+//    */
+//   replication: string;
+//   /**
+//    * Passed to `new ConnectionParameters(...)` and used in Client.getStartupConf()
+//    *
+//    * There's probably always a better option for how to set these options
+//    */
+//   options: string;
+
+//   /**
+//    * Passed to `new TypeOverrides(...)`
+//    */
+//   types: unknown;
+
+//   /**
+//    * Passed to `new Connection(...)`
+//    */
+//   stream: unknown;
+//   /**
+//    * Passed to `new Connection(...)` as "encoding",
+//    * defaults to 'utf8'
+//    */
+//   client_encoding: boolean;
+//   /**
+//    * Passed to `new Connection(...)`,
+//    * defaults to false
+//    */
+//   keepAlive: boolean;
+//   /**
+//    * Passed to `new Connection(...)`,
+//    * defaults to 0
+//    */
+//   keepAliveInitialDelayMillis: number;
+
+//   /**
+//    * Passed to `new Pool(...)`,
+//    * defaults to Infinity
+//    */
+//   maxUses: number;
+//   /**
+//    * Passed to `new Pool(...)`,
+//    * defaults to Infinity
+//    */
+//   log: () => void;
+//   /**
+//    * Passed to `new Pool(...)`,
+//    * Called on newly acquired clients to test that they are working before adding them to the pool.
+//    */
+//   verify: (client: Client, cb: (err?: Error | null) => void) => void;
+// }
