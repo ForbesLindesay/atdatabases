@@ -35,6 +35,8 @@ export default function parseKeywordValueConnectionString(
           isKey = true;
           key = '';
           value = '';
+        } else if (char === '\\') {
+          escaped = true;
         } else {
           value += char;
         }

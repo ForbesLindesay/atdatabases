@@ -17,6 +17,9 @@ const examples: (
   'postgresql://other@localhost/otherdb?connect_timeout=10&application_name=myapp',
   'postgresql://host1:123,host2:456/somedb?target_session_attrs=any&application_name=myapp',
 
+  // custom examples
+  `host=localhost port=5432 dbname=mydb connect_timeout=10 user='my name' password='my\\'password'`,
+
   // using environment variables
   {connectionString: undefined, env: {PGREQUIRESSL: '1'}},
   {

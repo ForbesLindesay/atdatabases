@@ -143,6 +143,26 @@
     "dbname": "somedb",
     "application_name": "myapp"
   },
+  "Env: {} Connection String: host=localhost port=5432 dbname=mydb connect_timeout=10 user='my name' password='my\\'password'": {
+    "channel_binding": "prefer",
+    "target_session_attrs": "any",
+    "keepalives": true,
+    "gssencmode": "prefer",
+    "sslmode": "prefer",
+    "sslcompression": false,
+    "ssl_min_protocol_version": "TLSv1.2",
+    "host": [
+      "localhost"
+    ],
+    "hostaddr": [],
+    "port": [
+      5432
+    ],
+    "dbname": "mydb",
+    "connect_timeout": 10,
+    "user": "my name",
+    "password": "my'password"
+  },
   "Env: { PGREQUIRESSL: '1' } Connection String: undefined": {
     "channel_binding": "prefer",
     "target_session_attrs": "any",
