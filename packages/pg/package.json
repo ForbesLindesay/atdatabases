@@ -6,6 +6,7 @@
   "types": "./lib/index.d.ts",
   "dependencies": {
     "@babel/code-frame": "^7.0.0",
+    "@databases/escape-identifier": "^0.0.0",
     "@databases/pg-config": "^0.0.0",
     "@databases/pg-data-type-id": "^0.0.0",
     "@databases/pg-errors": "^0.0.0",

@@ -1,9 +1,16 @@
-import sql, {SQLQuery} from '@databases/sql/web';
+import {escapeSQLiteIdentifier} from '@databases/escape-identifier';
+import sql, {SQLQuery, isSqlQuery, FormatConfig} from '@databases/sql/web';
 import * as ws from './websql-types';
 const {codeFrameColumns} = require('@babel/code-frame');
 
+const sqliteFormat: FormatConfig = {
+  escapeIdentifier: (str) => escapeSQLiteIdentifier(str),
+  formatValue: (value) => ({placeholder: '?', value}),
+};
+
 const DEFAULT_OPTIONS = {readOnly: false};
-export {sql, SQLQuery};
+export type {SQLQuery};
+export {sql, isSqlQuery};
 export class QueryTask {
   protected readonly _isQueryTask = true;
 }
@@ -13,7 +20,7 @@ export class Transaction {
     this._handler = handler;
   }
   query(query: SQLQuery): QueryTask {
-    if (!(query instanceof SQLQuery)) {
+    if (!isSqlQuery(query)) {
       throw new Error(
         'Invalid query, you must use @databases/sql to create your queries.',
       );
@@ -133,7 +140,7 @@ export default class Database {
               return;
             }
 
-            const {text, values} = query!.compile();
+            const {text, values} = query!.format(sqliteFormat);
             transaction.executeSql(
               text,
               values,
@@ -163,12 +170,12 @@ export default class Database {
   }
   async query(query: SQLQuery, options: {readOnly: boolean} = DEFAULT_OPTIONS) {
     const db = await this._db;
-    if (!(query instanceof SQLQuery)) {
+    if (!isSqlQuery(query)) {
       throw new Error(
         'Invalid query, you must use @databases/sql to create your queries.',
       );
     }
-    const {text, values} = query.compile();
+    const {text, values} = query.format(sqliteFormat);
     const results = await new Promise<ws.SQLResultSet>((resolve, reject) => {
       let resultSet: ws.SQLResultSet | undefined;
       db[options.readOnly ? 'readTransaction' : 'transaction'](

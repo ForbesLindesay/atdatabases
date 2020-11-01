@@ -1,8 +1,16 @@
 import * as sqlite from 'sqlite3';
-import sql, {SQLQuery} from '@databases/sql';
+import {escapeSQLiteIdentifier} from '@databases/escape-identifier';
+import sql, {SQLQuery, isSqlQuery, FormatConfig} from '@databases/sql';
 import Mutex from './Mutex';
-export {sql, SQLQuery};
 const Queue = require('then-queue');
+
+export type {SQLQuery};
+export {sql, isSqlQuery};
+
+const sqliteFormat: FormatConfig = {
+  escapeIdentifier: (str) => escapeSQLiteIdentifier(str),
+  formatValue: (value) => ({placeholder: '?', value}),
+};
 
 export enum DatabaseConnectionMode {
   ReadOnly = sqlite.OPEN_READONLY,
@@ -51,6 +59,9 @@ class DatabaseTransactionImplementation implements DatabaseTransaction {
     this._database = database;
   }
   async query(query: SQLQuery) {
+    if (!isSqlQuery(query)) {
+      throw new Error('Expected query to be an SQLQuery');
+    }
     return runQuery(query, this._database, async (fn) => fn());
   }
 
@@ -61,6 +72,9 @@ class DatabaseTransactionImplementation implements DatabaseTransaction {
     return this.queryStream(query);
   }
   queryStream(query: SQLQuery): AsyncIterableIterator<any> {
+    if (!isSqlQuery(query)) {
+      throw new Error('Expected query to be an SQLQuery');
+    }
     return runQueryStream(query, this._database, async (fn) => fn());
   }
 }
@@ -79,6 +93,9 @@ class DatabaseConnectionImplementation implements DatabaseConnection {
     }
   }
   async query(query: SQLQuery) {
+    if (!isSqlQuery(query)) {
+      throw new Error('Expected query to be an SQLQuery');
+    }
     return runQuery(query, this._database, async (fn) =>
       this._mutex.readLock(fn),
     );
@@ -91,6 +108,9 @@ class DatabaseConnectionImplementation implements DatabaseConnection {
     return this.queryStream(query);
   }
   queryStream(query: SQLQuery): AsyncIterableIterator<any> {
+    if (!isSqlQuery(query)) {
+      throw new Error('Expected query to be an SQLQuery');
+    }
     return runQueryStream(query, this._database, async (fn) =>
       this._mutex.readLock(fn),
     );
@@ -148,7 +168,7 @@ module.exports = Object.assign(connect, {
   DatabaseConnectionMode,
   IN_MEMORY,
   sql,
-  SQLQuery,
+  isSqlQuery,
 });
 
 async function runQuery(
@@ -156,7 +176,7 @@ async function runQuery(
   database: sqlite.Database,
   lock: <T>(fn: () => Promise<T>) => Promise<T>,
 ) {
-  const {text, values} = query.compileMySQL();
+  const {text, values} = query.format(sqliteFormat);
   return lock(async () => {
     return await new Promise<any[]>((resolve, reject) => {
       database.all(text, values, (err, rows) => {
@@ -184,7 +204,7 @@ async function* runQueryStream(
   const queue: Queue<
     {done: false; value: any} | {done: true; err: any}
   > = new Queue();
-  const {text, values} = query.compileMySQL();
+  const {text, values} = query.format(sqliteFormat);
   lock(async () => {
     await new Promise<void>((releaseMutex) => {
       database.each(

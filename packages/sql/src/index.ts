@@ -1,36 +1,28 @@
 import {readFileSync} from 'fs';
-import minify = require('pg-minify');
-import SQLQuery, {setPgMinify, setReadFileSync} from './SQLQuery';
-import SQLBase from './SQL';
+import sqlBase, {
+  SQL as SQLBase,
+  SQLQuery,
+  SQLItem,
+  SQLItemType,
+  FormatConfig,
+  isSqlQuery,
+} from './web';
 
+export type {SQLQuery, SQLItem, FormatConfig};
+export {isSqlQuery, SQLItemType};
 export interface SQL extends SQLBase {
   file(filename: string): SQLQuery;
 }
 
-setPgMinify(minify);
-setReadFileSync(readFileSync);
-
-export {SQLQuery};
-
 // Create the SQL interface we export.
-const modifiedSQL: SQL = Object.assign(
-  (strings: TemplateStringsArray, ...values: Array<any>): SQLQuery =>
-    SQLQuery.query(strings, ...values),
-  {
-    // tslint:disable:no-unbound-method
-    // tslint:disable-next-line:deprecation
-    join: SQLQuery.join,
-    __dangerous__rawValue: SQLQuery.raw,
-    file: (filename: string) => SQLQuery.file(filename),
-    value: SQLQuery.value,
-    ident: SQLQuery.ident,
-    registerFormatter: SQLQuery.registerFormatter,
-    // tslint:enable:no-unbound-method
-  },
-);
+const sql: SQL = Object.assign(sqlBase, {
+  file: (filename: string) =>
+    sqlBase.__dangerous__rawValue(readFileSync(filename, 'utf8')),
+});
 
-export default modifiedSQL;
+export default sql;
 
-module.exports = modifiedSQL;
-module.exports.default = modifiedSQL;
-module.exports.SQLQuery = SQLQuery;
+module.exports = sql;
+module.exports.default = sql;
+module.exports.isSqlQuery = isSqlQuery;
+module.exports.SQLItemType = SQLItemType;

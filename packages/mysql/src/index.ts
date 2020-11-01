@@ -1,12 +1,21 @@
 import {URL} from 'url';
+import {escapeMySqlIdentifier} from '@databases/escape-identifier';
 import {getMySqlConfigSync} from '@databases/mysql-config';
 import pushToAsyncIterable from '@databases/push-to-async-iterable';
-import sql, {SQLQuery} from '@databases/sql';
+import sql, {SQLQuery, FormatConfig, isSqlQuery} from '@databases/sql';
 import createPool, {Pool, PoolConnection} from './raw';
 import {PassThrough} from 'stream';
 const {codeFrameColumns} = require('@babel/code-frame');
 
+export type {SQLQuery};
+export {sql, isSqlQuery};
+
 const {connectionStringEnvironmentVariable} = getMySqlConfigSync();
+
+const mysqlFormat: FormatConfig = {
+  escapeIdentifier: (str) => escapeMySqlIdentifier(str),
+  formatValue: (value) => ({placeholder: '?', value}),
+};
 
 function transformError(text: string, ex: any) {
   // TODO: consider using https://github.com/Vincit/db-errors
@@ -68,7 +77,6 @@ export interface ConnectionPool extends Connection {
   dispose(): Promise<void>;
 }
 
-export {sql, SQLQuery};
 class ConnectionImplementation implements Connection {
   private readonly conn: Pick<PoolConnection, 'query' | 'connection'>;
   constructor(conn: Pick<PoolConnection, 'query' | 'connection'>) {
@@ -76,12 +84,12 @@ class ConnectionImplementation implements Connection {
   }
 
   async query(query: SQLQuery): Promise<any[]> {
-    if (!(query instanceof SQLQuery)) {
+    if (!isSqlQuery(query)) {
       throw new Error(
         'Invalid query, you must use @databases/sql to create your queries.',
       );
     }
-    const {text, values} = query.compileMySQL();
+    const {text, values} = query.format(mysqlFormat);
     try {
       return (await this.conn.query(text, values))[0] as any[];
     } catch (ex) {
@@ -96,12 +104,12 @@ class ConnectionImplementation implements Connection {
       highWaterMark?: number;
     },
   ) {
-    if (!(query instanceof SQLQuery)) {
+    if (!isSqlQuery(query)) {
       throw new Error(
         'Invalid query, you must use @databases/sql to create your queries.',
       );
     }
-    const {text, values} = query.compileMySQL();
+    const {text, values} = query.format(mysqlFormat);
     const highWaterMark = (options && options.highWaterMark) || 5;
     const stream = this.conn.connection.query(text, values);
 
@@ -131,12 +139,12 @@ class ConnectionImplementation implements Connection {
       highWaterMark?: number;
     },
   ): NodeJS.ReadableStream {
-    if (!(query instanceof SQLQuery)) {
+    if (!isSqlQuery(query)) {
       throw new Error(
         'Invalid query, you must use @databases/sql to create your queries.',
       );
     }
-    const {text, values} = query.compileMySQL();
+    const {text, values} = query.format(mysqlFormat);
     const result = this.conn.connection.query(text, values).stream(options);
     // tslint:disable-next-line:no-unbound-method
     const on = result.on;
@@ -164,12 +172,12 @@ class ConnectionPoolImplemenation implements ConnectionPool {
   }
 
   async query(query: SQLQuery): Promise<any[]> {
-    if (!(query instanceof SQLQuery)) {
+    if (!isSqlQuery(query)) {
       throw new Error(
         'Invalid query, you must use @databases/sql to create your queries.',
       );
     }
-    const {text, values} = query.compileMySQL();
+    const {text, values} = query.format(mysqlFormat);
     try {
       return (await this.pool.query(text, values))[0] as any[];
     } catch (ex) {
@@ -316,7 +324,8 @@ function validateMySqlUrl(urlString: string) {
   }
 }
 
-module.exports = connect;
-module.exports.default = connect;
-module.exports.sql = sql;
-module.exports.SQLQuery = SQLQuery;
+module.exports = Object.assign(connect, {
+  default: connect,
+  sql,
+  isSqlQuery,
+});

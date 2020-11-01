@@ -1,5 +1,6 @@
 import connect from '..';
 import sql from '@databases/sql';
+import {escapePostgresIdentifier} from '@databases/escape-identifier';
 
 jest.setTimeout(30000);
 
@@ -101,24 +102,35 @@ test('custom types', async () => {
       );
   `;
 
-  expect({
-    text: insert.text,
-    values: insert.values,
-  }).toMatchInlineSnapshot(`
-Object {
-  "text": "INSERT INTO custom_types.accounts (email, balance) VALUES ( $1, ROW ($2, $3, $4) ), ( $5, ROW ($6, $7, $8) );",
-  "values": Array [
-    "forbes@lindesay.co.uk",
-    "10.20",
-    "USD",
-    "This is a wonderful \\"description\\"!",
-    "dee@lindesay.co.uk",
-    "100.01",
-    "GBP",
-    "Descriptions can contain one thing, and another, and another.",
-  ],
-}
-`);
+  expect(
+    insert.format({
+      escapeIdentifier: (str) => escapePostgresIdentifier(str),
+      formatValue: (value, index) => ({placeholder: `$${index + 1}`, value}),
+    }),
+  ).toMatchInlineSnapshot(`
+    Object {
+      "text": "INSERT INTO custom_types.accounts (email, balance)
+    VALUES
+      (
+        $1,
+        ROW ($2, $3, $4)
+      ),
+      (
+        $5,
+        ROW ($6, $7, $8)
+      );",
+      "values": Array [
+        "forbes@lindesay.co.uk",
+        "10.20",
+        "USD",
+        "This is a wonderful \\"description\\"!",
+        "dee@lindesay.co.uk",
+        "100.01",
+        "GBP",
+        "Descriptions can contain one thing, and another, and another.",
+      ],
+    }
+  `);
 
   await db.query(insert);
   await db.query(sql`
@@ -135,25 +147,25 @@ Object {
       `,
     ),
   ).toMatchInlineSnapshot(`
-Array [
-  Object {
-    "balance": MoneyWithCurrency {
-      "currency": "USD",
-      "description": "This is a wonderful \\"description\\"!",
-      "value": "10.20",
-    },
-    "email": "forbes@lindesay.co.uk",
-  },
-  Object {
-    "balance": MoneyWithCurrency {
-      "currency": "GBP",
-      "description": "Descriptions can contain one thing, and another, and another.",
-      "value": "100.01",
-    },
-    "email": "dee@lindesay.co.uk",
-  },
-]
-`);
+    Array [
+      Object {
+        "balance": MoneyWithCurrency {
+          "currency": "USD",
+          "description": "This is a wonderful \\"description\\"!",
+          "value": "10.20",
+        },
+        "email": "forbes@lindesay.co.uk",
+      },
+      Object {
+        "balance": MoneyWithCurrency {
+          "currency": "GBP",
+          "description": "Descriptions can contain one thing, and another, and another.",
+          "value": "100.01",
+        },
+        "email": "dee@lindesay.co.uk",
+      },
+    ]
+  `);
   expect(
     await db.query(
       sql`
@@ -161,21 +173,21 @@ Array [
       `,
     ),
   ).toMatchInlineSnapshot(`
-Array [
-  Object {
-    "balance": BalancePair {
-      "expenditure": MoneyWithCurrency {
-        "currency": "USD",
-        "description": "Goodbye World",
-        "value": "10.00",
+    Array [
+      Object {
+        "balance": BalancePair {
+          "expenditure": MoneyWithCurrency {
+            "currency": "USD",
+            "description": "Goodbye World",
+            "value": "10.00",
+          },
+          "income": MoneyWithCurrency {
+            "currency": "GBP",
+            "description": "Hello World",
+            "value": "10.00",
+          },
+        },
       },
-      "income": MoneyWithCurrency {
-        "currency": "GBP",
-        "description": "Hello World",
-        "value": "10.00",
-      },
-    },
-  },
-]
-`);
+    ]
+  `);
 });

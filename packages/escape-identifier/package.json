@@ -1,16 +1,14 @@
 {
-  "name": "@databases/websql-core",
+  "name": "@databases/escape-identifier",
   "version": "0.0.0",
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {
-    "@babel/code-frame": "^7.0.0",
-    "@databases/escape-identifier": "^0.0.0",
-    "@databases/sql": "^0.0.0"
+    "@databases/validate-unicode": "^0.0.0"
   },
   "scripts": {},
-  "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/websql-core",
+  "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/escape-identifier",
   "bugs": "https://github.com/ForbesLindesay/atdatabases/issues",
   "license": "MIT",
   "publishConfig": {
