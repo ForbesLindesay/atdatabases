@@ -170,5 +170,22 @@
     "port": [],
     "user": "my_name",
     "password": "my_password"
+  },
+  "Env: { PGSSLMODE: 'require' } Connection String: postgresql://my_name:my_password@example.com/my_db": {
+    "channel_binding": "prefer",
+    "target_session_attrs": "any",
+    "keepalives": true,
+    "gssencmode": "prefer",
+    "sslmode": "require",
+    "sslcompression": false,
+    "ssl_min_protocol_version": "TLSv1.2",
+    "host": [
+      "example.com"
+    ],
+    "hostaddr": [],
+    "port": [],
+    "user": "my_name",
+    "password": "my_password",
+    "dbname": "my_db"
   }
 }

@@ -23,6 +23,10 @@ const examples: (
     connectionString: 'postgresql://example.com',
     env: {PGHOST: 'localhost', PGUSER: 'my_name', PGPASSWORD: 'my_password'},
   },
+  {
+    connectionString: 'postgresql://my_name:my_password@example.com/my_db',
+    env: {PGSSLMODE: 'require'},
+  },
 ];
 
 test('parseConnectionString', () => {
