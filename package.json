@@ -49,9 +49,9 @@
     ]
   },
   "dependencies": {
-    "@moped/babel-preset": "^0.0.8",
+    "@babel/core": "^7.12.3",
+    "@babel/preset-env": "^7.12.1",
     "@types/jest": "^26.0.15",
-    "babel-core": "^6.26.3",
     "cross-spawn": "^7.0.2",
     "github-actions-workflow-builder": "^1.0.3",
     "jest": "^26.6.1",

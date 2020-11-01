@@ -11,7 +11,7 @@ const resolve = require('path').resolve;
 const dirname = require('path').dirname;
 const relative = require('path').relative;
 const {lsrSync} = require('lsr');
-const babel = require('babel-core');
+const babel = require('@babel/core');
 const {sync: spawnSync} = require('cross-spawn');
 const mkdirp = require('mkdirp').sync;
 
@@ -107,9 +107,14 @@ const publicFilePaths = lsrSync(cwd + '/lib')
         babel.transformFileSync(entry.fullPath, {
           babelrc: false,
           presets: [
-            pkg['@databases/target'] === 'browser'
-              ? require.resolve('@moped/babel-preset/browser')
-              : require.resolve('@moped/babel-preset/server'),
+            [
+              require.resolve('@babel/preset-env'),
+              {
+                spec: true,
+                modules: 'commonjs',
+                targets: {node: 'v12.19.0'},
+              },
+            ],
           ],
         }).code,
       );
