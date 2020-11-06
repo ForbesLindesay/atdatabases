@@ -1,6 +1,7 @@
 import {ConnectionOptions} from 'tls';
 import throat from 'throat';
 import sql, {SQLQuery} from '@databases/sql';
+import {escapePostgresIdentifier} from '@databases/escape-identifier';
 import TransactionOptions from './types/TransactionOptions';
 import Connection from './Connection';
 import Transaction from './Transaction';
@@ -29,6 +30,7 @@ interface Pool {
 }
 interface PoolClient extends PgClient {
   release(dispose?: boolean): void;
+  _atdatabases_has_set_schema?: boolean;
 }
 
 const sslProperty = Symbol('_ssl');
@@ -48,6 +50,7 @@ export default class ConnectionPool implements IConnectionPool {
   public readonly type = QueryableType.ConnectionPool;
   public readonly sql = sql;
 
+  private readonly _schema: string | string[] | undefined;
   private readonly _config: ConnectionPoolConfig;
   private readonly _pool: Pool;
   private _hadSuccessfulConnection: boolean = false;
@@ -55,17 +58,26 @@ export default class ConnectionPool implements IConnectionPool {
   private readonly _preparingOverrides: Promise<void>;
   constructor(
     options: {types: TypeOverrides; [key: string]: any},
-    hosts: {host: string; port?: number | undefined}[],
-    ssl: null | {
-      allowFallback: boolean;
-      ssl: ConnectionOptions;
-    },
-    handlers: {
-      onError: (err: Error) => void;
+    {
+      schema,
+      hosts,
+      ssl,
+      handlers,
+    }: {
+      schema?: string | string[];
+      hosts: {host: string; port?: number | undefined}[];
+      ssl: null | {
+        allowFallback: boolean;
+        ssl: ConnectionOptions;
+      };
+      handlers: {
+        onError: (err: Error) => void;
+      };
     },
   ) {
     this._config = {options, hosts, [sslProperty]: ssl};
     this._pool = new Pool({...options, ssl: ssl?.ssl, ...hosts[0]});
+    this._schema = schema;
     this._pool.on('error', (err) => handlers.onError(err));
     this._preparingOverrides = this._withTypeResolver((getTypeID) =>
       this._pool.options.types.prepareOverrides(getTypeID),
@@ -138,10 +150,7 @@ export default class ConnectionPool implements IConnectionPool {
       throw error;
     },
   );
-
-  private async _withTypeResolver<T>(
-    fn: (getTypeID: (typeName: string) => Promise<number>) => Promise<T>,
-  ): Promise<T> {
+  private async _getClient() {
     this._throwIfDisposed();
     let client: PoolClient | undefined | null;
     if (!this._hadSuccessfulConnection) {
@@ -158,6 +167,27 @@ export default class ConnectionPool implements IConnectionPool {
     if (!client) {
       client = await this._pool.connect();
     }
+    if (!client._atdatabases_has_set_schema && this._schema) {
+      if (typeof this._schema === 'string') {
+        await client.query(
+          `SET search_path TO ${escapePostgresIdentifier(this._schema)}`,
+        );
+      } else if (Array.isArray(this._schema)) {
+        await client.query(
+          `SET search_path TO ${this._schema
+            .map((s) => escapePostgresIdentifier(s))
+            .join(', ')}`,
+        );
+      }
+      client._atdatabases_has_set_schema = true;
+    }
+    return client;
+  }
+
+  private async _withTypeResolver<T>(
+    fn: (getTypeID: (typeName: string) => Promise<number>) => Promise<T>,
+  ): Promise<T> {
+    const client = await this._getClient();
 
     try {
       const result = await fn(async (typeName: string) => {
@@ -233,23 +263,8 @@ export default class ConnectionPool implements IConnectionPool {
   public readonly parseArray = parseArray;
 
   async task<T>(fn: (connection: Connection) => Promise<T>): Promise<T> {
-    this._throwIfDisposed();
     await this._preparingOverrides;
-    let client: PoolClient | undefined | null;
-    if (!this._hadSuccessfulConnection) {
-      client = await this._repairConnectionPool();
-    }
-    if (!client) {
-      try {
-        client = await this._pool.connect();
-      } catch (ex) {
-        this._hadSuccessfulConnection = false;
-        client = await this._repairConnectionPool();
-      }
-    }
-    if (!client) {
-      client = await this._pool.connect();
-    }
+    const client = await this._getClient();
     const connection = new Connection(client);
     try {
       const result = await fn(connection);
@@ -294,22 +309,8 @@ export default class ConnectionPool implements IConnectionPool {
     });
     Promise.resolve(null)
       .then(async () => {
-        this._throwIfDisposed();
-        let client: PoolClient | undefined | null;
-        if (!this._hadSuccessfulConnection) {
-          client = await this._repairConnectionPool();
-        }
-        if (!client) {
-          try {
-            client = await this._pool.connect();
-          } catch (ex) {
-            this._hadSuccessfulConnection = false;
-            client = await this._repairConnectionPool();
-          }
-        }
-        if (!client) {
-          client = await this._pool.connect();
-        }
+        await this._preparingOverrides;
+        const client = await this._getClient();
         const connection = new Connection(client);
         const connectionStream = connection.queryNodeStream(query, options);
         connectionStream.pipe(stream);
@@ -336,22 +337,8 @@ export default class ConnectionPool implements IConnectionPool {
       signal?: AbortSignal | undefined;
     } = {},
   ): AsyncGenerator<any, void, unknown> {
-    this._throwIfDisposed();
-    let client: PoolClient | undefined | null;
-    if (!this._hadSuccessfulConnection) {
-      client = await this._repairConnectionPool();
-    }
-    if (!client) {
-      try {
-        client = await this._pool.connect();
-      } catch (ex) {
-        this._hadSuccessfulConnection = false;
-        client = await this._repairConnectionPool();
-      }
-    }
-    if (!client) {
-      client = await this._pool.connect();
-    }
+    await this._preparingOverrides;
+    const client = await this._getClient();
     const connection = new Connection(client);
     try {
       for await (const row of connection.queryStream(query, options)) {

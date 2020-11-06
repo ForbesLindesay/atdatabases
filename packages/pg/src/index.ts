@@ -84,6 +84,13 @@ export interface ClientConfig {
   port?: number | (number | null)[];
 
   /**
+   * Forces change of the default database schema(s) for every fresh
+   * connection, i.e. the library will execute SET search_path TO schema_1, schema_2, ...
+   * in the background whenever a fresh physical connection is allocated.
+   */
+  schema?: string | string[];
+
+  /**
    * SSL Mode, defaults to "prefer"
    *
    * false is equivalent to "disable"
@@ -190,7 +197,7 @@ export default function createConnectionPool(
     database = parsedConnectionString.dbname,
     port = parsedConnectionString.port,
     connectionTimeoutMilliseconds = 15_000,
-    idleTimeoutMilliseconds = 10_000,
+    idleTimeoutMilliseconds = 30_000,
     poolSize = 10,
     statementTimeoutMilliseconds = 0,
     queryTimeoutMilliseconds = 0,
@@ -202,6 +209,7 @@ export default function createConnectionPool(
     bigIntMode = null,
     // tslint:disable-next-line:deprecation
     bigIntAsString = false,
+    schema = null,
     types: typeOverrides = null,
     onError = (err: Error) => {
       // It's common for connections to be terminated "unexpectedly"
@@ -271,9 +279,8 @@ export default function createConnectionPool(
     types,
   };
 
-  return new ConnectionPoolImplementation(
-    pgOptions,
-    (hostList.length === 0 ? ['localhost'] : hostList).map((host, i) => {
+  return new ConnectionPoolImplementation(pgOptions, {
+    hosts: (hostList.length === 0 ? ['localhost'] : hostList).map((host, i) => {
       const port =
         portList.length === 0
           ? undefined
@@ -285,9 +292,10 @@ export default function createConnectionPool(
         port: port ?? undefined,
       };
     }),
-    sslConfig,
-    {onError},
-  );
+    schema: schema ?? undefined,
+    ssl: sslConfig,
+    handlers: {onError},
+  });
 }
 
 function getSSLConfig(
