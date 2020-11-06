@@ -20,6 +20,12 @@ interface Pool {
   };
   connect(): Promise<PoolClient>;
   end(): Promise<void>;
+
+  on(
+    event: 'connect' | 'acquire' | 'remove',
+    listener: (client: PoolClient) => void,
+  ): void;
+  on(event: 'error', listener: (err: Error, client?: PoolClient) => void): void;
 }
 interface PoolClient extends PgClient {
   release(dispose?: boolean): void;
@@ -54,9 +60,13 @@ export default class ConnectionPool implements IConnectionPool {
       allowFallback: boolean;
       ssl: ConnectionOptions;
     },
+    handlers: {
+      onError: (err: Error) => void;
+    },
   ) {
     this._config = {options, hosts, [sslProperty]: ssl};
     this._pool = new Pool({...options, ssl: ssl?.ssl, ...hosts[0]});
+    this._pool.on('error', handlers.onError);
     this._preparingOverrides = this._withTypeResolver((getTypeID) =>
       this._pool.options.types.prepareOverrides(getTypeID),
     );

@@ -162,6 +162,8 @@ export interface ConnectionPoolConfig extends ClientConfig {
    * by default this is 15 seconds. Set this to 0 to disable the timeout altogether.
    */
   connectionTimeoutMilliseconds?: number;
+
+  onError?: (err: Error) => void;
 }
 
 export default function createConnectionPool(
@@ -201,6 +203,16 @@ export default function createConnectionPool(
     // tslint:disable-next-line:deprecation
     bigIntAsString = false,
     types: typeOverrides = null,
+    onError = (err: Error) => {
+      // It's common for connections to be terminated "unexpectedly"
+      // If it happens on a connection that is actively in use, you'll get the error
+      // anyway when you attempt to query it. If it happens on a connection that is
+      // idle in the pool, a fresh connection will be allocated without you needing
+      // to do anything.
+      if (!/connection\s*terminated\s*unexpectedly/.test(err.message)) {
+        console.warn(`Error in Postgres ConnectionPool: ${err.message}`);
+      }
+    },
   } = typeof connectionConfig === 'object' ? connectionConfig : {};
 
   if (bigIntAsString) {
@@ -274,6 +286,7 @@ export default function createConnectionPool(
       };
     }),
     sslConfig,
+    {onError},
   );
 }
 
