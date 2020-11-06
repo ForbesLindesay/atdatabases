@@ -66,7 +66,7 @@ export default class ConnectionPool implements IConnectionPool {
   ) {
     this._config = {options, hosts, [sslProperty]: ssl};
     this._pool = new Pool({...options, ssl: ssl?.ssl, ...hosts[0]});
-    this._pool.on('error', handlers.onError);
+    this._pool.on('error', (err) => handlers.onError(err));
     this._preparingOverrides = this._withTypeResolver((getTypeID) =>
       this._pool.options.types.prepareOverrides(getTypeID),
     );
