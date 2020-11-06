@@ -117,9 +117,12 @@ export default createWorkflow(({setWorkflowName, addTrigger, addJob}) => {
       outputs: {output: buildOutput},
     } = addDependencies(build);
 
-    const {node} = setBuildMatrix({
-      node: ['12.x', '14.x'],
-    });
+    const {node} = setBuildMatrix(
+      {
+        node: ['12.x', '14.x'],
+      },
+      {failFast: false},
+    );
 
     add(setup(node));
 
@@ -161,14 +164,17 @@ export default createWorkflow(({setWorkflowName, addTrigger, addJob}) => {
       outputs: {output: buildOutput},
     } = addDependencies(build);
 
-    const {node, mysql} = setBuildMatrix({
-      node: ['12.x', '14.x'],
-      mysql: [
-        '5.6.50',
-        '5.7.32',
-        // '8.0.22',
-      ],
-    });
+    const {node, mysql} = setBuildMatrix(
+      {
+        node: ['12.x', '14.x'],
+        mysql: [
+          '5.6.50',
+          '5.7.32',
+          // '8.0.22',
+        ],
+      },
+      {failFast: false},
+    );
 
     add(setup(node));
 

@@ -1,12 +1,5 @@
 {
   "Env: {} Connection String: host=localhost port=5432 dbname=mydb connect_timeout=10": {
-    "channel_binding": "prefer",
-    "target_session_attrs": "any",
-    "keepalives": true,
-    "gssencmode": "prefer",
-    "sslmode": "prefer",
-    "sslcompression": false,
-    "ssl_min_protocol_version": "TLSv1.2",
     "host": [
       "localhost"
     ],
@@ -18,25 +11,11 @@
     "connect_timeout": 10
   },
   "Env: {} Connection String: postgresql://": {
-    "channel_binding": "prefer",
-    "target_session_attrs": "any",
-    "keepalives": true,
-    "gssencmode": "prefer",
-    "sslmode": "prefer",
-    "sslcompression": false,
-    "ssl_min_protocol_version": "TLSv1.2",
     "host": [],
     "hostaddr": [],
     "port": []
   },
   "Env: {} Connection String: postgresql://localhost": {
-    "channel_binding": "prefer",
-    "target_session_attrs": "any",
-    "keepalives": true,
-    "gssencmode": "prefer",
-    "sslmode": "prefer",
-    "sslcompression": false,
-    "ssl_min_protocol_version": "TLSv1.2",
     "host": [
       "localhost"
     ],
@@ -44,13 +23,6 @@
     "port": []
   },
   "Env: {} Connection String: postgresql://localhost:5433": {
-    "channel_binding": "prefer",
-    "target_session_attrs": "any",
-    "keepalives": true,
-    "gssencmode": "prefer",
-    "sslmode": "prefer",
-    "sslcompression": false,
-    "ssl_min_protocol_version": "TLSv1.2",
     "host": [
       "localhost"
     ],
@@ -60,13 +32,6 @@
     ]
   },
   "Env: {} Connection String: postgresql://localhost/mydb": {
-    "channel_binding": "prefer",
-    "target_session_attrs": "any",
-    "keepalives": true,
-    "gssencmode": "prefer",
-    "sslmode": "prefer",
-    "sslcompression": false,
-    "ssl_min_protocol_version": "TLSv1.2",
     "host": [
       "localhost"
     ],
@@ -75,13 +40,6 @@
     "dbname": "mydb"
   },
   "Env: {} Connection String: postgresql://user@localhost": {
-    "channel_binding": "prefer",
-    "target_session_attrs": "any",
-    "keepalives": true,
-    "gssencmode": "prefer",
-    "sslmode": "prefer",
-    "sslcompression": false,
-    "ssl_min_protocol_version": "TLSv1.2",
     "host": [
       "localhost"
     ],
@@ -90,13 +48,6 @@
     "user": "user"
   },
   "Env: {} Connection String: postgresql://user:secret@localhost": {
-    "channel_binding": "prefer",
-    "target_session_attrs": "any",
-    "keepalives": true,
-    "gssencmode": "prefer",
-    "sslmode": "prefer",
-    "sslcompression": false,
-    "ssl_min_protocol_version": "TLSv1.2",
     "host": [
       "localhost"
     ],
@@ -106,13 +57,6 @@
     "password": "secret"
   },
   "Env: {} Connection String: postgresql://other@localhost/otherdb?connect_timeout=10&application_name=myapp": {
-    "channel_binding": "prefer",
-    "target_session_attrs": "any",
-    "keepalives": true,
-    "gssencmode": "prefer",
-    "sslmode": "prefer",
-    "sslcompression": false,
-    "ssl_min_protocol_version": "TLSv1.2",
     "host": [
       "localhost"
     ],
@@ -124,13 +68,6 @@
     "application_name": "myapp"
   },
   "Env: {} Connection String: postgresql://host1:123,host2:456/somedb?target_session_attrs=any&application_name=myapp": {
-    "channel_binding": "prefer",
-    "target_session_attrs": "any",
-    "keepalives": true,
-    "gssencmode": "prefer",
-    "sslmode": "prefer",
-    "sslcompression": false,
-    "ssl_min_protocol_version": "TLSv1.2",
     "host": [
       "host1",
       "host2"
@@ -141,16 +78,10 @@
       456
     ],
     "dbname": "somedb",
+    "target_session_attrs": "any",
     "application_name": "myapp"
   },
   "Env: {} Connection String: host=localhost port=5432 dbname=mydb connect_timeout=10 user='my name' password='my\\'password'": {
-    "channel_binding": "prefer",
-    "target_session_attrs": "any",
-    "keepalives": true,
-    "gssencmode": "prefer",
-    "sslmode": "prefer",
-    "sslcompression": false,
-    "ssl_min_protocol_version": "TLSv1.2",
     "host": [
       "localhost"
     ],
@@ -164,25 +95,12 @@
     "password": "my'password"
   },
   "Env: { PGREQUIRESSL: '1' } Connection String: undefined": {
-    "channel_binding": "prefer",
-    "target_session_attrs": "any",
-    "keepalives": true,
-    "gssencmode": "prefer",
-    "sslmode": "require",
-    "sslcompression": false,
-    "ssl_min_protocol_version": "TLSv1.2",
     "host": [],
     "hostaddr": [],
-    "port": []
+    "port": [],
+    "sslmode": "require"
   },
   "Env: { PGHOST: 'localhost', PGUSER: 'my_name', PGPASSWORD: 'my_password' } Connection String: postgresql://example.com": {
-    "channel_binding": "prefer",
-    "target_session_attrs": "any",
-    "keepalives": true,
-    "gssencmode": "prefer",
-    "sslmode": "prefer",
-    "sslcompression": false,
-    "ssl_min_protocol_version": "TLSv1.2",
     "host": [
       "example.com"
     ],
@@ -192,13 +110,6 @@
     "password": "my_password"
   },
   "Env: { PGSSLMODE: 'require' } Connection String: postgresql://my_name:my_password@example.com/my_db": {
-    "channel_binding": "prefer",
-    "target_session_attrs": "any",
-    "keepalives": true,
-    "gssencmode": "prefer",
-    "sslmode": "require",
-    "sslcompression": false,
-    "ssl_min_protocol_version": "TLSv1.2",
     "host": [
       "example.com"
     ],
@@ -206,6 +117,7 @@
     "port": [],
     "user": "my_name",
     "password": "my_password",
-    "dbname": "my_db"
+    "dbname": "my_db",
+    "sslmode": "require"
   }
 }
