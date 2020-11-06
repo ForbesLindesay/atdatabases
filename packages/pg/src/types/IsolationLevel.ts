@@ -6,23 +6,23 @@ import assertNever from 'assert-never';
  *
  * For more information, see: https://www.postgresql.org/docs/9.6/transaction-iso.html
  */
-enum TransactionIsolationLevel {
+enum IsolationLevel {
   READ_UNCOMMITTED = 'READ_UNCOMMITTED',
   READ_COMMITTED = 'READ_COMMITTED',
   REPEATABLE_READ = 'REPEATABLE_READ',
   SERIALIZABLE = 'SERIALIZABLE',
 }
-export default TransactionIsolationLevel;
+export default IsolationLevel;
 
-export function isolationLevelToString(level: TransactionIsolationLevel) {
+export function isolationLevelToString(level: IsolationLevel) {
   switch (level) {
-    case TransactionIsolationLevel.READ_UNCOMMITTED:
+    case IsolationLevel.READ_UNCOMMITTED:
       return 'ISOLATION LEVEL READ UNCOMMITTED';
-    case TransactionIsolationLevel.READ_COMMITTED:
+    case IsolationLevel.READ_COMMITTED:
       return 'ISOLATION LEVEL READ COMMITTED';
-    case TransactionIsolationLevel.REPEATABLE_READ:
+    case IsolationLevel.REPEATABLE_READ:
       return 'ISOLATION LEVEL REPEATABLE READ';
-    case TransactionIsolationLevel.SERIALIZABLE:
+    case IsolationLevel.SERIALIZABLE:
       return 'ISOLATION LEVEL SERIALIZABLE';
     default:
       void assertNever(level, true);

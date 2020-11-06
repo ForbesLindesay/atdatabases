@@ -1,6 +1,6 @@
 import RawQueryFunction from '../types/RawQueryFunction';
 import TransactionOptions from '../types/TransactionOptions';
-import {isolationLevelToString} from '../types/TransactionIsolationLevel';
+import {isolationLevelToString} from '../types/IsolationLevel';
 
 // N.B. Issuing BEGIN when already inside a transaction block will provoke
 // a warning message. The state of the transaction is not affected. To nest

@@ -8,7 +8,7 @@ import DataTypeID from '@databases/pg-data-type-id';
 import {getPgConfigSync} from '@databases/pg-config';
 import ConnectionPool from './ConnectionPool';
 import {readFileSync} from 'fs';
-import TransactionIsolationLevel from './types/TransactionIsolationLevel';
+import IsolationLevel from './types/IsolationLevel';
 import TypeOverrides from './TypeOverrides';
 
 const {connectionStringEnvironmentVariable} = getPgConfigSync();
@@ -18,6 +18,11 @@ export {sql, isSqlQuery, isSQLError, SQLErrorCode, DataTypeID};
 
 // TODO: not all of these options really make sense
 export interface ClientConfig {
+  /**
+   * How would you like bigints to be returned from the database?
+   *
+   * If you choose `number` you may get inexact values for numbers greater than Number.MAX_SAFE_INTEGER
+   */
   bigIntMode?: 'string' | 'number' | 'bigint';
   /**
    * @deprecated use bigIntMode
@@ -291,7 +296,7 @@ module.exports = Object.assign(createConnectionPool, {
   isSQLError,
   SQLErrorCode,
   DataTypeID,
-  TransactionIsolationLevel,
+  IsolationLevel,
   // isConnectionPool,
 });
 
