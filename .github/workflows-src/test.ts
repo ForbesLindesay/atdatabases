@@ -135,10 +135,7 @@ export default createWorkflow(({setWorkflowName, addTrigger, addJob}) => {
 
     const {node, pg} = setBuildMatrix(
       {
-        node: [
-          '12.x',
-          // '14.x'
-        ],
+        node: ['12.x', '14.x'],
         pg: [
           // '9.6.19-alpine', -- unsupported by pg-migrations
           '10.14-alpine',
