@@ -1,3 +1,4 @@
+import {Readable} from 'stream';
 import {SQLQuery} from '@databases/sql';
 import {ClientBase} from 'pg';
 import throttle from 'throat';
@@ -11,6 +12,8 @@ import {
   executeOneStatement,
   executeMultipleStatements,
 } from './operations/queries';
+import {queryNodeStream, queryStream} from './operations/queryStream';
+import AbortSignal from './types/AbortSignal';
 
 export default class Transaction {
   private readonly _client: ClientBase;
@@ -66,6 +69,23 @@ export default class Transaction {
         return executeOneStatement(this._client, query);
       }
     });
+  }
+
+  queryNodeStream(
+    query: SQLQuery,
+    options: {highWaterMark?: number} = {},
+  ): Readable {
+    return queryNodeStream(this._client, query, options);
+  }
+
+  queryStream(
+    query: SQLQuery,
+    options: {
+      batchSize?: number;
+      signal?: AbortSignal | undefined;
+    } = {},
+  ): AsyncGenerator<any, void, unknown> {
+    return queryStream(this._client, query, options);
   }
 
   dispose() {

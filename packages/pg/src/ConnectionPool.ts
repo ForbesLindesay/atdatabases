@@ -5,6 +5,8 @@ import {Pool, PoolClient} from 'pg';
 import TransactionOptions from './types/TransactionOptions';
 import Connection from './Connection';
 import Transaction from './Transaction';
+import AbortSignal from './types/AbortSignal';
+import {PassThrough, Readable} from 'stream';
 
 const sslProperty = Symbol('_ssl');
 type SSLConfig = null | {
@@ -146,6 +148,87 @@ export default class ConnectionPool {
         return await connection.query(query);
       }
     });
+  }
+
+  queryNodeStream(
+    query: SQLQuery,
+    options: {highWaterMark?: number} = {},
+  ): Readable {
+    const stream = new PassThrough({
+      objectMode: true,
+    });
+    Promise.resolve(null)
+      .then(async () => {
+        this._throwIfDisposed();
+        let client: PoolClient | undefined | null;
+        if (!this._hadSuccessfulConnection) {
+          client = await this._repairConnectionPool();
+        }
+        if (!client) {
+          try {
+            client = await this._pool.connect();
+          } catch (ex) {
+            this._hadSuccessfulConnection = false;
+            client = await this._repairConnectionPool();
+          }
+        }
+        if (!client) {
+          client = await this._pool.connect();
+        }
+        const connection = new Connection(client);
+        const connectionStream = connection.queryNodeStream(query, options);
+        connectionStream.pipe(stream);
+        connectionStream.on('error', () => {
+          client?.release(true);
+          stream.emit('error', stream);
+        });
+        connectionStream.on('close', () => {
+          client?.release();
+          stream.emit('close');
+        });
+        stream.on('close', () => {
+          connectionStream.destroy();
+        });
+      })
+      .catch((ex) => stream.emit('error', ex));
+    return stream;
+  }
+
+  async *queryStream(
+    query: SQLQuery,
+    options: {
+      batchSize?: number;
+      signal?: AbortSignal | undefined;
+    } = {},
+  ): AsyncGenerator<any, void, unknown> {
+    this._throwIfDisposed();
+    let client: PoolClient | undefined | null;
+    if (!this._hadSuccessfulConnection) {
+      client = await this._repairConnectionPool();
+    }
+    if (!client) {
+      try {
+        client = await this._pool.connect();
+      } catch (ex) {
+        this._hadSuccessfulConnection = false;
+        client = await this._repairConnectionPool();
+      }
+    }
+    if (!client) {
+      client = await this._pool.connect();
+    }
+    const connection = new Connection(client);
+    try {
+      for await (const row of connection.queryStream(query, options)) {
+        yield row;
+      }
+      connection.dispose();
+      client.release();
+    } catch (ex) {
+      connection.dispose();
+      client.release(true);
+      throw ex;
+    }
   }
 
   async dispose() {

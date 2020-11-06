@@ -4753,6 +4753,11 @@ pg-connection-string@^2.4.0:
   resolved "https://registry.yarnpkg.com/pg-connection-string/-/pg-connection-string-2.4.0.tgz#c979922eb47832999a204da5dbe1ebf2341b6a10"
   integrity sha512-3iBXuv7XKvxeMrIgym7njT+HlZkwZqqGX4Bu9cci8xHZNT+Um1gWKqCsAzcC0d95rcKMU5WBg6YRUcHyV0HZKQ==
 
+pg-cursor@^2.4.2:
+  version "2.4.2"
+  resolved "https://registry.yarnpkg.com/pg-cursor/-/pg-cursor-2.4.2.tgz#2ce880ef744de1f734ba75ee6c08006ee184d230"
+  integrity sha512-IOXe0ByURzVLDKUvT685cWPYIHG1hWB41KefybZJone9HCTskDxlIYTWbThxnGzdlH/1C3H+s8OUOV/7ZQEP8g==
+
 pg-error-constants@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/pg-error-constants/-/pg-error-constants-1.0.0.tgz#8169a9649b55d1cfd1452eaabb3fedadaf6f35d5"

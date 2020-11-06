@@ -1,10 +1,7 @@
 import {escapePostgresIdentifier} from '@databases/escape-identifier';
 import {QueryResult} from 'pg';
 import {isSQLError} from '@databases/pg-errors';
-import splitSqlQuery, {
-  hasValues,
-  hasSemicolonBeforeEnd,
-} from '@databases/split-sql-query';
+import splitSqlQuery, {hasValues} from '@databases/split-sql-query';
 import sql, {isSqlQuery, SQLQuery, FormatConfig} from '@databases/sql';
 import RawQueryFunction from '../types/RawQueryFunction';
 const {codeFrameColumns} = require('@babel/code-frame');
@@ -25,7 +22,7 @@ export async function executeOneStatement(
       'Invalid query, you must use @databases/sql to create your queries.',
     );
   }
-  if (hasValues(query) && hasSemicolonBeforeEnd(query)) {
+  if (hasValues(query)) {
     const queries = splitSqlQuery(query);
     if (queries.length > 1) {
       const results = await Promise.all(
@@ -87,9 +84,7 @@ export async function executeMultipleStatements(
       );
     }
   }
-  const query = sql.join(queries, `;`);
-  const q = query.format(pgFormat);
-  if (q.values.length) {
+  if (queries.some((q) => hasValues(q))) {
     return await Promise.all(
       queries.map(async (query) => {
         const q = query.format(pgFormat);
@@ -111,14 +106,25 @@ export async function executeMultipleStatements(
       }),
     );
   }
+  const query = sql.join(queries, `;`);
+  const q = query.format(pgFormat);
   try {
-    // TODO: pg-promise used: https://github.com/vitaly-t/pg-promise/blob/d92ecf0091b4a38b8972c5052662633549a1b462/lib/formatting.js#L284
     const results = (await client.query(q)) as QueryResult | QueryResult[];
 
     // TODO: assert that lengths match
     if (Array.isArray(results)) {
+      if (results.length !== queries.length) {
+        throw new Error(
+          'The number of queries in the array did not match the number of result sets. You cannot pass a query with multiple statements as an entry in an array.',
+        );
+      }
       return results.map((r) => r.rows);
     } else {
+      if (1 !== queries.length) {
+        throw new Error(
+          'The number of queries in the array did not match the number of result sets. You cannot pass a query with multiple statements as an entry in an array.',
+        );
+      }
       return [results.rows];
     }
   } catch (ex) {

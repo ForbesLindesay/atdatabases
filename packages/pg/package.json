@@ -7,8 +7,8 @@
   "dependencies": {
     "@babel/code-frame": "^7.0.0",
     "@databases/escape-identifier": "^0.0.0",
-    "@databases/pg-connection-string": "^0.0.0",
     "@databases/pg-config": "^0.0.0",
+    "@databases/pg-connection-string": "^0.0.0",
     "@databases/pg-data-type-id": "^0.0.0",
     "@databases/pg-errors": "^0.0.0",
     "@databases/push-to-async-iterable": "^0.0.0",
@@ -19,6 +19,7 @@
     "assert-never": "^1.2.1",
     "cuid": "^2.1.8",
     "pg": "^8.4.2",
+    "pg-cursor": "^2.4.2",
     "pg-promise": "^10.7.1",
     "throat": "^5.0.0"
   },
