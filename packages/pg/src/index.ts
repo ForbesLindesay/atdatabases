@@ -1,13 +1,13 @@
+import {readFileSync} from 'fs';
+import type {ConnectionOptions} from 'tls';
 import parseConnectionString, {
   Configuration as ParsedConnectionString,
 } from '@databases/pg-connection-string';
+import DataTypeID from '@databases/pg-data-type-id';
 import {isSQLError, SQLError, SQLErrorCode} from '@databases/pg-errors';
 import sql, {SQLQuery, isSqlQuery} from '@databases/sql';
-import type {ConnectionOptions} from 'tls';
-import DataTypeID from '@databases/pg-data-type-id';
 import {getPgConfigSync} from '@databases/pg-config';
 import ConnectionPool from './ConnectionPool';
-import {readFileSync} from 'fs';
 import IsolationLevel from './types/IsolationLevel';
 import TypeOverrides from './TypeOverrides';
 
@@ -16,7 +16,6 @@ const {connectionStringEnvironmentVariable} = getPgConfigSync();
 export type {SQLQuery, SQLError};
 export {sql, isSqlQuery, isSQLError, SQLErrorCode, DataTypeID};
 
-// TODO: not all of these options really make sense
 export interface ClientConfig {
   /**
    * How would you like bigints to be returned from the database?

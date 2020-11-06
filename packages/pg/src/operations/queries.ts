@@ -1,20 +1,19 @@
 import {escapePostgresIdentifier} from '@databases/escape-identifier';
-import {QueryResult} from 'pg';
 import {isSQLError} from '@databases/pg-errors';
 import splitSqlQuery, {hasValues} from '@databases/split-sql-query';
 import sql, {isSqlQuery, SQLQuery, FormatConfig} from '@databases/sql';
-import RawQueryFunction from '../types/RawQueryFunction';
+import PgClient from '../types/PgClient';
 const {codeFrameColumns} = require('@babel/code-frame');
-// TODO: we should not depend on this internal functionality
-// const {formatQuery} = require('pg-promise/lib/formatting');
 
 const pgFormat: FormatConfig = {
   escapeIdentifier: (str) => escapePostgresIdentifier(str),
   formatValue: (value, index) => ({placeholder: `$${index + 1}`, value}),
 };
 
+type QueryResult = {rows: any[]};
+
 export async function executeOneStatement(
-  client: {query: RawQueryFunction},
+  client: PgClient,
   query: SQLQuery,
 ): Promise<any[]> {
   if (!isSqlQuery(query)) {
@@ -71,7 +70,7 @@ export async function executeOneStatement(
 }
 
 export async function executeMultipleStatements(
-  client: {query: RawQueryFunction},
+  client: PgClient,
   queries: SQLQuery[],
 ): Promise<any[]> {
   if (!Array.isArray(queries)) {

@@ -1,12 +1,21 @@
 import {ConnectionOptions} from 'tls';
 import throat from 'throat';
 import {SQLQuery} from '@databases/sql';
-import {Pool, PoolClient} from 'pg';
+// import {Pool, PoolClient} from 'pg';
 import TransactionOptions from './types/TransactionOptions';
 import Connection from './Connection';
 import Transaction from './Transaction';
 import AbortSignal from './types/AbortSignal';
 import {PassThrough, Readable} from 'stream';
+import PgClient from './types/PgClient';
+const {Pool} = require('pg');
+interface Pool {
+  connect(): Promise<PoolClient>;
+  end(): Promise<void>;
+}
+interface PoolClient extends PgClient {
+  release(dispose?: boolean): void;
+}
 
 const sslProperty = Symbol('_ssl');
 type SSLConfig = null | {

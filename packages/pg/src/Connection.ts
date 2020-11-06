@@ -1,6 +1,5 @@
 import {Readable} from 'stream';
 import {SQLQuery} from '@databases/sql';
-import {ClientBase} from 'pg';
 import throttle from 'throat';
 import Transaction from './Transaction';
 import {
@@ -15,13 +14,14 @@ import {
 } from './operations/queries';
 import {queryNodeStream, queryStream} from './operations/queryStream';
 import AbortSignal from './types/AbortSignal';
+import PgClient from './types/PgClient';
 
 export default class Connection {
-  private readonly _client: ClientBase;
+  private readonly _client: PgClient;
   private _disposed: boolean = false;
   // TODO: lock with timetout!!
   private readonly _lock = throttle(1);
-  constructor(client: ClientBase) {
+  constructor(client: PgClient) {
     this._client = client;
   }
   private _throwIfDisposed() {

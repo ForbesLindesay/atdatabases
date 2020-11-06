@@ -1,4 +1,4 @@
-import RawQueryFunction from '../types/RawQueryFunction';
+import PgClient from '../types/PgClient';
 import TransactionOptions from '../types/TransactionOptions';
 import {isolationLevelToString} from '../types/IsolationLevel';
 
@@ -7,7 +7,7 @@ import {isolationLevelToString} from '../types/IsolationLevel';
 // transactions within a transaction block, use savepoints.
 
 export async function beginTransaction(
-  client: {query: RawQueryFunction},
+  client: PgClient,
   options: TransactionOptions,
 ) {
   const parameters = [];
@@ -32,10 +32,10 @@ export async function beginTransaction(
   }
 }
 
-export async function rollbackTransaction(client: {query: RawQueryFunction}) {
+export async function rollbackTransaction(client: PgClient) {
   await client.query(`ROLLBACK`);
 }
 
-export async function commitTransaction(client: {query: RawQueryFunction}) {
+export async function commitTransaction(client: PgClient) {
   await client.query(`COMMIT`);
 }

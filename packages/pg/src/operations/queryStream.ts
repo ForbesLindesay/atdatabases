@@ -2,10 +2,8 @@ import {Readable} from 'stream';
 import {escapePostgresIdentifier} from '@databases/escape-identifier';
 import {isSqlQuery, SQLQuery, FormatConfig} from '@databases/sql';
 import AbortSignal from '../types/AbortSignal';
-import RawQueryFunction from '../types/RawQueryFunction';
+import PgClient from '../types/PgClient';
 const Cursor = require('pg-cursor');
-// TODO: we should not depend on this internal functionality
-// const {formatQuery} = require('pg-promise/lib/formatting');
 
 const pgFormat: FormatConfig = {
   escapeIdentifier: (str) => escapePostgresIdentifier(str),
@@ -13,7 +11,7 @@ const pgFormat: FormatConfig = {
 };
 
 export function queryNodeStream(
-  client: {query: RawQueryFunction},
+  client: PgClient,
   query: SQLQuery,
   options: {highWaterMark?: number},
 ): Readable {
@@ -74,7 +72,7 @@ export function queryNodeStream(
 }
 
 export async function* queryStream(
-  client: {query: RawQueryFunction},
+  client: PgClient,
   query: SQLQuery,
   {batchSize = 16, signal}: {batchSize?: number; signal?: AbortSignal},
 ): AsyncGenerator<any, void, unknown> {
