@@ -2,7 +2,7 @@ import connect, {sql} from '@databases/pg';
 import getClasses from '../getClasses';
 import ClassKind from '../enums/ClassKind';
 
-const db = connect();
+const db = connect({bigIntMode: 'number'});
 
 test('getClasses', async () => {
   await db.query(sql`CREATE SCHEMA getclasses`);

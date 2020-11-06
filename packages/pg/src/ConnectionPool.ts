@@ -1,15 +1,23 @@
 import {ConnectionOptions} from 'tls';
 import throat from 'throat';
-import {SQLQuery} from '@databases/sql';
-// import {Pool, PoolClient} from 'pg';
+import sql, {SQLQuery} from '@databases/sql';
 import TransactionOptions from './types/TransactionOptions';
 import Connection from './Connection';
 import Transaction from './Transaction';
 import AbortSignal from './types/AbortSignal';
 import {PassThrough, Readable} from 'stream';
 import PgClient from './types/PgClient';
+import {
+  ConnectionPool as IConnectionPool,
+  QueryableType,
+} from './types/Queryable';
+import TypeOverrides, {parseComposite, parseArray} from './TypeOverrides';
 const {Pool} = require('pg');
 interface Pool {
+  readonly options: {
+    types: TypeOverrides;
+    [key: string]: any;
+  };
   connect(): Promise<PoolClient>;
   end(): Promise<void>;
 }
@@ -23,17 +31,24 @@ type SSLConfig = null | {
   ssl: ConnectionOptions;
 };
 interface ConnectionPoolConfig {
-  readonly options: any;
+  readonly options: {
+    types: TypeOverrides;
+    [key: string]: any;
+  };
   readonly hosts: {host: string; port?: number | undefined}[];
   readonly [sslProperty]: SSLConfig;
 }
-export default class ConnectionPool {
+export default class ConnectionPool implements IConnectionPool {
+  public readonly type = QueryableType.ConnectionPool;
+  public readonly sql = sql;
+
   private readonly _config: ConnectionPoolConfig;
   private readonly _pool: Pool;
   private _hadSuccessfulConnection: boolean = false;
   private _disposed: boolean = false;
+  private readonly _preparingOverrides: Promise<void>;
   constructor(
-    options: any,
+    options: {types: TypeOverrides; [key: string]: any},
     hosts: {host: string; port?: number | undefined}[],
     ssl: null | {
       allowFallback: boolean;
@@ -42,6 +57,13 @@ export default class ConnectionPool {
   ) {
     this._config = {options, hosts, [sslProperty]: ssl};
     this._pool = new Pool({...options, ssl: ssl?.ssl, ...hosts[0]});
+    this._preparingOverrides = this._withTypeResolver((getTypeID) =>
+      this._pool.options.types.prepareOverrides(getTypeID),
+    );
+    this._preparingOverrides.catch((_ex) => {
+      // this error will be surfaced later, we do not want it to be treated
+      // as an unhandled rejection yet
+    });
   }
   private _throwIfDisposed() {
     if (this._disposed) {
@@ -68,9 +90,9 @@ export default class ConnectionPool {
         }
 
         for (const {host, port} of this._config.hosts) {
-          (this._pool as any).options.host = host;
-          (this._pool as any).options.port = port;
-          (this._pool as any).options.ssl = this._config[sslProperty]?.ssl;
+          this._pool.options.host = host;
+          this._pool.options.port = port;
+          this._pool.options.ssl = this._config[sslProperty]?.ssl;
 
           try {
             const connection = await this._pool.connect();
@@ -107,8 +129,102 @@ export default class ConnectionPool {
     },
   );
 
+  private async _withTypeResolver<T>(
+    fn: (getTypeID: (typeName: string) => Promise<number>) => Promise<T>,
+  ): Promise<T> {
+    this._throwIfDisposed();
+    let client: PoolClient | undefined | null;
+    if (!this._hadSuccessfulConnection) {
+      client = await this._repairConnectionPool();
+    }
+    if (!client) {
+      try {
+        client = await this._pool.connect();
+      } catch (ex) {
+        this._hadSuccessfulConnection = false;
+        client = await this._repairConnectionPool();
+      }
+    }
+    if (!client) {
+      client = await this._pool.connect();
+    }
+
+    try {
+      const result = await fn(async (typeName: string) => {
+        const ts = typeName.split('.');
+        let results;
+        if (ts.length === 1) {
+          results = await this.query(sql`
+            SELECT
+              ty.oid as "typeID",
+              ns.nspname AS "schemaName"
+            FROM pg_catalog.pg_type ty
+            INNER JOIN pg_catalog.pg_namespace ns
+              ON (ty.typnamespace = ns.oid)
+            WHERE lower(ty.typname) = ${typeName.toLowerCase()};
+          `);
+        } else if (ts.length === 2) {
+          results = await this.query(sql`
+            SELECT
+              ty.oid as "typeID",
+              ns.nspname AS "schemaName"
+            FROM pg_catalog.pg_type ty
+            INNER JOIN pg_catalog.pg_namespace ns
+              ON (ty.typnamespace = ns.oid)
+            WHERE lower(ty.typname) = ${ts[1].toLowerCase()} AND lower(ns.nspname) = ${ts[0].toLowerCase()};
+          `);
+        } else {
+          throw new Error('Type Name should only have one "." in it');
+        }
+        if (results.length === 0) {
+          throw new Error('Could not find the type ' + typeName);
+        }
+        if (results.length > 1) {
+          throw new Error(
+            'The type name ' +
+              typeName +
+              ' was found in multiple schemas: ' +
+              results.map((r) => r.schemaName).join(', '),
+          );
+        }
+        return results[0].typeID;
+      });
+      client.release();
+      return result;
+    } catch (ex) {
+      client.release(true);
+      throw ex;
+    }
+  }
+
+  async registerTypeParser<T>(
+    type: number | string,
+    parser: (value: string) => T,
+  ): Promise<(value: string) => T> {
+    if (typeof type === 'number') {
+      this._pool.options.types.setTypeParser(type, parser);
+    } else {
+      await this._withTypeResolver(async (getTypeID) => {
+        this._pool.options.types.setTypeParser(await getTypeID(type), parser);
+      });
+    }
+    return parser;
+  }
+  async getTypeParser(type: number | string): Promise<(value: string) => any> {
+    if (typeof type === 'number') {
+      return this._pool.options.types.getTypeParser(type);
+    } else {
+      return await this._withTypeResolver(async (getTypeID) =>
+        this._pool.options.types.getTypeParser(await getTypeID(type)),
+      );
+    }
+  }
+  public readonly parseComposite = parseComposite;
+  public readonly parseArray = parseArray;
+
   async task<T>(fn: (connection: Connection) => Promise<T>): Promise<T> {
     this._throwIfDisposed();
+    await this._preparingOverrides;
     let client: PoolClient | undefined | null;
     if (!this._hadSuccessfulConnection) {
       client = await this._repairConnectionPool();

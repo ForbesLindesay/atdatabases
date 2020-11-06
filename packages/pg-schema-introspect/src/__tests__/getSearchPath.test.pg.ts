@@ -1,7 +1,7 @@
 import connect, {sql} from '@databases/pg';
 import getSearchPath from '../getSearchPath';
 
-const db = connect();
+const db = connect({bigIntMode: 'number'});
 
 test('getSearchPath', async () => {
   expect(await getSearchPath(db)).toMatchInlineSnapshot(`

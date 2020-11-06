@@ -1,7 +1,7 @@
 import connect, {sql} from '@databases/pg';
 import getAttributes from '../getAttributes';
 
-const db = connect();
+const db = connect({bigIntMode: 'number'});
 
 test('getAttributes', async () => {
   await db.query(sql`CREATE SCHEMA getattributes`);

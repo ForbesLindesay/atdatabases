@@ -1,10 +1,10 @@
-import {Connection, sql} from '@databases/pg';
+import {Queryable, sql} from '@databases/pg';
 
 interface Options {
   includeNonExistantSchemas?: boolean;
 }
 export default async function getSearchPath(
-  connection: Connection,
+  connection: Queryable,
   options: Options = {},
 ): Promise<string[]> {
   const [[{current_user}], [{search_path}], namespaces] = await Promise.all([

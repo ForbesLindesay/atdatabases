@@ -1,5 +1,5 @@
 import {Readable} from 'stream';
-import {SQLQuery} from '@databases/sql';
+import sql, {SQLQuery} from '@databases/sql';
 import throttle from 'throat';
 import cuid = require('cuid');
 import {
@@ -14,8 +14,12 @@ import {
 import {queryNodeStream, queryStream} from './operations/queryStream';
 import AbortSignal from './types/AbortSignal';
 import PgClient from './types/PgClient';
+import {Transaction as ITransaction, QueryableType} from './types/Queryable';
 
-export default class Transaction {
+export default class Transaction implements ITransaction {
+  public readonly type = QueryableType.Transaction;
+  public readonly sql = sql;
+
   private readonly _client: PgClient;
   private _disposed: boolean = false;
   // TODO: lock with timetout!!
@@ -30,7 +34,10 @@ export default class Transaction {
       );
     }
   }
-  async tx<T>(fn: (connection: Transaction) => Promise<T>): Promise<T> {
+  async task<T>(fn: (connection: ITransaction) => Promise<T>): Promise<T> {
+    return await fn(this);
+  }
+  async tx<T>(fn: (connection: ITransaction) => Promise<T>): Promise<T> {
     return await this._lock(async () => {
       this._throwIfDisposed();
       const savepointName = cuid();

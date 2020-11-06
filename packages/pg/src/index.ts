@@ -7,14 +7,40 @@ import DataTypeID from '@databases/pg-data-type-id';
 import {isSQLError, SQLError, SQLErrorCode} from '@databases/pg-errors';
 import sql, {SQLQuery, isSqlQuery} from '@databases/sql';
 import {getPgConfigSync} from '@databases/pg-config';
-import ConnectionPool from './ConnectionPool';
+import ConnectionPoolImplementation from './ConnectionPool';
 import IsolationLevel from './types/IsolationLevel';
-import TypeOverrides from './TypeOverrides';
+import Queryable, {
+  QueryableType,
+  Transaction,
+  Connection,
+  ConnectionPool,
+  isTransaction,
+  isConnection,
+  isConnectionPool,
+} from './types/Queryable';
+import TypeOverrides, {TypeOverridesConfig} from './TypeOverrides';
 
 const {connectionStringEnvironmentVariable} = getPgConfigSync();
 
-export type {SQLQuery, SQLError};
-export {sql, isSqlQuery, isSQLError, SQLErrorCode, DataTypeID};
+export type {
+  SQLQuery,
+  SQLError,
+  Queryable,
+  Transaction,
+  Connection,
+  ConnectionPool,
+};
+export {
+  sql,
+  isSqlQuery,
+  isSQLError,
+  SQLErrorCode,
+  DataTypeID,
+  QueryableType,
+  isTransaction,
+  isConnection,
+  isConnectionPool,
+};
 
 export interface ClientConfig {
   /**
@@ -27,6 +53,8 @@ export interface ClientConfig {
    * @deprecated use bigIntMode
    */
   bigIntAsString?: boolean;
+
+  types?: TypeOverridesConfig['overrides'];
 
   /**
    * Defaults to process.env.DATABASE_URL
@@ -140,7 +168,7 @@ export default function createConnectionPool(
   connectionConfig: string | ConnectionPoolConfig | undefined = process.env[
     connectionStringEnvironmentVariable
   ],
-) {
+): ConnectionPool {
   if (!connectionConfig) {
     throw new Error(
       'You must provide a connection string for @databases/pg. You can ' +
@@ -172,6 +200,7 @@ export default function createConnectionPool(
     bigIntMode = null,
     // tslint:disable-next-line:deprecation
     bigIntAsString = false,
+    types: typeOverrides = null,
   } = typeof connectionConfig === 'object' ? connectionConfig : {};
 
   if (bigIntAsString) {
@@ -185,6 +214,7 @@ export default function createConnectionPool(
   }
   const types = new TypeOverrides({
     bigIntMode: bigIntMode ?? (bigIntAsString ? 'string' : 'number'),
+    overrides: typeOverrides ?? undefined,
   });
   const sslConfig = getSSLConfig(
     typeof connectionConfig === 'object' ? connectionConfig : {},
@@ -229,7 +259,7 @@ export default function createConnectionPool(
     types,
   };
 
-  return new ConnectionPool(
+  return new ConnectionPoolImplementation(
     pgOptions,
     (hostList.length === 0 ? ['localhost'] : hostList).map((host, i) => {
       const port =
@@ -296,7 +326,10 @@ module.exports = Object.assign(createConnectionPool, {
   SQLErrorCode,
   DataTypeID,
   IsolationLevel,
-  // isConnectionPool,
+  QueryableType,
+  isTransaction,
+  isConnection,
+  isConnectionPool,
 });
 
 // interface UndocumentedPgOptions {

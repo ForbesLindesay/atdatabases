@@ -18,4 +18,4 @@ export type {
 } from './getTypes';
 
 export type {SchemaQuery, ClassDetails, Schema} from './getSchema';
-export {default, connect, Connection, ConnectionPool, sql} from './getSchema';
+export {default, connect, Queryable, ConnectionPool, sql} from './getSchema';

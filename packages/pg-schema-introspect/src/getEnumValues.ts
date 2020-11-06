@@ -1,4 +1,4 @@
-import {Connection, sql} from '@databases/pg';
+import {Queryable, sql} from '@databases/pg';
 import {typeQuery, TypeQuery} from './getTypes';
 
 export interface EnumValue {
@@ -9,7 +9,7 @@ export interface EnumValue {
   value: string;
 }
 export default async function getEnumValues(
-  connection: Connection,
+  connection: Queryable,
   query: TypeQuery,
 ): Promise<EnumValue[]> {
   const conditions = typeQuery(query);

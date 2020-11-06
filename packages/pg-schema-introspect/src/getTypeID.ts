@@ -1,4 +1,4 @@
-import {Connection} from '@databases/pg';
+import {Queryable} from '@databases/pg';
 import getTypes from './getTypes';
 import getSearchPath from './getSearchPath';
 
@@ -9,7 +9,7 @@ export interface TypeIdQuery {
 }
 
 export default async function getTypeID(
-  connection: Connection,
+  connection: Queryable,
   query: TypeIdQuery,
 ) {
   const types = await getTypes(connection, query);

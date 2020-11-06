@@ -45,7 +45,7 @@ export default async function run(
   if (!database) {
     return 1;
   }
-  const connection = connect(database, {poolSize: 1});
+  const connection = connect({connectionString: database, poolSize: 1});
   let schema;
   try {
     schema = await getSchema(connection);

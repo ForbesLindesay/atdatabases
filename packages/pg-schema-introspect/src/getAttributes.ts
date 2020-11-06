@@ -1,4 +1,4 @@
-import {Connection, sql} from '@databases/pg';
+import {Queryable, sql} from '@databases/pg';
 import {ClassQuery, classQuery} from './getClasses';
 
 export interface AttributeQuery extends ClassQuery {
@@ -22,7 +22,7 @@ export interface Attribute {
   comment: string;
 }
 export default async function getAttributes(
-  connection: Connection,
+  connection: Queryable,
   query: AttributeQuery,
 ): Promise<Attribute[]> {
   const conditions = classQuery(query);

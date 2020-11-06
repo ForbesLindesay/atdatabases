@@ -1,5 +1,5 @@
 import {Readable} from 'stream';
-import {SQLQuery} from '@databases/sql';
+import sql, {SQLQuery} from '@databases/sql';
 import throttle from 'throat';
 import Transaction from './Transaction';
 import {
@@ -15,8 +15,12 @@ import {
 import {queryNodeStream, queryStream} from './operations/queryStream';
 import AbortSignal from './types/AbortSignal';
 import PgClient from './types/PgClient';
+import {Connection as IConnection, QueryableType} from './types/Queryable';
 
-export default class Connection {
+export default class Connection implements IConnection {
+  public readonly type = QueryableType.Connection;
+  public readonly sql = sql;
+
   private readonly _client: PgClient;
   private _disposed: boolean = false;
   // TODO: lock with timetout!!
@@ -31,6 +35,11 @@ export default class Connection {
       );
     }
   }
+
+  async task<T>(fn: (connection: IConnection) => Promise<T>): Promise<T> {
+    return await fn(this);
+  }
+
   async tx<T>(
     fn: (connection: Transaction) => Promise<T>,
     transactionOptions: TransactionOptions = {},

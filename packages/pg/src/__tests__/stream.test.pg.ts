@@ -1,7 +1,4 @@
-import connect, {sql} from '..';
-import ConnectionPool from '../ConnectionPool';
-import Connection from '../Connection';
-import Transaction from '../Transaction';
+import connect, {sql, Queryable} from '..';
 
 jest.setTimeout(10000);
 const BATCH_COUNT = 10;
@@ -39,9 +36,7 @@ afterAll(async () => {
 let passing = true;
 function addTests(
   name: string,
-  withConnection: <T>(
-    fn: (db: ConnectionPool | Connection | Transaction) => Promise<T>,
-  ) => Promise<T>,
+  withConnection: <T>(fn: (db: Queryable) => Promise<T>) => Promise<T>,
 ) {
   test(`${name} - node streaming`, async () => {
     if (!passing) {

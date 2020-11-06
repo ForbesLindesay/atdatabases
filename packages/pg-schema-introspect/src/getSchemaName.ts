@@ -1,7 +1,7 @@
-import {Connection, sql} from '@databases/pg';
+import {Queryable, sql} from '@databases/pg';
 
 export default async function getSchemaName(
-  connection: Connection,
+  connection: Queryable,
   schemaID: number,
 ): Promise<string> {
   const namespaces = (await connection.query(

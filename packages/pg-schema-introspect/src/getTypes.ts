@@ -1,4 +1,4 @@
-import {Connection, sql} from '@databases/pg';
+import {Queryable, sql} from '@databases/pg';
 import TypeCateogry from './enums/TypeCategory';
 import TypeKind from './enums/TypeKind';
 import getAttributes, {Attribute} from './getAttributes';
@@ -76,7 +76,7 @@ export type Type =
   | PseudoType;
 
 export default async function getTypes(
-  connection: Connection,
+  connection: Queryable,
   query: TypeQuery = {},
 ): Promise<Type[]> {
   const conditions = typeQuery(query);
