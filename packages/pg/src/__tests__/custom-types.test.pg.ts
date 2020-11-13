@@ -4,7 +4,9 @@ import {escapePostgresIdentifier} from '@databases/escape-identifier';
 
 jest.setTimeout(30000);
 
-const db = connect();
+const db = connect({
+  bigIntMode: 'number',
+});
 
 enum Currency {
   USD = 'USD',

@@ -1,4 +1,4 @@
-import {Connection, sql} from '@databases/pg';
+import {Queryable, sql} from '@databases/pg';
 import ClassKind from './enums/ClassKind';
 
 export interface ClassQuery {
@@ -17,7 +17,7 @@ export interface Class {
   comment: string | null;
 }
 export default async function getClasses(
-  connection: Connection,
+  connection: Queryable,
   query: ClassQuery,
 ): Promise<Class[]> {
   const conditions = classQuery(query);

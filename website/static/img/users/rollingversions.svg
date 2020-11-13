@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400">
+  <g fill="none" fill-rule="evenodd" transform="translate(79 76)">
+    <rect width="248" height="248" stroke="#000" stroke-width="3.321"/>
+    <polygon stroke="#000" stroke-width="3.321" points="53.152 27.2 261.303 27.162 261.264 235.004 53.114 235.042" transform="rotate(-82.998 157.208 131.102)"/>
+    <polygon stroke="#000" stroke-width="3.321" points="103.04 54.841 274.94 54.772 274.871 226.45 102.97 226.52" transform="rotate(-73.925 188.955 140.646)"/>
+    <polygon fill="#FF8000" fill-rule="nonzero" points="157.087 92.087 290.56 92 290.473 225.367 157 225.455" transform="rotate(-60.561 223.78 158.727)"/>
+  </g>
+</svg>

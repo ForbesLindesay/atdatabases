@@ -1,4 +1,4 @@
-import connect, {Connection, ConnectionPool, sql} from '@databases/pg';
+import connect, {Queryable, ConnectionPool, sql} from '@databases/pg';
 import ClassKind from './enums/ClassKind';
 import getAttributes, {Attribute} from './getAttributes';
 import getClasses, {Class} from './getClasses';
@@ -7,7 +7,7 @@ import getSchemaName from './getSchemaName';
 import getSearchPath from './getSearchPath';
 import getTypes, {Type} from './getTypes';
 
-export {connect, Connection, ConnectionPool, sql};
+export {connect, Queryable, ConnectionPool, sql};
 export interface SchemaQuery {
   schemaID?: number;
   schemaName?: string;
@@ -23,7 +23,7 @@ export interface Schema {
   classes: ClassDetails[];
 }
 export default async function getSchema(
-  connection: Connection,
+  connection: Queryable,
   query: SchemaQuery = {},
 ): Promise<Schema> {
   const schemaName = query.schemaName

@@ -4,7 +4,7 @@ import tables from '..';
 
 const {users, photos} = tables<Schema>({schemaName: 'typed_queries_tests'});
 
-const db = connect();
+const db = connect({bigIntMode: 'number'});
 
 afterAll(async () => {
   await db.dispose();

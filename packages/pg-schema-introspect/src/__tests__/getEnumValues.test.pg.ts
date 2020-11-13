@@ -1,7 +1,7 @@
 import connect, {sql} from '@databases/pg';
 import getEnumValues from '../getEnumValues';
 
-const db = connect();
+const db = connect({bigIntMode: 'number'});
 
 test('get custom types', async () => {
   await db.query(sql`CREATE SCHEMA getenumvalues`);

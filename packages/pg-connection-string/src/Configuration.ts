@@ -61,15 +61,6 @@ export class ConfigurationBuilder {
       }
     }
     return {
-      channel_binding: 'prefer',
-      target_session_attrs: 'any',
-      keepalives: true,
-      gssencmode: 'prefer',
-      sslmode: 'prefer',
-      sslcompression: false,
-      ssl_min_protocol_version: 'TLSv1.2',
-      // TODO: application_name/fallback_application_name
-      // TODO: environment variables
       ...this._config,
     };
   }
@@ -213,6 +204,7 @@ export class ConfigurationBuilder {
           ['require', 'require'],
           ['verify-ca', 'verify-ca'],
           ['verify-full', 'verify-full'],
+          ['no-verify', 'no-verify'],
         ] as const)(this._config, 'sslmode', paramValue);
         break;
       case 'requiressl':
@@ -378,7 +370,7 @@ export default interface Configuration {
    * PostgreSQL 11 or later servers using the SCRAM authentication
    * method.
    */
-  channel_binding: string;
+  channel_binding?: string;
   /**
    * Maximum time to wait while connecting, in seconds (write as a decimal integer, e.g., 10).
    * Zero, negative, or not specified means wait indefinitely. The minimum allowed timeout is
@@ -418,7 +410,7 @@ export default interface Configuration {
    * you can change this to 0, meaning off, if keepalives are not wanted. This parameter is ignored
    * for connections made via a Unix-domain socket.
    */
-  keepalives: boolean;
+  keepalives?: boolean;
   /**
    * Controls the number of seconds of inactivity after which TCP should send a keepalive message
    * to the server. A value of zero uses the system default. This parameter is ignored for
@@ -461,18 +453,21 @@ export default interface Configuration {
    * This option determines whether or with what priority a secure GSS TCP/IP connection will be
    * negotiated with the server. There are three modes, "prefer" is the default.
    */
-  gssencmode: 'disable' | 'prefer' | 'require';
+  gssencmode?: 'disable' | 'prefer' | 'require';
   /**
    * This option determines whether or with what priority a secure SSL TCP/IP connection will be
    * negotiated with the server. There are six modes, "prefer" is the default.
+   *
+   * We also allow for a non-standard "no-verify" option
    */
-  sslmode:
+  sslmode?:
     | 'disable'
     | 'allow'
     | 'prefer'
     | 'require'
     | 'verify-ca'
-    | 'verify-full';
+    | 'verify-full'
+    | 'no-verify';
   /**
    * If set to 1, data sent over SSL connections will be compressed. If set to 0, compression will
    * be disabled. The default is 0. This parameter is ignored if a connection without SSL is made.
@@ -486,7 +481,7 @@ export default interface Configuration {
    * bottleneck. Disabling compression can improve response time and throughput if CPU performance
    * is the limiting factor.
    */
-  sslcompression: boolean;
+  sslcompression?: boolean;
   /**
    * This parameter specifies the file name of the client SSL certificate, replacing the default
    * ~/.postgresql/postgresql.crt. This parameter is ignored if an SSL connection is not made.
@@ -538,7 +533,7 @@ export default interface Configuration {
    * If not specified, the default is TLSv1.2, which satisfies industry best practices as of this
    * writing.
    */
-  ssl_min_protocol_version: 'TLSv1' | 'TLSv1.1' | 'TLSv1.2' | 'TLSv1.3';
+  ssl_min_protocol_version?: 'TLSv1' | 'TLSv1.1' | 'TLSv1.2' | 'TLSv1.3';
   /**
    * This parameter specifies the maximum SSL/TLS protocol version to allow for the connection.
    * Valid values are TLSv1, TLSv1.1, TLSv1.2 and TLSv1.3. The supported protocols depend on the
@@ -574,7 +569,7 @@ export default interface Configuration {
    * just as if the connection attempt had failed. The default value of this parameter, any, regards
    * all connections as acceptable.
    */
-  target_session_attrs: 'any' | 'read-write';
+  target_session_attrs?: 'any' | 'read-write';
 }
 
 function parseInteger<TKey extends string>(

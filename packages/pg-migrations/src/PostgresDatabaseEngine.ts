@@ -9,7 +9,7 @@ import {
   DirectoryContext,
   IDirectoryContext,
 } from '@databases/migrations-base';
-import {Connection, ConnectionPool} from '@databases/pg';
+import {ConnectionPool, Queryable, Transaction} from '@databases/pg';
 
 export interface MigrationsConfig {
   migrationsDirectory: string;
@@ -23,7 +23,7 @@ export interface MigrationsConfig {
   appliedMigrationsTableName: string;
 }
 
-export type Migration = (tx: Connection) => Promise<void>;
+export type Migration = (tx: Transaction) => Promise<void>;
 export default class PostgresDatabaseEngine
   implements DatabaseEngine<Migration> {
   private readonly _connection: ConnectionPool;
@@ -40,7 +40,7 @@ export default class PostgresDatabaseEngine
       ): Result<Migration, MigrationWithNoValidExport> => {
         switch (extname(migrationFileName)) {
           case '.sql':
-            return Result.ok(async (db: Connection) => {
+            return Result.ok(async (db: Transaction) => {
               await db.query([db.sql.file(migrationFileName)]);
             });
           case '.js':
@@ -207,7 +207,7 @@ export default class PostgresDatabaseEngine
   ): Result<Migration, MigrationWithNoValidExport> {
     switch (extname(migrationFileName)) {
       case '.sql':
-        return Result.ok(async (db: Connection) => {
+        return Result.ok(async (db: Transaction) => {
           await db.query([db.sql.file(migrationFileName)]);
         });
       case '.js':
@@ -246,7 +246,7 @@ function getExport(mod: any, filename: string) {
   });
 }
 
-async function getPgVersion(connection: Connection): Promise<[number, number]> {
+async function getPgVersion(connection: Queryable): Promise<[number, number]> {
   // e.g. PostgreSQL 10.1 on x86_64-apple-darwin16.7.0, compiled by Apple LLVM version 9.0.0 (clang-900.0.38), 64-bit
   const [{version: sqlVersionString}] = await connection.query(
     connection.sql`SELECT version();`,

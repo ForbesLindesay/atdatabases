@@ -84,6 +84,8 @@ class SQLQuery {
               );
             }
             for (const item of formatted._items) items.push(item);
+          } else if (typeof value === 'bigint') {
+            items.push({type: SQLItemType.VALUE, value: value.toString(10)});
           } else {
             if (
               strings[i + 1] &&

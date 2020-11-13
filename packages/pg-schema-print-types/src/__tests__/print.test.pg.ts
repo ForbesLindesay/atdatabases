@@ -6,7 +6,7 @@ import PrintOptions from '../PrintOptions';
 import printSchema from '../printers/printSchema';
 import writeFiles from '../writeFiles';
 
-const db = connect();
+const db = connect({bigIntMode: 'number'});
 
 afterAll(async () => {
   await db.dispose();

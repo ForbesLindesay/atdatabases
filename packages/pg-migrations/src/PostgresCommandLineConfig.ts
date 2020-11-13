@@ -95,7 +95,9 @@ const PostgresCommandLineConfig: CommandLineInterfaceConfig<
     }
     migrationsDirectory = assertIsDirectory(migrationsDirectory, 'exit');
 
-    let connection = database && connect(database, {poolSize: 1});
+    let connection =
+      database &&
+      connect({connectionString: database, poolSize: 1, bigIntMode: 'bigint'});
     if (!connection) {
       console.error(
         'You must supply a connection string for the database. You can supply it as either:',
@@ -117,7 +119,8 @@ const PostgresCommandLineConfig: CommandLineInterfaceConfig<
           'Please enter a connection string:',
         );
         connection =
-          connectionString && connect(connectionString, {poolSize: 1});
+          connectionString &&
+          connect({connectionString, poolSize: 1, bigIntMode: 'bigint'});
       }
     }
     if (!connection) {

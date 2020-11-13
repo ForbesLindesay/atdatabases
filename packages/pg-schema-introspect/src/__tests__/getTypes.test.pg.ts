@@ -5,7 +5,7 @@ import {readFileSync, writeFileSync} from 'fs';
 import TypeKind from '../enums/TypeKind';
 const prettier = require('prettier');
 
-const db = connect();
+const db = connect({bigIntMode: 'number'});
 
 afterAll(async () => {
   await db.dispose();

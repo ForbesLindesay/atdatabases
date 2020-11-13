@@ -1,7 +1,7 @@
 import connect, {sql} from '@databases/pg';
 import getConstraints from '../getConstraints';
 
-const db = connect();
+const db = connect({bigIntMode: 'number'});
 
 test('getConstraints', async () => {
   await db.query(sql`CREATE SCHEMA getconstraints`);

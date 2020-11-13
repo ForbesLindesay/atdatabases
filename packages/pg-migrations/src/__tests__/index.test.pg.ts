@@ -6,7 +6,7 @@ import connect, {sql} from '@databases/pg';
 // connection, which makes them feel slow overall, even though each individual test
 // isn't actually that slow.
 jest.setTimeout(30000);
-const db = connect();
+const db = connect({bigIntMode: 'bigint'});
 
 const env = {...process.env, FORCE_COLOR: 'false'};
 
@@ -134,15 +134,15 @@ test('apply --dry-run - after already appying', async () => {
 test('migrations applied', async () => {
   expect(await db.query(sql`SELECT * FROM users`)).toEqual([
     {
-      id: 1,
+      id: BigInt(1),
       name: 'Forbes Lindesay',
     },
     {
-      id: 2,
+      id: BigInt(2),
       name: 'Eleanor Brodie',
     },
     {
-      id: 3,
+      id: BigInt(3),
       name: 'Carl Tedder',
     },
   ]);

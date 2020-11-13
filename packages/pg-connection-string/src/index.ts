@@ -7,6 +7,13 @@ import parseKeywordValueConnectionString, {
   isKeywordValueConnectionString,
 } from './parseKeywordValueConnectionString';
 
+export type {Configuration};
+export {
+  parseConnectionURI,
+  isConnectionURI,
+  parseKeywordValueConnectionString,
+  isKeywordValueConnectionString,
+};
 export default function parseConnectionString(
   str: string | undefined,
   {
@@ -40,3 +47,11 @@ export default function parseConnectionString(
     `Expected either a Connection URI, starting with "postgresql://" or "postgres://" or a Keyword/Value Connection String. See https://www.postgresql.org/docs/13/libpq-connect.html for examples.`,
   );
 }
+
+module.exports = Object.assign(parseConnectionString, {
+  default: parseConnectionString,
+  parseConnectionURI,
+  isConnectionURI,
+  parseKeywordValueConnectionString,
+  isKeywordValueConnectionString,
+});

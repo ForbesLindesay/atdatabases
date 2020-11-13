@@ -1,4 +1,4 @@
-import {Connection, sql} from '@databases/pg';
+import {Queryable, sql} from '@databases/pg';
 import {classQuery, ClassQuery} from './getClasses';
 import ConstraintType from './enums/ConstraintType';
 import ForeignKeyAction from './enums/ForeginKeyAction';
@@ -32,7 +32,7 @@ export interface Constraint {
   referencedAttributeNumbers: number[];
 }
 export default async function getConstraints(
-  connection: Connection,
+  connection: Queryable,
   query: ConstraintQuery,
 ): Promise<Constraint[]> {
   const conditions = classQuery(query);

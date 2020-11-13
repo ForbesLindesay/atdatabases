@@ -3,27 +3,26 @@ import sql from '@databases/sql';
 
 jest.setTimeout(30000);
 
-const db = connect(undefined, {noDuplicateDatabaseObjectsWarning: true});
-const db2 = connect(undefined, {noDuplicateDatabaseObjectsWarning: true});
-const db3 = connect(undefined, {noDuplicateDatabaseObjectsWarning: true});
+const db = connect({bigIntMode: 'number'});
 
+afterAll(async () => {
+  await db.dispose();
+});
 test('error messages', async () => {
   try {
     await db.query(sql`
-      SELECT * FROM foo;
-      SELECT * FROM bar WHERE id = ${'Hello World, Goodbye World, etc.'};
-      SELECT * FRM baz;
-      SELECT * FROM bing;
+      SELECT * FROM foo
+      WHERE id = ${'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'}
+      INER JOIN bar ON bar.id=foo.bar_id;
     `);
   } catch (ex) {
     expect(ex.message).toMatchInlineSnapshot(`
-      "syntax error at or near \\"FRM\\"
+      "syntax error at or near \\"INER\\"
 
-        1 | SELECT * FROM foo;
-        2 | SELECT * FROM bar WHERE id = $1;
-      > 3 | SELECT * FRM baz;
-          |          ^^^
-        4 | SELECT * FROM bing;
+        1 | SELECT * FROM foo
+        2 | WHERE id = $1
+      > 3 | INER JOIN bar ON bar.id=foo.bar_id;
+          | ^^^^
       "
     `);
     return;
@@ -51,6 +50,107 @@ test('query with params', async () => {
   expect(foo).toBe(42);
 });
 
+test('json', async () => {
+  await db.query(sql`CREATE SCHEMA json_test`);
+  await db.query(
+    sql`CREATE TABLE json_test.json (id TEXT NOT NULL PRIMARY KEY, val JSONB NOT NULL);`,
+  );
+  async function setOneImpliedJson(
+    id: string,
+    val: unknown,
+  ): Promise<{id: string; val: unknown}> {
+    const [result] = await db.query(sql`
+      INSERT INTO json_test.json (id, val) VALUES (${id}, ${val})
+      ON CONFLICT (id) DO UPDATE SET val=EXCLUDED.val
+      RETURNING *;
+    `);
+    return result;
+  }
+  async function setOneExplicitJson(
+    id: string,
+    val: unknown,
+  ): Promise<{id: string; val: unknown}> {
+    const [result] = await db.query(sql`
+      INSERT INTO json_test.json (id, val) VALUES (${id}, ${JSON.stringify(
+      val,
+    )})
+      ON CONFLICT (id) DO UPDATE SET val=EXCLUDED.val
+      RETURNING *;
+    `);
+    return result;
+  }
+  async function setMany(
+    ...values: readonly {
+      readonly id: string;
+      readonly val: unknown;
+    }[]
+  ): Promise<{id: string; val: unknown}[]> {
+    const results = await db.query(
+      values.map(
+        ({id, val}) => sql`
+          INSERT INTO json_test.json (id, val)
+          VALUES (${id}, ${JSON.stringify(val)})
+          ON CONFLICT (id) DO UPDATE SET val=EXCLUDED.val
+          RETURNING *;
+        `,
+      ),
+    );
+    return results.map(([{id, val}]) => ({id, val}));
+  }
+
+  await expect(setOneImpliedJson('obj', {foo: 'bar'})).resolves.toEqual({
+    id: 'obj',
+    val: {
+      foo: 'bar',
+    },
+  });
+  await expect(setOneExplicitJson('arr', ['my string', 56])).resolves.toEqual({
+    id: 'arr',
+    val: ['my string', 56],
+  });
+  await expect(setOneExplicitJson('str', 'my string')).resolves.toEqual({
+    id: 'str',
+    val: 'my string',
+  });
+  await expect(setOneExplicitJson('num', 42)).resolves.toEqual({
+    id: 'num',
+    val: 42,
+  });
+
+  await expect(setOneImpliedJson('obj', {foo: 'bing'})).resolves.toEqual({
+    id: 'obj',
+    val: {
+      foo: 'bing',
+    },
+  });
+  await expect(setOneExplicitJson('arr', [56, 'my string'])).resolves.toEqual({
+    id: 'arr',
+    val: [56, 'my string'],
+  });
+  await expect(setOneExplicitJson('str', 'my other string')).resolves.toEqual({
+    id: 'str',
+    val: 'my other string',
+  });
+  await expect(setOneExplicitJson('num', 21)).resolves.toEqual({
+    id: 'num',
+    val: 21,
+  });
+
+  await expect(
+    setMany(
+      {id: 'obj', val: {foo: 'bar'}},
+      {id: 'arr', val: ['my string', 56]},
+      {id: 'str', val: 'my string'},
+      {id: 'num', val: 42},
+    ),
+  ).resolves.toEqual([
+    {id: 'obj', val: {foo: 'bar'}},
+    {id: 'arr', val: ['my string', 56]},
+    {id: 'str', val: 'my string'},
+    {id: 'num', val: 42},
+  ]);
+});
+
 test('bigint', async () => {
   await db.query(sql`CREATE SCHEMA bigint_test`);
   await db.query(
@@ -64,20 +164,10 @@ test('bigint', async () => {
   `);
   const result = await db.query(sql`SELECT id from bigint_test.bigints;`);
   expect(result).toEqual([{id: 1}, {id: 2}, {id: 42}]);
-  // tslint:disable-next-line:no-void-expression
-  expect(await db.dispose()).toBe(undefined);
 
-  expect(await db2.query(sql`SELECT id from bigint_test.bigints;`)).toEqual([
+  expect(await db.query(sql`SELECT id from bigint_test.bigints;`)).toEqual([
     {id: 1},
     {id: 2},
     {id: 42},
   ]);
-  await db2.dispose();
-
-  expect(await db3.query(sql`SELECT id from bigint_test.bigints;`)).toEqual([
-    {id: 1},
-    {id: 2},
-    {id: 42},
-  ]);
-  await db3.dispose();
 });

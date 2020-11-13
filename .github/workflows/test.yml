@@ -32,6 +32,13 @@ jobs:
             packages/*/node_modules
           key: ${{runner.os}}-14.x-${{hashFiles('yarn.lock')}}-2
       - run: yarn install --prefer-offline
+      - name: Enable Cache for escape-identifier
+        uses: actions/cache@v2
+        with:
+          path: |-
+            packages/escape-identifier/lib
+            packages/escape-identifier/.last_build
+          key: v2-build-output-${{hashFiles('packages/escape-identifier/src')}}
       - name: Enable Cache for expo
         uses: actions/cache@v2
         with:
@@ -81,6 +88,13 @@ jobs:
             packages/pg-config/lib
             packages/pg-config/.last_build
           key: v2-build-output-${{hashFiles('packages/pg-config/src')}}
+      - name: Enable Cache for pg-connection-string
+        uses: actions/cache@v2
+        with:
+          path: |-
+            packages/pg-connection-string/lib
+            packages/pg-connection-string/.last_build
+          key: v2-build-output-${{hashFiles('packages/pg-connection-string/src')}}
       - name: Enable Cache for pg-create
         uses: actions/cache@v2
         with:
@@ -151,6 +165,13 @@ jobs:
             packages/push-to-async-iterable/lib
             packages/push-to-async-iterable/.last_build
           key: v2-build-output-${{hashFiles('packages/push-to-async-iterable/src')}}
+      - name: Enable Cache for split-sql-query
+        uses: actions/cache@v2
+        with:
+          path: |-
+            packages/split-sql-query/lib
+            packages/split-sql-query/.last_build
+          key: v2-build-output-${{hashFiles('packages/split-sql-query/src')}}
       - name: Enable Cache for sql
         uses: actions/cache@v2
         with:
@@ -165,6 +186,13 @@ jobs:
             packages/sqlite/lib
             packages/sqlite/.last_build
           key: v2-build-output-${{hashFiles('packages/sqlite/src')}}
+      - name: Enable Cache for validate-unicode
+        uses: actions/cache@v2
+        with:
+          path: |-
+            packages/validate-unicode/lib
+            packages/validate-unicode/.last_build
+          key: v2-build-output-${{hashFiles('packages/validate-unicode/src')}}
       - name: Enable Cache for websql
         uses: actions/cache@v2
         with:
@@ -205,6 +233,7 @@ jobs:
         node:
           - 12.x
           - 14.x
+      fail-fast: false
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
@@ -237,6 +266,7 @@ jobs:
       matrix:
         node:
           - 12.x
+          - 14.x
         pg:
           - 10.14-alpine
           - 11.9-alpine
@@ -282,6 +312,7 @@ jobs:
         mysql:
           - 5.6.50
           - 5.7.32
+      fail-fast: false
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1

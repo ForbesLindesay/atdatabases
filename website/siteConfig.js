@@ -23,6 +23,18 @@ const users = [
     pinned: true,
   },
   {
+    caption: 'Rolling Versions',
+    image: '/img/users/rollingversions.svg',
+    infoLink: 'https://rollingversions.com',
+    pinned: true,
+  },
+  {
+    caption: 'Mavenoid',
+    image: '/img/users/mavenoid.svg',
+    infoLink: 'https://www.mavenoid.com',
+    pinned: true,
+  },
+  {
     caption: 'Quandoo',
     image: '/img/users/quandoo.png',
     infoLink: 'https://www.quandoo.com',
@@ -60,10 +72,13 @@ const siteConfig = {
 
   // For no header links in the top nav bar -> headerLinks: [],
   headerLinks: [
+    {doc: 'sql', label: 'Building SQL Queries'},
     {doc: 'sql', label: 'Documentation'},
     // {page: 'help', label: 'Help'},
     // {blog: true, label: 'Blog'},
   ],
+
+  docsSideNavCollapsible: true,
 
   // If you have users set above, you add it here:
   users,
@@ -102,7 +117,7 @@ const siteConfig = {
   },
 
   // Add custom scripts here that would be placed in <script> tags.
-  scripts: ['https://buttons.github.io/buttons.js'],
+  scripts: ['/js/language-switcher.js', 'https://buttons.github.io/buttons.js'],
 
   // On page navigation for the current documentation page.
   onPageNav: 'separate',

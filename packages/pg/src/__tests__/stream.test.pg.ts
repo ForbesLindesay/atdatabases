@@ -1,8 +1,11 @@
-import connect, {sql} from '..';
+import connect, {sql, Queryable} from '..';
 
-jest.setTimeout(30000);
+jest.setTimeout(10000);
+const BATCH_COUNT = 10;
+const BATCH_SIZE = 1000;
 
-const db = connect();
+// setting pool size to 1 to test connections are properly released
+const db = connect({poolSize: 1, bigIntMode: 'number'});
 
 const allValues: number[] = [];
 beforeAll(async () => {
@@ -10,10 +13,10 @@ beforeAll(async () => {
   await db.query(
     sql`CREATE TABLE streaming_test.values (id BIGINT NOT NULL PRIMARY KEY);`,
   );
-  for (let batch = 0; batch < 10; batch++) {
+  for (let batch = 0; batch < BATCH_COUNT; batch++) {
     const batchValues = [];
-    for (let i = 0; i < 1000; i++) {
-      const value = batch * 1000 + i;
+    for (let i = 0; i < BATCH_SIZE; i++) {
+      const value = batch * BATCH_SIZE + i;
       batchValues.push(value);
       allValues.push(value);
     }
@@ -26,27 +29,60 @@ beforeAll(async () => {
     `);
   }
 });
+afterAll(async () => {
+  await db.dispose();
+});
 
-test('node streaming', async () => {
-  const results = await new Promise<any[]>((resolve, reject) => {
-    const results: number[] = [];
-    db.queryNodeStream(sql`SELECT * FROM streaming_test.values`, {batchSize: 1})
-      .on('data', (data) => results.push(data.id))
-      .on('error', reject)
-      .on('end', () => resolve(results));
+let passing = true;
+function addTests(
+  name: string,
+  withConnection: <T>(fn: (db: Queryable) => Promise<T>) => Promise<T>,
+) {
+  test(`${name} - node streaming`, async () => {
+    if (!passing) {
+      throw new Error('An earlier test already failed');
+    }
+    passing = false;
+    const results = await withConnection(async (db) => {
+      const results = await new Promise<any[]>((resolve, reject) => {
+        const results: number[] = [];
+        db.queryNodeStream(sql`SELECT * FROM streaming_test.values`, {
+          highWaterMark: 100,
+        })
+          .on('data', (data) => results.push(data.id))
+          .on('error', reject)
+          .on('end', () => resolve(results));
+      });
+      return results;
+    });
+    expect(results).toEqual(allValues);
+    passing = true;
   });
-  expect(results).toEqual(allValues);
-});
 
-test('await streaming', async () => {
-  const results: number[] = [];
-  for await (const {id} of db.queryStream(
-    sql`SELECT * FROM streaming_test.values`,
-    {
-      batchSize: 1,
-    },
-  )) {
-    results.push(id);
-  }
-  expect(results).toEqual(allValues);
-});
+  test(`${name} - await streaming`, async () => {
+    if (!passing) {
+      throw new Error('An earlier test already failed');
+    }
+    passing = false;
+    const results = await withConnection(async (db) => {
+      const results: number[] = [];
+      for await (const {id} of db.queryStream(
+        sql`SELECT * FROM streaming_test.values`,
+        {
+          batchSize: 100,
+        },
+      )) {
+        results.push(id);
+      }
+      return results;
+    });
+    expect(results).toEqual(allValues);
+    passing = true;
+  });
+}
+
+addTests('Connection', (fn) => db.task((connection) => fn(connection)));
+
+addTests('Transaction', (fn) => db.tx((transaction) => fn(transaction)));
+
+addTests('ConnectionPool', (fn) => fn(db));
