@@ -59,7 +59,7 @@ export interface ClientConfig {
   /**
    * Defaults to process.env.DATABASE_URL
    */
-  connectionString?: string;
+  connectionString?: string | false;
 
   /**
    * Application name to provide to postgres when connecting.
@@ -104,8 +104,6 @@ export interface ClientConfig {
     | 'require'
     | 'no-verify'
     | ConnectionOptions;
-
-  // TODO: types
 
   /**
    * number of milliseconds before a statement in query will time out,
@@ -166,7 +164,11 @@ export interface ConnectionPoolConfig extends ClientConfig {
 
   /**
    * Number of milliseconds to wait before timing out when connecting a new client
-   * by default this is 15 seconds. Set this to 0 to disable the timeout altogether.
+   * by default this is 10 seconds. Set this to 0 to disable the timeout altogether.
+   *
+   * N.B. if you have multiple hosts, or an SSL mode of "prefer" (which is the default),
+   * this will be the timeout per attempt, meaning the total timeout is this value,
+   * multiplied by the number of possible connetion details to attempt.
    */
   connectionTimeoutMilliseconds?: number;
 
@@ -189,14 +191,16 @@ export default function createConnectionPool(
     typeof connectionConfig === 'object'
       ? connectionConfig
       : {connectionString: connectionConfig};
-  const parsedConnectionString = parseConnectionString(connectionString);
+  const parsedConnectionString = parseConnectionString(
+    connectionString || undefined,
+  );
   const {
     user = parsedConnectionString.user,
     password = parsedConnectionString.password,
     host = parsedConnectionString.host,
     database = parsedConnectionString.dbname,
     port = parsedConnectionString.port,
-    connectionTimeoutMilliseconds = 15_000,
+    connectionTimeoutMilliseconds = 10_000,
     idleTimeoutMilliseconds = 30_000,
     poolSize = 10,
     statementTimeoutMilliseconds = 0,

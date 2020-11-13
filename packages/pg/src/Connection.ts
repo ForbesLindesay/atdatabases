@@ -1,5 +1,6 @@
 import {Readable} from 'stream';
 import sql, {SQLQuery} from '@databases/sql';
+import {isSQLError, SQLErrorCode} from '@databases/pg-errors';
 import throttle from 'throat';
 import Transaction from './Transaction';
 import {
@@ -44,21 +45,38 @@ export default class Connection implements IConnection {
     fn: (connection: Transaction) => Promise<T>,
     transactionOptions: TransactionOptions = {},
   ): Promise<T> {
-    return await this._lock(async () => {
-      this._throwIfDisposed();
-      await beginTransaction(this._client, transactionOptions);
-      const transaction = new Transaction(this._client);
+    let retrySerializationFailuresCount =
+      transactionOptions.retrySerializationFailures === true
+        ? 10
+        : typeof transactionOptions.retrySerializationFailures === 'number'
+        ? transactionOptions.retrySerializationFailures
+        : 0;
+    while (true) {
       try {
-        const result = await fn(transaction);
-        await commitTransaction(this._client);
-        transaction.dispose();
-        return result;
+        return await this._lock(async () => {
+          this._throwIfDisposed();
+          await beginTransaction(this._client, transactionOptions);
+          const transaction = new Transaction(this._client);
+          try {
+            const result = await fn(transaction);
+            await commitTransaction(this._client);
+            transaction.dispose();
+            return result;
+          } catch (ex) {
+            transaction.dispose();
+            await rollbackTransaction(this._client);
+            throw ex;
+          }
+        });
       } catch (ex) {
-        transaction.dispose();
-        await rollbackTransaction(this._client);
+        if (isSQLError(ex) && ex.code === SQLErrorCode.SERIALIZATION_FAILURE) {
+          if (retrySerializationFailuresCount--) {
+            continue;
+          }
+        }
         throw ex;
       }
-    });
+    }
   }
 
   async query(query: SQLQuery): Promise<any[]>;

@@ -11,7 +11,7 @@ export default interface TransactionOptions {
    */
   isolationLevel?: IsolationLevel;
   /**
-   * The default value is `false`, but you can also this using `default_transaction_read_only`
+   * The default value is `false`, but you can also set this using `default_transaction_read_only`
    */
   readOnly?: boolean;
   /**
@@ -27,4 +27,6 @@ export default interface TransactionOptions {
    * The default value is `false`, but you can also this using `default_transaction_deferrable`
    */
   deferrable?: boolean;
+
+  retrySerializationFailures?: boolean | number;
 }

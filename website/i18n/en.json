@@ -13,21 +13,57 @@
         "title": "MySQL",
         "sidebar_label": "API"
       },
+      "pg-connection-pool": {
+        "title": "Postgres Connection Pool",
+        "sidebar_label": "Connection Pool"
+      },
+      "pg-connection": {
+        "title": "Postgres Connection",
+        "sidebar_label": "Connection"
+      },
       "pg-custom-types": {
         "title": "Postgres Custom Types",
         "sidebar_label": "Custom Types"
+      },
+      "pg-guide-connections": {
+        "title": "Managing Postgres Connections",
+        "sidebar_label": "Managing Connections"
+      },
+      "pg-guide-migrations": {
+        "title": "Maintaining a Postgres schema using migrations",
+        "sidebar_label": "Maintaining the schema"
+      },
+      "pg-guide-query": {
+        "title": "Querying Postgres Databases",
+        "sidebar_label": "Querying Postgres"
+      },
+      "pg-guide-setup": {
+        "title": "Postgres Installation & Setup",
+        "sidebar_label": "Installation & Setup"
+      },
+      "pg-guide-transactions": {
+        "title": "Using Transactions in Postgres",
+        "sidebar_label": "Using Transactions"
       },
       "pg-options": {
         "title": "Postgres Connection Options",
         "sidebar_label": "Connection Options"
       },
+      "pg-queryable": {
+        "title": "Postgres Queryable",
+        "sidebar_label": "Queryable"
+      },
       "pg-test": {
         "title": "Postgres Testing",
         "sidebar_label": "Testing"
       },
+      "pg-transaction": {
+        "title": "Postgres Transaction",
+        "sidebar_label": "Transaction"
+      },
       "pg": {
         "title": "Postgres",
-        "sidebar_label": "API"
+        "sidebar_label": "Getting Started"
       },
       "sql": {
         "title": "Building SQL Queries"
@@ -50,6 +86,7 @@
       }
     },
     "links": {
+      "Building SQL Queries": "Building SQL Queries",
       "Documentation": "Documentation"
     },
     "categories": {
@@ -57,7 +94,7 @@
       "Postgres": "Postgres",
       "MySQL": "MySQL",
       "SQLite": "SQLite",
-      "Expo/WebSQL": "Expo/WebSQL"
+      "Expo/Web SQL": "Expo/Web SQL"
     }
   },
   "pages-strings": {

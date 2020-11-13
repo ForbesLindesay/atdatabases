@@ -40,6 +40,7 @@ export default interface Queryable {
 export interface Transaction extends Queryable {
   readonly type: QueryableType.Transaction;
   task<T>(fn: (connection: Transaction) => Promise<T>): Promise<T>;
+  tx<T>(fn: (connection: Transaction) => Promise<T>): Promise<T>;
 }
 
 /**

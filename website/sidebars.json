@@ -1,9 +1,43 @@
 {
   "docs": {
     "Getting Started": ["sql"],
-    "Postgres": ["pg", "pg-options", "pg-custom-types", "pg-test"],
-    "MySQL": ["mysql", "mysql-test"],
-    "SQLite": ["sqlite", "sqlite-test"],
-    "Expo/WebSQL": ["websql", "websql-test"]
+    "Postgres": [
+      {
+        "type": "subcategory",
+        "label": "Guides",
+        "ids": [
+          "pg",
+          "pg-guide-setup",
+          "pg-guide-connections",
+          "pg-guide-query",
+          "pg-guide-transactions",
+          "pg-migrations",
+          "pg-test"
+        ]
+      },
+      {
+        "type": "subcategory",
+        "label": "API",
+        "ids": [
+          "pg-options",
+          "pg-queryable",
+          "pg-connection-pool",
+          "pg-connection",
+          "pg-transaction"
+        ]
+      }
+    ],
+    "MySQL": [
+      "mysql",
+      "mysql-test"
+    ],
+    "SQLite": [
+      "sqlite",
+      "sqlite-test"
+    ],
+    "Expo/Web SQL": [
+      "websql",
+      "websql-test"
+    ]
   }
 }

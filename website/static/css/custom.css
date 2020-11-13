@@ -27,3 +27,29 @@
 .blockImage img {
   max-height: 200px;
 }
+
+.code-language-switcher {
+  position: relative;
+}
+.code-language-switcher code {
+  padding-bottom: 4em;
+}
+.code-language-switcher-buttons {
+  position: absolute;
+  bottom: 0.3em;
+  right: 0.5em;
+}
+.code-language-switcher-buttons button {
+  background: none;
+  border: 2px solid #fa2b3a;
+  border-radius: 4px;
+  margin: 0.5em;
+  padding: 0.8em 1.5em;
+  outline: none;
+  font-weight: bold;
+  color: #fa2b3a;
+}
+.code-language-switcher-buttons button.active {
+  background: #fa2b3a;
+  color: white;
+}
