@@ -1,5 +1,11 @@
 import {getPublicApi} from '@databases/migrations-base';
-import connect, {ConnectionPool, Connection, sql} from '@databases/pg';
+import connect, {
+  ConnectionPool,
+  Connection,
+  Transaction,
+  Queryable,
+  sql,
+} from '@databases/pg';
 import PostgresDatabaseEngine, {
   Migration,
   MigrationsConfig,
@@ -7,7 +13,7 @@ import PostgresDatabaseEngine, {
 import assertIsDirectory from './assertIsDirectory';
 
 export type {Migration};
-export type {ConnectionPool, Connection};
+export type {ConnectionPool, Connection, Transaction, Queryable};
 export {connect, sql};
 
 export interface Parameters extends Partial<MigrationsConfig> {
