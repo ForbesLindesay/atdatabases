@@ -215,6 +215,14 @@ function getTable<TRecord, TInsertParameters>(
   tableName: string,
   {schemaName, defaultConnection}: Partial<PgTypedOptionsWithDefaultConnection>,
 ) {
+  const cache = new WeakMap<Queryable, Table<TRecord, TInsertParameters>>();
+  const getTable = (queryable: Queryable) =>
+    new Table<TRecord, TInsertParameters>(
+      queryable,
+      schemaName
+        ? queryable.sql.ident(schemaName, tableName)
+        : queryable.sql.ident(tableName),
+    );
   return (
     queryable: Queryable | undefined = defaultConnection,
   ): Table<TRecord, TInsertParameters> => {
@@ -223,12 +231,7 @@ function getTable<TRecord, TInsertParameters>(
         'You must either provide a "defaultConnection" to pg-typed, or specify a connection when accessing the table.',
       );
     }
-    return new Table<TRecord, TInsertParameters>(
-      queryable,
-      schemaName
-        ? queryable.sql.ident(schemaName, tableName)
-        : queryable.sql.ident(tableName),
-    );
+    return mapGetOrSet(cache, queryable, getTable);
   };
 }
 export type {Table};
@@ -270,6 +273,11 @@ export default function tables<TTables>(
     PropertyOf<TTables[TTableName], 'insert'>
   >;
 } {
+  const tables = new Map<
+    string,
+    (queryable?: Queryable | undefined) => Table<unknown, unknown>
+  >();
+  const gt = (prop: string) => getTable(prop, options);
   return new Proxy(
     {},
     {
@@ -277,7 +285,7 @@ export default function tables<TTables>(
         if (prop === 'then') {
           return undefined;
         }
-        return getTable(String(prop), options);
+        return mapGetOrSet(tables, String(prop), gt);
       },
     },
   ) as any;
@@ -288,3 +296,18 @@ type PropertyOf<T, TProp extends string> = T extends {
 }
   ? TValue
   : never;
+
+function mapGetOrSet<TKey, TValue>(
+  map: {
+    get(key: TKey): Exclude<TValue, undefined> | undefined;
+    set(key: TKey, value: Exclude<TValue, undefined>): unknown;
+  },
+  key: TKey,
+  getValue: (key: TKey) => Exclude<TValue, undefined>,
+) {
+  const cached = map.get(key);
+  if (cached !== undefined) return cached;
+  const fresh = getValue(key);
+  map.set(key, fresh);
+  return fresh;
+}
