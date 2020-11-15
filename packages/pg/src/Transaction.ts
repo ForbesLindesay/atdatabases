@@ -59,6 +59,7 @@ export default class Transaction implements ITransaction {
   async query(query: SQLQuery): Promise<any[]>;
   async query(query: SQLQuery[]): Promise<any[][]>;
   async query(query: SQLQuery | SQLQuery[]): Promise<any[]> {
+    if (Array.isArray(query) && query.length === 0) return [];
     return await this._lock(async () => {
       this._throwIfDisposed();
       if (Array.isArray(query)) {

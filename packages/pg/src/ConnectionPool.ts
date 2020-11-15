@@ -291,6 +291,7 @@ export default class ConnectionPool implements IConnectionPool {
   async query(query: SQLQuery[]): Promise<any[][]>;
   async query(query: SQLQuery | SQLQuery[]): Promise<any[]> {
     this._throwIfDisposed();
+    if (Array.isArray(query) && query.length === 0) return [];
     return await this.task(async (connection) => {
       if (Array.isArray(query)) {
         return await connection.query(query);
