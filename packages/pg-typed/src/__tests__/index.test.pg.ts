@@ -56,6 +56,7 @@ test('create users', async () => {
       cdn_url: 'http://example.com/4',
       metadata: {},
       owner_user_id: ellie.id,
+      caption: null,
     },
   );
   const photoRecords = await photos(db)
@@ -168,6 +169,11 @@ test('create users', async () => {
     {cdn_url: 'http://example.com/3'},
     {caption: 'Hello World'},
   );
+  expect(await photos(db).find({caption: null}).orderByAsc('id').all()).toEqual(
+    (await photos(db).find().orderByAsc('id').all()).filter(
+      (p) => p.caption === null,
+    ),
+  );
   expect(
     (await photos(db).find({caption: null}).orderByAsc('id').all()).map(
       (p) => ({
@@ -175,14 +181,18 @@ test('create users', async () => {
         cdn_url: p.cdn_url,
       }),
     ),
-  ).toEqual(
-    (await photos(db).find().orderByAsc('id').all())
-      .filter((p) => p.caption === null)
-      .map((p) => ({
-        caption: p.caption,
-        cdn_url: p.cdn_url,
-      })),
-  );
+  ).toMatchInlineSnapshot(`
+    Array [
+      Object {
+        "caption": null,
+        "cdn_url": "http://example.com/1",
+      },
+      Object {
+        "caption": null,
+        "cdn_url": "http://example.com/4",
+      },
+    ]
+  `);
 });
 
 test('use a default connection', async () => {
