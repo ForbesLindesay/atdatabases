@@ -59,7 +59,7 @@ test('create users', async () => {
     },
   );
   const photoRecords = await photos(db)
-    .select({owner_user_id: forbes.id})
+    .find({owner_user_id: forbes.id})
     .orderByAsc('cdn_url')
     .limit(2);
   expect(photoRecords.map((p) => p.cdn_url)).toMatchInlineSnapshot(`
@@ -70,7 +70,7 @@ test('create users', async () => {
   `);
 
   const photoRecordsDesc = await photos(db)
-    .select({owner_user_id: forbes.id})
+    .find({owner_user_id: forbes.id})
     .orderByDesc('cdn_url')
     .limit(2);
   expect(photoRecordsDesc.map((p) => p.cdn_url)).toMatchInlineSnapshot(`
@@ -79,7 +79,7 @@ test('create users', async () => {
       "http://example.com/2",
     ]
   `);
-  expect(await users(db).selectOne({id: ellie.id})).toEqual(ellie);
+  expect(await users(db).findOne({id: ellie.id})).toEqual(ellie);
 
   const updated = await photos(db).update(
     {cdn_url: 'http://example.com/1'},
@@ -114,9 +114,7 @@ test('create users', async () => {
   await photos(db).delete({cdn_url: 'http://example.com/2'});
 
   expect(
-    (await photos(db).select().orderByAsc('cdn_url').all()).map(
-      (u) => u.cdn_url,
-    ),
+    (await photos(db).find().orderByAsc('cdn_url').all()).map((u) => u.cdn_url),
   ).toMatchInlineSnapshot(`
     Array [
       "http://example.com/1",
@@ -134,14 +132,14 @@ test('create users', async () => {
   expect(martin!.bio).toBe('Updated bio');
 
   expect(
-    (await users(db).select().orderByAsc('screen_name').first())?.screen_name,
+    (await users(db).find().orderByAsc('screen_name').first())?.screen_name,
   ).toMatchInlineSnapshot(`"Ellie"`);
   expect(
-    (await users(db).select().orderByDesc('screen_name').first())?.screen_name,
+    (await users(db).find().orderByDesc('screen_name').first())?.screen_name,
   ).toMatchInlineSnapshot(`"Martin"`);
 
   expect(
-    (await users(db).select().orderByAsc('screen_name').all()).map((u) => [
+    (await users(db).find().orderByAsc('screen_name').all()).map((u) => [
       u.screen_name,
       u.bio,
     ]),
@@ -185,14 +183,14 @@ test('use a default connection', async () => {
       sql,
     } as any,
   });
-  await mockUsers().selectOne({id: 10});
+  await mockUsers().findOne({id: 10});
   expect(defaultConnectionQuery).toBeCalledTimes(1);
   expect(transactionQuery).toBeCalledTimes(0);
 
   await mockUsers({
     query: transactionQuery,
     sql,
-  } as any).selectOne({id: 10});
+  } as any).findOne({id: 10});
   expect(defaultConnectionQuery).toBeCalledTimes(1);
   expect(transactionQuery).toBeCalledTimes(1);
 
