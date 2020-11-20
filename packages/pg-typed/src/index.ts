@@ -93,8 +93,10 @@ class Table<TRecord, TInsertParameters> {
       return sql``;
     }
     return sql`WHERE ${sql.join(
-      entries.map(
-        ([columnName, value]) => sql`${sql.ident(columnName)} = ${value}`,
+      entries.map(([columnName, value]) =>
+        value === null
+          ? sql`${sql.ident(columnName)} IS NULL`
+          : sql`${sql.ident(columnName)} = ${value}`,
       ),
       sql` AND `,
     )}`;

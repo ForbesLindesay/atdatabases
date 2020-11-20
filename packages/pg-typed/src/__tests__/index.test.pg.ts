@@ -163,6 +163,26 @@ test('create users', async () => {
       ],
     ]
   `);
+
+  await photos(db).update(
+    {cdn_url: 'http://example.com/3'},
+    {caption: 'Hello World'},
+  );
+  expect(
+    (await photos(db).find({caption: null}).orderByAsc('id').all()).map(
+      (p) => ({
+        caption: p.caption,
+        cdn_url: p.cdn_url,
+      }),
+    ),
+  ).toEqual(
+    (await photos(db).find().orderByAsc('id').all())
+      .filter((p) => p.caption === null)
+      .map((p) => ({
+        caption: p.caption,
+        cdn_url: p.cdn_url,
+      })),
+  );
 });
 
 test('use a default connection', async () => {
