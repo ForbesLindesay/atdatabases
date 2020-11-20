@@ -12,6 +12,106 @@ export interface OrderedSelectQuery<TRecord> extends SelectQuery<TRecord> {
   limit(count: number): Promise<TRecord[]>;
 }
 
+class FieldQuery<T> {
+  protected readonly __query: (
+    sql: Queryable['sql'],
+    columnName: string,
+  ) => SQLQuery;
+  constructor(query: (sql: Queryable['sql'], columnName: string) => SQLQuery) {
+    this.__query = query;
+  }
+  protected __checkFieldType(): T {
+    throw new Error(
+      'This method is only there to help TypeScript interpret the type',
+    );
+  }
+  static query<T>(
+    sql: Queryable['sql'],
+    columnName: string,
+    q: FieldQuery<T> | unknown,
+  ) {
+    if (q === null) {
+      return sql`${sql.ident(columnName)} IS NULL`;
+    }
+    if (q && q instanceof FieldQuery) {
+      return q.__query(sql, columnName);
+    }
+
+    return sql`${sql.ident(columnName)} = ${q}`;
+  }
+}
+
+export type {FieldQuery};
+
+export type WhereCondition<TRecord> = Partial<
+  {[key in keyof TRecord]: TRecord[key] | FieldQuery<TRecord[key]>}
+>;
+
+export function anyOf<T>(values: {
+  [Symbol.iterator](): IterableIterator<T | FieldQuery<T>>;
+}) {
+  const valuesArray: any[] = [];
+  const parts: FieldQuery<T>[] = [];
+  for (const value of values) {
+    if (value === null) {
+      parts.push(
+        new FieldQuery((sql, columnName) =>
+          FieldQuery.query(sql, columnName, null),
+        ),
+      );
+    } else if (value instanceof FieldQuery) {
+      parts.push(value);
+    } else {
+      valuesArray.push(value);
+    }
+  }
+  if (valuesArray.length) {
+    parts.push(
+      new FieldQuery<T>(
+        (sql, columnName) =>
+          sql`${sql.ident(columnName)} = ANY(${valuesArray})`,
+      ),
+    );
+  }
+  if (parts.length === 0) {
+    return new FieldQuery<T>((sql) => sql`FALSE`);
+  }
+  if (parts.length === 1) {
+    return parts[0];
+  }
+  return new FieldQuery<T>(
+    (sql, columnName) =>
+      sql`(${sql.join(
+        parts.map((p) => FieldQuery.query(sql, columnName, p)),
+        ' OR ',
+      )})`,
+  );
+}
+
+export function not<T>(value: T | FieldQuery<T>) {
+  return new FieldQuery<T>(
+    (sql, columnName) => sql`NOT (${FieldQuery.query(sql, columnName, value)})`,
+  );
+}
+
+export function inQueryResults(query: SQLQuery) {
+  return new FieldQuery<any>(
+    (sql, columnName) => sql`${sql.ident(columnName)} IN (${query})`,
+  );
+}
+
+export function lessThan<T>(value: T) {
+  return new FieldQuery<T>(
+    (sql, columnName) => sql`${sql.ident(columnName)} < ${value}`,
+  );
+}
+
+export function greaterThan<T>(value: T) {
+  return new FieldQuery<T>(
+    (sql, columnName) => sql`${sql.ident(columnName)} > ${value}`,
+  );
+}
+
 class SelectQueryImplementation<TRecord>
   implements OrderedSelectQuery<TRecord> {
   public readonly orderByQueries: SQLQuery[] = [];
@@ -86,17 +186,15 @@ class Table<TRecord, TInsertParameters> {
     this._tableID = tableName;
   }
 
-  private _rowToWhere(row: Partial<TRecord>) {
+  private _rowToWhere(row: WhereCondition<TRecord>) {
     const {sql} = this._underlyingDb;
-    const entries = Object.entries(row);
+    const entries = Object.entries(row).filter((row) => row[1] !== undefined);
     if (entries.length === 0) {
       return sql``;
     }
     return sql`WHERE ${sql.join(
       entries.map(([columnName, value]) =>
-        value === null
-          ? sql`${sql.ident(columnName)} IS NULL`
-          : sql`${sql.ident(columnName)} = ${value}`,
+        FieldQuery.query(sql, columnName, value),
       ),
       sql` AND `,
     )}`;
@@ -190,10 +288,10 @@ class Table<TRecord, TInsertParameters> {
   /**
    * @deprecated use .find instead of .select
    */
-  select(whereValues: Partial<TRecord> = {}): SelectQuery<TRecord> {
+  select(whereValues: WhereCondition<TRecord> = {}): SelectQuery<TRecord> {
     return this.find(whereValues);
   }
-  find(whereValues: Partial<TRecord> = {}): SelectQuery<TRecord> {
+  find(whereValues: WhereCondition<TRecord> = {}): SelectQuery<TRecord> {
     const {sql} = this._underlyingDb;
     const where = this._rowToWhere(whereValues);
     return new SelectQueryImplementation(
@@ -207,11 +305,13 @@ class Table<TRecord, TInsertParameters> {
   /**
    * @deprecated use .findOne instead of .selectOne
    */
-  async selectOne(whereValues: Partial<TRecord>): Promise<TRecord | null> {
+  async selectOne(
+    whereValues: WhereCondition<TRecord>,
+  ): Promise<TRecord | null> {
     return this.findOne(whereValues);
   }
   // throws if > 1 row matches
-  async findOne(whereValues: Partial<TRecord>): Promise<TRecord | null> {
+  async findOne(whereValues: WhereCondition<TRecord>): Promise<TRecord | null> {
     const rows = await this.find(whereValues).all();
     invariant(rows.length < 2, 'more than one row matched this query');
     if (rows.length !== 1) {
