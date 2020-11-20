@@ -185,7 +185,13 @@ class Table<TRecord, TInsertParameters> {
     await this.untypedQuery(sql`DELETE FROM ${this._tableID} ${where}`);
   }
 
+  /**
+   * @deprecated use .find instead of .select
+   */
   select(whereValues: Partial<TRecord> = {}): SelectQuery<TRecord> {
+    return this.find(whereValues);
+  }
+  find(whereValues: Partial<TRecord> = {}): SelectQuery<TRecord> {
     const {sql} = this._underlyingDb;
     const where = this._rowToWhere(whereValues);
     return new SelectQueryImplementation(
@@ -196,9 +202,15 @@ class Table<TRecord, TInsertParameters> {
     );
   }
 
-  // throws if > 1 row matches
+  /**
+   * @deprecated use .findOne instead of .selectOne
+   */
   async selectOne(whereValues: Partial<TRecord>): Promise<TRecord | null> {
-    const rows = await this.select(whereValues).all();
+    return this.findOne(whereValues);
+  }
+  // throws if > 1 row matches
+  async findOne(whereValues: Partial<TRecord>): Promise<TRecord | null> {
+    const rows = await this.find(whereValues).all();
     invariant(rows.length < 2, 'more than one row matched this query');
     if (rows.length !== 1) {
       return null;
