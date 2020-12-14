@@ -329,7 +329,12 @@ function getSSLConfig(
   }
   if (
     config.ssl === 'no-verify' ||
-    (parsedConnectionString.sslmode === 'no-verify' && !config.ssl)
+    (!config.ssl && parsedConnectionString.sslmode === 'no-verify') ||
+    !(
+      parsedConnectionString.sslcert ||
+      parsedConnectionString.sslkey ||
+      parsedConnectionString.sslrootcert
+    )
   ) {
     ssl.rejectUnauthorized = false;
   }
