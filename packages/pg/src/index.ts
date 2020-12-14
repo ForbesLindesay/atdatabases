@@ -37,6 +37,7 @@ export {
   SQLErrorCode,
   DataTypeID,
   QueryableType,
+  IsolationLevel,
   isTransaction,
   isConnection,
   isConnectionPool,

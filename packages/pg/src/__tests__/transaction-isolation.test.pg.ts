@@ -1,5 +1,4 @@
-import connect, {Transaction, sql} from '..';
-import IsolationLevel from '../types/IsolationLevel';
+import connect, {IsolationLevel, Transaction, sql} from '..';
 
 jest.setTimeout(30000);
 
