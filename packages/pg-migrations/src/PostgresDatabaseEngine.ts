@@ -41,7 +41,7 @@ export default class PostgresDatabaseEngine
         switch (extname(migrationFileName)) {
           case '.sql':
             return Result.ok(async (db: Transaction) => {
-              await db.query([db.sql.file(migrationFileName)]);
+              await db.query(db.sql.file(migrationFileName));
             });
           case '.js':
           case '.mjs':
