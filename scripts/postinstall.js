@@ -19,7 +19,7 @@ const tsconfig = `{
   "extends": "../../tsconfig.json"
 }`;
 
-const dependencies = require('../package.json').devDependencies;
+const packageNames = [];
 readdirSync(__dirname + '/../packages').forEach((directory) => {
   if (!statSync(__dirname + '/../packages/' + directory).isDirectory()) {
     return;
@@ -51,6 +51,7 @@ readdirSync(__dirname + '/../packages').forEach((directory) => {
       throw ex;
     }
   }
+  packageNames.push(pkg.name);
   const before = JSON.stringify(pkg);
   if (!pkg.name) {
     pkg.name = '@databases/' + directory;
@@ -105,3 +106,25 @@ readdirSync(__dirname + '/../packages').forEach((directory) => {
     JSON.stringify(pkg, null, '  ') + '\n',
   );
 });
+
+const [README_HEADER, _table, README_FOOTER] = readFileSync(
+  __dirname + '/../README.md',
+  'utf8',
+).split('<!-- VERSION_TABLE -->');
+
+const versionsTable = `
+Package Name | Version
+-------------|--------
+${packageNames
+  .map(
+    (name) =>
+      `${name} | [![NPM version](https://img.shields.io/npm/v/${name}?style=for-the-badge)](https://www.npmjs.com/package/${name})`,
+  )
+  .join('\n')}
+`;
+writeFileSync(
+  __dirname + '/../README.md',
+  [README_HEADER, versionsTable, README_FOOTER || ''].join(
+    '<!-- VERSION_TABLE -->',
+  ),
+);
