@@ -42,25 +42,38 @@ export default function printSchema(type: Schema, context: PrintContext) {
         `}`,
       ];
     }
+    const columnCondition = (columns: string[]) =>
+      columns.length === 0
+        ? `false`
+        : columns.length === 1
+        ? `c === ${JSON.stringify(columns[0])}`
+        : `(${columns
+            .map((columnName) => `c === ${JSON.stringify(columnName)}`)
+            .join(' || ')})`;
+    const tableConditions = tables.map(
+      ({tableName, jsonAttributes}) =>
+        `t === ${JSON.stringify(tableName)} && ${columnCondition(
+          jsonAttributes,
+        )}`,
+    );
     return [
-      `function ${identifier}(tableName: string, columnName: string, value: unknown): unknown {`,
-      `  switch (tableName) {`,
-      ...tables.map(({tableName, jsonAttributes}) =>
-        [
-          `    case ${JSON.stringify(tableName)}:`,
-          `      switch (columnName) {`,
-          ...jsonAttributes.map(
-            (columnName) => `        case ${JSON.stringify(columnName)}:`,
-          ),
-          `          return JSON.stringify(value);`,
-          `        default:`,
-          `          return value;`,
-          `      }`,
-        ].join('\n'),
-      ),
-      `    default:`,
-      `      return value;`,
+      `/**`,
+      ` * JSON serialize values (v) if the table name (t) and column name (c)`,
+      ` * is a JSON or JSONB column.`,
+      ` * This is necessary if you want to store values that are not plain objects`,
+      ` * in a JSON or JSONB column.`,
+      ` */`,
+      `function ${identifier}(t: string, c: string, v: unknown): unknown {`,
+      `  if (${
+        tableConditions.length === 1
+          ? tableConditions[0]
+          : `\n    ${tableConditions
+              .map((c) => `(${c})`)
+              .join(' ||\n    ')}\n  `
+      }) {`,
+      `    return JSON.stringify(v);`,
       `  }`,
+      `  return v;`,
       `}`,
     ];
   });

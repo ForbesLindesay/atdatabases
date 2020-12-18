@@ -71,18 +71,17 @@ test('getClasses', async () => {
     }
     export default DatabaseSchema;
 
-    function serializeValue(tableName: string, columnName: string, value: unknown): unknown {
-      switch (tableName) {
-        case \\"photos\\":
-          switch (columnName) {
-            case \\"metadata\\":
-              return JSON.stringify(value);
-            default:
-              return value;
-          }
-        default:
-          return value;
+    /**
+     * JSON serialize values (v) if the table name (t) and column name (c)
+     * is a JSON or JSONB column.
+     * This is necessary if you want to store values that are not plain objects
+     * in a JSON or JSONB column.
+     */
+    function serializeValue(t: string, c: string, v: unknown): unknown {
+      if (t === \\"photos\\" && c === \\"metadata\\") {
+        return JSON.stringify(v);
       }
+      return v;
     }
     export {serializeValue}
     ",
