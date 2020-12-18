@@ -1,5 +1,5 @@
 import {Schema, ClassKind} from '@databases/pg-schema-introspect';
-import {DataTypeID} from '@databases/pg/src';
+import PgDataTypeID from '@databases/pg-data-type-id';
 import PrintContext from '../PrintContext';
 import printClassDetails from './printClassDetails';
 
@@ -26,7 +26,7 @@ export default function printSchema(type: Schema, context: PrintContext) {
         const jsonAttributes = cls.attributes
           .filter(
             (a) =>
-              a.typeID === DataTypeID.json || a.typeID === DataTypeID.jsonb,
+              a.typeID === PgDataTypeID.json || a.typeID === PgDataTypeID.jsonb,
           )
           .map((a) => a.attributeName);
         return {
