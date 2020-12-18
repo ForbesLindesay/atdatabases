@@ -1,4 +1,5 @@
 import {Schema, ClassKind} from '@databases/pg-schema-introspect';
+import PgDataTypeID from '@databases/pg-data-type-id';
 import PrintContext from '../PrintContext';
 import printClassDetails from './printClassDetails';
 
@@ -18,4 +19,62 @@ export default function printSchema(type: Schema, context: PrintContext) {
       }),
     `}`,
   ]);
+  context.pushValueDeclaration({type: 'serializeValue'}, (identifier) => {
+    const tables = type.classes
+      .filter((cls) => cls.kind === ClassKind.OrdinaryTable)
+      .map((cls) => {
+        const jsonAttributes = cls.attributes
+          .filter(
+            (a) =>
+              a.typeID === PgDataTypeID.json || a.typeID === PgDataTypeID.jsonb,
+          )
+          .map((a) => a.attributeName);
+        return {
+          tableName: cls.className,
+          jsonAttributes,
+        };
+      })
+      .filter((table) => table.jsonAttributes.length > 0);
+    if (!tables.length) {
+      return [
+        `function ${identifier}(_tableName: string, _columnName: string, value: unknown): unknown {`,
+        `  return value;`,
+        `}`,
+      ];
+    }
+    const columnCondition = (columns: string[]) =>
+      columns.length === 0
+        ? `false`
+        : columns.length === 1
+        ? `c === ${JSON.stringify(columns[0])}`
+        : `(${columns
+            .map((columnName) => `c === ${JSON.stringify(columnName)}`)
+            .join(' || ')})`;
+    const tableConditions = tables.map(
+      ({tableName, jsonAttributes}) =>
+        `t === ${JSON.stringify(tableName)} && ${columnCondition(
+          jsonAttributes,
+        )}`,
+    );
+    return [
+      `/**`,
+      ` * JSON serialize values (v) if the table name (t) and column name (c)`,
+      ` * is a JSON or JSONB column.`,
+      ` * This is necessary if you want to store values that are not plain objects`,
+      ` * in a JSON or JSONB column.`,
+      ` */`,
+      `function ${identifier}(t: string, c: string, v: unknown): unknown {`,
+      `  if (${
+        tableConditions.length === 1
+          ? tableConditions[0]
+          : `\n    ${tableConditions
+              .map((c) => `(${c})`)
+              .join(' ||\n    ')}\n  `
+      }) {`,
+      `    return JSON.stringify(v);`,
+      `  }`,
+      `  return v;`,
+      `}`,
+    ];
+  });
 }

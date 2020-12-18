@@ -70,6 +70,20 @@ test('getClasses', async () => {
       users: {record: User, insert: Users_InsertParameters};
     }
     export default DatabaseSchema;
+
+    /**
+     * JSON serialize values (v) if the table name (t) and column name (c)
+     * is a JSON or JSONB column.
+     * This is necessary if you want to store values that are not plain objects
+     * in a JSON or JSONB column.
+     */
+    function serializeValue(t: string, c: string, v: unknown): unknown {
+      if (t === \\"photos\\" && c === \\"metadata\\") {
+        return JSON.stringify(v);
+      }
+      return v;
+    }
+    export {serializeValue}
     ",
         "filename": "index.ts",
       },

@@ -183,6 +183,18 @@ export const PgConfigSchema = {
           description: 'What should the main generated "schema" type be called',
           type: 'string',
         },
+        serializeValueFileName: {
+          default: 'index.ts',
+          description:
+            'What filename do you want to use for the generated "serializeValue" function',
+          type: 'string',
+        },
+        serializeValueTypeName: {
+          default: 'serializeValue',
+          description:
+            'What should the generated "serializeValue" function be called',
+          type: 'string',
+        },
         tableFileName: {
           default: '{{ TABLE_NAME }}.ts',
           description: 'What filename do you want to use for tables',
@@ -231,6 +243,8 @@ export const PgConfigSchema = {
         'primaryKeyTypeName',
         'schemaFileName',
         'schemaTypeName',
+        'serializeValueFileName',
+        'serializeValueTypeName',
         'tableFileName',
         'tableInsertParametersFileName',
         'tableInsertParametersTypeName',

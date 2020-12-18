@@ -121,6 +121,11 @@ export default class PrintOptions {
           this._v('domainFileName'),
           this._v('domainTypeName'),
         );
+      case 'serializeValue':
+        return isDefaultExportCandidate(
+          this._v('serializeValueFileName'),
+          this._v('serializeValueTypeName'),
+        );
     }
   }
 
@@ -151,6 +156,10 @@ export default class PrintOptions {
         return parseTemplate(this._v('domainTypeName')).applyTemplate({
           TYPE_NAME: fileID.name,
         });
+      case 'serializeValue':
+        return parseTemplate(this._v('serializeValueTypeName')).applyTemplate(
+          {},
+        );
     }
   }
 
@@ -181,6 +190,10 @@ export default class PrintOptions {
         return parseTemplate(this._v('domainFileName')).applyTemplate({
           TYPE_NAME: fileID.name,
         });
+      case 'serializeValue':
+        return parseTemplate(this._v('serializeValueFileName')).applyTemplate(
+          {},
+        );
     }
   }
 }
