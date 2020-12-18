@@ -25,6 +25,8 @@ test('get root config', () => {
         '{{ TABLE_NAME | pascal-case }}_{{ COLUMN_NAME | pascal-case }}',
       schemaFileName: 'index.ts',
       schemaTypeName: 'DatabaseSchema',
+      serializeValueFileName: 'index.ts',
+      serializeValueTypeName: 'serializeValue',
       tableFileName: '{{ TABLE_NAME }}.ts',
       tableInsertParametersFileName: '{{ TABLE_NAME }}.ts',
       tableInsertParametersTypeName:
@@ -61,6 +63,8 @@ test('valid config', () => {
         '{{ TABLE_NAME | pascal-case }}_{{ COLUMN_NAME | pascal-case }}',
       schemaFileName: 'index.ts',
       schemaTypeName: 'DatabaseSchema',
+      serializeValueFileName: 'index.ts',
+      serializeValueTypeName: 'serializeValue',
       tableFileName: '{{ TABLE_NAME }}.ts',
       tableInsertParametersFileName: '{{ TABLE_NAME }}.ts',
       tableInsertParametersTypeName:
@@ -94,6 +98,8 @@ test('valid config', () => {
         '{{ TABLE_NAME | pascal-case }}_{{ COLUMN_NAME | pascal-case }}',
       schemaFileName: 'index.ts',
       schemaTypeName: 'DatabaseSchema',
+      serializeValueFileName: 'index.ts',
+      serializeValueTypeName: 'serializeValue',
       tableFileName: '{{ TABLE_NAME }}.ts',
       tableInsertParametersFileName: '{{ TABLE_NAME }}.ts',
       tableInsertParametersTypeName:

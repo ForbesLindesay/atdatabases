@@ -70,6 +70,21 @@ test('getClasses', async () => {
       users: {record: User, insert: Users_InsertParameters};
     }
     export default DatabaseSchema;
+
+    function serializeValue(tableName: string, columnName: string, value: unknown): unknown {
+      switch (tableName) {
+        case \\"photos\\":
+          switch (columnName) {
+            case \\"metadata\\":
+              return JSON.stringify(value);
+            default:
+              return value;
+          }
+        default:
+          return value;
+      }
+    }
+    export {serializeValue}
     ",
         "filename": "index.ts",
       },
