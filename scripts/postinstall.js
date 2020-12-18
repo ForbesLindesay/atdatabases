@@ -20,6 +20,9 @@ const tsconfig = `{
 }`;
 
 const packageNames = [];
+const packageDocs = new Map([
+  ['@databases/expo', 'https://www.atdatabases.org/docs/websql'],
+]);
 readdirSync(__dirname + '/../packages').forEach((directory) => {
   if (!statSync(__dirname + '/../packages/' + directory).isDirectory()) {
     return;
@@ -80,6 +83,7 @@ readdirSync(__dirname + '/../packages').forEach((directory) => {
     directory;
   pkg.bugs = 'https://github.com/ForbesLindesay/atdatabases/issues';
   if (existsSync(__dirname + '/../docs/' + directory + '.md')) {
+    packageDocs.set(pkg.name, 'https://www.atdatabases.org/docs/' + directory);
     pkg.homepage = 'https://www.atdatabases.org/docs/' + directory;
     writeFileSync(
       __dirname + '/../packages/' + directory + '/README.md',
@@ -113,12 +117,25 @@ const [README_HEADER, _table, README_FOOTER] = readFileSync(
 ).split('<!-- VERSION_TABLE -->');
 
 const versionsTable = `
-Package Name | Version
--------------|--------
+Package Name | Version | Docs
+-------------|---------|------
 ${packageNames
+  .sort((a, b) =>
+    packageDocs.has(a) && !packageDocs.has(b)
+      ? -1
+      : !packageDocs.has(a) && packageDocs.has(b)
+      ? 1
+      : a < b
+      ? -1
+      : 1,
+  )
   .map(
     (name) =>
-      `${name} | [![NPM version](https://img.shields.io/npm/v/${name}?style=for-the-badge)](https://www.npmjs.com/package/${name})`,
+      `${name} | [![NPM version](https://img.shields.io/npm/v/${name}?style=for-the-badge)](https://www.npmjs.com/package/${name}) | ${
+        packageDocs.has(name)
+          ? `[${packageDocs.get(name)}](${packageDocs.get(name)})`
+          : `Not documented yet`
+      }`,
   )
   .join('\n')}
 `;

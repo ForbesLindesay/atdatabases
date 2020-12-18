@@ -33,5 +33,6 @@
   "bugs": "https://github.com/ForbesLindesay/atdatabases/issues",
   "files": [
     "lib/"
-  ]
+  ],
+  "homepage": "https://www.atdatabases.org/docs/pg-migrations"
 }
