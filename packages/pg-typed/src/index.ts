@@ -14,10 +14,17 @@ export interface OrderedSelectQuery<TRecord> extends SelectQuery<TRecord> {
 
 class FieldQuery<T> {
   protected readonly __query: (
-    sql: Queryable['sql'],
     columnName: string,
+    sql: Queryable['sql'],
+    toValue: (columnName: string, value: any) => SQLQuery,
   ) => SQLQuery;
-  constructor(query: (sql: Queryable['sql'], columnName: string) => SQLQuery) {
+  constructor(
+    query: (
+      columnName: string,
+      sql: Queryable['sql'],
+      toValue: (columnName: string, value: any) => SQLQuery,
+    ) => SQLQuery,
+  ) {
     this.__query = query;
   }
   protected __checkFieldType(): T {
@@ -26,18 +33,19 @@ class FieldQuery<T> {
     );
   }
   static query<T>(
-    sql: Queryable['sql'],
     columnName: string,
     q: FieldQuery<T> | unknown,
-  ) {
+    sql: Queryable['sql'],
+    toValue: (columnName: string, value: any) => SQLQuery,
+  ): SQLQuery {
     if (q === null) {
       return sql`${sql.ident(columnName)} IS NULL`;
     }
     if (q && q instanceof FieldQuery) {
-      return q.__query(sql, columnName);
+      return q.__query(columnName, sql, toValue);
     }
 
-    return sql`${sql.ident(columnName)} = ${q}`;
+    return sql`${sql.ident(columnName)} = ${toValue(columnName, q)}`;
   }
 }
 
@@ -55,8 +63,8 @@ export function anyOf<T>(values: {
   for (const value of values) {
     if (value === null) {
       parts.push(
-        new FieldQuery((sql, columnName) =>
-          FieldQuery.query(sql, columnName, null),
+        new FieldQuery((columnName, sql, toValue) =>
+          FieldQuery.query(columnName, null, sql, toValue),
         ),
       );
     } else if (value instanceof FieldQuery) {
@@ -68,21 +76,23 @@ export function anyOf<T>(values: {
   if (valuesArray.length) {
     parts.push(
       new FieldQuery<T>(
-        (sql, columnName) =>
-          sql`${sql.ident(columnName)} = ANY(${valuesArray})`,
+        (columnName, sql, toValue) =>
+          sql`${sql.ident(columnName)} = ANY(${valuesArray.map((v) =>
+            toValue(columnName, v),
+          )})`,
       ),
     );
   }
   if (parts.length === 0) {
-    return new FieldQuery<T>((sql) => sql`FALSE`);
+    return new FieldQuery<T>((_columnName, sql) => sql`FALSE`);
   }
   if (parts.length === 1) {
     return parts[0];
   }
   return new FieldQuery<T>(
-    (sql, columnName) =>
+    (columnName, sql, toValue) =>
       sql`(${sql.join(
-        parts.map((p) => FieldQuery.query(sql, columnName, p)),
+        parts.map((p) => FieldQuery.query(columnName, p, sql, toValue)),
         ' OR ',
       )})`,
   );
@@ -90,25 +100,28 @@ export function anyOf<T>(values: {
 
 export function not<T>(value: T | FieldQuery<T>) {
   return new FieldQuery<T>(
-    (sql, columnName) => sql`NOT (${FieldQuery.query(sql, columnName, value)})`,
+    (columnName, sql, toValue) =>
+      sql`NOT (${FieldQuery.query(columnName, value, sql, toValue)})`,
   );
 }
 
 export function inQueryResults(query: SQLQuery) {
   return new FieldQuery<any>(
-    (sql, columnName) => sql`${sql.ident(columnName)} IN (${query})`,
+    (columnName, sql) => sql`${sql.ident(columnName)} IN (${query})`,
   );
 }
 
 export function lessThan<T>(value: T) {
   return new FieldQuery<T>(
-    (sql, columnName) => sql`${sql.ident(columnName)} < ${value}`,
+    (columnName, sql, toValue) =>
+      sql`${sql.ident(columnName)} < ${toValue(columnName, value)}`,
   );
 }
 
 export function greaterThan<T>(value: T) {
   return new FieldQuery<T>(
-    (sql, columnName) => sql`${sql.ident(columnName)} > ${value}`,
+    (columnName, sql, toValue) =>
+      sql`${sql.ident(columnName)} > ${toValue(columnName, value)}`,
   );
 }
 
@@ -182,8 +195,16 @@ class SelectQueryImplementation<TRecord>
 
 class Table<TRecord, TInsertParameters> {
   private readonly _tableID: SQLQuery;
-  constructor(private readonly _underlyingDb: Queryable, tableName: SQLQuery) {
+  private readonly _value: (columnName: string, value: any) => SQLQuery;
+  constructor(
+    private readonly _underlyingDb: Queryable,
+    tableName: SQLQuery,
+    serializer: (columnName: string, value: unknown) => unknown,
+  ) {
+    const {sql} = _underlyingDb;
+
     this._tableID = tableName;
+    this._value = (c, v) => sql.value(serializer(c, v));
   }
 
   private _rowToWhere(row: WhereCondition<TRecord>) {
@@ -194,7 +215,7 @@ class Table<TRecord, TInsertParameters> {
     }
     return sql`WHERE ${sql.join(
       entries.map(([columnName, value]) =>
-        FieldQuery.query(sql, columnName, value),
+        FieldQuery.query(columnName, value, sql, this._value),
       ),
       sql` AND `,
     )}`;
@@ -209,11 +230,11 @@ class Table<TRecord, TInsertParameters> {
       rows.map((row) => {
         const entries = Object.entries(row);
         const columnNames = sql.join(
-          entries.map(([key, _value]) => sql.ident(key)),
+          entries.map(([columnName, _value]) => sql.ident(columnName)),
           sql`, `,
         );
         const values = sql.join(
-          entries.map(([_key, value]) => sql.value(value)),
+          entries.map(([columnName, value]) => this._value(columnName, value)),
           sql`, `,
         );
         const query = sql`INSERT INTO ${this._tableID} (${columnNames}) VALUES (${values})`;
@@ -263,14 +284,17 @@ class Table<TRecord, TInsertParameters> {
   }
 
   async update(
-    whereValues: Partial<TRecord>,
+    whereValues: WhereCondition<TRecord>,
     updateValues: Partial<TRecord>,
   ): Promise<TRecord[]> {
     const {sql} = this._underlyingDb;
     const where = this._rowToWhere(whereValues);
     const setClause = sql.join(
       Object.entries(updateValues).map(([columnName, value]) => {
-        return sql`${sql.ident(columnName)} = ${value}`;
+        return sql`${sql.ident(columnName)} = ${this._value(
+          columnName,
+          value,
+        )}`;
       }),
       sql`, `,
     );
@@ -279,7 +303,7 @@ class Table<TRecord, TInsertParameters> {
     );
   }
 
-  async delete(whereValues: Partial<TRecord>): Promise<void> {
+  async delete(whereValues: WhereCondition<TRecord>): Promise<void> {
     const {sql} = this._underlyingDb;
     const where = this._rowToWhere(whereValues);
     await this.untypedQuery(sql`DELETE FROM ${this._tableID} ${where}`);
@@ -327,7 +351,9 @@ class Table<TRecord, TInsertParameters> {
 
 function getTable<TRecord, TInsertParameters>(
   tableName: string,
-  {schemaName, defaultConnection}: Partial<PgTypedOptionsWithDefaultConnection>,
+  defaultConnection: Queryable | undefined,
+  schemaName: string | undefined,
+  serializer: (columnName: string, value: unknown) => unknown,
 ) {
   return (
     queryable: Queryable | undefined = defaultConnection,
@@ -342,6 +368,7 @@ function getTable<TRecord, TInsertParameters>(
       schemaName
         ? queryable.sql.ident(schemaName, tableName)
         : queryable.sql.ident(tableName),
+      serializer,
     );
   };
 }
@@ -349,6 +376,13 @@ export type {Table};
 
 export interface PgTypedOptions {
   schemaName?: string;
+  serializer?: (
+    tableName: string,
+    columnName: string,
+    value: unknown,
+  ) => unknown;
+
+  // TODO: easy aliasing of fields and easy parsing of fields using a similar API to the serializer?
 }
 export interface PgTypedOptionsWithDefaultConnection extends PgTypedOptions {
   defaultConnection: Queryable;
@@ -391,7 +425,13 @@ export default function tables<TTables>(
         if (prop === 'then') {
           return undefined;
         }
-        return getTable(String(prop), options);
+        const tableName = String(prop);
+        return getTable(
+          tableName,
+          options.defaultConnection,
+          options.schemaName,
+          getTableSerializer(tableName, options.serializer),
+        );
       },
     },
   ) as any;
@@ -402,3 +442,16 @@ type PropertyOf<T, TProp extends string> = T extends {
 }
   ? TValue
   : never;
+
+function getTableSerializer(
+  tableName: string,
+  serializer?: (
+    tableName: string,
+    columnName: string,
+    value: unknown,
+  ) => unknown,
+): (columnName: string, value: unknown) => unknown {
+  return serializer
+    ? (columnName, value) => serializer(tableName, columnName, value)
+    : (_, value) => value;
+}
