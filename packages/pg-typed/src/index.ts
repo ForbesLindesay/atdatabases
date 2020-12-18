@@ -16,13 +16,13 @@ class FieldQuery<T> {
   protected readonly __query: (
     columnName: string,
     sql: Queryable['sql'],
-    toValue: (columnName: string, value: any) => SQLQuery,
+    toValue: (columnName: string, value: unknown) => unknown,
   ) => SQLQuery;
   constructor(
     query: (
       columnName: string,
       sql: Queryable['sql'],
-      toValue: (columnName: string, value: any) => SQLQuery,
+      toValue: (columnName: string, value: unknown) => unknown,
     ) => SQLQuery,
   ) {
     this.__query = query;
@@ -36,7 +36,7 @@ class FieldQuery<T> {
     columnName: string,
     q: FieldQuery<T> | unknown,
     sql: Queryable['sql'],
-    toValue: (columnName: string, value: any) => SQLQuery,
+    toValue: (columnName: string, value: unknown) => unknown,
   ): SQLQuery {
     if (q === null) {
       return sql`${sql.ident(columnName)} IS NULL`;
@@ -195,16 +195,14 @@ class SelectQueryImplementation<TRecord>
 
 class Table<TRecord, TInsertParameters> {
   private readonly _tableID: SQLQuery;
-  private readonly _value: (columnName: string, value: any) => SQLQuery;
+  private readonly _value: (columnName: string, value: any) => unknown;
   constructor(
     private readonly _underlyingDb: Queryable,
     tableName: SQLQuery,
-    serializer: (columnName: string, value: unknown) => unknown,
+    serializeValue: (columnName: string, value: unknown) => unknown,
   ) {
-    const {sql} = _underlyingDb;
-
     this._tableID = tableName;
-    this._value = (c, v) => sql.value(serializer(c, v));
+    this._value = (c, v) => serializeValue(c, v);
   }
 
   private _rowToWhere(row: WhereCondition<TRecord>) {
@@ -234,7 +232,9 @@ class Table<TRecord, TInsertParameters> {
           sql`, `,
         );
         const values = sql.join(
-          entries.map(([columnName, value]) => this._value(columnName, value)),
+          entries.map(([columnName, value]) =>
+            sql.value(this._value(columnName, value)),
+          ),
           sql`, `,
         );
         const query = sql`INSERT INTO ${this._tableID} (${columnNames}) VALUES (${values})`;
@@ -353,7 +353,7 @@ function getTable<TRecord, TInsertParameters>(
   tableName: string,
   defaultConnection: Queryable | undefined,
   schemaName: string | undefined,
-  serializer: (columnName: string, value: unknown) => unknown,
+  serializeValue: (columnName: string, value: unknown) => unknown,
 ) {
   return (
     queryable: Queryable | undefined = defaultConnection,
@@ -368,7 +368,7 @@ function getTable<TRecord, TInsertParameters>(
       schemaName
         ? queryable.sql.ident(schemaName, tableName)
         : queryable.sql.ident(tableName),
-      serializer,
+      serializeValue,
     );
   };
 }
@@ -376,13 +376,13 @@ export type {Table};
 
 export interface PgTypedOptions {
   schemaName?: string;
-  serializer?: (
+  serializeValue?: (
     tableName: string,
     columnName: string,
     value: unknown,
   ) => unknown;
 
-  // TODO: easy aliasing of fields and easy parsing of fields using a similar API to the serializer?
+  // TODO: easy aliasing of fields and easy parsing of fields using a similar API to the serializeValue?
 }
 export interface PgTypedOptionsWithDefaultConnection extends PgTypedOptions {
   defaultConnection: Queryable;
@@ -430,7 +430,7 @@ export default function tables<TTables>(
           tableName,
           options.defaultConnection,
           options.schemaName,
-          getTableSerializer(tableName, options.serializer),
+          getTableserializeValue(tableName, options.serializeValue),
         );
       },
     },
@@ -443,15 +443,15 @@ type PropertyOf<T, TProp extends string> = T extends {
   ? TValue
   : never;
 
-function getTableSerializer(
+function getTableserializeValue(
   tableName: string,
-  serializer?: (
+  serializeValue?: (
     tableName: string,
     columnName: string,
     value: unknown,
   ) => unknown,
 ): (columnName: string, value: unknown) => unknown {
-  return serializer
-    ? (columnName, value) => serializer(tableName, columnName, value)
+  return serializeValue
+    ? (columnName, value) => serializeValue(tableName, columnName, value)
     : (_, value) => value;
 }
