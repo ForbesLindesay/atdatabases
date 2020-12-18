@@ -1,9 +1,10 @@
 import connect, {sql} from '@databases/pg';
-import Schema from './__generated__';
+import Schema, {serializeValue} from './__generated__';
 import tables, {not, anyOf, greaterThan, lessThan, inQueryResults} from '..';
 
-const {users} = tables<Schema>({
+const {users, photos} = tables<Schema>({
   schemaName: 'typed_queries_advanced_tests',
+  serializeValue,
 });
 
 const db = connect({bigIntMode: 'number'});
@@ -139,4 +140,48 @@ test('create users', async () => {
       .orderByDesc('screen_name')
       .all(),
   ).resolves.toEqual([forbes]);
+});
+
+test('JSON values can be of any type', async () => {
+  const [user] = await users(db).insert({screen_name: 'photo-owner'});
+  const inserted = await photos(db).insert(
+    {
+      cdn_url: 'http://example.com/a',
+      metadata: 'A " string',
+      owner_user_id: user.id,
+    },
+    {
+      cdn_url: 'http://example.com/b',
+      metadata: 42,
+      owner_user_id: user.id,
+    },
+    {
+      cdn_url: 'http://example.com/c',
+      metadata: true,
+      owner_user_id: user.id,
+    },
+    {
+      cdn_url: 'http://example.com/d',
+      metadata: [1, 2, 3],
+      owner_user_id: user.id,
+    },
+    {
+      cdn_url: 'http://example.com/e',
+      metadata: ['foo', 'bar', 'baz'],
+      owner_user_id: user.id,
+    },
+    {
+      cdn_url: 'http://example.com/f',
+      metadata: {whatever: 'this is great'},
+      owner_user_id: user.id,
+    },
+  );
+  expect(inserted.map((img) => [img.cdn_url, img.metadata])).toEqual([
+    ['http://example.com/a', 'A " string'],
+    ['http://example.com/b', 42],
+    ['http://example.com/c', true],
+    ['http://example.com/d', [1, 2, 3]],
+    ['http://example.com/e', ['foo', 'bar', 'baz']],
+    ['http://example.com/f', {whatever: 'this is great'}],
+  ]);
 });
