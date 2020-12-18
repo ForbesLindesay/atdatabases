@@ -168,6 +168,19 @@ export interface TypesConfig {
   schemaFileName: string;
 
   /**
+   * What should the generated "serializeValue" function be called
+   *
+   * @default "serializeValue"
+   */
+  serializeValueTypeName: string;
+  /**
+   * What filename do you want to use for the generated "serializeValue" function
+   *
+   * @default "index.ts"
+   */
+  serializeValueFileName: string;
+
+  /**
    * Override column types for some columns. The name can be either:
    *
    * - "table_name.column_name"

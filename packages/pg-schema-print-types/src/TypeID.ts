@@ -4,7 +4,8 @@ type TypeID =
   | {type: 'primary_key'; name: string; columnName: string}
   | {type: 'domain'; name: string}
   | {type: 'enum'; name: string}
-  | {type: 'schema'};
+  | {type: 'schema'}
+  | {type: 'serializeValue'};
 export default TypeID;
 
 export const DEFAULT_EXPORT_PRIORITY = {
@@ -14,4 +15,5 @@ export const DEFAULT_EXPORT_PRIORITY = {
   primary_key: 2,
   enum: 2,
   domain: 2,
+  serializeValue: 3,
 };
