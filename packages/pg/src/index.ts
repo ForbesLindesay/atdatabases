@@ -234,7 +234,7 @@ export default function createConnectionPool(
     );
   } else if (bigIntMode === null) {
     console.warn(
-      'bigIntMode currently deafults to "number" but will default to "bigint" in the next major version of @databases/pg. Set it explicitly to disable this warning.',
+      'bigIntMode currently defaults to "number" but will default to "bigint" in the next major version of @databases/pg. Set it explicitly to disable this warning.',
     );
   }
   const types = new TypeOverrides({
