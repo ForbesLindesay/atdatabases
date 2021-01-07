@@ -13,7 +13,7 @@ We do not do the escaping of SQL ourselves, instead we pass the query and parame
 import sql from '@databases/sql';
 ```
 
-### ``` sql`...` ```
+### `` sql`...` ``
 
 Builds part of, or the whole of, an SQL query, safely interpreting the embedded expressions. You can use it for a basic SQL query with no parameters:
 
@@ -39,7 +39,7 @@ db.query(sql`SELECT ${FIELD_SET} FROM users WHERE id=${id};`);
 // => {text: 'SELECT id, name FROM users WHERE id=$1;', values: [10]}
 ```
 
-### ``` sql.ident(...names) ```
+### `sql.ident(...names)`
 
 If you want to dynamically include an identifier in a query, you can use `sql.identifier`. e.g.
 
@@ -57,9 +57,9 @@ db.query(sql`SELECT ${fieldName} FROM users AS u;`);
 // => {text: 'SELECT "u"."id" FROM users AS u;', values: []}
 ```
 
-### ``` sql.value(val) ```
+### `sql.value(val)`
 
-`sql.value(val)` acts as a shorthand for ``` sql`${val}` ```. It takes a value, and represents it with a placeholder in the resulting query.
+`sql.value(val)` acts as a shorthand for `` sql`${val}` ``. It takes a value, and represents it with a placeholder in the resulting query.
 
 ```ts
 const id = sql.value(10);
@@ -67,30 +67,24 @@ db.query(sql`SELECT * FROM users WHERE id=${id};`);
 // => {text: 'SELECT * FROM users WHERE id=$1;', values: [10]}
 ```
 
-### ``` sql.join(arrayOfFragments, delimiter) ```
+### `sql.join(arrayOfFragments, delimiter)`
 
 Joins an array of SQLQuery values using the delimiter (which is treated as a raw SQL string). It properly handles joining the array of values and ensuring that the placeholders match up.
 
 ```ts
-const arrayOfSqlFields = ["a", "b", "c", "d"].map(
-  n => sql.identifier(n),
-);
+const arrayOfSqlFields = ['a', 'b', 'c', 'd'].map((n) => sql.identifier(n));
 
 sql`SELECT ${sql.join(arrayOfSqlFields, sql`, `)}`;
 // => {text: 'SELECT "a", "b", "c", "d";', values: []}
 
-const arrayOfSqlConditions = [
-  sql.query`a = ${1}`,
-  sql.query`b = ${2}`,
-  sql.query`c = ${3}`
-];
+const arrayOfSqlConditions = [sql`a = ${1}`, sql`b = ${2}`, sql`c = ${3}`];
 sql`WHERE (${sql.join(arrayOfSqlConditions, sql`) AND (`)})`;
 // => {text: 'WHERE (a = $1) AND (b = $2) AND (c = $3)', values: [1, 2, 3]}
 ```
 
 > N.B. the delimiter should always be a string literal, never allow user input to be passed as the delimiter. If you allow user specified delimiters, it will lead to an SQL Injection Vulnerability.
 
-### ``` sql.file(filename) ```
+### `sql.file(filename)`
 
 This reads a file containing an SQL query in utf8 text, and returns it as an SQLQuery. It's generally most useful for large blocks of SQL, like database migrations.
 
@@ -101,7 +95,7 @@ db.query(migration);
 
 > N.B. if you allow users to write to the files that you later read in as queries via this method, your code will be vulnerable to SQL Injeciton. Only read in trusted files created by your own team of developers.
 
-### ``` sql.__dangerous__rawValue(str) ```
+### `sql.__dangerous__rawValue(str)`
 
 This is an escape hatch to allow you to take a string from a source you trust and treat it as an SQL query. There is almost always a better way.
 
@@ -113,7 +107,7 @@ db.query(sql`SELECT * FROM users WHERE id in ${idSet};`);
 
 > N.B. if you pass user input to this function, it will result in an SQL Injection Vulnerability. That is why it has such an odd name.
 
-### ``` sql.registerFormatter(class, format) ```
+### `sql.registerFormatter(class, format)`
 
 The `registerFormatter` function allows you to add custom handling for a given class. Instead of just directly adding the value to the "values" array, this lets you write your own function that takes the value and returns an `SQLQuery`.
 
@@ -134,19 +128,23 @@ class DayDate {
   }
 }
 
-sql.registerFormatter(DayDate, (date) => sql.value(
-  `${padNumber(date.year, 4)}-${padNumber(date.month, 2)}-${padNumber(date.day, 2)}`,
-));
-
+sql.registerFormatter(DayDate, (date) =>
+  sql.value(
+    `${padNumber(date.year, 4)}-${padNumber(date.month, 2)}-${padNumber(
+      date.day,
+      2,
+    )}`,
+  ),
+);
 
 db.query(sql`SELECT * FROM users WHERE dob = ${new DayDate(2018, 1, 20)};`);
 // => {text: 'SELECT * FROM users WHERE dob = $1;', values: ['2018-01-20']}
 ```
 
-### ``` SQLQuery.compile() ```
+### `SQLQuery.compile()`
 
 This returns an object with `{text: string, values: any[]}` where the `text` field contains the SQL query formatted for postgres. It also minifies the query using `pg-minify` by default. You can pass `SQLQuery.compile({minify: false})` to disable minifying.
 
-### ``` SQLQuery.compileMySql() ```
+### `SQLQuery.compileMySql()`
 
 This returns an object with `{text: string, values: any[]}` where the `text` field contains the SQL query formatted for MySQL. We also use this function to generate queries for SQLite as it has a very similar format.
