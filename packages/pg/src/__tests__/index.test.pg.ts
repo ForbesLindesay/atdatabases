@@ -34,8 +34,10 @@ test('error messages', async function testErrorMessages() {
       "
     `);
 
-    expect(ex.stack).toMatch(/testErrorMessages/);
-    expect(ex.stack).toMatch(/index\.test\.pg\.ts/);
+    if (!process.version.startsWith('v12.')) {
+      expect(ex.stack).toMatch(/testErrorMessages/);
+      expect(ex.stack).toMatch(/index\.test\.pg\.ts/);
+    }
     return;
   }
   expect(false).toBe(true);
@@ -69,9 +71,11 @@ test('error messages in a transaction', async function testErrorMessages() {
       "
     `);
 
-    expect(ex.stack).toMatch(/testTransaction/);
-    expect(ex.stack).toMatch(/testErrorMessages/);
-    expect(ex.stack).toMatch(/index\.test\.pg\.ts/);
+    if (!process.version.startsWith('v12.')) {
+      expect(ex.stack).toMatch(/testTransaction/);
+      expect(ex.stack).toMatch(/testErrorMessages/);
+      expect(ex.stack).toMatch(/index\.test\.pg\.ts/);
+    }
     return;
   }
   expect(false).toBe(true);
