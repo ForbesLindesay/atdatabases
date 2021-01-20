@@ -5710,10 +5710,10 @@ throat@^5.0.0:
   resolved "https://registry.yarnpkg.com/throat/-/throat-5.0.0.tgz#c5199235803aad18754a667d659b5e72ce16764b"
   integrity sha512-fcwX4mndzpLQKBS1DVYhGAcYaYt7vsHNIvQV+WXMvnow5cgjPphq5CaayLaGsjRdSCKZFNGt7/GYAuXaNOiYCA==
 
-throat@^6.0.0:
-  version "6.0.0"
-  resolved "https://registry.yarnpkg.com/throat/-/throat-6.0.0.tgz#e5d793bff24e2d329e25239978ba79b9c797b3a6"
-  integrity sha512-xFKdqx9QpWfXq471eaKQ/ao7xOFye4CKc8pyNJ9wU+oa6R4EKPTVY6V7JMqPVMZhB8TUbY5TB/mgU4AYA4Y8dA==
+throat@^6.0.1:
+  version "6.0.1"
+  resolved "https://registry.yarnpkg.com/throat/-/throat-6.0.1.tgz#d514fedad95740c12c2d7fc70ea863eb51ade375"
+  integrity sha512-8hmiGIJMDlwjg7dlJ4yKGLK8EsYqKgPWbG3b4wjJddKNwc7N7Dpn08Df4szr/sZdMVeOstrdYSsqzX6BYbcB+w==
 
 through@2, through@^2.3.6:
   version "2.3.8"
