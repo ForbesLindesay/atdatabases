@@ -25,17 +25,29 @@ export async function beginTransaction(
     parameters.push('NOT DEFERRABLE');
   }
 
-  if (parameters.length) {
-    await client.query(`BEGIN ${parameters.join(', ')}`);
-  } else {
-    await client.query(`BEGIN`);
+  try {
+    if (parameters.length) {
+      await client.query(`BEGIN ${parameters.join(', ')}`);
+    } else {
+      await client.query(`BEGIN`);
+    }
+  } catch (ex) {
+    throw Object.assign(new Error(ex.message), ex);
   }
 }
 
 export async function rollbackTransaction(client: PgClient) {
-  await client.query(`ROLLBACK`);
+  try {
+    await client.query(`ROLLBACK`);
+  } catch (ex) {
+    throw Object.assign(new Error(ex.message), ex);
+  }
 }
 
 export async function commitTransaction(client: PgClient) {
-  await client.query(`COMMIT`);
+  try {
+    await client.query(`COMMIT`);
+  } catch (ex) {
+    throw Object.assign(new Error(ex.message), ex);
+  }
 }

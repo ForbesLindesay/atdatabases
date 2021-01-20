@@ -8,7 +8,7 @@ const db = connect({bigIntMode: 'number'});
 afterAll(async () => {
   await db.dispose();
 });
-test('error messages', async () => {
+test('error messages', async function testErrorMessages() {
   try {
     await db.query(sql`
       SELECT * FROM foo
@@ -16,6 +16,14 @@ test('error messages', async () => {
       INER JOIN bar ON bar.id=foo.bar_id;
     `);
   } catch (ex) {
+    expect(ex).toHaveProperty('severity', 'ERROR');
+    expect(ex).toHaveProperty('code', '42601');
+    expect(ex).toHaveProperty('position', '33');
+    expect(ex).toHaveProperty('length');
+    expect(ex).toHaveProperty('file');
+    expect(ex).toHaveProperty('line');
+    expect(ex).toHaveProperty('routine');
+
     expect(ex.message).toMatchInlineSnapshot(`
       "syntax error at or near \\"INER\\"
 
@@ -25,6 +33,45 @@ test('error messages', async () => {
           | ^^^^
       "
     `);
+
+    expect(ex.stack).toMatch(/testErrorMessages/);
+    expect(ex.stack).toMatch(/index\.test\.pg\.ts/);
+    return;
+  }
+  expect(false).toBe(true);
+});
+
+test('error messages in a transaction', async function testErrorMessages() {
+  try {
+    await db.tx(async function testTransaction(db) {
+      await db.query(sql`
+        SELECT * FROM foo
+        WHERE id = ${'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'}
+        INER JOIN bar ON bar.id=foo.bar_id;
+      `);
+    });
+  } catch (ex) {
+    expect(ex).toHaveProperty('severity', 'ERROR');
+    expect(ex).toHaveProperty('code', '42601');
+    expect(ex).toHaveProperty('position', '33');
+    expect(ex).toHaveProperty('length');
+    expect(ex).toHaveProperty('file');
+    expect(ex).toHaveProperty('line');
+    expect(ex).toHaveProperty('routine');
+
+    expect(ex.message).toMatchInlineSnapshot(`
+      "syntax error at or near \\"INER\\"
+
+        1 | SELECT * FROM foo
+        2 | WHERE id = $1
+      > 3 | INER JOIN bar ON bar.id=foo.bar_id;
+          | ^^^^
+      "
+    `);
+
+    expect(ex.stack).toMatch(/testTransaction/);
+    expect(ex.stack).toMatch(/testErrorMessages/);
+    expect(ex.stack).toMatch(/index\.test\.pg\.ts/);
     return;
   }
   expect(false).toBe(true);
