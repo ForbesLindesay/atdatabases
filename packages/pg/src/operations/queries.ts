@@ -155,7 +155,19 @@ function handleError(ex: unknown, query: SQLQuery): never {
       end = {line, column: column + match[1].length};
     }
 
-    ex.message += `\n\n${codeFrameColumns(q.text, {start, end})}\n`;
+    throw Object.assign(
+      new Error(`${ex.message}\n\n${codeFrameColumns(q.text, {start, end})}\n`),
+      ex,
+    );
   }
-  throw ex;
+  throw Object.assign(new Error(isError(ex) ? ex.message : `${ex}`), ex);
+}
+
+function isError(ex: unknown): ex is {message: string} {
+  return (
+    typeof ex === 'object' &&
+    ex !== null &&
+    'message' in ex &&
+    typeof (ex as any).message === 'string'
+  );
 }

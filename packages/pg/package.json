@@ -19,7 +19,7 @@
     "cuid": "^2.1.8",
     "pg": "^8.4.2",
     "pg-cursor": "^2.4.2",
-    "throat": "^5.0.0"
+    "throat": "^6.0.1"
   },
   "scripts": {},
   "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/pg",
