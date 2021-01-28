@@ -10,7 +10,9 @@ test('logging', async () => {
     expect(isSqlQuery(query)).toBe(true);
     events.push(
       `${name}(SQLQuery, ${args
-        .map((a) => JSON.stringify(a, null, '  '))
+        .map((a) =>
+          a instanceof Error ? a.message : JSON.stringify(a, null, '  '),
+        )
         .join(', ')
         // .replace(/\\n/g, '\n')
         .replace(/\"/g, `'`)
@@ -215,16 +217,11 @@ test('logging', async () => {
           100,
           'forbes@lindesay.co.uk'
         ]
-      }, {
-        'length': 126,
-        'name': 'error',
-        'severity': 'ERROR',
-        'code': '42703',
-        'position': '29',
-        'file': 'analyze.c',
-        'line': '2339',
-        'routine': 'transformUpdateTargetList'
-      })",
+      }, column 'bal' of relation 'accounts' does not exist
+      
+      > 1 | UPDATE logging.accounts SET bal=$1 WHERE email=$2;
+          |                             ^^^^^^^^
+      )",
     ]
   `);
 
