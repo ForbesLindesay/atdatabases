@@ -19,6 +19,7 @@ import Queryable, {
   isConnectionPool,
 } from './types/Queryable';
 import TypeOverrides, {TypeOverridesConfig} from './TypeOverrides';
+import EventHandlers from './types/EventHandlers';
 
 const {connectionStringEnvironmentVariable} = getPgConfigSync();
 
@@ -148,7 +149,7 @@ export interface ClientConfig {
   maxUses?: number;
 }
 
-export interface ConnectionPoolConfig extends ClientConfig {
+export interface ConnectionPoolConfig extends ClientConfig, EventHandlers {
   /**
    * maximum number of clients the pool should contain
    * by default this is set to 10.
@@ -226,6 +227,9 @@ export default function createConnectionPool(
         console.warn(`Error in Postgres ConnectionPool: ${err.message}`);
       }
     },
+    onQueryError = undefined,
+    onQueryResults = undefined,
+    onQueryStart = undefined,
   } = typeof connectionConfig === 'object' ? connectionConfig : {};
 
   if (bigIntAsString) {
@@ -299,7 +303,7 @@ export default function createConnectionPool(
     }),
     schema: schema ?? undefined,
     ssl: sslConfig,
-    handlers: {onError},
+    handlers: {onError, onQueryStart, onQueryResults, onQueryError},
   });
 }
 

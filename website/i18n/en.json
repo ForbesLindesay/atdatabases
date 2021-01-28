@@ -29,9 +29,9 @@
         "title": "Managing Postgres Connections",
         "sidebar_label": "Managing Connections"
       },
-      "pg-guide-migrations": {
-        "title": "Maintaining a Postgres schema using migrations",
-        "sidebar_label": "Maintaining the schema"
+      "pg-guide-logging": {
+        "title": "Postgres Logging & Debugging",
+        "sidebar_label": "Logging & Debugging"
       },
       "pg-guide-query": {
         "title": "Querying Postgres Databases",
@@ -44,6 +44,10 @@
       "pg-guide-transactions": {
         "title": "Using Transactions in Postgres",
         "sidebar_label": "Using Transactions"
+      },
+      "pg-migrations": {
+        "title": "Maintaining a Postgres schema using migrations",
+        "sidebar_label": "Migrations"
       },
       "pg-options": {
         "title": "Postgres Connection Options",

@@ -11,6 +11,7 @@
           "pg-guide-connections",
           "pg-guide-query",
           "pg-guide-transactions",
+          "pg-guide-logging",
           "pg-migrations",
           "pg-test"
         ]
