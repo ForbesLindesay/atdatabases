@@ -31,7 +31,7 @@ export async function executeOneStatement(
           const q = query.format(pgFormat);
           try {
             if (handlers.onQueryStart) {
-              handlers.onQueryStart(query, q);
+              enforceUndefined(handlers.onQueryStart(query, q));
             }
             // TODO: pg-promise used: https://github.com/vitaly-t/pg-promise/blob/d92ecf0091b4a38b8972c5052662633549a1b462/lib/formatting.js#L284
             const results = (await client.query(q)) as
@@ -49,7 +49,7 @@ export async function executeOneStatement(
               rows = results.rows;
             }
             if (handlers.onQueryResults) {
-              handlers.onQueryResults(query, q, rows);
+              enforceUndefined(handlers.onQueryResults(query, q, rows));
             }
             return rows;
           } catch (ex) {
@@ -63,7 +63,7 @@ export async function executeOneStatement(
   const q = query.format(pgFormat);
   try {
     if (handlers.onQueryStart) {
-      handlers.onQueryStart(query, q);
+      enforceUndefined(handlers.onQueryStart(query, q));
     }
     // TODO: pg-promise used: https://github.com/vitaly-t/pg-promise/blob/d92ecf0091b4a38b8972c5052662633549a1b462/lib/formatting.js#L284
     const results = (await client.query(q)) as QueryResult | QueryResult[];
@@ -79,7 +79,7 @@ export async function executeOneStatement(
       rows = results.rows;
     }
     if (handlers.onQueryResults) {
-      handlers.onQueryResults(query, q, rows);
+      enforceUndefined(handlers.onQueryResults(query, q, rows));
     }
     return rows;
   } catch (ex) {
@@ -108,7 +108,7 @@ export async function executeMultipleStatements(
         const q = query.format(pgFormat);
         try {
           if (handlers.onQueryStart) {
-            handlers.onQueryStart(query, q);
+            enforceUndefined(handlers.onQueryStart(query, q));
           }
           const results = (await client.query(q)) as
             | QueryResult
@@ -120,7 +120,7 @@ export async function executeMultipleStatements(
             );
           } else {
             if (handlers.onQueryResults) {
-              handlers.onQueryResults(query, q, results.rows);
+              enforceUndefined(handlers.onQueryResults(query, q, results.rows));
             }
             return results.rows;
           }
@@ -134,7 +134,7 @@ export async function executeMultipleStatements(
   const q = query.format(pgFormat);
   try {
     if (handlers.onQueryStart) {
-      handlers.onQueryStart(query, q);
+      enforceUndefined(handlers.onQueryStart(query, q));
     }
     const results = (await client.query(q)) as QueryResult | QueryResult[];
 
@@ -147,7 +147,7 @@ export async function executeMultipleStatements(
       }
       const rows = results.map((r) => r.rows);
       if (handlers.onQueryResults) {
-        handlers.onQueryResults(query, q, rows);
+        enforceUndefined(handlers.onQueryResults(query, q, rows));
       }
       return rows;
     } else {
@@ -158,7 +158,7 @@ export async function executeMultipleStatements(
       }
       const rows = [results.rows];
       if (handlers.onQueryResults) {
-        handlers.onQueryResults(query, q, rows);
+        enforceUndefined(handlers.onQueryResults(query, q, rows));
       }
       return rows;
     }
@@ -204,7 +204,7 @@ function handleError(
     err = Object.assign(new Error(isError(ex) ? ex.message : `${ex}`), ex);
   }
   if (handlers.onQueryError) {
-    handlers.onQueryError(query, q, err);
+    enforceUndefined(handlers.onQueryError(query, q, err));
   }
   throw err;
 }
@@ -216,4 +216,12 @@ function isError(ex: unknown): ex is {message: string} {
     'message' in ex &&
     typeof (ex as any).message === 'string'
   );
+}
+
+function enforceUndefined(value: void) {
+  if (value !== undefined) {
+    throw new Error(
+      `Your event handlers must return "undefined". This is to allow for the possibility of event handlers being used as hooks with more advanced functionality in the future.`,
+    );
+  }
 }
