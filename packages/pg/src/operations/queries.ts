@@ -1,3 +1,5 @@
+/* tslint:disable:no-void-expression */
+
 import {escapePostgresIdentifier} from '@databases/escape-identifier';
 import {isSQLError} from '@databases/pg-errors';
 import splitSqlQuery, {hasValues} from '@databases/split-sql-query';

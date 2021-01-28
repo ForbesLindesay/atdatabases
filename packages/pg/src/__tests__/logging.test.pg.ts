@@ -1,6 +1,7 @@
+/* tslint:disable:no-console */
+
 import connect from '..';
 import sql, {isSqlQuery, SQLQuery} from '@databases/sql';
-// import {inspect} from 'util';
 
 jest.setTimeout(30000);
 
