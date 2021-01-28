@@ -17,17 +17,20 @@ import {queryNodeStream, queryStream} from './operations/queryStream';
 import AbortSignal from './types/AbortSignal';
 import PgClient from './types/PgClient';
 import {Connection as IConnection, QueryableType} from './types/Queryable';
+import EventHandlers from './types/EventHandlers';
 
 export default class Connection implements IConnection {
   public readonly type = QueryableType.Connection;
   public readonly sql = sql;
 
   private readonly _client: PgClient;
+  private readonly _handlers: EventHandlers;
   private _disposed: boolean = false;
   // TODO: lock with timetout!!
   private readonly _lock = throttle(1);
-  constructor(client: PgClient) {
+  constructor(client: PgClient, handlers: EventHandlers) {
     this._client = client;
+    this._handlers = handlers;
   }
   private _throwIfDisposed() {
     if (this._disposed) {
@@ -56,7 +59,7 @@ export default class Connection implements IConnection {
         return await this._lock(async () => {
           this._throwIfDisposed();
           await beginTransaction(this._client, transactionOptions);
-          const transaction = new Transaction(this._client);
+          const transaction = new Transaction(this._client, this._handlers);
           try {
             const result = await fn(transaction);
             await commitTransaction(this._client);
@@ -88,7 +91,11 @@ export default class Connection implements IConnection {
       if (Array.isArray(query)) {
         await beginTransaction(this._client, {});
         try {
-          const result = await executeMultipleStatements(this._client, query);
+          const result = await executeMultipleStatements(
+            this._client,
+            query,
+            this._handlers,
+          );
           await commitTransaction(this._client);
           return result;
         } catch (ex) {
@@ -96,7 +103,7 @@ export default class Connection implements IConnection {
           throw ex;
         }
       } else {
-        return executeOneStatement(this._client, query);
+        return executeOneStatement(this._client, query, this._handlers);
       }
     });
   }

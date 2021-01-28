@@ -1,3 +1,5 @@
+/* tslint:disable:no-unnecessary-initializer */
+
 import {readFileSync} from 'fs';
 import type {ConnectionOptions} from 'tls';
 import parseConnectionString, {
@@ -19,6 +21,7 @@ import Queryable, {
   isConnectionPool,
 } from './types/Queryable';
 import TypeOverrides, {TypeOverridesConfig} from './TypeOverrides';
+import EventHandlers from './types/EventHandlers';
 
 const {connectionStringEnvironmentVariable} = getPgConfigSync();
 
@@ -148,7 +151,7 @@ export interface ClientConfig {
   maxUses?: number;
 }
 
-export interface ConnectionPoolConfig extends ClientConfig {
+export interface ConnectionPoolConfig extends ClientConfig, EventHandlers {
   /**
    * maximum number of clients the pool should contain
    * by default this is set to 10.
@@ -226,6 +229,9 @@ export default function createConnectionPool(
         console.warn(`Error in Postgres ConnectionPool: ${err.message}`);
       }
     },
+    onQueryError = undefined,
+    onQueryResults = undefined,
+    onQueryStart = undefined,
   } = typeof connectionConfig === 'object' ? connectionConfig : {};
 
   if (bigIntAsString) {
@@ -299,7 +305,7 @@ export default function createConnectionPool(
     }),
     schema: schema ?? undefined,
     ssl: sslConfig,
-    handlers: {onError},
+    handlers: {onError, onQueryStart, onQueryResults, onQueryError},
   });
 }
 
@@ -362,78 +368,3 @@ module.exports = Object.assign(createConnectionPool, {
   isConnection,
   isConnectionPool,
 });
-
-// interface UndocumentedPgOptions {
-//   /**
-//    * Use binary mode for pg communication,
-//    * defaults to false
-//    */
-//   binary: boolean;
-//   /**
-//    * Override the "Promise" used within pg
-//    */
-//   Promise: typeof Promise;
-
-//   /**
-//    * Passed to `new ConnectionParameters(...)` and used in Client.getStartupConf()
-//    * Defaults to fallback_application_name
-//    */
-//   application_name: string;
-//   /**
-//    * Passed to `new ConnectionParameters(...)` and used in Client.getStartupConf()
-//    */
-//   fallback_application_name: string;
-//   /**
-//    * Passed to `new ConnectionParameters(...)` and used in Client.getStartupConf()
-//    *
-//    * This changes the protocol that's used, which would almost certainly just break the library
-//    */
-//   replication: string;
-//   /**
-//    * Passed to `new ConnectionParameters(...)` and used in Client.getStartupConf()
-//    *
-//    * There's probably always a better option for how to set these options
-//    */
-//   options: string;
-
-//   /**
-//    * Passed to `new TypeOverrides(...)`
-//    */
-//   types: unknown;
-
-//   /**
-//    * Passed to `new Connection(...)`
-//    */
-//   stream: unknown;
-//   /**
-//    * Passed to `new Connection(...)` as "encoding",
-//    * defaults to 'utf8'
-//    */
-//   client_encoding: boolean;
-//   /**
-//    * Passed to `new Connection(...)`,
-//    * defaults to false
-//    */
-//   keepAlive: boolean;
-//   /**
-//    * Passed to `new Connection(...)`,
-//    * defaults to 0
-//    */
-//   keepAliveInitialDelayMillis: number;
-
-//   /**
-//    * Passed to `new Pool(...)`,
-//    * defaults to Infinity
-//    */
-//   maxUses: number;
-//   /**
-//    * Passed to `new Pool(...)`,
-//    * defaults to Infinity
-//    */
-//   log: () => void;
-//   /**
-//    * Passed to `new Pool(...)`,
-//    * Called on newly acquired clients to test that they are working before adding them to the pool.
-//    */
-//   verify: (client: Client, cb: (err?: Error | null) => void) => void;
-// }

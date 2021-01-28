@@ -13,6 +13,7 @@ import {
   QueryableType,
 } from './types/Queryable';
 import TypeOverrides, {parseComposite, parseArray} from './TypeOverrides';
+import EventHandlers from './types/EventHandlers';
 const {Pool} = require('pg');
 interface Pool {
   readonly options: {
@@ -56,13 +57,14 @@ export default class ConnectionPool implements IConnectionPool {
   private _hadSuccessfulConnection: boolean = false;
   private _disposed: boolean = false;
   private readonly _preparingOverrides: Promise<void>;
+  private readonly _handlers: EventHandlers;
   constructor(
     options: {types: TypeOverrides; [key: string]: any},
     {
       schema,
       hosts,
       ssl,
-      handlers,
+      handlers: {onError, ...handlers},
     }: {
       schema?: string | string[];
       hosts: {host: string; port?: number | undefined}[];
@@ -70,7 +72,7 @@ export default class ConnectionPool implements IConnectionPool {
         allowFallback: boolean;
         ssl: ConnectionOptions;
       };
-      handlers: {
+      handlers: EventHandlers & {
         onError: (err: Error) => void;
       };
     },
@@ -78,7 +80,7 @@ export default class ConnectionPool implements IConnectionPool {
     this._config = {options, hosts, [sslProperty]: ssl};
     this._pool = new Pool({...options, ssl: ssl?.ssl, ...hosts[0]});
     this._schema = schema;
-    this._pool.on('error', (err) => handlers.onError(err));
+    this._pool.on('error', (err) => onError(err));
     this._preparingOverrides = this._withTypeResolver((getTypeID) =>
       this._pool.options.types.prepareOverrides(getTypeID),
     );
@@ -86,6 +88,7 @@ export default class ConnectionPool implements IConnectionPool {
       // this error will be surfaced later, we do not want it to be treated
       // as an unhandled rejection yet
     });
+    this._handlers = handlers;
   }
   private _throwIfDisposed() {
     if (this._disposed) {
@@ -265,7 +268,7 @@ export default class ConnectionPool implements IConnectionPool {
   async task<T>(fn: (connection: Connection) => Promise<T>): Promise<T> {
     await this._preparingOverrides;
     const client = await this._getClient();
-    const connection = new Connection(client);
+    const connection = new Connection(client, this._handlers);
     try {
       const result = await fn(connection);
       connection.dispose();
@@ -312,7 +315,7 @@ export default class ConnectionPool implements IConnectionPool {
       .then(async () => {
         await this._preparingOverrides;
         const client = await this._getClient();
-        const connection = new Connection(client);
+        const connection = new Connection(client, this._handlers);
         const connectionStream = connection.queryNodeStream(query, options);
         connectionStream.pipe(stream);
         connectionStream.on('error', () => {
@@ -340,7 +343,7 @@ export default class ConnectionPool implements IConnectionPool {
   ): AsyncGenerator<any, void, unknown> {
     await this._preparingOverrides;
     const client = await this._getClient();
-    const connection = new Connection(client);
+    const connection = new Connection(client, this._handlers);
     try {
       for await (const row of connection.queryStream(query, options)) {
         yield row;

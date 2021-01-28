@@ -20,3 +20,12 @@ sidebar_label: Connection Options
 - `idleInTransactionSessionTimeoutMilliseconds` (`number`, default: no timeout) - number of milliseconds before terminating any session with
 - an open idle transaction,
 - `idleTimeoutMilliseconds` (`number`, default: `30000`ms) - max milliseconds a client can go unused before it is removed from the pool and destroyed
+
+## Event Handlers
+
+For more detail on how to use event handlers, see [Logging & Debugging](pg-guide-logging.md) - install `@databases/pg` and run your first query
+
+- `onError(err: Error)` - called for global connection errors. e.g. when Postgres terminates a connection that is not currently in use
+- `onQueryStart(query: SQLQuery, formatted: {text: string, values: unknown[]})` - called before executing a query
+- `onQueryResults(query: SQLQuery, formatted: {text: string, values: unknown[]}, results: unknown[])` - called after a query succeeds
+- `onQueryError(query: SQLQuery, formatted: {text: string, values: unknown[]}, err: Error)` - called when a query results in an Error
