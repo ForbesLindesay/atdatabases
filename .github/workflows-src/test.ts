@@ -46,30 +46,32 @@ export function setup(nodeVersion: Expression<string> = '14.x'): Steps {
 
 export function buildCache(): Steps {
   return ({use}) => {
-    for (const packageName of readdirSync(`${__dirname}/../../packages`)) {
-      try {
-        if (
-          !statSync(
+    const packageNames = readdirSync(`${__dirname}/../../packages`)
+      .filter((packageName) => {
+        try {
+          return statSync(
             `${__dirname}/../../packages/${packageName}/src`,
-          ).isDirectory()
-        ) {
-          continue;
+          ).isDirectory();
+        } catch (ex) {
+          return false;
         }
-      } catch (ex) {
-        continue;
-      }
-      use(`Enable Cache for ${packageName}`, 'actions/cache@v2', {
-        with: {
-          path: [
-            `packages/${packageName}/lib`,
-            `packages/${packageName}/.last_build`,
-          ].join('\n'),
-          key: interpolate`v2-build-output-${hashFiles(
-            `packages/${packageName}/src`,
-          )}`,
-        },
-      });
-    }
+      })
+      .sort();
+    use(`Enable Cache`, 'actions/cache@v2', {
+      with: {
+        path: [
+          ...packageNames.map((packageName) => `packages/${packageName}/lib`),
+          ...packageNames.map(
+            (packageName) => `packages/${packageName}/.last_build`,
+          ),
+        ].join('\n'),
+        key: interpolate`v2-build-output-${hashFiles(
+          `yarn.lock`,
+          ...packageNames.map((packageName) => `packages/${packageName}/src`),
+        )}`,
+        'restore-keys': [`v2-build-output-`].join('\n'),
+      },
+    });
   };
 }
 
