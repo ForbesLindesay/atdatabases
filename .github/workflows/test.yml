@@ -32,188 +32,77 @@ jobs:
             packages/*/node_modules
           key: ${{runner.os}}-14.x-${{hashFiles('yarn.lock')}}-2
       - run: yarn install --prefer-offline
-      - name: Enable Cache for escape-identifier
+      - name: Enable Cache
         uses: actions/cache@v2
         with:
           path: |-
             packages/escape-identifier/lib
-            packages/escape-identifier/.last_build
-          key: v2-build-output-${{hashFiles('packages/escape-identifier/src')}}
-      - name: Enable Cache for expo
-        uses: actions/cache@v2
-        with:
-          path: |-
             packages/expo/lib
-            packages/expo/.last_build
-          key: v2-build-output-${{hashFiles('packages/expo/src')}}
-      - name: Enable Cache for migrations-base
-        uses: actions/cache@v2
-        with:
-          path: |-
             packages/migrations-base/lib
-            packages/migrations-base/.last_build
-          key: v2-build-output-${{hashFiles('packages/migrations-base/src')}}
-      - name: Enable Cache for mysql
-        uses: actions/cache@v2
-        with:
-          path: |-
             packages/mysql/lib
-            packages/mysql/.last_build
-          key: v2-build-output-${{hashFiles('packages/mysql/src')}}
-      - name: Enable Cache for mysql-config
-        uses: actions/cache@v2
-        with:
-          path: |-
             packages/mysql-config/lib
-            packages/mysql-config/.last_build
-          key: v2-build-output-${{hashFiles('packages/mysql-config/src')}}
-      - name: Enable Cache for mysql-test
-        uses: actions/cache@v2
-        with:
-          path: |-
             packages/mysql-test/lib
-            packages/mysql-test/.last_build
-          key: v2-build-output-${{hashFiles('packages/mysql-test/src')}}
-      - name: Enable Cache for pg
-        uses: actions/cache@v2
-        with:
-          path: |-
             packages/pg/lib
-            packages/pg/.last_build
-          key: v2-build-output-${{hashFiles('packages/pg/src')}}
-      - name: Enable Cache for pg-config
-        uses: actions/cache@v2
-        with:
-          path: |-
             packages/pg-config/lib
-            packages/pg-config/.last_build
-          key: v2-build-output-${{hashFiles('packages/pg-config/src')}}
-      - name: Enable Cache for pg-connection-string
-        uses: actions/cache@v2
-        with:
-          path: |-
             packages/pg-connection-string/lib
-            packages/pg-connection-string/.last_build
-          key: v2-build-output-${{hashFiles('packages/pg-connection-string/src')}}
-      - name: Enable Cache for pg-create
-        uses: actions/cache@v2
-        with:
-          path: |-
             packages/pg-create/lib
-            packages/pg-create/.last_build
-          key: v2-build-output-${{hashFiles('packages/pg-create/src')}}
-      - name: Enable Cache for pg-data-type-id
-        uses: actions/cache@v2
-        with:
-          path: |-
             packages/pg-data-type-id/lib
-            packages/pg-data-type-id/.last_build
-          key: v2-build-output-${{hashFiles('packages/pg-data-type-id/src')}}
-      - name: Enable Cache for pg-errors
-        uses: actions/cache@v2
-        with:
-          path: |-
             packages/pg-errors/lib
-            packages/pg-errors/.last_build
-          key: v2-build-output-${{hashFiles('packages/pg-errors/src')}}
-      - name: Enable Cache for pg-migrations
-        uses: actions/cache@v2
-        with:
-          path: |-
             packages/pg-migrations/lib
-            packages/pg-migrations/.last_build
-          key: v2-build-output-${{hashFiles('packages/pg-migrations/src')}}
-      - name: Enable Cache for pg-schema-cli
-        uses: actions/cache@v2
-        with:
-          path: |-
             packages/pg-schema-cli/lib
-            packages/pg-schema-cli/.last_build
-          key: v2-build-output-${{hashFiles('packages/pg-schema-cli/src')}}
-      - name: Enable Cache for pg-schema-introspect
-        uses: actions/cache@v2
-        with:
-          path: |-
             packages/pg-schema-introspect/lib
-            packages/pg-schema-introspect/.last_build
-          key: v2-build-output-${{hashFiles('packages/pg-schema-introspect/src')}}
-      - name: Enable Cache for pg-schema-print-types
-        uses: actions/cache@v2
-        with:
-          path: |-
             packages/pg-schema-print-types/lib
-            packages/pg-schema-print-types/.last_build
-          key: v2-build-output-${{hashFiles('packages/pg-schema-print-types/src')}}
-      - name: Enable Cache for pg-test
-        uses: actions/cache@v2
-        with:
-          path: |-
             packages/pg-test/lib
-            packages/pg-test/.last_build
-          key: v2-build-output-${{hashFiles('packages/pg-test/src')}}
-      - name: Enable Cache for pg-typed
-        uses: actions/cache@v2
-        with:
-          path: |-
             packages/pg-typed/lib
-            packages/pg-typed/.last_build
-          key: v2-build-output-${{hashFiles('packages/pg-typed/src')}}
-      - name: Enable Cache for push-to-async-iterable
-        uses: actions/cache@v2
-        with:
-          path: |-
             packages/push-to-async-iterable/lib
-            packages/push-to-async-iterable/.last_build
-          key: v2-build-output-${{hashFiles('packages/push-to-async-iterable/src')}}
-      - name: Enable Cache for split-sql-query
-        uses: actions/cache@v2
-        with:
-          path: |-
             packages/split-sql-query/lib
-            packages/split-sql-query/.last_build
-          key: v2-build-output-${{hashFiles('packages/split-sql-query/src')}}
-      - name: Enable Cache for sql
-        uses: actions/cache@v2
-        with:
-          path: |-
             packages/sql/lib
-            packages/sql/.last_build
-          key: v2-build-output-${{hashFiles('packages/sql/src')}}
-      - name: Enable Cache for sqlite
-        uses: actions/cache@v2
-        with:
-          path: |-
             packages/sqlite/lib
-            packages/sqlite/.last_build
-          key: v2-build-output-${{hashFiles('packages/sqlite/src')}}
-      - name: Enable Cache for validate-unicode
-        uses: actions/cache@v2
-        with:
-          path: |-
             packages/validate-unicode/lib
-            packages/validate-unicode/.last_build
-          key: v2-build-output-${{hashFiles('packages/validate-unicode/src')}}
-      - name: Enable Cache for websql
-        uses: actions/cache@v2
-        with:
-          path: |-
             packages/websql/lib
-            packages/websql/.last_build
-          key: v2-build-output-${{hashFiles('packages/websql/src')}}
-      - name: Enable Cache for websql-core
-        uses: actions/cache@v2
-        with:
-          path: |-
             packages/websql-core/lib
-            packages/websql-core/.last_build
-          key: v2-build-output-${{hashFiles('packages/websql-core/src')}}
-      - name: Enable Cache for with-container
-        uses: actions/cache@v2
-        with:
-          path: |-
             packages/with-container/lib
+            packages/escape-identifier/.last_build
+            packages/expo/.last_build
+            packages/migrations-base/.last_build
+            packages/mysql/.last_build
+            packages/mysql-config/.last_build
+            packages/mysql-test/.last_build
+            packages/pg/.last_build
+            packages/pg-config/.last_build
+            packages/pg-connection-string/.last_build
+            packages/pg-create/.last_build
+            packages/pg-data-type-id/.last_build
+            packages/pg-errors/.last_build
+            packages/pg-migrations/.last_build
+            packages/pg-schema-cli/.last_build
+            packages/pg-schema-introspect/.last_build
+            packages/pg-schema-print-types/.last_build
+            packages/pg-test/.last_build
+            packages/pg-typed/.last_build
+            packages/push-to-async-iterable/.last_build
+            packages/split-sql-query/.last_build
+            packages/sql/.last_build
+            packages/sqlite/.last_build
+            packages/validate-unicode/.last_build
+            packages/websql/.last_build
+            packages/websql-core/.last_build
             packages/with-container/.last_build
-          key: v2-build-output-${{hashFiles('packages/with-container/src')}}
+          key: v2-build-output-${{hashFiles('yarn.lock', 'packages/escape-identifier/src',
+            'packages/expo/src', 'packages/migrations-base/src',
+            'packages/mysql/src', 'packages/mysql-config/src',
+            'packages/mysql-test/src', 'packages/pg/src',
+            'packages/pg-config/src', 'packages/pg-connection-string/src',
+            'packages/pg-create/src', 'packages/pg-data-type-id/src',
+            'packages/pg-errors/src', 'packages/pg-migrations/src',
+            'packages/pg-schema-cli/src', 'packages/pg-schema-introspect/src',
+            'packages/pg-schema-print-types/src', 'packages/pg-test/src',
+            'packages/pg-typed/src', 'packages/push-to-async-iterable/src',
+            'packages/split-sql-query/src', 'packages/sql/src',
+            'packages/sqlite/src', 'packages/validate-unicode/src',
+            'packages/websql/src', 'packages/websql-core/src',
+            'packages/with-container/src')}}
+          restore-keys: v2-build-output-
       - run: yarn build
       - name: "Save output: build"
         uses: actions/upload-artifact@v2
@@ -310,8 +199,9 @@ jobs:
           - 12.x
           - 14.x
         mysql:
-          - 5.6.50
-          - 5.7.32
+          - 5.6.51
+          - 5.7.33
+          - 8.0.23
       fail-fast: false
     steps:
       - uses: actions/checkout@v2

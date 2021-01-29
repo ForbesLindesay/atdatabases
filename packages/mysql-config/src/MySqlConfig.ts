@@ -17,9 +17,6 @@ export interface TestConfig {
    * tried using the ream image it didn't
    * work very well.
    *
-   * See https://github.com/mysqljs/mysql/pull/1962
-   * for issues supporting mysql 8
-   *
    * @default "mysql:5.7.24"
    */
   image: string;

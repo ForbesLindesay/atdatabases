@@ -12,7 +12,7 @@
     "@databases/with-container": "^0.0.0",
     "modern-spawn": "^1.0.0",
     "ms": "^2.1.2",
-    "mysql2": "^1.6.4",
+    "mysql2": "^2.2.5",
     "parameter-reducers": "^2.0.0",
     "type-assertions": "^1.1.0"
   },

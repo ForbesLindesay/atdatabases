@@ -295,13 +295,6 @@ export default function connect(
 
   const pool = createPool({
     uri: connectionConfig,
-    authSwitchHandler({pluginName, pluginData}: any, cb: any) {
-      const err = new Error(
-        `Unknown AuthSwitchRequest plugin name ${pluginName}`,
-      );
-      (err as any).fatal = true;
-      cb(err);
-    },
     multipleStatements: true,
   });
   return new ConnectionPoolImplemenation(pool);
