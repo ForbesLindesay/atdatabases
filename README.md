@@ -35,6 +35,7 @@ Each database driver is published to npm as a separate module, so you don't need
 <!-- VERSION_TABLE -->
 Package Name | Version | Docs
 -------------|---------|------
+@databases/connection-pool | [![NPM version](https://img.shields.io/npm/v/@databases/connection-pool?style=for-the-badge)](https://www.npmjs.com/package/@databases/connection-pool) | [https://www.atdatabases.org/docs/connection-pool](https://www.atdatabases.org/docs/connection-pool)
 @databases/expo | [![NPM version](https://img.shields.io/npm/v/@databases/expo?style=for-the-badge)](https://www.npmjs.com/package/@databases/expo) | [https://www.atdatabases.org/docs/websql](https://www.atdatabases.org/docs/websql)
 @databases/mysql | [![NPM version](https://img.shields.io/npm/v/@databases/mysql?style=for-the-badge)](https://www.npmjs.com/package/@databases/mysql) | [https://www.atdatabases.org/docs/mysql](https://www.atdatabases.org/docs/mysql)
 @databases/mysql-test | [![NPM version](https://img.shields.io/npm/v/@databases/mysql-test?style=for-the-badge)](https://www.npmjs.com/package/@databases/mysql-test) | [https://www.atdatabases.org/docs/mysql-test](https://www.atdatabases.org/docs/mysql-test)

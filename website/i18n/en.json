@@ -5,6 +5,10 @@
     "previous": "Previous",
     "tagline": "Database libraries for Node.js that protect you from SQL Injection",
     "docs": {
+      "connection-pool": {
+        "title": "@databases/connection-pool",
+        "sidebar_label": "connection-pool"
+      },
       "mysql-test": {
         "title": "MySQL Testing",
         "sidebar_label": "Testing"
@@ -98,7 +102,8 @@
       "Postgres": "Postgres",
       "MySQL": "MySQL",
       "SQLite": "SQLite",
-      "Expo/Web SQL": "Expo/Web SQL"
+      "Expo/Web SQL": "Expo/Web SQL",
+      "Utilities": "Utilities"
     }
   },
   "pages-strings": {
