@@ -39,6 +39,9 @@
     "Expo/Web SQL": [
       "websql",
       "websql-test"
+    ],
+    "Utilities": [
+      "connection-pool"
     ]
   }
 }
