@@ -1,6 +1,6 @@
 import {Readable} from 'stream';
 import {escapePostgresIdentifier} from '@databases/escape-identifier';
-import {isSQLError} from '@databases/pg-errors';
+import {isSQLError, SQLErrorCode} from '@databases/pg-errors';
 import {SQLQuery, FormatConfig, isSqlQuery} from '@databases/sql';
 import {Driver} from '@databases/shared';
 import PgClient from './types/PgClient';
@@ -58,6 +58,31 @@ export default class PgDriver implements Driver<TransactionOptions> {
   }
   async rollbackTransaction() {
     await execute(this.client, `ROLLBACK`);
+  }
+  async shouldRetryTransactionFailure(
+    transactionOptions: TransactionOptions | undefined,
+    ex: Error,
+    failureCount: number,
+  ) {
+    const retrySerializationFailuresCount = !transactionOptions
+      ? 0
+      : transactionOptions.retrySerializationFailures === true
+      ? 10
+      : typeof transactionOptions.retrySerializationFailures === 'number'
+      ? transactionOptions.retrySerializationFailures
+      : 0;
+    if (isSQLError(ex) && ex.code === SQLErrorCode.SERIALIZATION_FAILURE) {
+      if (retrySerializationFailuresCount > failureCount) {
+        await new Promise((resolve) =>
+          setTimeout(
+            resolve,
+            Math.max(10, Math.floor(Math.random() * 100 * failureCount)),
+          ),
+        );
+        return true;
+      }
+    }
+    return false;
   }
 
   async createSavepoint(savepointName: string) {

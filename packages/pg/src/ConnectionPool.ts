@@ -1,7 +1,6 @@
-import {BaseConnectionPool, Factory} from '@databases/shared';
+import {BaseConnectionPool, Factory, PoolOptions} from '@databases/shared';
 import {SQLQuery} from '@databases/sql';
 import {escapePostgresIdentifier} from '@databases/escape-identifier';
-import {isSQLError, SQLErrorCode} from '@databases/pg-errors';
 import Connection from './Connection';
 import Transaction from './Transaction';
 import AbortSignal from './types/AbortSignal';
@@ -14,12 +13,9 @@ import TypeOverrides, {
   getTypeResolver,
 } from './TypeOverrides';
 import EventHandlers from './types/EventHandlers';
-
 import PgDriver from './Driver';
 import createConnectionSource, {PgOptions} from './ConnectionSource';
-import {PoolOptions} from '@databases/connection-pool/src';
 import definePrecondition from './definePrecondition';
-import TransactionOptions from './types/TransactionOptions';
 
 const factories: Factory<PgDriver, Connection, Transaction> = {
   createTransaction(driver) {
@@ -147,30 +143,6 @@ export default class ConnectionPool
   }
   public readonly parseComposite = parseComposite;
   public readonly parseArray = parseArray;
-
-  async tx<T>(
-    fn: (connection: Transaction) => Promise<T>,
-    transactionOptions: TransactionOptions = {},
-  ): Promise<T> {
-    let retrySerializationFailuresCount =
-      transactionOptions.retrySerializationFailures === true
-        ? 10
-        : typeof transactionOptions.retrySerializationFailures === 'number'
-        ? transactionOptions.retrySerializationFailures
-        : 0;
-    while (true) {
-      try {
-        return await super.tx(fn, transactionOptions);
-      } catch (ex) {
-        if (isSQLError(ex) && ex.code === SQLErrorCode.SERIALIZATION_FAILURE) {
-          if (retrySerializationFailuresCount--) {
-            continue;
-          }
-        }
-        throw ex;
-      }
-    }
-  }
 
   queryNodeStream(
     query: SQLQuery,
