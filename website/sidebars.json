@@ -41,7 +41,10 @@
       "websql-test"
     ],
     "Utilities": [
-      "connection-pool"
+      "connection-pool",
+      "escape-identifier",
+      "queue",
+      "validate-unicode"
     ]
   }
 }

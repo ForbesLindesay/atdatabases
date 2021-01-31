@@ -43,7 +43,7 @@ export const MySqlConfigSchema = {
         image: {
           default: 'mysql:5.7.24',
           description:
-            "The docker image to use when testing\nusing @databases/mysql-test. When I\ntried using the ream image it didn't\nwork very well.\n\nSee https://github.com/mysqljs/mysql/pull/1962\nfor issues supporting mysql 8",
+            "The docker image to use when testing\nusing @databases/mysql-test. When I\ntried using the ream image it didn't\nwork very well.",
           type: 'string',
         },
         migrationsScript: {

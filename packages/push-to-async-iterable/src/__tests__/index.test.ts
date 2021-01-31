@@ -3,22 +3,20 @@ import pushToAsyncIterable from '../';
 test('pushToAsyncIterable', async () => {
   const pause = jest.fn();
   const resume = jest.fn();
+  const dispose = jest.fn();
   let onData!: (data: number) => void;
   let onError!: (err: any) => void;
   let onEnd!: () => void;
-  const result = pushToAsyncIterable<number>({
-    onData(fn) {
-      onData = fn;
-    },
-    onError(fn) {
-      onError = fn;
-    },
-    onEnd(fn) {
-      onEnd = fn;
-    },
-    pause,
-    resume,
-    highWaterMark: 2,
+  const result = pushToAsyncIterable<number>((handlers) => {
+    onData = handlers.onData;
+    onError = handlers.onError;
+    onEnd = handlers.onEnd;
+    return {
+      pause,
+      resume,
+      dispose,
+      highWaterMark: 2,
+    };
   });
   onData(1);
   expect(pause).not.toBeCalled();
@@ -66,22 +64,20 @@ test('pushToAsyncIterable', async () => {
 test('pushToAsyncIterable Error', async () => {
   const pause = jest.fn();
   const resume = jest.fn();
+  const dispose = jest.fn();
   let onData!: (data: number) => void;
   let onError!: (err: any) => void;
   let onEnd!: () => void;
-  const result = pushToAsyncIterable<number>({
-    onData(fn) {
-      onData = fn;
-    },
-    onError(fn) {
-      onError = fn;
-    },
-    onEnd(fn) {
-      onEnd = fn;
-    },
-    pause,
-    resume,
-    highWaterMark: 2,
+  const result = pushToAsyncIterable<number>((handlers) => {
+    onData = handlers.onData;
+    onError = handlers.onError;
+    onEnd = handlers.onEnd;
+    return {
+      pause,
+      resume,
+      dispose,
+      highWaterMark: 2,
+    };
   });
   onData(1);
   expect(pause).not.toBeCalled();

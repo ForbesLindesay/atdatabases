@@ -1,13 +1,8 @@
 import {Readable} from 'stream';
+import {QueryableType} from '@databases/shared';
 import {SQL, SQLQuery} from '@databases/sql';
 import AbortSignal from './AbortSignal';
 import TransactionOptions from './TransactionOptions';
-
-export enum QueryableType {
-  Transaction = 'transaction',
-  Connection = 'connection',
-  ConnectionPool = 'connection_pool',
-}
 
 export default interface Queryable {
   readonly type: QueryableType;

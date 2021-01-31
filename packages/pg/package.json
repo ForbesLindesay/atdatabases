@@ -12,6 +12,7 @@
     "@databases/pg-data-type-id": "^0.0.0",
     "@databases/pg-errors": "^0.0.0",
     "@databases/push-to-async-iterable": "^0.0.0",
+    "@databases/shared": "^0.0.0",
     "@databases/split-sql-query": "^0.0.0",
     "@databases/sql": "^0.0.0",
     "@types/cuid": "^1.3.1",

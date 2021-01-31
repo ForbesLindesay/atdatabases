@@ -14,5 +14,6 @@
   },
   "files": [
     "lib/"
-  ]
+  ],
+  "homepage": "https://www.atdatabases.org/docs/validate-unicode"
 }

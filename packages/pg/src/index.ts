@@ -2,6 +2,7 @@
 
 import {readFileSync} from 'fs';
 import type {ConnectionOptions} from 'tls';
+import {QueryableType} from '@databases/shared';
 import parseConnectionString, {
   Configuration as ParsedConnectionString,
 } from '@databases/pg-connection-string';
@@ -12,7 +13,6 @@ import {getPgConfigSync} from '@databases/pg-config';
 import ConnectionPoolImplementation from './ConnectionPool';
 import IsolationLevel from './types/IsolationLevel';
 import Queryable, {
-  QueryableType,
   Transaction,
   Connection,
   ConnectionPool,
@@ -22,6 +22,7 @@ import Queryable, {
 } from './types/Queryable';
 import TypeOverrides, {TypeOverridesConfig} from './TypeOverrides';
 import EventHandlers from './types/EventHandlers';
+import {PgOptions} from './ConnectionSource';
 
 const {connectionStringEnvironmentVariable} = getPgConfigSync();
 
@@ -261,13 +262,11 @@ export default function createConnectionPool(
     );
   }
 
-  const pgOptions = {
+  const pgOptions: PgOptions = {
     user,
     password,
     database,
     connectionTimeoutMillis: connectionTimeoutMilliseconds,
-    idleTimeoutMillis: idleTimeoutMilliseconds,
-    max: poolSize,
     ...(statementTimeoutMilliseconds
       ? {statement_timeout: statementTimeoutMilliseconds}
       : {}),
@@ -286,11 +285,8 @@ export default function createConnectionPool(
       parsedConnectionString.fallback_application_name,
     keepAlive,
     keepAliveInitialDelayMillis: keepAliveInitialDelayMilliseconds,
-    maxUses,
     types,
-  };
 
-  return new ConnectionPoolImplementation(pgOptions, {
     hosts: (hostList.length === 0 ? ['localhost'] : hostList).map((host, i) => {
       const port =
         portList.length === 0
@@ -303,8 +299,17 @@ export default function createConnectionPool(
         port: port ?? undefined,
       };
     }),
-    schema: schema ?? undefined,
     ssl: sslConfig,
+  };
+
+  return new ConnectionPoolImplementation(pgOptions, {
+    poolOptions: {
+      maxSize: poolSize,
+      maxUses,
+      idleTimeoutMilliseconds,
+      queueTimeoutMilliseconds: connectionTimeoutMilliseconds,
+    },
+    schema: schema ?? undefined,
     handlers: {onError, onQueryStart, onQueryResults, onQueryError},
   });
 }
@@ -321,7 +326,7 @@ function getSSLConfig(
     return null;
   }
   if (config.ssl && typeof config.ssl === 'object') {
-    return {allowFallback: false, ssl: config.ssl};
+    return {allowFallback: false, connectionOptions: config.ssl};
   }
 
   const ssl: ConnectionOptions = {};
@@ -349,9 +354,9 @@ function getSSLConfig(
   const mode = config.ssl || parsedConnectionString.sslmode;
   if (mode === 'prefer' || mode === undefined) {
     ssl.rejectUnauthorized = false;
-    return {allowFallback: true, ssl};
+    return {allowFallback: true, connectionOptions: ssl};
   } else {
-    return {allowFallback: false, ssl};
+    return {allowFallback: false, connectionOptions: ssl};
   }
 }
 

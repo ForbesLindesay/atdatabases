@@ -1,4 +1,4 @@
-import Queue from './Queue';
+import Queue from '@databases/queue';
 
 /**
  * A connetion in the pool.

@@ -3,6 +3,11 @@ import sql, {SQLQuery, SQLItem, SQLItemType} from '@databases/sql';
 function hasValuesFormatter(query: readonly SQLItem[]): boolean {
   return query.some((q) => q.type === SQLItemType.VALUE);
 }
+
+/**
+ * Test whether the query has any parameters, or whether it is just a static
+ * string. Returns `true` if there are parameters.
+ */
 export function hasValues(query: SQLQuery): boolean {
   return query.format(hasValuesFormatter);
 }
@@ -18,6 +23,13 @@ function hasSemicolonBeforeEndFormatter(query: readonly SQLItem[]): boolean {
     return q.text.includes(';');
   });
 }
+/**
+ * A faster test for whether an SQLQuery is likely to contain multiple statements
+ *
+ * It is possible for a single query to return `true` if it has a `;` in a comment
+ * or in a string literal/identifier name. If `hasSemicolonBeforeEnd` returns `false`
+ * you can trust that the query is a single statement.
+ */
 export function hasSemicolonBeforeEnd(query: SQLQuery): boolean {
   return query.format(hasSemicolonBeforeEndFormatter);
 }
@@ -132,6 +144,10 @@ function splitSqlQueryParts(query: readonly SQLItem[]): SQLQuery[] {
     .filter((parts) => parts.length)
     .map((parts) => sql.__dangerous__constructFromParts(parts));
 }
+
+/**
+ * Split an SQLQuery into an array of statements
+ */
 export default function splitSqlQuery(query: SQLQuery): SQLQuery[] {
   if (!hasSemicolonBeforeEnd(query)) return [query];
   const split = query.format(splitSqlQueryParts);

@@ -5,4 +5,6 @@ export type RawQueryFunction = (
 
 export default interface PgClient {
   query: RawQueryFunction;
+  connect(): Promise<void>;
+  end(): Promise<void>;
 }

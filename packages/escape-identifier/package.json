@@ -16,5 +16,6 @@
   },
   "files": [
     "lib/"
-  ]
+  ],
+  "homepage": "https://www.atdatabases.org/docs/escape-identifier"
 }

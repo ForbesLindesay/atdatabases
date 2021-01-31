@@ -111,25 +111,24 @@ class ConnectionImplementation implements Connection {
     }
     const {text, values} = query.format(mysqlFormat);
     const highWaterMark = (options && options.highWaterMark) || 5;
-    const stream = this.conn.connection.query(text, values);
 
-    return pushToAsyncIterable<any>({
-      onData(fn) {
-        stream.on('result', fn);
-      },
-      onError(fn) {
-        stream.on('error', fn);
-      },
-      onEnd(fn) {
-        stream.on('end', fn);
-      },
-      pause: () => {
-        this.conn.connection.pause();
-      },
-      resume: () => {
-        this.conn.connection.resume();
-      },
-      highWaterMark,
+    return pushToAsyncIterable<any>((handlers) => {
+      const stream = this.conn.connection.query(text, values);
+      stream.on('result', handlers.onData);
+      stream.on('error', handlers.onError);
+      stream.on('end', handlers.onEnd);
+      return {
+        dispose: () => {
+          this.conn.connection.resume();
+        },
+        pause: () => {
+          this.conn.connection.pause();
+        },
+        resume: () => {
+          this.conn.connection.resume();
+        },
+        highWaterMark,
+      };
     });
   }
 

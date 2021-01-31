@@ -1,4 +1,5 @@
 import PgDataTypeID from '@databases/pg-data-type-id';
+import PgClient from './types/PgClient';
 
 const {types} = require('pg');
 
@@ -221,4 +222,52 @@ export function parseArray<T>(
   } else {
     return parseStringArray(value);
   }
+}
+
+export function getTypeResolver(client: PgClient) {
+  return async (typeName: string): Promise<number> => {
+    const ts = typeName.split('.');
+    let results: {rows: {typeID: number; schemaName: string}[]};
+    if (ts.length === 1) {
+      results = (await client.query(
+        `
+          SELECT
+            ty.oid as "typeID",
+            ns.nspname AS "schemaName"
+          FROM pg_catalog.pg_type ty
+          INNER JOIN pg_catalog.pg_namespace ns
+            ON (ty.typnamespace = ns.oid)
+          WHERE lower(ty.typname) = $1;
+        `,
+        [typeName.toLowerCase()],
+      )) as any;
+    } else if (ts.length === 2) {
+      results = (await client.query(
+        `
+          SELECT
+            ty.oid as "typeID",
+            ns.nspname AS "schemaName"
+          FROM pg_catalog.pg_type ty
+          INNER JOIN pg_catalog.pg_namespace ns
+            ON (ty.typnamespace = ns.oid)
+          WHERE lower(ns.nspname) = $1 AND lower(ty.typname) = $2;
+        `,
+        [ts[0].toLowerCase(), ts[1].toLowerCase()],
+      )) as any;
+    } else {
+      throw new Error('Type Name should only have one "." in it');
+    }
+    if (results.rows.length === 0) {
+      throw new Error('Could not find the type ' + typeName);
+    }
+    if (results.rows.length > 1) {
+      throw new Error(
+        'The type name ' +
+          typeName +
+          ' was found in multiple schemas: ' +
+          results.rows.map((r) => r.schemaName).join(', '),
+      );
+    }
+    return results.rows[0].typeID;
+  };
 }

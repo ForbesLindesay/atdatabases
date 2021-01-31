@@ -9,6 +9,10 @@
         "title": "@databases/connection-pool",
         "sidebar_label": "connection-pool"
       },
+      "escape-identifier": {
+        "title": "@databases/escape-identifier",
+        "sidebar_label": "escape-identifier"
+      },
       "mysql-test": {
         "title": "MySQL Testing",
         "sidebar_label": "Testing"
@@ -73,6 +77,10 @@
         "title": "Postgres",
         "sidebar_label": "Getting Started"
       },
+      "queue": {
+        "title": "@databases/queue",
+        "sidebar_label": "queue"
+      },
       "sql": {
         "title": "Building SQL Queries"
       },
@@ -83,6 +91,10 @@
       "sqlite": {
         "title": "SQLite",
         "sidebar_label": "API"
+      },
+      "validate-unicode": {
+        "title": "@databases/validate-unicode",
+        "sidebar_label": "validate-unicode"
       },
       "websql-test": {
         "title": "Expo / WebSQL Testing",
