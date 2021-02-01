@@ -1,81 +1,109 @@
 import Queue from '@databases/queue';
 
+enum PoolRecordState {
+  Idle,
+  Active,
+  Disposed,
+}
+enum PoolRecordAction {
+  Release,
+  Dispose,
+  ReleaseTimeout,
+  IdleTimeout,
+}
 /**
  * A connetion in the pool.
  */
 class PoolConnectionRecord<T> {
-  public readonly connection: T;
-  private readonly _release: (record: this) => void;
-  private readonly _dispose: (record: this) => void;
-  private readonly _onReleaseTimeout: (record: this) => void;
-  private readonly _onIdleTimeout: (record: this) => void;
   private readonly _releaseTimeoutMilliseconds: number | undefined;
   private readonly _idleTimeoutMilliseconds: number | undefined;
+
+  public connection: T | undefined;
+  private readonly _action: (
+    record: PoolConnectionRecord<T>,
+    action: PoolRecordAction,
+  ) => void;
+  private _state: PoolRecordState = PoolRecordState.Idle;
   private _idleTimeout: number | undefined;
   private _releaseTimeout: number | undefined;
   private _usageCount = 0;
-  private _disposed = false;
 
   constructor(
     connection: T,
-    release: (record: PoolConnectionRecord<T>) => void,
-    dispose: (record: PoolConnectionRecord<T>) => void,
-    onReleaseTimeout: (record: PoolConnectionRecord<T>) => void,
-    onIdleTimeout: (record: PoolConnectionRecord<T>) => void,
+    removeFromPoolPromise: Promise<void>,
+    action: (record: PoolConnectionRecord<T>, action: PoolRecordAction) => void,
     releaseTimeoutMilliseconds: number | undefined,
     idleTimeoutMilliseconds: number | undefined,
   ) {
     this.connection = connection;
-    this._release = release;
-    this._dispose = dispose;
-    this._onReleaseTimeout = onReleaseTimeout;
-    this._onIdleTimeout = onIdleTimeout;
+    this._action = action;
     this._releaseTimeoutMilliseconds = releaseTimeoutMilliseconds;
     this._idleTimeoutMilliseconds = idleTimeoutMilliseconds;
+    if (this._idleTimeout) {
+      this._idleTimeout = setTimeout(
+        this._action,
+        this._idleTimeoutMilliseconds,
+        this,
+        PoolRecordAction.IdleTimeout,
+      );
+    }
+    removeFromPoolPromise.then(() => {
+      this.setState(PoolRecordState.Disposed);
+    });
+  }
+
+  public setState(state: PoolRecordState) {
+    switch (state) {
+      case PoolRecordState.Active:
+        // an active record can remain active, which still bumps the _usageCount
+        if (
+          this._state !== PoolRecordState.Idle &&
+          this._state !== PoolRecordState.Active
+        ) {
+          throw new Error('Invalid state transition');
+        }
+        this._state = PoolRecordState.Active;
+        clearTimeout(this._idleTimeout);
+        this._usageCount++;
+        if (this._releaseTimeoutMilliseconds) {
+          this._releaseTimeout = setTimeout(
+            this._action,
+            this._releaseTimeoutMilliseconds,
+            this,
+            PoolRecordAction.ReleaseTimeout,
+          );
+        }
+        break;
+      case PoolRecordState.Idle:
+        if (this._state !== PoolRecordState.Active) {
+          throw new Error('Invalid state transition');
+        }
+        this._state = PoolRecordState.Idle;
+        clearTimeout(this._releaseTimeout);
+        if (this._idleTimeoutMilliseconds) {
+          this._idleTimeout = setTimeout(
+            this._action,
+            this._idleTimeoutMilliseconds,
+            this,
+            PoolRecordAction.IdleTimeout,
+          );
+        }
+        break;
+      case PoolRecordState.Disposed:
+        this._state = PoolRecordState.Disposed;
+        clearTimeout(this._idleTimeout);
+        clearTimeout(this._releaseTimeout);
+        this.connection = undefined;
+        break;
+    }
   }
 
   public getUsageCount() {
     return this._usageCount;
   }
-  public markAsActive() {
-    this._usageCount++;
-    if (this._releaseTimeoutMilliseconds) {
-      this._releaseTimeout = setTimeout(
-        this._onReleaseTimeout,
-        this._releaseTimeoutMilliseconds,
-        this,
-      );
-    }
-    clearTimeout(this._idleTimeout);
-    return this;
-  }
-  public release() {
-    if (this._disposed) {
-      return;
-    }
-    clearTimeout(this._releaseTimeout);
-    this._release(this);
-    if (this._idleTimeoutMilliseconds) {
-      this._idleTimeout = setTimeout(
-        this._onIdleTimeout,
-        this._idleTimeoutMilliseconds,
-        this,
-      );
-    }
-  }
-  public dispose() {
-    if (this._disposed) {
-      return;
-    }
-    this._disposed = true;
-    clearTimeout(this._releaseTimeout);
-    this._dispose(this);
-  }
-  public isDisposed() {
-    return this._disposed;
-  }
-  public markAsDisposed() {
-    this._disposed = true;
+
+  public action(action: PoolRecordAction) {
+    this._action(this, action);
   }
 }
 
@@ -86,16 +114,18 @@ class PoolConnectionRecord<T> {
 class Waiter<T> {
   static waiterTimeout<T>(waiter: Waiter<T>) {
     waiter._timedOut = true;
-    waiter._reject(queueTimeoutError());
+    waiter._resolve(null);
     (waiter as any)._resolve = null;
     (waiter as any)._reject = null;
   }
-  private readonly _resolve: (connection: PoolConnectionRecord<T>) => unknown;
+  private readonly _resolve: (
+    connection: PoolConnectionRecord<T> | null,
+  ) => unknown;
   private readonly _reject: (err: Error) => unknown;
   private _timedOut = false;
   private readonly _timeout: number | undefined;
   constructor(
-    resolve: (connection: PoolConnectionRecord<T>) => unknown,
+    resolve: (connection: PoolConnectionRecord<T> | null) => unknown,
     reject: (err: Error) => unknown,
     timeout: number | undefined,
   ) {
@@ -147,22 +177,23 @@ class PoolConnectionImpl<T> implements PoolConnection<T> {
   private readonly _record: PoolConnectionRecord<T>;
   private _released = false;
   constructor(record: PoolConnectionRecord<T>) {
-    this.connection = record.connection;
-    this._record = record.markAsActive();
+    record.setState(PoolRecordState.Active);
+    this.connection = record.connection!;
+    this._record = record;
   }
   release() {
     if (this._released) {
       throw doubleReleaseError();
     }
     this._released = true;
-    this._record.release();
+    this._record.action(PoolRecordAction.Release);
   }
   dispose() {
     if (this._released) {
       throw doubleReleaseError();
     }
     this._released = true;
-    this._record.dispose();
+    this._record.action(PoolRecordAction.Dispose);
   }
 }
 
@@ -174,7 +205,7 @@ export interface PoolOptions<T> {
    * `getConnection` is used to create a new connection. If it
    * throws an error, no connection is added to the pool.
    */
-  getConnection: () => Promise<T>;
+  getConnection: (removeFromPool: () => void) => Promise<T>;
   /**
    * `closeConnection` is called in any of the following cases:
    *
@@ -188,6 +219,16 @@ export interface PoolOptions<T> {
    * while closing a connection.
    */
   closeConnection: (connection: T) => Promise<void>;
+  /**
+   * Handler to be called every time a connection from the pool
+   * is activated.
+   */
+  onActive?: (connetion: T) => void;
+  /**
+   * Handler to be called every time a connection is returned
+   * to the pool.
+   */
+  onIdle?: (connetion: T) => void;
   /**
    * Handler for when neither `release` nor `dispose` is
    * called within `releaseTimeoutMilliseconds`. This is
@@ -327,8 +368,12 @@ class ConnectionPoolImpl<T> implements ConnectionPool<T> {
 
   private _getExistingConnection() {
     let conn = this._connections.shift();
-    while (conn && conn.isDisposed()) {
+    while (conn && !conn.connection) {
+      this._poolSize--;
       conn = this._connections.shift();
+    }
+    if (this._options.onActive && conn?.connection) {
+      this._options.onActive(conn.connection);
     }
     return conn;
   }
@@ -347,17 +392,23 @@ class ConnectionPoolImpl<T> implements ConnectionPool<T> {
   }
   private async _allocateConnection() {
     this._poolSize++;
-    return this._options.getConnection().then(
-      (connection) =>
-        new PoolConnectionRecord(
+    let removeFromPool!: () => void;
+    const removeFromPoolPromise = new Promise<void>((resolve) => {
+      removeFromPool = resolve;
+    });
+    return this._options.getConnection(removeFromPool).then(
+      (connection) => {
+        if (this._options.onActive) {
+          this._options.onActive(connection);
+        }
+        return new PoolConnectionRecord(
           connection,
-          this._release,
-          this._dispose,
-          this._onReleaseTimeout,
-          this._onIdleTimeout,
+          removeFromPoolPromise,
+          this._action,
           this._options.releaseTimeoutMilliseconds,
           this._options.idleTimeoutMilliseconds,
-        ),
+        );
+      },
       (err) => {
         this._poolSize--;
         this._onPoolShrink();
@@ -384,62 +435,60 @@ class ConnectionPoolImpl<T> implements ConnectionPool<T> {
     }
   }
 
-  private readonly _release = (record: PoolConnectionRecord<T>) => {
+  private readonly _action = (
+    record: PoolConnectionRecord<T>,
+    action: PoolRecordAction,
+  ) => {
     if (
+      action === PoolRecordAction.Release &&
       this._options.maxUses !== undefined &&
       record.getUsageCount() >= this._options.maxUses
     ) {
-      this._dispose(record);
+      this._action(record, PoolRecordAction.Dispose);
       return;
     }
-    const waiter = this._getWaiter();
-    if (waiter) {
-      waiter.resolve(record);
-    } else if (this._draining) {
-      void this._options
-        .closeConnection(record.connection)
-        .catch(globalError)
-        .then(() => {
-          this._poolSize--;
-          if (this._poolSize === 0) {
-            this._onDrained();
-          }
-        });
-    } else {
-      this._connections.push(record);
+    if (!record.connection) {
+      return;
     }
-  };
-  private readonly _dispose = (record: PoolConnectionRecord<T>) => {
-    void this._options
-      .closeConnection(record.connection)
-      .catch(globalError)
-      .then(() => {
-        this._poolSize--;
-        this._onPoolShrink();
-      });
-  };
-  private readonly _onIdleTimeout = (record: PoolConnectionRecord<T>) => {
-    record.markAsDisposed();
-    void this._options
-      .closeConnection(record.connection)
-      .catch(globalError)
-      .then(() => {
-        this._poolSize--;
-        this._onPoolShrink();
-      });
-  };
-  private readonly _onReleaseTimeout = (record: PoolConnectionRecord<T>) => {
-    record.markAsDisposed();
-    if (this._options.onReleaseTimeout) {
+    const connection = record.connection;
+    if (action === PoolRecordAction.Dispose) {
+      record.setState(PoolRecordState.Disposed);
       void this._options
-        .onReleaseTimeout(record.connection)
+        .closeConnection(connection)
         .catch(globalError)
         .then(() => {
           this._poolSize--;
           this._onPoolShrink();
         });
-    } else {
-      globalError(releaseTimeoutError());
+    } else if (action === PoolRecordAction.Release) {
+      const waiter = this._getWaiter();
+      if (waiter) {
+        waiter.resolve(record);
+      } else if (this._draining) {
+        this._action(record, PoolRecordAction.Dispose);
+      } else {
+        record.setState(PoolRecordState.Idle);
+        if (this._options.onIdle) {
+          this._options.onIdle(record.connection);
+        }
+        this._connections.push(record);
+      }
+    } else if (action === PoolRecordAction.ReleaseTimeout) {
+      record.setState(PoolRecordState.Disposed);
+      if (this._options.onReleaseTimeout) {
+        void this._options
+          .onReleaseTimeout(connection)
+          .catch(globalError)
+          .then(() => {
+            this._poolSize--;
+            this._onPoolShrink();
+          });
+      } else {
+        globalError(releaseTimeoutError());
+      }
+    } else if (action === PoolRecordAction.IdleTimeout) {
+      record.setState(PoolRecordState.Disposed);
+      void this._options.closeConnection(connection).catch(globalError);
     }
   };
 
@@ -455,15 +504,21 @@ class ConnectionPoolImpl<T> implements ConnectionPool<T> {
       this._getExistingConnection() ??
       (this._canAllocateConnection()
         ? await this._allocateConnection()
-        : await new Promise<PoolConnectionRecord<T>>((resolve, reject) => {
-            this._waiters.push(
-              new Waiter(
-                resolve,
-                reject,
-                this._options.queueTimeoutMilliseconds,
-              ),
-            );
-          }));
+        : await new Promise<PoolConnectionRecord<T> | null>(
+            (resolve, reject) => {
+              this._waiters.push(
+                new Waiter(
+                  resolve,
+                  reject,
+                  this._options.queueTimeoutMilliseconds,
+                ),
+              );
+            },
+          ));
+    if (!record) {
+      throw queueTimeoutError();
+    }
+
     return new PoolConnectionImpl(record);
   }
 
@@ -476,7 +531,7 @@ class ConnectionPoolImpl<T> implements ConnectionPool<T> {
   async drain(): Promise<void> {
     this._draining = true;
     for (const c of this._connections.clear()) {
-      this._release(c);
+      this._action(c, PoolRecordAction.Dispose);
     }
     if (this._poolSize) {
       await this._drained;

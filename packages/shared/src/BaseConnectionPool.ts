@@ -45,15 +45,22 @@ export default class BaseConnectionPool<
     fn: (driver: TDriver, ...args: TArgs) => Promise<TResult>,
     ...args: TArgs
   ) {
+    let releasing = false;
     const driver = await this._pool.getConnection();
     try {
       const result = await fn(driver.connection, ...args);
+      releasing = true;
       driver.release();
       return result;
     } catch (ex) {
+      if (releasing) {
+        throw ex;
+      }
       if (await this._factories.canRecycleConnection(driver.connection, ex)) {
+        releasing = true;
         driver.release();
       } else {
+        releasing = true;
         driver.dispose();
       }
       throw ex;

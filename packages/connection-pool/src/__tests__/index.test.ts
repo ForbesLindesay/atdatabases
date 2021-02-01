@@ -79,6 +79,7 @@ test('ConnectionPool', async () => {
   g.release();
   await clearPromiseQueue();
   expect(drained).toBe(true);
+  expect(connections.size).toBe(0);
 });
 
 test('ConnectionPool - Unlimited size', async () => {
@@ -131,6 +132,7 @@ test('ConnectionPool - Unlimited size', async () => {
   expect(pool.getConnectionsCount() === 0);
 
   await pool.drain();
+  expect(connections.size).toBe(0);
 });
 
 test('ConnectionPool - maxUses', async () => {
@@ -174,6 +176,7 @@ test('ConnectionPool - maxUses', async () => {
   b.release();
 
   await pool.drain();
+  expect(connections.size).toBe(0);
 });
 
 test('ConnectionPool - idleTimeoutMilliseconds', async () => {
@@ -214,6 +217,7 @@ test('ConnectionPool - idleTimeoutMilliseconds', async () => {
   b.release();
 
   await pool.drain();
+  expect(connections.size).toBe(0);
 });
 
 test('ConnectionPool - queueTimeoutMilliseconds', async () => {
@@ -245,6 +249,11 @@ test('ConnectionPool - queueTimeoutMilliseconds', async () => {
   [a, b] = await Promise.all([aPromise, pool.getConnection()]);
   expect(a.connection).toBe(1);
   expect(b.connection).toBe(2);
+
+  a.release();
+  b.release();
+  await pool.drain();
+  expect(connections.size).toBe(0);
 });
 
 test('ConnectionPool - releaseTimeoutMilliseconds', async () => {
@@ -290,4 +299,7 @@ test('ConnectionPool - releaseTimeoutMilliseconds', async () => {
   expect(pool.getIdleConnectionsCount()).toBe(0);
   expect(pool.getQueueLength()).toBe(0);
   expect([...connections].sort()).toEqual([1, 2, 3, 4]);
+
+  await pool.drain();
+  expect(connections.size - timedOut.size).toBe(0);
 });

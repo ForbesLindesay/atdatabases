@@ -30,13 +30,38 @@ const factories: Factory<PgDriver, Connection, Transaction> = {
   },
 };
 
+function timeout<T>(promise: Promise<T>): Promise<T> {
+  let err = new Error('Operation timed out');
+  try {
+    throw err;
+  } catch (ex) {
+    err = ex;
+  }
+  return new Promise<T>((resolve, reject) => {
+    const timeout = setTimeout(() => {
+      reject(err);
+    }, 1000);
+    promise.then(
+      (v) => {
+        clearTimeout(timeout);
+        resolve(v);
+      },
+      (v) => {
+        clearTimeout(timeout);
+        reject(v);
+      },
+    );
+  });
+}
+
 const getConnectionPoolOptions = (
   srcConfig: PgOptions,
   schema: string | string[] | undefined,
   poolOptions: Omit<PoolOptions<PgDriver>, 'getConnection' | 'closeConnection'>,
   handlers: EventHandlers,
+  onError: (err: Error) => void,
 ): PoolOptions<PgDriver> => {
-  const src = createConnectionSource(srcConfig);
+  const src = createConnectionSource(srcConfig, handlers);
 
   // setting up types requires a connection, but doesn't have to be done separately for each connection,
   // doing it once is sufficient
@@ -44,32 +69,62 @@ const getConnectionPoolOptions = (
     return srcConfig.types.prepareOverrides(getTypeResolver(client));
   });
 
+  // function makeIdleListener(pool, client) {
+  //   return function idleListener(err) {
+  //     err.client = client
+
+  //     client.removeListener('error', idleListener)
+  //     client.on('error', () => {
+  //       pool.log('additional client error after disconnection due to error', err)
+  //     })
+  //     pool._remove(client)
+  //     // TODO - document that once the pool emits an error
+  //     // the client has already been closed & purged and is unusable
+  //     pool.emit('error', err, client)
+  //   }
+  // }
   return {
     ...poolOptions,
-    getConnection: async () => {
-      const client = await src();
+    getConnection: async (removeFromPool) => {
+      const driver = await src();
+      try {
+        await typesSetup.callPrecondition(driver.client);
 
-      await typesSetup.callPrecondition(client);
-
-      if (schema) {
-        // the schema (i.e. the search_path) must be set on each connection before it is used
-        if (typeof schema === 'string') {
-          await client.query(
-            `SET search_path TO ${escapePostgresIdentifier(schema)}`,
-          );
-        } else if (Array.isArray(schema)) {
-          await client.query(
-            `SET search_path TO ${schema
-              .map((s) => escapePostgresIdentifier(s))
-              .join(', ')}`,
-          );
+        if (schema) {
+          // the schema (i.e. the search_path) must be set on each connection before it is used
+          if (typeof schema === 'string') {
+            await driver.client.query(
+              `SET search_path TO ${escapePostgresIdentifier(schema)}`,
+            );
+          } else if (Array.isArray(schema)) {
+            await driver.client.query(
+              `SET search_path TO ${schema
+                .map((s) => escapePostgresIdentifier(s))
+                .join(', ')}`,
+            );
+          }
         }
+      } catch (ex) {
+        driver.dispose();
+        throw ex;
       }
 
-      const driver = new PgDriver(client, handlers);
+      driver.onAddingToPool(removeFromPool, onError);
       return driver;
     },
-    closeConnection: (driver) => driver.dispose(),
+    closeConnection: async (driver) => {
+      try {
+        await timeout(driver.dispose());
+      } catch (ex) {
+        console.warn(ex.message);
+      }
+    },
+    onActive(driver) {
+      driver.onActive();
+    },
+    onIdle(driver) {
+      driver.onIdle();
+    },
   };
 };
 
@@ -95,7 +150,7 @@ export default class ConnectionPool
     },
   ) {
     super(
-      getConnectionPoolOptions(options, schema, poolOptions, handlers),
+      getConnectionPoolOptions(options, schema, poolOptions, handlers, onError),
       factories,
     );
     this._types = options.types;

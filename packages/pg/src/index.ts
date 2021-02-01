@@ -226,7 +226,7 @@ export default function createConnectionPool(
       // anyway when you attempt to query it. If it happens on a connection that is
       // idle in the pool, a fresh connection will be allocated without you needing
       // to do anything.
-      if (!/connection\s*terminated\s*unexpectedly/.test(err.message)) {
+      if (!/connection\s*terminated\s*unexpectedly/i.test(err.message)) {
         console.warn(`Error in Postgres ConnectionPool: ${err.message}`);
       }
     },
@@ -307,7 +307,8 @@ export default function createConnectionPool(
       maxSize: poolSize,
       maxUses,
       idleTimeoutMilliseconds,
-      queueTimeoutMilliseconds: connectionTimeoutMilliseconds,
+      // queueTimeoutMilliseconds: 1000, //connectionTimeoutMilliseconds,
+      // releaseTimeoutMilliseconds: 1000,
     },
     schema: schema ?? undefined,
     handlers: {onError, onQueryStart, onQueryResults, onQueryError},

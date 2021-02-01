@@ -5,6 +5,8 @@ import {readFileSync, writeFileSync} from 'fs';
 import TypeKind from '../enums/TypeKind';
 const prettier = require('prettier');
 
+jest.setTimeout(30_000);
+
 const db = connect({bigIntMode: 'number'});
 
 afterAll(async () => {

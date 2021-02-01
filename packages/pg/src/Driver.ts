@@ -21,13 +21,60 @@ type QueryResult = {rows: any[]};
 export default class PgDriver implements Driver<TransactionOptions> {
   public readonly client: PgClient;
   private readonly _handlers: EventHandlers;
+  private _endCalled = false;
+  private readonly _disposed: Promise<void>;
   constructor(client: PgClient, handlers: EventHandlers) {
+    // client.on('error', () => {
+    //   // do not crash on random errors
+    // });
+    this._disposed = new Promise<void>((resolve) => {
+      client.on('end', resolve);
+    });
     this.client = client;
     this._handlers = handlers;
   }
+  private _removeFromPool: undefined | (() => void);
+  private _idleErrorEventHandler: undefined | ((err: Error) => void);
+  private _onIdleError = (err: Error) => {
+    if (this._disposed) {
+      return;
+    }
+    this.client.removeListener('error', this._onIdleError);
+    if (this._removeFromPool) {
+      this._removeFromPool();
+    }
+    if (this._idleErrorEventHandler) {
+      this._idleErrorEventHandler(err);
+    }
+  };
+  onAddingToPool(
+    removeFromPool: undefined | (() => void),
+    idleErrorEventHandler: undefined | ((err: Error) => void),
+  ) {
+    this._removeFromPool = removeFromPool;
+    this._idleErrorEventHandler = idleErrorEventHandler;
+  }
+  onActive() {
+    this.client.removeListener('error', this._onIdleError);
+  }
+  onIdle() {
+    this.client.on('error', this._onIdleError);
+  }
 
+  connect(): Promise<void> {
+    return this.client.connect();
+  }
   dispose(): Promise<void> {
-    return this.client.end();
+    this.client.on('error', this._onIdleError);
+    if (!this._endCalled) {
+      this._endCalled = true;
+      if (this.client.connection?.stream?.destroy) {
+        this.client.connection.stream.destroy();
+      } else {
+        this.client.end();
+      }
+    }
+    return this._disposed;
   }
 
   async beginTransaction(options?: TransactionOptions) {

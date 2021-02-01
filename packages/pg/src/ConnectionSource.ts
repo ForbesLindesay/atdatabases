@@ -1,7 +1,8 @@
 import {ConnectionOptions} from 'tls';
+import PgDriver from './Driver';
 import definePrecondition from './definePrecondition';
 import TypeOverrides from './TypeOverrides';
-import PgClient from './types/PgClient';
+import EventHandlers from './types/EventHandlers';
 const {Client} = require('pg');
 
 type SSLConfig = null | {
@@ -25,18 +26,17 @@ export interface PgOptions {
   ssl: SSLConfig;
 }
 
-export default function createConnectionSource({
-  hosts,
-  ssl,
-  ...partialOptions
-}: PgOptions): () => Promise<PgClient> {
+export default function createConnectionSource(
+  {hosts, ssl, ...partialOptions}: PgOptions,
+  handlers: EventHandlers,
+) {
   const options = {
     ...partialOptions,
     ...hosts[0],
     ssl: ssl?.connectionOptions ?? false,
   };
   const precondition = definePrecondition(
-    async (): Promise<PgClient> => {
+    async (): Promise<PgDriver> => {
       const start = Date.now();
       let error: {message: string} | undefined;
       let attemptCount = 0;
@@ -54,7 +54,7 @@ export default function createConnectionSource({
           options.ssl = ssl?.connectionOptions ?? false;
 
           try {
-            const connection: PgClient = new Client(options);
+            const connection = new PgDriver(new Client(options), handlers);
             await connection.connect();
             return connection;
           } catch (ex) {
@@ -71,7 +71,7 @@ export default function createConnectionSource({
               // ssl.
               try {
                 options.ssl = false;
-                const connection: PgClient = new Client(options);
+                const connection = new PgDriver(new Client(options), handlers);
                 await connection.connect();
                 return connection;
               } catch (ex) {
@@ -89,13 +89,13 @@ export default function createConnectionSource({
     },
   );
 
-  const getConnection = async (): Promise<PgClient> => {
+  const getConnection = async (): Promise<PgDriver> => {
     const firstClient = await precondition.callPrecondition();
     if (firstClient) {
       return firstClient;
     } else {
       try {
-        const client: PgClient = new Client(options);
+        const client = new PgDriver(new Client(options), handlers);
         await client.connect();
         return client;
       } catch (ex) {
