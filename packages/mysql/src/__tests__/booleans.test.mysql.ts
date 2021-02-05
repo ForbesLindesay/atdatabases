@@ -1,27 +1,42 @@
 import connect, {sql} from '..';
 
 jest.setTimeout(30000);
-
-const db = connect();
-
-afterAll(async () => {
-  await db.dispose();
-});
-
-test('booleans', async () => {
+beforeAll(async () => {
+  const db = connect();
   await db.query(
     sql`CREATE TABLE booleans_test_booleans (id INT NOT NULL PRIMARY KEY, test_value BOOLEAN NOT NULL);`,
   );
   await db.query(sql`
     INSERT INTO booleans_test_booleans (id, test_value)
     VALUES (1, ${true}),
-           (2, ${false});
+           (2, ${false}),
+           (3, 42);
   `);
+  await db.dispose();
+});
+
+test('booleans as number', async () => {
+  const db = connect({tinyIntMode: 'number'});
   const result = await db.query(sql`
     SELECT id, test_value from booleans_test_booleans;
   `);
   expect(result).toEqual([
     {id: 1, test_value: 1},
     {id: 2, test_value: 0},
+    {id: 3, test_value: 42},
   ]);
+  await db.dispose();
+});
+
+test('booleans as boolean', async () => {
+  const db = connect({tinyIntMode: 'boolean'});
+  const result = await db.query(sql`
+    SELECT id, test_value from booleans_test_booleans;
+  `);
+  expect(result).toEqual([
+    {id: 1, test_value: true},
+    {id: 2, test_value: false},
+    {id: 3, test_value: true},
+  ]);
+  await db.dispose();
 });

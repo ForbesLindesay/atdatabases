@@ -183,6 +183,7 @@ export interface ConnectionPoolConfig extends ClientConfig, EventHandlers {
    * Defaults to the maximum of 60 seconds or connectionTimeoutMilliseconds * number of hosts * 2
    */
   queueTimeoutMilliseconds?: number;
+
   /**
    * Number of milliseconds to wait for a lock on a connection/transaction. This is
    * helpful for catching cases where you have accidentally attempted to query a connection

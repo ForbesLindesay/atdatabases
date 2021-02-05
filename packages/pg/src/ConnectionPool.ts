@@ -25,30 +25,6 @@ const factories: Factory<PgDriver, Connection, Transaction> = {
   },
 };
 
-async function timeout<T>(promise: Promise<T>): Promise<T> {
-  let err = new Error('Operation timed out');
-  try {
-    throw err;
-  } catch (ex) {
-    err = ex;
-  }
-  return new Promise<T>((resolve, reject) => {
-    const timeout = setTimeout(() => {
-      reject(err);
-    }, 1000);
-    promise.then(
-      (v) => {
-        clearTimeout(timeout);
-        resolve(v);
-      },
-      (v) => {
-        clearTimeout(timeout);
-        reject(v);
-      },
-    );
-  });
-}
-
 const getConnectionPoolOptions = (
   srcConfig: PgOptions,
   schema: string | string[] | undefined,
@@ -72,20 +48,6 @@ const getConnectionPoolOptions = (
     return srcConfig.types.prepareOverrides(getTypeResolver(client));
   });
 
-  // function makeIdleListener(pool, client) {
-  //   return function idleListener(err) {
-  //     err.client = client
-
-  //     client.removeListener('error', idleListener)
-  //     client.on('error', () => {
-  //       pool.log('additional client error after disconnection due to error', err)
-  //     })
-  //     pool._remove(client)
-  //     // TODO - document that once the pool emits an error
-  //     // the client has already been closed & purged and is unusable
-  //     pool.emit('error', err, client)
-  //   }
-  // }
   return {
     ...poolOptions,
     openConnection: async (removeFromPool) => {
@@ -122,7 +84,7 @@ const getConnectionPoolOptions = (
     },
     closeConnection: async (driver) => {
       try {
-        await timeout(driver.dispose());
+        await driver.dispose();
         if (handlers.onConnectionClosed) {
           handlers.onConnectionClosed();
         }
@@ -223,6 +185,7 @@ export default class ConnectionPool
     query: SQLQuery,
     options: {highWaterMark?: number} = {},
   ): Readable {
+    this._throwIfDisposed();
     const stream = new PassThrough({
       objectMode: true,
     });

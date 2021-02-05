@@ -9,6 +9,7 @@
     "@databases/escape-identifier": "^0.0.0",
     "@databases/mysql-config": "^0.0.0",
     "@databases/push-to-async-iterable": "^0.0.0",
+    "@databases/shared": "^0.0.0",
     "@databases/sql": "^0.0.0",
     "@types/mysql": "^2.15.5",
     "mysql2": "^2.2.5"
