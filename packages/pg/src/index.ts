@@ -233,6 +233,8 @@ export default function createConnectionPool(
     onQueryError = undefined,
     onQueryResults = undefined,
     onQueryStart = undefined,
+    onConnectionOpened = undefined,
+    onConnectionClosed = undefined,
   } = typeof connectionConfig === 'object' ? connectionConfig : {};
 
   if (bigIntAsString) {
@@ -311,7 +313,14 @@ export default function createConnectionPool(
       // releaseTimeoutMilliseconds: 1000,
     },
     schema: schema ?? undefined,
-    handlers: {onError, onQueryStart, onQueryResults, onQueryError},
+    handlers: {
+      onError,
+      onQueryStart,
+      onQueryResults,
+      onQueryError,
+      onConnectionOpened,
+      onConnectionClosed,
+    },
   });
 }
 

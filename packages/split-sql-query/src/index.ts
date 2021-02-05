@@ -114,11 +114,13 @@ function splitSqlQueryParts(query: readonly SQLItem[]): SQLQuery[] {
               blockCommentStart = true;
               break;
             case `;`:
-              if (parts.length) {
+              if (str.trim()) {
                 parts.push({type: SQLItemType.RAW, text: str});
+                str = '';
+              }
+              if (parts.length) {
                 parts = [];
                 queries.push(parts);
-                str = '';
               }
               break;
             default:

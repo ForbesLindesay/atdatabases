@@ -7,7 +7,7 @@ import PgClient from './types/PgClient';
 import {isolationLevelToString} from './types/IsolationLevel';
 import TransactionOptions from './types/TransactionOptions';
 import EventHandlers from './types/EventHandlers';
-import AbortSignal from './types/AbortSignal';
+import QueryStreamOptions from './types/QueryStreamOptions';
 const {codeFrameColumns} = require('@babel/code-frame');
 const Cursor = require('pg-cursor');
 
@@ -18,7 +18,9 @@ const pgFormat: FormatConfig = {
 
 type QueryResult = {rows: any[]};
 
-export default class PgDriver implements Driver<TransactionOptions> {
+export default class PgDriver
+  implements Driver<TransactionOptions, QueryStreamOptions> {
+  public readonly lockTimeoutMilliseconds = 60_000;
   public readonly client: PgClient;
   private readonly _handlers: EventHandlers;
   private _endCalled = false;
@@ -158,17 +160,28 @@ export default class PgDriver implements Driver<TransactionOptions> {
     if (this._handlers.onQueryResults) {
       enforceUndefined(this._handlers.onQueryResults(query, q, results.rows));
     }
+    if (results.rows === undefined) {
+      console.log('results=', results);
+      console.log('query=', q.text);
+      throw new Error('results.rows is undefined');
+    }
     return results.rows;
   }
-  executeAndReturnAll(queries: SQLQuery[]): Promise<any[][]> {
-    return Promise.all(queries.map(this._executeQuery, this));
-  }
-  executeAndReturnLast(queries: SQLQuery[]): Promise<any[]> {
-    if (queries.length === 1) {
-      return this._executeQuery(queries[0]);
-    } else {
-      return this.executeAndReturnAll(queries).then(getLastResultSet);
+  async executeAndReturnAll(queries: SQLQuery[]): Promise<any[][]> {
+    const results = new Array(queries.length);
+    for (let i = 0; i < queries.length; i++) {
+      results[i] = await this._executeQuery(queries[i]);
     }
+    return results;
+  }
+  async executeAndReturnLast(queries: SQLQuery[]): Promise<any[]> {
+    if (queries.length === 0) {
+      return [];
+    }
+    for (let i = 0; i < queries.length - 1; i++) {
+      await this._executeQuery(queries[i]);
+    }
+    return await this._executeQuery(queries[queries.length - 1]);
   }
 
   queryNodeStream(
@@ -233,7 +246,7 @@ export default class PgDriver implements Driver<TransactionOptions> {
 
   async *queryStream(
     query: SQLQuery,
-    {batchSize = 16, signal}: {batchSize?: number; signal?: AbortSignal},
+    {batchSize = 16, signal}: QueryStreamOptions = {},
   ): AsyncGenerator<any, void, unknown> {
     if (!isSqlQuery(query)) {
       throw new Error(
@@ -296,11 +309,6 @@ export default class PgDriver implements Driver<TransactionOptions> {
   }
 }
 
-function getLastResultSet(values: readonly any[][]): any[] {
-  if (values.length) return values[values.length - 1];
-  return [];
-}
-
 async function execute(client: PgClient, query: unknown): Promise<void> {
   try {
     await client.query(query);
@@ -313,9 +321,14 @@ async function executeQueryInternal(
   query: SQLQuery,
   q: {text: string; values: unknown[]},
   handlers: EventHandlers,
-) {
+): Promise<QueryResult> {
   try {
-    return (await client.query(q)) as QueryResult;
+    const result = (await client.query(q)) as QueryResult | QueryResult[];
+    if (Array.isArray(result)) {
+      return result[result.length - 1];
+    } else {
+      return result;
+    }
   } catch (ex) {
     handleError(ex, query, q, handlers);
   }

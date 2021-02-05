@@ -1,33 +1,36 @@
 import splitSqlQuery from '@databases/split-sql-query';
 import sql, {SQLQuery} from '@databases/sql';
-import throttle from 'throat';
 import {Disposable, TransactionFactory} from './Factory';
 import Driver from './Driver';
 import QueryableType from './QueryableType';
 import {
-  asyncNoop,
   executeAndReturnAll,
   executeAndReturnLast,
   queryInternal,
   txInternal,
 } from './utils';
+import {Lock, getLock} from './Lock';
 
-type TransactionOptions<TDriver extends Driver<any>> = TDriver extends Driver<
-  infer TTransactionOptions
->
+type TransactionOptions<
+  TDriver extends Driver<any, any>
+> = TDriver extends Driver<infer TTransactionOptions, any>
   ? TTransactionOptions
+  : unknown;
+type QueryStreamOptions<
+  TDriver extends Driver<any, any>
+> = TDriver extends Driver<any, infer TQueryStreamOptions>
+  ? TQueryStreamOptions
   : unknown;
 
 export default class BaseConnection<
   TTransaction extends Disposable,
-  TDriver extends Driver<any>
+  TDriver extends Driver<any, any>
 > {
   public readonly type = QueryableType.Connection;
   public readonly sql = sql;
 
-  private _disposed: boolean = false;
-  // TODO: lock with timetout!!
-  protected readonly _lock = throttle(1);
+  private _disposed: undefined | Promise<void>;
+  protected readonly _lock: Lock;
   protected _throwIfDisposed() {
     if (this._disposed) {
       throw new Error(
@@ -44,6 +47,7 @@ export default class BaseConnection<
   ) {
     this._driver = driver;
     this._factories = factories;
+    this._lock = getLock(driver.lockTimeoutMilliseconds);
   }
 
   async task<T>(fn: (connection: this) => Promise<T>): Promise<T> {
@@ -51,12 +55,17 @@ export default class BaseConnection<
     return await fn(this);
   }
 
-  tx<TResult>(
+  async tx<TResult>(
     fn: (connection: TTransaction) => Promise<TResult>,
     options?: TransactionOptions<TDriver>,
   ): Promise<TResult> {
     this._throwIfDisposed();
-    return this._lock(txInternal, this._driver, this._factories, fn, options);
+    await this._lock.aquireLock();
+    try {
+      return await txInternal(this._driver, this._factories, fn, options);
+    } finally {
+      this._lock.releaseLock();
+    }
   }
 
   async query(query: SQLQuery): Promise<any[]>;
@@ -65,24 +74,41 @@ export default class BaseConnection<
     this._throwIfDisposed();
     if (Array.isArray(query)) {
       if (query.length === 0) return [];
-      return await this._lock(
-        queryInternal,
-        this._driver,
-        query,
-        executeAndReturnAll,
-      );
+      await this._lock.aquireLock();
+      try {
+        return await queryInternal(this._driver, query, executeAndReturnAll);
+      } finally {
+        this._lock.releaseLock();
+      }
     } else {
-      return await this._lock(
-        queryInternal,
-        this._driver,
-        splitSqlQuery(query),
-        executeAndReturnLast,
-      );
+      await this._lock.aquireLock();
+      try {
+        return await queryInternal(
+          this._driver,
+          splitSqlQuery(query),
+          executeAndReturnLast,
+        );
+      } finally {
+        this._lock.releaseLock();
+      }
+    }
+  }
+
+  async *queryStream(
+    query: SQLQuery,
+    options?: QueryStreamOptions<TDriver>,
+  ): AsyncGenerator<any, void, unknown> {
+    await this._lock.aquireLock();
+    try {
+      for await (const record of this._driver.queryStream(query, options)) {
+        yield record;
+      }
+    } finally {
+      this._lock.releaseLock();
     }
   }
 
   async dispose() {
-    this._disposed = true;
-    await this._lock(asyncNoop);
+    return this._disposed || (this._disposed = this._lock.pool());
   }
 }

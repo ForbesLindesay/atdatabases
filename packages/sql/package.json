@@ -6,7 +6,7 @@
   "types": "./lib/index.d.ts",
   "dependencies": {},
   "devDependencies": {
-    "@types/node": "^13.13.4"
+    "@types/node": "^14.14.25"
   },
   "scripts": {},
   "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/sql",

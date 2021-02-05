@@ -14,7 +14,7 @@ test('ConnectionPool', async () => {
   let nextConnection = 1;
   const connections = new Set();
   const pool = createConnectionPool({
-    getConnection: async () => {
+    openConnection: async () => {
       const connection = nextConnection++;
       connections.add(connection);
       return connection;
@@ -36,6 +36,7 @@ test('ConnectionPool', async () => {
   b.release();
   const d = await pool.getConnection();
   expect(d.connection).toBe(2);
+  debugger;
 
   const ePromise = pool.getConnection();
   a.release();
@@ -86,7 +87,7 @@ test('ConnectionPool - Unlimited size', async () => {
   let nextConnection = 1;
   const connections = new Set();
   const pool = createConnectionPool({
-    getConnection: async () => {
+    openConnection: async () => {
       const connection = nextConnection++;
       connections.add(connection);
       return connection;
@@ -139,7 +140,7 @@ test('ConnectionPool - maxUses', async () => {
   let nextConnection = 1;
   const connections = new Set();
   const pool = createConnectionPool({
-    getConnection: async () => {
+    openConnection: async () => {
       const connection = nextConnection++;
       connections.add(connection);
       return connection;
@@ -183,7 +184,7 @@ test('ConnectionPool - idleTimeoutMilliseconds', async () => {
   let nextConnection = 1;
   const connections = new Set();
   const pool = createConnectionPool({
-    getConnection: async () => {
+    openConnection: async () => {
       const connection = nextConnection++;
       connections.add(connection);
       return connection;
@@ -224,7 +225,7 @@ test('ConnectionPool - queueTimeoutMilliseconds', async () => {
   let nextConnection = 1;
   const connections = new Set();
   const pool = createConnectionPool({
-    getConnection: async () => {
+    openConnection: async () => {
       const connection = nextConnection++;
       connections.add(connection);
       return connection;
@@ -261,7 +262,7 @@ test('ConnectionPool - releaseTimeoutMilliseconds', async () => {
   const connections = new Set();
   const timedOut = new Set();
   const pool = createConnectionPool({
-    getConnection: async () => {
+    openConnection: async () => {
       const connection = nextConnection++;
       connections.add(connection);
       return connection;

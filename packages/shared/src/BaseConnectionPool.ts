@@ -15,17 +15,22 @@ import {
   txInternal,
 } from './utils';
 
-type TransactionOptions<TDriver extends Driver<any>> = TDriver extends Driver<
-  infer TTransactionOptions
->
+type TransactionOptions<
+  TDriver extends Driver<any, any>
+> = TDriver extends Driver<infer TTransactionOptions, any>
   ? TTransactionOptions
+  : unknown;
+type QueryStreamOptions<
+  TDriver extends Driver<any, any>
+> = TDriver extends Driver<any, infer TQueryStreamOptions>
+  ? TQueryStreamOptions
   : unknown;
 
 export {PoolOptions};
 export default class BaseConnectionPool<
   TConnection extends Disposable,
   TTransaction extends Disposable,
-  TDriver extends Driver<any>
+  TDriver extends Driver<any, any>
 > {
   public readonly type = QueryableType.ConnectionPool;
   public readonly sql = sql;
@@ -105,6 +110,23 @@ export default class BaseConnectionPool<
         splitSqlQuery(query),
         executeAndReturnLast,
       );
+    }
+  }
+
+  async *queryStream(
+    query: SQLQuery,
+    options?: QueryStreamOptions<TDriver>,
+  ): AsyncGenerator<any, void, unknown> {
+    const poolRecord = await this._pool.getConnection();
+    try {
+      for await (const record of poolRecord.connection.queryStream(
+        query,
+        options,
+      )) {
+        yield record;
+      }
+    } finally {
+      poolRecord.dispose();
     }
   }
 

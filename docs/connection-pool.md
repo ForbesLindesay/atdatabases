@@ -9,6 +9,37 @@ The `@databases/connection-pool` package provides a generic, async connection po
 1. There is a significant cost to create or destroy connections, and you therefore want to recycle existing connections wherever possible
 2. There is a limit to the total number of connections it is ok to create, and you therefore want to ensure that additional concurrent requests are queued.
 
+## Errors
+
+### Open Connection
+
+- If `.openConnection` throws an error, we decrement the count of connections in the pool, so that a new attempt to create a connection can be made, then re-throw the error so the original call to get a connection from the pool will error.
+- If `.openConnection` takes longer than `openConnectionTimeoutMilliseconds` (defaults to `60_000`), we decrement the count of connections in the pool, then throw an error explaining that opening the connection timed out. If `.openConnection` eventually returns a connection, but it is after the timeout, we will attempt to close the connection and will not make any further adjustments to the pool.
+
+### Close Connection
+
+- If `.closeConnection` throws an error, we call `options.onErrorClosingConnection` if it is provided, otherwise we call `console.warn` with the error message. We still decrement the count of connections in the pool as if it succeeded.
+- If `.closeConnection` takes longer than `closeConnectionTimeoutMilliseconds` (defaults to `60_000`), we call `options.onTimeoutClosingConnection` if it is provided, otherwise we call `console.warn`. We still decrement the count of connections in the pool, and we ignore the result if `.closeConnection` does eventually return or throw after timing out.
+
+### Release Timeout
+
+- If you specify `releaseTimeoutMilliseconds` and do not `release` or `dispose` the connection within the timeout, we decrement the count of connections in the pool and then call `onReleaseTimeout`. We do not also attempt to close the connection, as it may actually still be in use, it is your responsibility to do that or crash the app.
+
+### On Active
+
+- If `.onActive` throws an error, we decrement the count of connections in the pool, then re-throw the error so the call to get a connection from the pool will error. N.B. we do not attempt to close the connection.
+- `.onActive` is not async, so cannot timeout.
+
+### On Inactive
+
+- If `.onIdle` throws an error, we decrement the number of connections in the pool, then re-throw the error so the call to `release` the connection will error. N.B. we do not attempt to close the connection.
+- `.onIdle` is not async, so cannot timeout.
+
+// If an error is thrown while marking a connection active or marking a connection as idle
+// the corresponding connection is removed from the pool, and the error is rethrown.
+
+// If waiting for a connection to be released times out, call `onReleaseTimeout`
+
 ## Usage
 
 ```typescript

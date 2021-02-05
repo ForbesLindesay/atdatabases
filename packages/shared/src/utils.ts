@@ -3,23 +3,23 @@ import type Driver from './Driver';
 import {ConnectionFactory, Disposable, TransactionFactory} from './Factory';
 
 export function executeAndReturnAll<TTransactionOptions>(
-  driver: Driver<TTransactionOptions>,
+  driver: Driver<TTransactionOptions, any>,
   queries: SQLQuery[],
 ): Promise<any[][]> {
   return driver.executeAndReturnAll(queries);
 }
 export function executeAndReturnLast<TTransactionOptions>(
-  driver: Driver<TTransactionOptions>,
+  driver: Driver<TTransactionOptions, any>,
   queries: SQLQuery[],
 ): Promise<any[]> {
   return driver.executeAndReturnLast(queries);
 }
 
 export async function queryInternal<TTransactionOptions, TResult>(
-  driver: Driver<TTransactionOptions>,
+  driver: Driver<TTransactionOptions, any>,
   queries: SQLQuery[],
   fn: <TTransactionOptions>(
-    driver: Driver<TTransactionOptions>,
+    driver: Driver<TTransactionOptions, any>,
     queries: SQLQuery[],
   ) => Promise<TResult>,
 ): Promise<TResult> {
@@ -43,7 +43,7 @@ export async function queryInternal<TTransactionOptions, TResult>(
 export async function taskInternal<
   TConnection extends Disposable,
   TTransactionOptions,
-  TDriver extends Driver<TTransactionOptions>,
+  TDriver extends Driver<TTransactionOptions, any>,
   TResult
 >(
   driver: TDriver,
@@ -60,7 +60,7 @@ export async function taskInternal<
 export async function txInternal<
   TTransaction extends Disposable,
   TTransactionOptions,
-  TDriver extends Driver<TTransactionOptions>,
+  TDriver extends Driver<TTransactionOptions, any>,
   TResult
 >(
   driver: TDriver,

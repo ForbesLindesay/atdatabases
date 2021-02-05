@@ -3,7 +3,6 @@ import {SQLQuery} from '@databases/sql';
 import {escapePostgresIdentifier} from '@databases/escape-identifier';
 import Connection from './Connection';
 import Transaction from './Transaction';
-import AbortSignal from './types/AbortSignal';
 import {PassThrough, Readable} from 'stream';
 import PgClient from './types/PgClient';
 import {ConnectionPool as IConnectionPool} from './types/Queryable';
@@ -24,9 +23,26 @@ const factories: Factory<PgDriver, Connection, Transaction> = {
   createConnection(driver) {
     return new Connection(driver, factories);
   },
-  async canRecycleConnection() {
-    // never recycle connections on error
-    return false;
+  async canRecycleConnection(client, _err) {
+    try {
+      let timeout: NodeJS.Timeout | undefined;
+      const result:
+        | undefined
+        | {1?: {rows?: {0?: {result?: number}}}} = await Promise.race([
+        client.client.query(
+          'BEGIN TRANSACTION READ ONLY;SELECT 1 AS result;COMMIT;',
+        ) as any,
+        new Promise((r) => {
+          timeout = setTimeout(r, 100);
+        }),
+      ]);
+      if (timeout !== undefined) {
+        clearTimeout(timeout);
+      }
+      return result?.[1]?.rows?.[0]?.result === 1;
+    } catch (ex) {
+      return false;
+    }
   },
 };
 
@@ -57,7 +73,10 @@ function timeout<T>(promise: Promise<T>): Promise<T> {
 const getConnectionPoolOptions = (
   srcConfig: PgOptions,
   schema: string | string[] | undefined,
-  poolOptions: Omit<PoolOptions<PgDriver>, 'getConnection' | 'closeConnection'>,
+  poolOptions: Omit<
+    PoolOptions<PgDriver>,
+    'openConnection' | 'closeConnection'
+  >,
   handlers: EventHandlers,
   onError: (err: Error) => void,
 ): PoolOptions<PgDriver> => {
@@ -85,7 +104,7 @@ const getConnectionPoolOptions = (
   // }
   return {
     ...poolOptions,
-    getConnection: async (removeFromPool) => {
+    openConnection: async (removeFromPool) => {
       const driver = await src();
       try {
         await typesSetup.callPrecondition(driver.client);
@@ -110,11 +129,17 @@ const getConnectionPoolOptions = (
       }
 
       driver.onAddingToPool(removeFromPool, onError);
+      if (handlers.onConnectionOpened) {
+        handlers.onConnectionOpened();
+      }
       return driver;
     },
     closeConnection: async (driver) => {
       try {
         await timeout(driver.dispose());
+        if (handlers.onConnectionClosed) {
+          handlers.onConnectionClosed();
+        }
       } catch (ex) {
         console.warn(ex.message);
       }
@@ -141,7 +166,7 @@ export default class ConnectionPool
     }: {
       poolOptions?: Omit<
         PoolOptions<PgDriver>,
-        'getConnection' | 'closeConnection'
+        'openConnection' | 'closeConnection'
       >;
       schema?: string | string[];
       handlers: EventHandlers & {
@@ -235,28 +260,5 @@ export default class ConnectionPool
       })
       .catch((ex) => stream.emit('error', ex));
     return stream;
-  }
-
-  async *queryStream(
-    query: SQLQuery,
-    options: {
-      batchSize?: number;
-      signal?: AbortSignal | undefined;
-    } = {},
-  ): AsyncGenerator<any, void, unknown> {
-    const driver = await this._pool.getConnection();
-    let finished = false;
-    try {
-      for await (const row of driver.connection.queryStream(query, options)) {
-        yield row;
-      }
-      finished = true;
-    } finally {
-      if (finished) {
-        driver.release();
-      } else {
-        driver.dispose();
-      }
-    }
   }
 }

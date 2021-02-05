@@ -57,7 +57,6 @@ test('splitSqlQuery', () => {
   doesNotSplit(sql`
     SELECT * FROM ${sql.ident('my_table')} WHERE val = ${'foo;bar'};
   `);
-  // debugger;
   doesNotSplit(sql`
     SELECT * FROM ${sql.ident(
       'my_table',
@@ -76,4 +75,31 @@ test('splitSqlQuery', () => {
       sql`SELECT * FROM ${sql.ident('my_table')} WHERE id = ${42}`,
     ].map((q) => q.format(testFormatter)),
   );
+});
+
+test('regression - 1', () => {
+  expect(
+    splitSqlQuery(sql`
+      CREATE DOMAIN custom_types.email AS TEXT CHECK (VALUE ~ '^.+@.+$');
+      CREATE TYPE custom_types.currency AS ENUM('USD', 'GBP');
+      
+      CREATE TYPE custom_types.money_with_currency AS (
+        value NUMERIC(1000, 2),
+        currency custom_types.currency,
+        description TEXT
+      );
+      CREATE TYPE custom_types.balance_pair AS (
+        income custom_types.money_with_currency,
+        expenditure custom_types.money_with_currency
+      );
+      
+      CREATE TABLE custom_types.accounts (
+        email custom_types.email NOT NULL PRIMARY KEY,
+        balance custom_types.money_with_currency
+      );
+      CREATE TABLE custom_types.balance_pairs (
+        balance custom_types.balance_pair
+      );
+    `).length,
+  ).toBe(6);
 });

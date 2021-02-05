@@ -26,6 +26,18 @@ export default class Queue<T> {
     return undefined;
   }
   /**
+   * Look at an item off the start of the queue without removing it
+   */
+  peek(): T | undefined {
+    if (this._head.length !== 0) {
+      return this._head[this._head.length - 1];
+    }
+    if (this._tail.length !== 0) {
+      return this._tail[0];
+    }
+    return undefined;
+  }
+  /**
    * Get the total number of items in the queue
    */
   getLength() {

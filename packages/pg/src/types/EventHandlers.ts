@@ -1,6 +1,8 @@
 import {SQLQuery} from '@databases/sql';
 
 export default interface EventHandlers {
+  onConnectionOpened?: () => void;
+  onConnectionClosed?: () => void;
   onQueryStart?: (
     query: SQLQuery,
     formattedQuery: {

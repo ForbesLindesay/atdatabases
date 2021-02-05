@@ -12,7 +12,7 @@
     "rimraf": "^2.6.2"
   },
   "devDependencies": {
-    "@types/node": "^13.13.4"
+    "@types/node": "^14.14.25"
   },
   "scripts": {},
   "bin": {
