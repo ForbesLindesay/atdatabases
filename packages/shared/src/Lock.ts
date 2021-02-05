@@ -50,7 +50,7 @@ class LockImpl implements Lock {
       );
     }
     if (this._executing) {
-      if (!this._timeout === undefined) {
+      if (this._timeout === undefined) {
         this._timeout = setTimeout(this._onTimeout, this._timeoutMilliseconds);
       }
       return new Promise<QueueRecord>((resolve) => {

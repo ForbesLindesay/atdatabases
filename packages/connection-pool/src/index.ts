@@ -31,7 +31,7 @@ class PoolConnectionImpl<T> implements PoolConnection<T> {
   private readonly _record: IActivePoolRecord<T>;
   private _released = false;
   private readonly _pool: ConnectionPoolState<T>;
-  private readonly _timeout: NodeJS.Timeout | number | undefined;
+  private readonly _timeout: NodeJS.Timeout | undefined;
   private _timedOut = false;
   constructor(
     record: IActivePoolRecord<T>,
@@ -54,7 +54,7 @@ class PoolConnectionImpl<T> implements PoolConnection<T> {
       return;
     }
     if (this._timeout !== undefined) {
-      clearTimeout(this._timeout as number);
+      clearTimeout(this._timeout);
     }
     if (this._released) {
       throw doubleReleaseError();
@@ -67,7 +67,7 @@ class PoolConnectionImpl<T> implements PoolConnection<T> {
       return;
     }
     if (this._timeout !== undefined) {
-      clearTimeout(this._timeout as number);
+      clearTimeout(this._timeout);
     }
     if (this._released) {
       throw doubleReleaseError();
