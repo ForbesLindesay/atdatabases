@@ -31,7 +31,7 @@ class PoolConnectionImpl<T> implements PoolConnection<T> {
   private readonly _record: IActivePoolRecord<T>;
   private _released = false;
   private readonly _pool: ConnectionPoolState<T>;
-  private readonly _timeout: NodeJS.Timeout | undefined;
+  private readonly _timeout: any | undefined;
   private _timedOut = false;
   constructor(
     record: IActivePoolRecord<T>,

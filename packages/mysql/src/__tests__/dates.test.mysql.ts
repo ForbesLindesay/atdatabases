@@ -352,13 +352,13 @@ test('dates with timezone set to utc', async () => {
       {
         a: new Date('2000-06-03T05:40:10.000Z'),
         b: new Date('2000-06-03T05:40:10.000Z'),
-        c: '15:10:10',
+        c: '05:40:10',
         d: 2000,
         id: 1,
       },
       {
-        a: new Date('2000-06-02T20:10:10.000Z'),
-        b: new Date('2000-06-02T20:10:10.000Z'),
+        a: new Date('2000-06-03T05:40:10.000Z'),
+        b: new Date('2000-06-03T05:40:10.000Z'),
         c: '05:40:10',
         d: 2000,
         id: 2,
@@ -370,19 +370,19 @@ test('dates with timezone set to utc', async () => {
       `),
     ).toEqual([
       {
-        date_value: new Date('2000-06-02T14:30:00.000Z'),
+        date_value: new Date('2000-06-03T00:00:00.000Z'),
         id: 1,
       },
       {
-        date_value: new Date('2000-06-02T14:30:00.000Z'),
+        date_value: new Date('2000-06-03T00:00:00.000Z'),
         id: 2,
       },
       {
-        date_value: new Date('2000-06-02T14:30:00.000Z'),
+        date_value: new Date('2000-06-03T00:00:00.000Z'),
         id: 3,
       },
       {
-        date_value: new Date('2000-06-03T14:30:00.000Z'),
+        date_value: new Date('2000-06-03T00:00:00.000Z'),
         id: 4,
       },
     ]);

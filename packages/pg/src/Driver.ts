@@ -85,7 +85,7 @@ export default class PgDriver
 
   async canRecycleConnectionAfterError(_err: Error) {
     try {
-      let timeout: NodeJS.Timeout | undefined;
+      let timeout: any | undefined;
       const result:
         | undefined
         | {1?: {rows?: {0?: {result?: number}}}} = await Promise.race([
