@@ -5,7 +5,7 @@
 			"type": "npm",
 			"script": "test",
 			"group": "build",
-			"label": "Test/All",
+			"label": "Test - All",
 			"detail": "Run all tests",
 			"presentation": {
 				"reveal": "always",
@@ -16,7 +16,7 @@
 			"type": "npm",
 			"script": "test:node",
 			"group": "build",
-			"label": "Test/Node.js",
+			"label": "Test - Node.js",
 			"presentation": {
 				"reveal": "always",
 			},
@@ -26,7 +26,7 @@
 			"type": "npm",
 			"script": "test:pg",
 			"group": "build",
-			"label": "Test/Postgres",
+			"label": "Test - Postgres",
 			"presentation": {
 				"reveal": "always",
 			},
@@ -36,7 +36,7 @@
 			"type": "npm",
 			"script": "test:mysql",
 			"group": "build",
-			"label": "Test/MySQL",
+			"label": "Test - MySQL",
 			"presentation": {
 				"reveal": "always",
 			},
@@ -46,7 +46,7 @@
 			"type": "npm",
 			"script": "install",
 			"group": "build",
-			"label": "Build / Install Dependencies",
+			"label": "Build - Install Dependencies",
 			"presentation": {
 				"reveal": "always",
 			},
@@ -56,7 +56,7 @@
 			"type": "npm",
 			"script": "build",
 			"group": "build",
-			"label": "Build / TypeScript",
+			"label": "Build - TypeScript",
 			"detail": "Compile all TypeScript",
 			"presentation": {
 				"reveal": "always",
@@ -67,7 +67,7 @@
 			"type": "npm",
 			"script": "tslint",
 			"group": "build",
-			"label": "Lint / TSLint",
+			"label": "Lint - TSLint",
 			"detail": "Lint all files in the workspace",
 			"presentation": {
 				"reveal": "never",
@@ -94,7 +94,7 @@
 			"type": "npm",
 			"script": "clean",
 			"group": "build",
-			"label": "Build / Clean",
+			"label": "Build - Clean",
 			"presentation": {
 				"reveal": "always",
 			},
@@ -104,7 +104,7 @@
 			"type": "npm",
 			"script": "prettier:write",
 			"group": "build",
-			"label": "Lint / Prettier",
+			"label": "Lint - Prettier",
 			"presentation": {
 				"reveal": "always",
 			},
@@ -114,7 +114,7 @@
 			"type": "npm",
 			"script": "update-workflows",
 			"group": "build",
-			"label": "Build / Update Workflows",
+			"label": "Build - Update Workflows",
 			"presentation": {
 				"reveal": "always",
 			},
