@@ -183,10 +183,12 @@ export class PoolOptionsObject<T> {
     }
   }
 
-  private _onConnectionAfterTimeout = (connection: T) => {
+  private readonly _onConnectionAfterTimeout = (connection: T) => {
     void this.closeConnection(connection);
   };
-  public openConnection(removeFromPool: () => void): Promise<T | Timeout> {
+  public async openConnection(
+    removeFromPool: () => void,
+  ): Promise<T | Timeout> {
     return withTimeout(
       this._options.openConnection,
       {
@@ -197,7 +199,7 @@ export class PoolOptionsObject<T> {
     );
   }
 
-  private _onConnectionClosed = (timeout: Timeout | void) => {
+  private readonly _onConnectionClosed = (timeout: Timeout | void) => {
     if (isTimeout(timeout)) {
       if (this._options.onTimeoutClosingConnection) {
         this._options.onTimeoutClosingConnection();
@@ -208,14 +210,14 @@ export class PoolOptionsObject<T> {
       }
     }
   };
-  private _onConnectionError = (err: Error) => {
+  private readonly _onConnectionError = (err: Error) => {
     if (this._options.onErrorClosingConnection) {
       this._options.onErrorClosingConnection(err);
     } else {
       console.error(`Error closing connection: ${err.stack}`);
     }
   };
-  public closeConnection(connection: T): Promise<void> {
+  public async closeConnection(connection: T): Promise<void> {
     return withTimeout(
       this._options.closeConnection,
       {timeoutMilliseconds: this._closeConnectionTimeoutMilliseconds},
@@ -234,7 +236,7 @@ export class PoolOptionsObject<T> {
   }
 
   public onReleaseTimeout(connection: T) {
-    return withTimeout(
+    void withTimeout(
       this._options.onReleaseTimeout!,
       {timeoutMilliseconds: this._closeConnectionTimeoutMilliseconds},
       connection,

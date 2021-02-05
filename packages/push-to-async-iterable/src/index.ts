@@ -1,9 +1,9 @@
 import {AsyncQueue} from '@databases/queue';
 
 export interface PushStreamInput<T> {
-  onData(value: T): void;
-  onError(err: any): void;
-  onEnd(): void;
+  onData: (value: T) => void;
+  onError: (err: any) => void;
+  onEnd: () => void;
 }
 export interface PushStream {
   dispose(): void;
@@ -70,6 +70,7 @@ export default function pushToAsyncIterable<T>(
       throw e;
     },
     [Symbol.asyncIterator](): AsyncGenerator<T, void, unknown> {
+      // tslint:disable-next-line no-invalid-this
       return this;
     },
   };

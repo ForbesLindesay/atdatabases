@@ -13,7 +13,9 @@ export default function definePrecondition<TArgs extends any[], TResult>(
     return q;
   };
   const emptyPromise = Promise.resolve(undefined);
-  const callPrecondition = (...args: TArgs): Promise<TResult | undefined> => {
+  const callPrecondition = async (
+    ...args: TArgs
+  ): Promise<TResult | undefined> => {
     if (!done) {
       if (doing) {
         return new Promise<undefined>((resolve, reject) =>

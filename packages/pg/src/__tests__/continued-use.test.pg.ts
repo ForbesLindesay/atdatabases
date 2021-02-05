@@ -230,7 +230,6 @@ test('continued & varied use', async () => {
       startProcess(stopPromise).then(
         (count) => {
           testCount += count;
-          return undefined;
         },
         (err) => err,
       ),
@@ -243,7 +242,7 @@ test('continued & varied use', async () => {
     throw err;
   }
   await db.dispose();
-  console.log(
+  console.info(
     `test count = ${testCount}\nduration = ${
       Date.now() - start
     }ms\nsuccessful queries=${queryResultsCount}\nfailing queries=${queryErrorCount} (N.B. we are intentionally testing queries with errors)\nconnections opened=${connectionsOpened}\nmax concurrent connections=${maxConcurrentConnections}`,

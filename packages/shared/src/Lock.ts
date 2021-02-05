@@ -1,29 +1,29 @@
 import Queue from '@databases/queue';
 
-const lockPool: PoolLock[] = [];
-
-export function getLock(timeoutMilliseconds: number): Lock {
-  if (lockPool.length) {
-    const record = lockPool.pop()!;
-    return record.setTimeout(timeoutMilliseconds);
-  } else {
-    return new LockImpl(timeoutMilliseconds);
+class QueueRecord {
+  public isTimedOut = false;
+  public readonly resolve: (record: QueueRecord) => void;
+  public readonly createdAt: number;
+  constructor(resolve: (record: QueueRecord) => void) {
+    this.resolve = resolve;
+    this.createdAt = Date.now();
   }
 }
 
 interface PoolLock {
   setTimeout(timeoutMilliseconds: number): Lock;
 }
+const lockPool: PoolLock[] = [];
+
 export interface Lock {
   pool(): Promise<void>;
   aquireLock(): Promise<void>;
   releaseLock(): void;
 }
-const ResolvedPromise = Promise.resolve();
 class LockImpl implements Lock {
+  private readonly _queue = new Queue<QueueRecord>();
   private _active = true;
   private _executing = false;
-  private _queue = new Queue<QueueRecord>();
   private _timeout: NodeJS.Timeout | undefined;
   private _timeoutMilliseconds: number;
   constructor(timeoutMilliseconds: number) {
@@ -43,7 +43,7 @@ class LockImpl implements Lock {
     this._executing = false;
     lockPool.push(this);
   }
-  public aquireLock(): Promise<void> {
+  public async aquireLock(): Promise<void> {
     if (!this._active) {
       throw new Error(
         'Cannot call Lock after returning the object to the pool.',
@@ -56,8 +56,6 @@ class LockImpl implements Lock {
       return new Promise<QueueRecord>((resolve) => {
         this._queue.push(new QueueRecord(resolve));
       }).then(this._runDelayed);
-    } else {
-      return ResolvedPromise;
     }
   }
 
@@ -70,7 +68,7 @@ class LockImpl implements Lock {
     }
   }
 
-  private _onTimeout = () => {
+  private readonly _onTimeout = () => {
     this._timeout = undefined;
     const record = this._queue.shift();
     if (record) {
@@ -78,7 +76,7 @@ class LockImpl implements Lock {
       record.resolve(record);
     }
   };
-  private _runDelayed = (d: QueueRecord): void => {
+  private readonly _runDelayed = (d: QueueRecord): void => {
     if (this._timeout) {
       clearTimeout(this._timeout);
       this._timeout = undefined;
@@ -95,16 +93,14 @@ class LockImpl implements Lock {
         `Timed out waiting for lock after ${this._timeoutMilliseconds}ms`,
       );
     }
-    return undefined;
   };
 }
 
-class QueueRecord {
-  public isTimedOut = false;
-  public readonly resolve: (record: QueueRecord) => void;
-  public readonly createdAt: number;
-  constructor(resolve: (record: QueueRecord) => void) {
-    this.resolve = resolve;
-    this.createdAt = Date.now();
+export function getLock(timeoutMilliseconds: number): Lock {
+  if (lockPool.length) {
+    const record = lockPool.pop()!;
+    return record.setTimeout(timeoutMilliseconds);
+  } else {
+    return new LockImpl(timeoutMilliseconds);
   }
 }

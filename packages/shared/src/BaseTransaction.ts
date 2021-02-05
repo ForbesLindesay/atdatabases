@@ -54,11 +54,11 @@ export default class BaseTransaction<
       const subTransaction = this._factories.createTransaction(this._driver);
       try {
         const result = await fn(subTransaction);
-        subTransaction.dispose();
+        await subTransaction.dispose();
         await this._driver.releaseSavepoint(savepointName);
         return result;
       } catch (ex) {
-        subTransaction.dispose();
+        await subTransaction.dispose();
         await this._driver.rollbackToSavepoint(savepointName);
         throw ex;
       }

@@ -26,6 +26,57 @@ export type {PoolOptions, PoolConnection, ConnectionPool};
 
 const RESOLVED_PROMISE = Promise.resolve();
 
+class PoolConnectionImpl<T> implements PoolConnection<T> {
+  public readonly connection: T;
+  private readonly _record: IActivePoolRecord<T>;
+  private _released = false;
+  private readonly _pool: ConnectionPoolState<T>;
+  private readonly _timeout: NodeJS.Timeout | number | undefined;
+  private _timedOut = false;
+  constructor(
+    record: IActivePoolRecord<T>,
+    pool: ConnectionPoolState<T>,
+    onReleaseTimeout: (record: IActivePoolRecord<T>) => void,
+    releaseTimeoutMilliseconds: number | undefined,
+  ) {
+    this.connection = record.connection!;
+    this._record = record;
+    this._pool = pool;
+    if (releaseTimeoutMilliseconds) {
+      this._timeout = setTimeout(() => {
+        this._timedOut = true;
+        onReleaseTimeout(record);
+      }, releaseTimeoutMilliseconds);
+    }
+  }
+  release() {
+    if (this._timedOut) {
+      return;
+    }
+    if (this._timeout !== undefined) {
+      clearTimeout(this._timeout as number);
+    }
+    if (this._released) {
+      throw doubleReleaseError();
+    }
+    this._released = true;
+    this._pool._releaseConnection(this._record);
+  }
+  dispose() {
+    if (this._timedOut) {
+      return;
+    }
+    if (this._timeout !== undefined) {
+      clearTimeout(this._timeout as number);
+    }
+    if (this._released) {
+      throw doubleReleaseError();
+    }
+    this._released = true;
+    this._pool._closeConnection(this._record);
+  }
+}
+
 class ConnectionPoolState<T> implements ConnectionPool<T> {
   private readonly _options: PoolOptionsObject<T>;
 
@@ -62,10 +113,10 @@ class ConnectionPoolState<T> implements ConnectionPool<T> {
       this._onDrained();
     }
   }
-  private _onIdleTimeout = (record: IIdlePoolRecord<T>) => {
+  private readonly _onIdleTimeout = (record: IIdlePoolRecord<T>) => {
     this._closeConnection(record);
   };
-  private _onReleaseTimeout = (record: IActivePoolRecord<T>) => {
+  private readonly _onReleaseTimeout = (record: IActivePoolRecord<T>) => {
     const connection = record.connection;
     setRecordState(record, PoolRecordState.Disposed);
     this._decreaseTotalConnectionsCount();
@@ -76,7 +127,7 @@ class ConnectionPoolState<T> implements ConnectionPool<T> {
     if (!this._options.maxSize) return true;
     return this._totalConnectionsCount < this._options.maxSize;
   }
-  private _openConnection(): Promise<IIdlePoolRecord<T>> {
+  private async _openConnection(): Promise<IIdlePoolRecord<T>> {
     const [destroyed, destroy] = defer<void>();
     this._increaseTotalConnectionsCount();
     return RESOLVED_PROMISE.then(() => this._options.openConnection(destroy))
@@ -86,7 +137,7 @@ class ConnectionPoolState<T> implements ConnectionPool<T> {
         }
         const record = getPoolRecord(connection);
         const r: IPoolRecord<T> = record;
-        destroyed.then(() => {
+        void destroyed.then(() => {
           if (isActivePoolRecord(r)) {
             r.shouldDestroy = true;
           } else if (isIdlePoolRecord(r)) {
@@ -248,57 +299,6 @@ class ConnectionPoolState<T> implements ConnectionPool<T> {
     }
 
     await this._drained;
-  }
-}
-
-class PoolConnectionImpl<T> implements PoolConnection<T> {
-  public readonly connection: T;
-  private readonly _record: IActivePoolRecord<T>;
-  private _released = false;
-  private readonly _pool: ConnectionPoolState<T>;
-  private readonly _timeout: NodeJS.Timeout | undefined;
-  private _timedOut = false;
-  constructor(
-    record: IActivePoolRecord<T>,
-    pool: ConnectionPoolState<T>,
-    onReleaseTimeout: (record: IActivePoolRecord<T>) => void,
-    releaseTimeoutMilliseconds: number | undefined,
-  ) {
-    this.connection = record.connection!;
-    this._record = record;
-    this._pool = pool;
-    if (releaseTimeoutMilliseconds) {
-      this._timeout = setTimeout(() => {
-        this._timedOut = true;
-        onReleaseTimeout(record);
-      }, releaseTimeoutMilliseconds);
-    }
-  }
-  release() {
-    if (this._timedOut) {
-      return;
-    }
-    if (this._timeout !== undefined) {
-      clearTimeout(this._timeout);
-    }
-    if (this._released) {
-      throw doubleReleaseError();
-    }
-    this._released = true;
-    this._pool._releaseConnection(this._record);
-  }
-  dispose() {
-    if (this._timedOut) {
-      return;
-    }
-    if (this._timeout !== undefined) {
-      clearTimeout(this._timeout);
-    }
-    if (this._released) {
-      throw doubleReleaseError();
-    }
-    this._released = true;
-    this._pool._closeConnection(this._record);
   }
 }
 

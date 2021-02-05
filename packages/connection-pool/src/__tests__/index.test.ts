@@ -36,7 +36,6 @@ test('ConnectionPool', async () => {
   b.release();
   const d = await pool.getConnection();
   expect(d.connection).toBe(2);
-  debugger;
 
   const ePromise = pool.getConnection();
   a.release();
@@ -278,7 +277,10 @@ test('ConnectionPool - releaseTimeoutMilliseconds', async () => {
     maxSize: 2,
     releaseTimeoutMilliseconds: 10,
   });
-  let [a, b] = await Promise.all([pool.getConnection(), pool.getConnection()]);
+  const [a, b] = await Promise.all([
+    pool.getConnection(),
+    pool.getConnection(),
+  ]);
   expect(a.connection).toBe(1);
   expect(b.connection).toBe(2);
 

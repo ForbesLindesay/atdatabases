@@ -9,21 +9,18 @@ export default interface PgClient {
   end(): Promise<void>;
 
   on(event: 'error', handler: (err: Error) => void): void;
-  on(event: 'connect', handler: () => void): void;
-  on(event: 'drain', handler: () => void): void;
-  on(event: 'end', handler: () => void): void;
-  on(event: 'notification', handler: (notification: unknown) => void): void;
-  on(event: 'notice', handler: (notice: unknown) => void): void;
+  on(event: 'connect' | 'drain' | 'end', handler: () => void): void;
+  on(
+    event: 'notification' | 'notice',
+    handler: (notificationOrNotice: unknown) => void,
+  ): void;
 
   removeListener(event: 'error', handler: (err: Error) => void): void;
-  removeListener(event: 'connect', handler: () => void): void;
-  removeListener(event: 'drain', handler: () => void): void;
-  removeListener(event: 'end', handler: () => void): void;
+  removeListener(event: 'connect' | 'drain' | 'end', handler: () => void): void;
   removeListener(
-    event: 'notification',
-    handler: (notification: unknown) => void,
+    event: 'notification' | 'notice',
+    handler: (notificationOrNotice: unknown) => void,
   ): void;
-  removeListener(event: 'notice', handler: (notice: unknown) => void): void;
 
   connection?: {stream?: {destroy?: () => void}};
 }

@@ -1,3 +1,5 @@
+/* tslint:disable:no-void-expression */
+
 import {Readable} from 'stream';
 import {escapePostgresIdentifier} from '@databases/escape-identifier';
 import {isSQLError, SQLErrorCode} from '@databases/pg-errors';
@@ -37,7 +39,7 @@ export default class PgDriver
   }
   private _removeFromPool: undefined | (() => void);
   private _idleErrorEventHandler: undefined | ((err: Error) => void);
-  private _onIdleError = (err: Error) => {
+  private readonly _onIdleError = (err: Error) => {
     if (this._disposed) {
       return;
     }
@@ -63,20 +65,20 @@ export default class PgDriver
     this.client.on('error', this._onIdleError);
   }
 
-  connect(): Promise<void> {
-    return this.client.connect();
+  async connect(): Promise<void> {
+    return await this.client.connect();
   }
-  dispose(): Promise<void> {
+  async dispose(): Promise<void> {
     this.client.on('error', this._onIdleError);
     if (!this._endCalled) {
       this._endCalled = true;
       if (this.client.connection?.stream?.destroy) {
         this.client.connection.stream.destroy();
       } else {
-        this.client.end();
+        void this.client.end();
       }
     }
-    return this._disposed;
+    return await this._disposed;
   }
 
   async beginTransaction(options?: TransactionOptions) {
@@ -159,11 +161,6 @@ export default class PgDriver
 
     if (this._handlers.onQueryResults) {
       enforceUndefined(this._handlers.onQueryResults(query, q, results.rows));
-    }
-    if (results.rows === undefined) {
-      console.log('results=', results);
-      console.log('query=', q.text);
-      throw new Error('results.rows is undefined');
     }
     return results.rows;
   }

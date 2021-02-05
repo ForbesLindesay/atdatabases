@@ -46,7 +46,7 @@ const factories: Factory<PgDriver, Connection, Transaction> = {
   },
 };
 
-function timeout<T>(promise: Promise<T>): Promise<T> {
+async function timeout<T>(promise: Promise<T>): Promise<T> {
   let err = new Error('Operation timed out');
   try {
     throw err;
@@ -124,7 +124,9 @@ const getConnectionPoolOptions = (
           }
         }
       } catch (ex) {
-        driver.dispose();
+        await driver.dispose().catch(() => {
+          // ignore error within error
+        });
         throw ex;
       }
 

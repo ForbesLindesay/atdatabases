@@ -24,8 +24,8 @@ test('Queue', () => {
 });
 
 test('AsyncQueue', async () => {
-  var q = new AsyncQueue<number>();
-  var results = new Queue<Promise<number>>();
+  const q = new AsyncQueue<number>();
+  const results = new Queue<Promise<number>>();
   expect(q.getLength()).toBe(0);
   q.push(1);
   expect(q.getLength()).toBe(1);

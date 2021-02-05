@@ -19,8 +19,8 @@ export default class Waiter<T> {
   ) {
     this._resolve = resolve;
     if (timeoutMilliseconds) {
-      // tslint:disable-next-line: no-unbound-method
       this._timeout = setTimeout(
+        // tslint:disable-next-line: no-unbound-method
         Waiter.waiterTimeout,
         timeoutMilliseconds,
         this,

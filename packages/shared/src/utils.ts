@@ -2,13 +2,13 @@ import type {SQLQuery} from '@databases/sql';
 import type Driver from './Driver';
 import {ConnectionFactory, Disposable, TransactionFactory} from './Factory';
 
-export function executeAndReturnAll<TTransactionOptions>(
+export async function executeAndReturnAll<TTransactionOptions>(
   driver: Driver<TTransactionOptions, any>,
   queries: SQLQuery[],
 ): Promise<any[][]> {
   return driver.executeAndReturnAll(queries);
 }
-export function executeAndReturnLast<TTransactionOptions>(
+export async function executeAndReturnLast<TTransactionOptions>(
   driver: Driver<TTransactionOptions, any>,
   queries: SQLQuery[],
 ): Promise<any[]> {
@@ -88,9 +88,4 @@ export async function txInternal<
       throw ex;
     }
   }
-}
-
-const resolvedPromise = Promise.resolve();
-export function asyncNoop() {
-  return resolvedPromise;
 }

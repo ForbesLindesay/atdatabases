@@ -55,13 +55,13 @@ export default class Queue<T> {
 }
 
 export class AsyncQueue<T> {
-  private _items = new Queue<T>();
-  private _waiting = new Queue<(value: T) => void>();
+  private readonly _items = new Queue<T>();
+  private readonly _waiting = new Queue<(value: T) => void>();
   /**
    * Push an item onto the end of the queue
    */
   push(value: T) {
-    var waiting = this._waiting.shift();
+    const waiting = this._waiting.shift();
     if (waiting) {
       waiting(value);
     } else {
@@ -72,10 +72,10 @@ export class AsyncQueue<T> {
    * Get the next item from the start queue, waiting until one
    * is added if the queue is currently empty
    */
-  shift(): Promise<T> {
+  async shift(): Promise<T> {
     const item = this._items.shift();
     if (item) {
-      return Promise.resolve(item);
+      return item;
     } else {
       return new Promise((resolve) => {
         this._waiting.push(resolve);

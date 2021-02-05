@@ -36,8 +36,8 @@ export default class BaseConnectionPool<
   public readonly sql = sql;
 
   protected readonly _pool: ConnectionPool<TDriver>;
+  private readonly _factories: Factory<TDriver, TConnection, TTransaction>;
   private _disposed: boolean = false;
-  private _factories: Factory<TDriver, TConnection, TTransaction>;
   constructor(
     options: PoolOptions<TDriver>,
     factories: Factory<TDriver, TConnection, TTransaction>,
@@ -85,7 +85,7 @@ export default class BaseConnectionPool<
     return this._withDriverFromPool(taskInternal, this._factories, fn);
   }
 
-  tx<TResult>(
+  async tx<TResult>(
     fn: (connection: TTransaction) => Promise<TResult>,
     options?: TransactionOptions<TDriver>,
   ): Promise<TResult> {
