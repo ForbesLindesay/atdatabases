@@ -37,12 +37,12 @@ class PoolConnectionImpl<T> implements PoolConnection<T> {
     record: IActivePoolRecord<T>,
     pool: ConnectionPoolState<T>,
     onReleaseTimeout: (record: IActivePoolRecord<T>) => void,
-    releaseTimeoutMilliseconds: number | undefined,
+    releaseTimeoutMilliseconds: number,
   ) {
     this.connection = record.connection!;
     this._record = record;
     this._pool = pool;
-    if (releaseTimeoutMilliseconds) {
+    if (releaseTimeoutMilliseconds !== Infinity) {
       this._timeout = setTimeout(() => {
         this._timedOut = true;
         onReleaseTimeout(record);

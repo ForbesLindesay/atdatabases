@@ -26,6 +26,8 @@ type QueryStreamOptions<
   ? TQueryStreamOptions
   : unknown;
 
+const returnFalse = () => false;
+
 export {PoolOptions};
 export default class BaseConnectionPool<
   TConnection extends Disposable,
@@ -61,7 +63,11 @@ export default class BaseConnectionPool<
       if (releasing) {
         throw ex;
       }
-      if (await this._factories.canRecycleConnection(driver.connection, ex)) {
+      if (
+        await driver.connection
+          .canRecycleConnectionAfterError(ex)
+          .catch(returnFalse)
+      ) {
         releasing = true;
         driver.release();
       } else {
@@ -117,6 +123,7 @@ export default class BaseConnectionPool<
     query: SQLQuery,
     options?: QueryStreamOptions<TDriver>,
   ): AsyncGenerator<any, void, unknown> {
+    this._throwIfDisposed();
     const poolRecord = await this._pool.getConnection();
     try {
       for await (const record of poolRecord.connection.queryStream(

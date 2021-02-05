@@ -22,15 +22,17 @@ type QueryResult = {rows: any[]};
 
 export default class PgDriver
   implements Driver<TransactionOptions, QueryStreamOptions> {
-  public readonly lockTimeoutMilliseconds = 60_000;
+  public readonly aquireLockTimeoutMilliseconds: number;
   public readonly client: PgClient;
   private readonly _handlers: EventHandlers;
   private _endCalled = false;
   private readonly _disposed: Promise<void>;
-  constructor(client: PgClient, handlers: EventHandlers) {
-    // client.on('error', () => {
-    //   // do not crash on random errors
-    // });
+  constructor(
+    client: PgClient,
+    handlers: EventHandlers,
+    aquireLockTimeoutMilliseconds: number,
+  ) {
+    this.aquireLockTimeoutMilliseconds = aquireLockTimeoutMilliseconds;
     this._disposed = new Promise<void>((resolve) => {
       client.on('end', resolve);
     });
@@ -79,6 +81,28 @@ export default class PgDriver
       }
     }
     return await this._disposed;
+  }
+
+  async canRecycleConnectionAfterError(_err: Error) {
+    try {
+      let timeout: NodeJS.Timeout | undefined;
+      const result:
+        | undefined
+        | {1?: {rows?: {0?: {result?: number}}}} = await Promise.race([
+        this.client.query(
+          'BEGIN TRANSACTION READ ONLY;SELECT 1 AS result;COMMIT;',
+        ) as any,
+        new Promise((r) => {
+          timeout = setTimeout(r, 100);
+        }),
+      ]);
+      if (timeout !== undefined) {
+        clearTimeout(timeout);
+      }
+      return result?.[1]?.rows?.[0]?.result === 1;
+    } catch (ex) {
+      return false;
+    }
   }
 
   async beginTransaction(options?: TransactionOptions) {

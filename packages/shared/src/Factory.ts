@@ -6,7 +6,6 @@ export interface TransactionFactory<TDriver, TTransaction extends Disposable> {
 }
 export interface ConnectionFactory<TDriver, TConnection extends Disposable> {
   createConnection(driver: TDriver): TConnection;
-  canRecycleConnection(client: TDriver, err: Error): Promise<boolean>;
 }
 export default interface Factory<
   TDriver,

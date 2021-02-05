@@ -4,7 +4,7 @@ import cuid = require('cuid');
 import {Disposable, TransactionFactory} from './Factory';
 import Driver from './Driver';
 import QueryableType from './QueryableType';
-import {getLock, Lock} from './Lock';
+import {Lock, getLock} from '@databases/lock';
 
 type QueryStreamOptions<
   TDriver extends Driver<any, any>
@@ -19,10 +19,10 @@ export default class BaseTransaction<
   public readonly type = QueryableType.Transaction;
   public readonly sql = sql;
 
-  private readonly _lock: Lock;
+  protected readonly _lock: Lock;
 
   private _disposed: undefined | Promise<void>;
-  private _throwIfDisposed() {
+  protected _throwIfDisposed() {
     if (this._disposed) {
       throw new Error(
         'You cannot run any operations on a Transaction after it has been committed or rolled back.',
@@ -38,7 +38,7 @@ export default class BaseTransaction<
   ) {
     this._driver = driver;
     this._factories = factories;
-    this._lock = getLock(driver.lockTimeoutMilliseconds);
+    this._lock = getLock(driver.aquireLockTimeoutMilliseconds);
   }
 
   async task<T>(fn: (connection: this) => Promise<T>): Promise<T> {
@@ -100,6 +100,7 @@ export default class BaseTransaction<
     query: SQLQuery,
     options?: QueryStreamOptions<TDriver>,
   ): AsyncGenerator<any, void, unknown> {
+    this._throwIfDisposed();
     await this._lock.aquireLock();
     try {
       for await (const record of this._driver.queryStream(query, options)) {

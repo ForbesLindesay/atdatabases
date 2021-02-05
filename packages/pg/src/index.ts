@@ -1,5 +1,3 @@
-/* tslint:disable:no-unnecessary-initializer */
-
 import {readFileSync} from 'fs';
 import type {ConnectionOptions} from 'tls';
 import {QueryableType} from '@databases/shared';
@@ -177,6 +175,24 @@ export interface ConnectionPoolConfig extends ClientConfig, EventHandlers {
    */
   connectionTimeoutMilliseconds?: number;
 
+  /**
+   * Number of milliseconds to wait for a connection from the connection pool. This
+   * must always be greater than the connectionTimeoutMilliseconds otherwise waiting
+   * for the pool will timeout before the connection times out.
+   *
+   * Defaults to the maximum of 60 seconds or connectionTimeoutMilliseconds * number of hosts * 2
+   */
+  queueTimeoutMilliseconds?: number;
+  /**
+   * Number of milliseconds to wait for a lock on a connection/transaction. This is
+   * helpful for catching cases where you have accidentally attempted to query a connection
+   * within a transaction that is on that connection, or attempted to query an outer transaction
+   * within a nested transaction.
+   *
+   * Defaults to 60 seconds
+   */
+  aquireLockTimeoutMilliseconds?: number;
+
   onError?: (err: Error) => void;
 }
 
@@ -199,6 +215,9 @@ export default function createConnectionPool(
   const parsedConnectionString = parseConnectionString(
     connectionString || undefined,
   );
+
+  const connectionConfigObject: ConnectionPoolConfig =
+    typeof connectionConfig === 'object' ? connectionConfig : {};
   const {
     user = parsedConnectionString.user,
     password = parsedConnectionString.password,
@@ -211,6 +230,19 @@ export default function createConnectionPool(
     statementTimeoutMilliseconds = 0,
     queryTimeoutMilliseconds = 0,
     idleInTransactionSessionTimeoutMilliseconds = 0,
+    queueTimeoutMilliseconds = Math.max(
+      60_000,
+      (connectionConfigObject.connectionTimeoutMilliseconds ?? 10_000) *
+        (Array.isArray(host)
+          ? host.length
+          : host === undefined
+          ? 1
+          : parsedConnectionString.host.length
+          ? parsedConnectionString.host.length
+          : 1) *
+        2,
+    ),
+    aquireLockTimeoutMilliseconds = 60_000,
     applicationName = parsedConnectionString.application_name,
     keepAlive = false,
     keepAliveInitialDelayMilliseconds = 0,
@@ -218,8 +250,8 @@ export default function createConnectionPool(
     bigIntMode = null,
     // tslint:disable-next-line:deprecation
     bigIntAsString = false,
-    schema = null,
-    types: typeOverrides = null,
+    schema,
+    types: typeOverrides,
     onError = (err: Error) => {
       // It's common for connections to be terminated "unexpectedly"
       // If it happens on a connection that is actively in use, you'll get the error
@@ -230,12 +262,12 @@ export default function createConnectionPool(
         console.warn(`Error in Postgres ConnectionPool: ${err.message}`);
       }
     },
-    onQueryError = undefined,
-    onQueryResults = undefined,
-    onQueryStart = undefined,
-    onConnectionOpened = undefined,
-    onConnectionClosed = undefined,
-  } = typeof connectionConfig === 'object' ? connectionConfig : {};
+    onQueryError,
+    onQueryResults,
+    onQueryStart,
+    onConnectionOpened,
+    onConnectionClosed,
+  } = connectionConfigObject;
 
   if (bigIntAsString) {
     console.warn(
@@ -248,7 +280,7 @@ export default function createConnectionPool(
   }
   const types = new TypeOverrides({
     bigIntMode: bigIntMode ?? (bigIntAsString ? 'string' : 'number'),
-    overrides: typeOverrides ?? undefined,
+    overrides: typeOverrides,
   });
   const sslConfig = getSSLConfig(
     typeof connectionConfig === 'object' ? connectionConfig : {},
@@ -309,10 +341,10 @@ export default function createConnectionPool(
       maxSize: poolSize,
       maxUses,
       idleTimeoutMilliseconds,
-      // queueTimeoutMilliseconds: 1000, //connectionTimeoutMilliseconds,
+      queueTimeoutMilliseconds,
       // releaseTimeoutMilliseconds: 1000,
     },
-    schema: schema ?? undefined,
+    schema,
     handlers: {
       onError,
       onQueryStart,
@@ -321,6 +353,10 @@ export default function createConnectionPool(
       onConnectionOpened,
       onConnectionClosed,
     },
+    aquireLockTimeoutMilliseconds:
+      aquireLockTimeoutMilliseconds === 0
+        ? Infinity
+        : aquireLockTimeoutMilliseconds,
   });
 }
 

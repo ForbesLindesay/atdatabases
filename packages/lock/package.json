@@ -1,0 +1,21 @@
+{
+  "name": "@databases/lock",
+  "version": "0.0.0",
+  "description": "",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "dependencies": {
+    "@databases/queue": "^0.0.0"
+  },
+  "scripts": {},
+  "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/lock",
+  "bugs": "https://github.com/ForbesLindesay/atdatabases/issues",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "lib/"
+  ],
+  "homepage": "https://www.atdatabases.org/docs/lock"
+}

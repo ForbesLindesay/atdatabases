@@ -1,4 +1,5 @@
 import sql, {SQLQuery} from '@databases/sql';
+import {Lock} from '@databases/lock';
 import Factory, {
   Disposable,
   ConnectionFactory,
@@ -9,6 +10,8 @@ import QueryableType from './QueryableType';
 import BaseTransaction from './BaseTransaction';
 import BaseConnection from './BaseConnection';
 import BaseConnectionPool, {PoolOptions} from './BaseConnectionPool';
+
+export type {Lock};
 
 export type {SQLQuery, PoolOptions};
 export {sql};

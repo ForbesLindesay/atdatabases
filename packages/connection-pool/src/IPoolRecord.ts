@@ -52,7 +52,7 @@ function setRecordState<T>(
   if (record.idleTimeout !== undefined) {
     clearTimeout(record.idleTimeout);
   }
-  if (onTimeout && timeoutMilliseconds) {
+  if (onTimeout && timeoutMilliseconds !== Infinity) {
     record.idleTimeout = setTimeout(onTimeout, timeoutMilliseconds, record);
   }
   record.state = state;

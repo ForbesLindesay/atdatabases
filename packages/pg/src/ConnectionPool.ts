@@ -23,27 +23,6 @@ const factories: Factory<PgDriver, Connection, Transaction> = {
   createConnection(driver) {
     return new Connection(driver, factories);
   },
-  async canRecycleConnection(client, _err) {
-    try {
-      let timeout: NodeJS.Timeout | undefined;
-      const result:
-        | undefined
-        | {1?: {rows?: {0?: {result?: number}}}} = await Promise.race([
-        client.client.query(
-          'BEGIN TRANSACTION READ ONLY;SELECT 1 AS result;COMMIT;',
-        ) as any,
-        new Promise((r) => {
-          timeout = setTimeout(r, 100);
-        }),
-      ]);
-      if (timeout !== undefined) {
-        clearTimeout(timeout);
-      }
-      return result?.[1]?.rows?.[0]?.result === 1;
-    } catch (ex) {
-      return false;
-    }
-  },
 };
 
 async function timeout<T>(promise: Promise<T>): Promise<T> {
@@ -79,8 +58,13 @@ const getConnectionPoolOptions = (
   >,
   handlers: EventHandlers,
   onError: (err: Error) => void,
+  aquireLockTimeoutMilliseconds: number,
 ): PoolOptions<PgDriver> => {
-  const src = createConnectionSource(srcConfig, handlers);
+  const src = createConnectionSource(
+    srcConfig,
+    handlers,
+    aquireLockTimeoutMilliseconds,
+  );
 
   // setting up types requires a connection, but doesn't have to be done separately for each connection,
   // doing it once is sufficient
@@ -165,6 +149,7 @@ export default class ConnectionPool
       poolOptions = {},
       schema,
       handlers: {onError, ...handlers},
+      aquireLockTimeoutMilliseconds,
     }: {
       poolOptions?: Omit<
         PoolOptions<PgDriver>,
@@ -174,10 +159,18 @@ export default class ConnectionPool
       handlers: EventHandlers & {
         onError: (err: Error) => void;
       };
+      aquireLockTimeoutMilliseconds: number;
     },
   ) {
     super(
-      getConnectionPoolOptions(options, schema, poolOptions, handlers, onError),
+      getConnectionPoolOptions(
+        options,
+        schema,
+        poolOptions,
+        handlers,
+        onError,
+        aquireLockTimeoutMilliseconds,
+      ),
       factories,
     );
     this._types = options.types;

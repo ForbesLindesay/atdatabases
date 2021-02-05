@@ -20,6 +20,9 @@ export async function withTimeout<TArgs extends any[], TResult>(
   },
   ...args: TArgs
 ): Promise<TResult | Timeout> {
+  if (timeoutMilliseconds === Infinity) {
+    return await fn(...args);
+  }
   return await new Promise<TResult | Timeout>((resolve, reject) => {
     const promise = fn(...args);
     if (isPromise(promise)) {

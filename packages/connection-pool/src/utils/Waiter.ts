@@ -15,10 +15,10 @@ export default class Waiter<T> {
   private readonly _timeout: number | undefined;
   constructor(
     resolve: (result: Promise<T> | T | Timeout) => unknown,
-    timeoutMilliseconds: number | undefined,
+    timeoutMilliseconds: number,
   ) {
     this._resolve = resolve;
-    if (timeoutMilliseconds) {
+    if (timeoutMilliseconds !== Infinity) {
       this._timeout = setTimeout(
         // tslint:disable-next-line: no-unbound-method
         Waiter.waiterTimeout,

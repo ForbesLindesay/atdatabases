@@ -43,6 +43,7 @@
     "Utilities": [
       "connection-pool",
       "escape-identifier",
+      "lock",
       "queue",
       "validate-unicode"
     ]

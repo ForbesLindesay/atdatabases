@@ -1,6 +1,19 @@
 import {attemptHook, globalError} from './utils/errors';
 import {isTimeout, Timeout, withTimeout} from './utils/timeout';
 
+function zeroToInfinity(
+  value: number | undefined,
+  defaultValue: number = Infinity,
+): number {
+  if (value === undefined) {
+    return defaultValue;
+  } else if (value === 0) {
+    return Infinity;
+  } else {
+    return value;
+  }
+}
+
 /**
  * Options for configuring a connection pool
  */
@@ -136,7 +149,7 @@ export class PoolOptionsObject<T> {
    *
    * @default Infinity
    */
-  readonly idleTimeoutMilliseconds: number | undefined;
+  readonly idleTimeoutMilliseconds: number;
 
   /**
    * How many milliseconds is a task allowed to run before releasing
@@ -148,7 +161,7 @@ export class PoolOptionsObject<T> {
    *
    * @default Infinity
    */
-  readonly releaseTimeoutMilliseconds: number | undefined;
+  readonly releaseTimeoutMilliseconds: number;
 
   /**
    * How many milliseconds to wait in the queue for a connection
@@ -156,22 +169,32 @@ export class PoolOptionsObject<T> {
    *
    * @default Infinity
    */
-  readonly queueTimeoutMilliseconds: number | undefined;
+  readonly queueTimeoutMilliseconds: number;
 
   private readonly _openConnectionTimeoutMilliseconds: number;
   private readonly _closeConnectionTimeoutMilliseconds: number;
 
   constructor(options: PoolOptions<T>) {
     this._options = options;
-    this.maxSize = options.maxSize ?? Infinity;
-    this.maxUses = options.maxUses ?? Infinity;
-    this.idleTimeoutMilliseconds = options.idleTimeoutMilliseconds;
-    this.releaseTimeoutMilliseconds = options.releaseTimeoutMilliseconds;
-    this.queueTimeoutMilliseconds = options.queueTimeoutMilliseconds;
-    this._openConnectionTimeoutMilliseconds =
-      options.openConnectionTimeoutMilliseconds ?? 60_000;
-    this._closeConnectionTimeoutMilliseconds =
-      options.closeConnectionTimeoutMilliseconds ?? 60_000;
+    this.maxSize = zeroToInfinity(options.maxSize);
+    this.maxUses = zeroToInfinity(options.maxUses);
+    this.idleTimeoutMilliseconds = zeroToInfinity(
+      options.idleTimeoutMilliseconds,
+    );
+    this.releaseTimeoutMilliseconds = zeroToInfinity(
+      options.releaseTimeoutMilliseconds,
+    );
+    this.queueTimeoutMilliseconds = zeroToInfinity(
+      options.queueTimeoutMilliseconds,
+    );
+    this._openConnectionTimeoutMilliseconds = zeroToInfinity(
+      options.openConnectionTimeoutMilliseconds,
+      60_000,
+    );
+    this._closeConnectionTimeoutMilliseconds = zeroToInfinity(
+      options.closeConnectionTimeoutMilliseconds,
+      60_000,
+    );
 
     if (
       this._options.releaseTimeoutMilliseconds !== undefined &&

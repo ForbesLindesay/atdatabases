@@ -6,6 +6,7 @@
   "types": "./lib/index.d.ts",
   "dependencies": {
     "@databases/connection-pool": "^0.0.0",
+    "@databases/lock": "^0.0.0",
     "@databases/queue": "^0.0.0",
     "@databases/split-sql-query": "^0.0.0",
     "@databases/sql": "^0.0.0",

@@ -29,6 +29,7 @@ export interface PgOptions {
 export default function createConnectionSource(
   {hosts, ssl, ...partialOptions}: PgOptions,
   handlers: EventHandlers,
+  aquireLockTimeoutMilliseconds: number,
 ) {
   const options = {
     ...partialOptions,
@@ -54,7 +55,11 @@ export default function createConnectionSource(
           options.ssl = ssl?.connectionOptions ?? false;
 
           try {
-            const connection = new PgDriver(new Client(options), handlers);
+            const connection = new PgDriver(
+              new Client(options),
+              handlers,
+              aquireLockTimeoutMilliseconds,
+            );
             await connection.connect();
             return connection;
           } catch (ex) {
@@ -71,7 +76,11 @@ export default function createConnectionSource(
               // ssl.
               try {
                 options.ssl = false;
-                const connection = new PgDriver(new Client(options), handlers);
+                const connection = new PgDriver(
+                  new Client(options),
+                  handlers,
+                  aquireLockTimeoutMilliseconds,
+                );
                 await connection.connect();
                 return connection;
               } catch (ex) {
@@ -95,7 +104,11 @@ export default function createConnectionSource(
       return firstClient;
     } else {
       try {
-        const client = new PgDriver(new Client(options), handlers);
+        const client = new PgDriver(
+          new Client(options),
+          handlers,
+          aquireLockTimeoutMilliseconds,
+        );
         await client.connect();
         return client;
       } catch (ex) {

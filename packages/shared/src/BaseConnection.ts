@@ -9,7 +9,7 @@ import {
   queryInternal,
   txInternal,
 } from './utils';
-import {Lock, getLock} from './Lock';
+import {Lock, getLock} from '@databases/lock';
 
 type TransactionOptions<
   TDriver extends Driver<any, any>
@@ -29,8 +29,9 @@ export default class BaseConnection<
   public readonly type = QueryableType.Connection;
   public readonly sql = sql;
 
-  private _disposed: undefined | Promise<void>;
   protected readonly _lock: Lock;
+
+  private _disposed: undefined | Promise<void>;
   protected _throwIfDisposed() {
     if (this._disposed) {
       throw new Error(
@@ -47,7 +48,7 @@ export default class BaseConnection<
   ) {
     this._driver = driver;
     this._factories = factories;
-    this._lock = getLock(driver.lockTimeoutMilliseconds);
+    this._lock = getLock(driver.aquireLockTimeoutMilliseconds);
   }
 
   async task<T>(fn: (connection: this) => Promise<T>): Promise<T> {
@@ -98,6 +99,7 @@ export default class BaseConnection<
     query: SQLQuery,
     options?: QueryStreamOptions<TDriver>,
   ): AsyncGenerator<any, void, unknown> {
+    this._throwIfDisposed();
     await this._lock.aquireLock();
     try {
       for await (const record of this._driver.queryStream(query, options)) {
