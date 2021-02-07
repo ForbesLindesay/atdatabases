@@ -73,7 +73,7 @@ export interface ConnectionPoolConfig extends EventHandlers {
   timeStampMode?: 'string' | 'date-object';
 
   /**
-   * Time zone to
+   * Time zone to use when serializing and parsing
    */
   timeZone?:
     | 'local'
