@@ -18,10 +18,10 @@ class HomeSplash extends React.Component {
     const {siteConfig, language = ''} = this.props;
     const {baseUrl, docsUrl} = siteConfig;
     const docsPart = `${docsUrl ? `${docsUrl}/` : ''}`;
-    const langPart = `${language ? `${language}/` : ''}`;
-    const docUrl = doc => `${baseUrl}${docsPart}${langPart}${doc}`;
+    // const langPart = `${language ? `${language}/` : ''}`;
+    const docUrl = (doc) => `${baseUrl}${docsPart}${doc}`;
 
-    const SplashContainer = props => (
+    const SplashContainer = (props) => (
       <div className="homeContainer" style={{background: '#FA2B3A'}}>
         <div className="homeSplashFade">
           <div className="wrapper homeWrapper">{props.children}</div>
@@ -36,7 +36,7 @@ class HomeSplash extends React.Component {
       </h2>
     );
 
-    const PromoSection = props => (
+    const PromoSection = (props) => (
       <div className="section promoSection">
         <div className="promoRow">
           <div className="pluginRowBlock">{props.children}</div>
@@ -44,7 +44,7 @@ class HomeSplash extends React.Component {
       </div>
     );
 
-    const Button = props => (
+    const Button = (props) => (
       <div className="pluginWrapper buttonWrapper">
         <a className="button" href={props.href} target={props.target}>
           {props.children}
@@ -57,7 +57,7 @@ class HomeSplash extends React.Component {
         <div className="inner">
           <ProjectTitle siteConfig={siteConfig} />
           <PromoSection>
-            <Button href={docUrl('sql.html')}>Getting Started</Button>
+            <Button href={docUrl('sql')}>Getting Started</Button>
           </PromoSection>
         </div>
       </SplashContainer>
@@ -70,10 +70,10 @@ class Index extends React.Component {
     const {config: siteConfig, language = ''} = this.props;
     const {baseUrl, docsUrl} = siteConfig;
     const docsPart = `${docsUrl ? `${docsUrl}/` : ''}`;
-    const langPart = `${language ? `${language}/` : ''}`;
-    const docUrl = doc => `${baseUrl}${docsPart}${langPart}${doc}`;
+    // const langPart = `${language ? `${language}/` : ''}`;
+    const docUrl = (doc) => `${baseUrl}${docsPart}${doc}`;
 
-    const Block = props => (
+    const Block = (props) => (
       <Container
         padding={['bottom', 'top']}
         id={props.id}
@@ -163,25 +163,25 @@ The query is then passed to your database engine as a separate string and values
             // content: 'This is the content of my feature',
             image: `${baseUrl}img/postgres.svg`,
             imageAlign: 'top',
-            title: `[Postgres](${docUrl('pg.html')})`,
+            title: `[Postgres](${docUrl('pg')})`,
           },
           {
             // content: 'The content of my second feature',
             image: `${baseUrl}img/mysql.svg`,
             imageAlign: 'top',
-            title: `[MySQL](${docUrl('mysql.html')})`,
+            title: `[MySQL](${docUrl('mysql')})`,
           },
           {
             // content: 'The content of my second feature',
             image: `${baseUrl}img/sqlite.svg`,
             imageAlign: 'top',
-            title: `[SQLite](${docUrl('sqlite.html')})`,
+            title: `[SQLite](${docUrl('sqlite')})`,
           },
           {
             // content: 'The content of my second feature',
             image: `${baseUrl}img/expo.svg`,
             imageAlign: 'top',
-            title: `[Expo/WebSQL](${docUrl('websql.html')})`,
+            title: `[Expo/WebSQL](${docUrl('websql')})`,
           },
         ]}
       </Block>
@@ -193,14 +193,14 @@ The query is then passed to your database engine as a separate string and values
       }
 
       const showcase = siteConfig.users
-        .filter(user => user.pinned)
-        .map(user => (
+        .filter((user) => user.pinned)
+        .map((user) => (
           <a href={user.infoLink} key={user.infoLink}>
             <img src={user.image} alt={user.caption} title={user.caption} />
           </a>
         ));
 
-      const pageUrl = page => baseUrl + (language ? `${language}/` : '') + page;
+      const pageUrl = (page) => baseUrl + page;
 
       return (
         <div className="productShowcaseSection paddingBottom">
@@ -208,7 +208,7 @@ The query is then passed to your database engine as a separate string and values
           <p>This project is used by all these people</p>
           <div className="logos">{showcase}</div>
           <div className="more-users">
-            <a className="button" href={pageUrl('users.html')}>
+            <a className="button" href={pageUrl('users')}>
               More {siteConfig.title} Users
             </a>
           </div>

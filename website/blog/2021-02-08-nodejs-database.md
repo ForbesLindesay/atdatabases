@@ -27,7 +27,7 @@ SQLite is great if you need to store data in a small project that will run on pe
 
 It cannot be shared amongst multiple instances of your app, which makes it a poor choice for most server side applications.
 
-If you decide to use SQLite, you should read [Getting started with SQLite and Node.js](https://www.atdatabases.org/docs/sqlite.html) next.
+If you decide to use SQLite, you should read [Getting started with SQLite and Node.js](https://www.atdatabases.org/docs/sqlite) next.
 
 ### MySQL
 
@@ -37,10 +37,10 @@ MySQL is widely used and deployed. It is easy to get hosted versions from any of
 1. It doesn't have a propper type for `BOOLEAN`, which leads to messy translation between `0`/`1` and `true`/`false`.
 1. It also doesn't have nearly as good support for JSON as Postgres
 
-If decide to use MySQL, you should read [Getting started with MySQL and Node.js](https://www.atdatabases.org/docs/mysql.html) next.
+If decide to use MySQL, you should read [Getting started with MySQL and Node.js](https://www.atdatabases.org/docs/mysql) next.
 
 ### Postgres
 
 Postgres is one of the most fully featured databases, and has good handling of dates & times, as well as excellent support for storing and querying unstructured JSON when you need to.
 
-If you decide to use Postgres, you should read [Getting started with Postgres and Node.js](https://www.atdatabases.org/docs/pg.html) next.
+If you decide to use Postgres, you should read [Getting started with Postgres and Node.js](https://www.atdatabases.org/docs/pg) next.
