@@ -4,7 +4,10 @@
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
-  "dependencies": {},
+  "dependencies": {
+    "@databases/queue": "^0.0.0",
+    "is-promise": "^4.0.0"
+  },
   "scripts": {},
   "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/connection-pool",
   "bugs": "https://github.com/ForbesLindesay/atdatabases/issues",

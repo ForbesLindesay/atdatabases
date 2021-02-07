@@ -42,6 +42,24 @@ test('error messages', async function testErrorMessages() {
   }
   expect(false).toBe(true);
 });
+test('non sql error messages in a transaction', async function testErrorMessages() {
+  try {
+    await db.tx(async function testTransaction() {
+      await new Promise<void>((resolve) => setTimeout(resolve, 1000));
+      throw new Error('Some Error');
+    });
+  } catch (ex) {
+    expect(ex.message).toBe('Some Error');
+
+    if (!process.version.startsWith('v12.')) {
+      expect(ex.stack).toMatch(/testTransaction/);
+      expect(ex.stack).toMatch(/testErrorMessages/);
+      expect(ex.stack).toMatch(/index\.test\.pg\.ts/);
+    }
+    return;
+  }
+  expect(false).toBe(true);
+});
 
 test('error messages in a transaction', async function testErrorMessages() {
   try {

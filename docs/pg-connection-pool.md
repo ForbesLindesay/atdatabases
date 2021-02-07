@@ -1,6 +1,6 @@
 ---
 id: pg-connection-pool
-title: Postgres Connection Pool
+title: Postgres Node.js Connection Pool
 sidebar_label: Connection Pool
 ---
 

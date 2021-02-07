@@ -29,7 +29,11 @@ yarn pg-test start
 npx pg-test start
 ```
 
-This will print a connection string as the last line of it's output, it will look something like: `postgres://test-user@localhost:5432/test-db`
+This will print a connection string as the last line of it's output, it will look something like:
+
+```
+postgres://test-user@localhost:5432/test-db
+```
 
 > N.B. This database does not have any persistence, it should only be used for testing things out/getting started. Please do not store anything even vaguely important in it.
 

@@ -1,75 +1,77 @@
-const Queue = require('then-queue');
-interface Queue<T> {
-  push(item: T): void;
-  pop(): Promise<T>;
-  /**
-   * Amount of items in the queue
-   * This can be negative if pop has been called more times than push.
-   */
-  length: number;
+import {AsyncQueue} from '@databases/queue';
+
+export interface PushStreamInput<T> {
+  onData: (value: T) => void;
+  onError: (err: any) => void;
+  onEnd: () => void;
 }
-interface PushStream<T> {
-  onData(fn: (value: T) => void): void;
-  onError(fn: (err: any) => void): void;
-  onEnd(fn: () => void): void;
+export interface PushStream {
+  dispose(): void;
   pause(): void;
   resume(): void;
   highWaterMark: number;
 }
-export default function pushToAsyncIterable<T>(stream: PushStream<T>) {
-  const queue: Queue<
+
+export default function pushToAsyncIterable<T>(
+  getStream: (input: PushStreamInput<T>) => PushStream,
+): AsyncGenerator<T, void, unknown> {
+  const queue = new AsyncQueue<
     {done: false; value: T} | {done: true; err: any}
-  > = new Queue();
+  >();
+  let bufferSize = 0;
   let paused = false;
   let ended = false;
-  stream.onData((value) => {
-    if (!ended) {
-      queue.push({done: false, value});
-      if (!paused && queue.length >= stream.highWaterMark) {
-        paused = true;
-        stream.pause();
+  const stream = getStream({
+    onData(value) {
+      if (!ended) {
+        queue.push({done: false, value});
+        bufferSize++;
+        if (!paused && bufferSize >= stream.highWaterMark) {
+          paused = true;
+          stream.pause();
+        }
       }
-    }
+    },
+    onError(err) {
+      if (!ended) {
+        ended = true;
+        queue.push({done: true, err});
+      }
+    },
+    onEnd() {
+      if (!ended) {
+        ended = true;
+        queue.push({done: true, err: undefined});
+      }
+    },
   });
-  stream.onError((err) => {
-    if (!ended) {
-      ended = true;
-      queue.push({done: true, err});
-      if (paused) {
+  return {
+    async next(): Promise<IteratorResult<T, void>> {
+      bufferSize--;
+      if (paused && bufferSize < stream.highWaterMark) {
         paused = false;
         stream.resume();
       }
-    }
-  });
-  stream.onEnd(() => {
-    if (!ended) {
-      ended = true;
-      queue.push({done: true, err: undefined});
-      if (paused) {
-        paused = false;
-        stream.resume();
+      const next = await queue.shift();
+      if (next.done && next.err) {
+        throw next.err;
+      } else if (next.done) {
+        return {done: true, value: undefined};
+      } else {
+        return next;
       }
-    }
-  });
-  return queueConsumer(queue, () => {
-    if (paused && queue.length < stream.highWaterMark) {
-      paused = false;
-      stream.resume();
-    }
-  });
-}
-async function* queueConsumer<T>(
-  queue: Queue<{done: false; value: T} | {done: true; err: any}>,
-  onPop: () => void,
-) {
-  let value = await queue.pop();
-  while (!value.done) {
-    yield value.value;
-    const next = queue.pop();
-    onPop();
-    value = await next;
-  }
-  if (value.err) {
-    throw value.err;
-  }
+    },
+    async return(): Promise<IteratorResult<T, void>> {
+      stream.dispose();
+      return {done: true, value: undefined};
+    },
+    async throw(e): Promise<IteratorResult<T, void>> {
+      stream.dispose();
+      throw e;
+    },
+    [Symbol.asyncIterator](): AsyncGenerator<T, void, unknown> {
+      // tslint:disable-next-line no-invalid-this
+      return this;
+    },
+  };
 }

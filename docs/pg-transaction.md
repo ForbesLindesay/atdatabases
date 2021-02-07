@@ -1,6 +1,6 @@
 ---
 id: pg-transaction
-title: Postgres Transaction
+title: Postgres Node.js Transaction
 sidebar_label: Transaction
 ---
 
@@ -20,7 +20,7 @@ result[0].a;
 
 ### `Transaction.query(SQLQuery[]): Promise<any[]>`
 
-If you pass an array of SQLQueries, they will be run as a single transaction and you will get an array in response where each element of the array is the results of one of the queries.
+If you pass an array of SQLQueries, you will get an array in response where each element of the array is the results of one of the queries.
 
 ```ts
 const [resultA, resultB] = await task.query([

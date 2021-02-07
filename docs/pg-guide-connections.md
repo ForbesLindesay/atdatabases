@@ -60,8 +60,8 @@ import db, {sql} from './database';
 ```
 
 ```javascript
+const {sql} = require('@databases/pg');
 const db = require('./database');
-const {sql} = require('./database');
 ```
 
 ## Disposing of connections

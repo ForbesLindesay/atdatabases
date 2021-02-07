@@ -110,7 +110,7 @@ function assertUnicode(str: string, db: string) {
   // U+0080 .. U+FFFF
   if (!/^[\u0001-\uffff]+$/.test(str)) {
     throw new Error(
-      `${db} identifiers should onoy contain charcters in the range: U+0001 .. U+FFFF`,
+      `${db} identifiers should only contain charcters in the range: U+0001 .. U+FFFF`,
     );
   }
 }

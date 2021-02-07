@@ -1,6 +1,6 @@
 ---
 id: pg-guide-logging
-title: Postgres Logging & Debugging
+title: Postgres Logging & Debugging with Node.js
 sidebar_label: Logging & Debugging
 ---
 
@@ -128,6 +128,56 @@ const db = createConnectionPool({
   onQueryError: (query, {text}, err) => {
     startTimes.delete(query);
     console.log(`${text} - ${err.message}`);
+  },
+});
+
+module.exports = db;
+```
+
+## Tracking Open Connections
+
+You can also use the `onConnectionOpened` and `onConnectionClosed` events to track the number of open connections:
+
+```typescript
+// database.ts
+
+import createConnectionPool, {sql} from '@databases/pg';
+
+export {sql};
+
+let connectionsCount = 0;
+const db = createConnectionPool({
+  onConnectionOpened: () => {
+    console.log(
+      `Opened connection. Active connections = ${++connectionsCount}`,
+    );
+  },
+  onConnectionClosed: () => {
+    console.log(
+      `Closed connection. Active connections = ${--connectionsCount}`,
+    );
+  },
+});
+
+export default db;
+```
+
+```javascript
+// database.js
+
+const createConnectionPool = require('@databases/pg');
+
+let connectionsCount = 0;
+const db = createConnectionPool({
+  onConnectionOpened: () => {
+    console.log(
+      `Opened connection. Active connections = ${++connectionsCount}`,
+    );
+  },
+  onConnectionClosed: () => {
+    console.log(
+      `Closed connection. Active connections = ${--connectionsCount}`,
+    );
   },
 });
 

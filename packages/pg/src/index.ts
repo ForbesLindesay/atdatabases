@@ -1,7 +1,6 @@
-/* tslint:disable:no-unnecessary-initializer */
-
 import {readFileSync} from 'fs';
 import type {ConnectionOptions} from 'tls';
+import {QueryableType} from '@databases/shared';
 import parseConnectionString, {
   Configuration as ParsedConnectionString,
 } from '@databases/pg-connection-string';
@@ -12,7 +11,6 @@ import {getPgConfigSync} from '@databases/pg-config';
 import ConnectionPoolImplementation from './ConnectionPool';
 import IsolationLevel from './types/IsolationLevel';
 import Queryable, {
-  QueryableType,
   Transaction,
   Connection,
   ConnectionPool,
@@ -22,6 +20,7 @@ import Queryable, {
 } from './types/Queryable';
 import TypeOverrides, {TypeOverridesConfig} from './TypeOverrides';
 import EventHandlers from './types/EventHandlers';
+import {PgOptions} from './ConnectionSource';
 
 const {connectionStringEnvironmentVariable} = getPgConfigSync();
 
@@ -162,7 +161,7 @@ export interface ConnectionPoolConfig extends ClientConfig, EventHandlers {
    * number of milliseconds a client must sit idle in the pool and not be checked out
    * before it is disconnected from the backend and discarded
    *
-   * default is 10000 (10 seconds) - set to 0 to disable auto-disconnection of idle clients
+   * default is 30_000 (30 seconds) - set to 0 to disable auto-disconnection of idle clients
    */
   idleTimeoutMilliseconds?: number;
 
@@ -175,6 +174,25 @@ export interface ConnectionPoolConfig extends ClientConfig, EventHandlers {
    * multiplied by the number of possible connetion details to attempt.
    */
   connectionTimeoutMilliseconds?: number;
+
+  /**
+   * Number of milliseconds to wait for a connection from the connection pool. This
+   * must always be greater than the connectionTimeoutMilliseconds otherwise waiting
+   * for the pool will timeout before the connection times out.
+   *
+   * Defaults to the maximum of 60 seconds or connectionTimeoutMilliseconds * number of hosts * 2
+   */
+  queueTimeoutMilliseconds?: number;
+
+  /**
+   * Number of milliseconds to wait for a lock on a connection/transaction. This is
+   * helpful for catching cases where you have accidentally attempted to query a connection
+   * within a transaction that is on that connection, or attempted to query an outer transaction
+   * within a nested transaction.
+   *
+   * Defaults to 60 seconds
+   */
+  aquireLockTimeoutMilliseconds?: number;
 
   onError?: (err: Error) => void;
 }
@@ -198,6 +216,9 @@ export default function createConnectionPool(
   const parsedConnectionString = parseConnectionString(
     connectionString || undefined,
   );
+
+  const connectionConfigObject: ConnectionPoolConfig =
+    typeof connectionConfig === 'object' ? connectionConfig : {};
   const {
     user = parsedConnectionString.user,
     password = parsedConnectionString.password,
@@ -210,6 +231,19 @@ export default function createConnectionPool(
     statementTimeoutMilliseconds = 0,
     queryTimeoutMilliseconds = 0,
     idleInTransactionSessionTimeoutMilliseconds = 0,
+    queueTimeoutMilliseconds = Math.max(
+      60_000,
+      (connectionConfigObject.connectionTimeoutMilliseconds ?? 10_000) *
+        (Array.isArray(host)
+          ? host.length
+          : host === undefined
+          ? 1
+          : parsedConnectionString.host.length
+          ? parsedConnectionString.host.length
+          : 1) *
+        2,
+    ),
+    aquireLockTimeoutMilliseconds = 60_000,
     applicationName = parsedConnectionString.application_name,
     keepAlive = false,
     keepAliveInitialDelayMilliseconds = 0,
@@ -217,22 +251,24 @@ export default function createConnectionPool(
     bigIntMode = null,
     // tslint:disable-next-line:deprecation
     bigIntAsString = false,
-    schema = null,
-    types: typeOverrides = null,
+    schema,
+    types: typeOverrides,
     onError = (err: Error) => {
       // It's common for connections to be terminated "unexpectedly"
       // If it happens on a connection that is actively in use, you'll get the error
       // anyway when you attempt to query it. If it happens on a connection that is
       // idle in the pool, a fresh connection will be allocated without you needing
       // to do anything.
-      if (!/connection\s*terminated\s*unexpectedly/.test(err.message)) {
+      if (!/connection\s*terminated\s*unexpectedly/i.test(err.message)) {
         console.warn(`Error in Postgres ConnectionPool: ${err.message}`);
       }
     },
-    onQueryError = undefined,
-    onQueryResults = undefined,
-    onQueryStart = undefined,
-  } = typeof connectionConfig === 'object' ? connectionConfig : {};
+    onQueryError,
+    onQueryResults,
+    onQueryStart,
+    onConnectionOpened,
+    onConnectionClosed,
+  } = connectionConfigObject;
 
   if (bigIntAsString) {
     console.warn(
@@ -245,7 +281,7 @@ export default function createConnectionPool(
   }
   const types = new TypeOverrides({
     bigIntMode: bigIntMode ?? (bigIntAsString ? 'string' : 'number'),
-    overrides: typeOverrides ?? undefined,
+    overrides: typeOverrides,
   });
   const sslConfig = getSSLConfig(
     typeof connectionConfig === 'object' ? connectionConfig : {},
@@ -261,13 +297,11 @@ export default function createConnectionPool(
     );
   }
 
-  const pgOptions = {
+  const pgOptions: PgOptions = {
     user,
     password,
     database,
     connectionTimeoutMillis: connectionTimeoutMilliseconds,
-    idleTimeoutMillis: idleTimeoutMilliseconds,
-    max: poolSize,
     ...(statementTimeoutMilliseconds
       ? {statement_timeout: statementTimeoutMilliseconds}
       : {}),
@@ -286,11 +320,8 @@ export default function createConnectionPool(
       parsedConnectionString.fallback_application_name,
     keepAlive,
     keepAliveInitialDelayMillis: keepAliveInitialDelayMilliseconds,
-    maxUses,
     types,
-  };
 
-  return new ConnectionPoolImplementation(pgOptions, {
     hosts: (hostList.length === 0 ? ['localhost'] : hostList).map((host, i) => {
       const port =
         portList.length === 0
@@ -303,9 +334,30 @@ export default function createConnectionPool(
         port: port ?? undefined,
       };
     }),
-    schema: schema ?? undefined,
     ssl: sslConfig,
-    handlers: {onError, onQueryStart, onQueryResults, onQueryError},
+  };
+
+  return new ConnectionPoolImplementation(pgOptions, {
+    poolOptions: {
+      maxSize: poolSize,
+      maxUses,
+      idleTimeoutMilliseconds,
+      queueTimeoutMilliseconds,
+      // releaseTimeoutMilliseconds: 1000,
+    },
+    schema,
+    handlers: {
+      onError,
+      onQueryStart,
+      onQueryResults,
+      onQueryError,
+      onConnectionOpened,
+      onConnectionClosed,
+    },
+    aquireLockTimeoutMilliseconds:
+      aquireLockTimeoutMilliseconds === 0
+        ? Infinity
+        : aquireLockTimeoutMilliseconds,
   });
 }
 
@@ -321,7 +373,7 @@ function getSSLConfig(
     return null;
   }
   if (config.ssl && typeof config.ssl === 'object') {
-    return {allowFallback: false, ssl: config.ssl};
+    return {allowFallback: false, connectionOptions: config.ssl};
   }
 
   const ssl: ConnectionOptions = {};
@@ -349,9 +401,9 @@ function getSSLConfig(
   const mode = config.ssl || parsedConnectionString.sslmode;
   if (mode === 'prefer' || mode === undefined) {
     ssl.rejectUnauthorized = false;
-    return {allowFallback: true, ssl};
+    return {allowFallback: true, connectionOptions: ssl};
   } else {
-    return {allowFallback: false, ssl};
+    return {allowFallback: false, connectionOptions: ssl};
   }
 }
 

@@ -36,8 +36,10 @@ jobs:
         uses: actions/cache@v2
         with:
           path: |-
+            packages/connection-pool/lib
             packages/escape-identifier/lib
             packages/expo/lib
+            packages/lock/lib
             packages/migrations-base/lib
             packages/mysql/lib
             packages/mysql-config/lib
@@ -55,6 +57,8 @@ jobs:
             packages/pg-test/lib
             packages/pg-typed/lib
             packages/push-to-async-iterable/lib
+            packages/queue/lib
+            packages/shared/lib
             packages/split-sql-query/lib
             packages/sql/lib
             packages/sqlite/lib
@@ -62,8 +66,10 @@ jobs:
             packages/websql/lib
             packages/websql-core/lib
             packages/with-container/lib
+            packages/connection-pool/.last_build
             packages/escape-identifier/.last_build
             packages/expo/.last_build
+            packages/lock/.last_build
             packages/migrations-base/.last_build
             packages/mysql/.last_build
             packages/mysql-config/.last_build
@@ -81,6 +87,8 @@ jobs:
             packages/pg-test/.last_build
             packages/pg-typed/.last_build
             packages/push-to-async-iterable/.last_build
+            packages/queue/.last_build
+            packages/shared/.last_build
             packages/split-sql-query/.last_build
             packages/sql/.last_build
             packages/sqlite/.last_build
@@ -88,8 +96,9 @@ jobs:
             packages/websql/.last_build
             packages/websql-core/.last_build
             packages/with-container/.last_build
-          key: v2-build-output-${{hashFiles('yarn.lock', 'packages/escape-identifier/src',
-            'packages/expo/src', 'packages/migrations-base/src',
+          key: v2-build-output-${{hashFiles('yarn.lock', 'packages/connection-pool/src',
+            'packages/escape-identifier/src', 'packages/expo/src',
+            'packages/lock/src', 'packages/migrations-base/src',
             'packages/mysql/src', 'packages/mysql-config/src',
             'packages/mysql-test/src', 'packages/pg/src',
             'packages/pg-config/src', 'packages/pg-connection-string/src',
@@ -98,6 +107,7 @@ jobs:
             'packages/pg-schema-cli/src', 'packages/pg-schema-introspect/src',
             'packages/pg-schema-print-types/src', 'packages/pg-test/src',
             'packages/pg-typed/src', 'packages/push-to-async-iterable/src',
+            'packages/queue/src', 'packages/shared/src',
             'packages/split-sql-query/src', 'packages/sql/src',
             'packages/sqlite/src', 'packages/validate-unicode/src',
             'packages/websql/src', 'packages/websql-core/src',

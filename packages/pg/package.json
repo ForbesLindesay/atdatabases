@@ -12,14 +12,14 @@
     "@databases/pg-data-type-id": "^0.0.0",
     "@databases/pg-errors": "^0.0.0",
     "@databases/push-to-async-iterable": "^0.0.0",
+    "@databases/shared": "^0.0.0",
     "@databases/split-sql-query": "^0.0.0",
     "@databases/sql": "^0.0.0",
     "@types/cuid": "^1.3.1",
     "assert-never": "^1.2.1",
     "cuid": "^2.1.8",
     "pg": "^8.4.2",
-    "pg-cursor": "^2.4.2",
-    "throat": "^6.0.1"
+    "pg-cursor": "^2.4.2"
   },
   "scripts": {},
   "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/pg",
@@ -28,7 +28,6 @@
     "access": "public"
   },
   "devDependencies": {
-    "@types/node": "^13.13.4"
   },
   "bugs": "https://github.com/ForbesLindesay/atdatabases/issues",
   "homepage": "https://www.atdatabases.org/docs/pg",

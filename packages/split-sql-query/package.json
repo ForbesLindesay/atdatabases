@@ -20,5 +20,6 @@
   "files": [
     "lib/"
   ],
-  "dependencies": {}
+  "dependencies": {},
+  "homepage": "https://www.atdatabases.org/docs/split-sql-query"
 }

@@ -5,9 +5,7 @@
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {},
-  "devDependencies": {
-    "@types/node": "^13.13.4"
-  },
+  "devDependencies": {},
   "scripts": {},
   "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/sql",
   "license": "MIT",

@@ -1,6 +1,6 @@
 ---
 id: pg-guide-query
-title: Querying Postgres Databases
+title: Querying Postgres Databases in Node.js
 sidebar_label: Querying Postgres
 ---
 

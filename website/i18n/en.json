@@ -9,20 +9,68 @@
         "title": "@databases/connection-pool",
         "sidebar_label": "connection-pool"
       },
+      "escape-identifier": {
+        "title": "@databases/escape-identifier",
+        "sidebar_label": "escape-identifier"
+      },
+      "lock": {
+        "title": "@databases/lock",
+        "sidebar_label": "lock"
+      },
+      "mysql-connection-pool": {
+        "title": "MySQL Node.js Connection Pool",
+        "sidebar_label": "Connection Pool"
+      },
+      "mysql-connection": {
+        "title": "MySQL Node.js Connection",
+        "sidebar_label": "Connection"
+      },
+      "mysql-guide-connections": {
+        "title": "Managing MySQL Connections",
+        "sidebar_label": "Managing Connections"
+      },
+      "mysql-guide-logging": {
+        "title": "MySQL Logging & Debugging with Node.js",
+        "sidebar_label": "Logging & Debugging"
+      },
+      "mysql-guide-query": {
+        "title": "Querying MySQL Databases in Node.js",
+        "sidebar_label": "Querying MySQL"
+      },
+      "mysql-guide-setup": {
+        "title": "MySQL Installation & Setup",
+        "sidebar_label": "Installation & Setup"
+      },
+      "mysql-guide-transactions": {
+        "title": "Using Transactions in MySQL with Node.js",
+        "sidebar_label": "Using Transactions"
+      },
+      "mysql-options": {
+        "title": "MySQL Connection Options",
+        "sidebar_label": "Connection Options"
+      },
+      "mysql-queryable": {
+        "title": "MySQL Queryable",
+        "sidebar_label": "Queryable"
+      },
       "mysql-test": {
-        "title": "MySQL Testing",
+        "title": "MySQL Testing with Node.js",
         "sidebar_label": "Testing"
       },
+      "mysql-transaction": {
+        "title": "MySQL Node.js Transaction",
+        "sidebar_label": "Transaction"
+      },
       "mysql": {
-        "title": "MySQL",
-        "sidebar_label": "API"
+        "title": "Getting started with MySQL and Node.js",
+        "sidebar_label": "Getting Started"
       },
       "pg-connection-pool": {
-        "title": "Postgres Connection Pool",
+        "title": "Postgres Node.js Connection Pool",
         "sidebar_label": "Connection Pool"
       },
       "pg-connection": {
-        "title": "Postgres Connection",
+        "title": "Postgres Node.js Connection",
         "sidebar_label": "Connection"
       },
       "pg-custom-types": {
@@ -34,11 +82,11 @@
         "sidebar_label": "Managing Connections"
       },
       "pg-guide-logging": {
-        "title": "Postgres Logging & Debugging",
+        "title": "Postgres Logging & Debugging with Node.js",
         "sidebar_label": "Logging & Debugging"
       },
       "pg-guide-query": {
-        "title": "Querying Postgres Databases",
+        "title": "Querying Postgres Databases in Node.js",
         "sidebar_label": "Querying Postgres"
       },
       "pg-guide-setup": {
@@ -46,7 +94,7 @@
         "sidebar_label": "Installation & Setup"
       },
       "pg-guide-transactions": {
-        "title": "Using Transactions in Postgres",
+        "title": "Using Transactions in Postgres with Node.js",
         "sidebar_label": "Using Transactions"
       },
       "pg-migrations": {
@@ -62,16 +110,24 @@
         "sidebar_label": "Queryable"
       },
       "pg-test": {
-        "title": "Postgres Testing",
+        "title": "Postgres Testing with Node.js",
         "sidebar_label": "Testing"
       },
       "pg-transaction": {
-        "title": "Postgres Transaction",
+        "title": "Postgres Node.js Transaction",
         "sidebar_label": "Transaction"
       },
       "pg": {
-        "title": "Postgres",
+        "title": "Getting started with Postgres and Node.js",
         "sidebar_label": "Getting Started"
+      },
+      "queue": {
+        "title": "@databases/queue",
+        "sidebar_label": "queue"
+      },
+      "split-sql-query": {
+        "title": "@databases/split-sql-query",
+        "sidebar_label": "split-sql-query"
       },
       "sql": {
         "title": "Building SQL Queries"
@@ -83,6 +139,14 @@
       "sqlite": {
         "title": "SQLite",
         "sidebar_label": "API"
+      },
+      "syntax-highlighting": {
+        "title": "Syntax Highlighting for SQL in Tagged Template Literals",
+        "sidebar_label": "Syntax Highlighting"
+      },
+      "validate-unicode": {
+        "title": "@databases/validate-unicode",
+        "sidebar_label": "validate-unicode"
       },
       "websql-test": {
         "title": "Expo / WebSQL Testing",

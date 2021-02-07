@@ -1,6 +1,6 @@
 ---
 id: pg-test
-title: Postgres Testing
+title: Postgres Testing with Node.js
 sidebar_label: Testing
 ---
 
@@ -35,23 +35,19 @@ BAD:
 
 ```ts
 expect(
-  await db.query(sql`SELECT id, name FROM users WHERE name=${'Joe'}`)
-).toEqual(
-  [{id: 1, name: 'Joe'}]
-);
+  await db.query(sql`SELECT id, name FROM users WHERE name=${'Joe'}`),
+).toEqual([{id: 1, name: 'Joe'}]);
 ```
 
 GOOD:
 
 ```ts
 expect(
-  await db.query(sql`SELECT id, name FROM users WHERE name=${'Joe'}`)
-).toEqual(
-  [{id: expect.any(Number), name: 'Joe'}]
-);
+  await db.query(sql`SELECT id, name FROM users WHERE name=${'Joe'}`),
+).toEqual([{id: expect.any(Number), name: 'Joe'}]);
 ```
 
-If you need to run migrations before your tests run, e.g. to create database tables/setup test data, you can add a command to run in your pg config.  e.g. add the following to package.json:
+If you need to run migrations before your tests run, e.g. to create database tables/setup test data, you can add a command to run in your pg config. e.g. add the following to package.json:
 
 ```
 "scripts" {
@@ -106,7 +102,6 @@ If the `DATABASE_URL` environment is already set, `pg-test` does nothing. This m
 version: 2
 
 refs:
-
   container: &container
     docker:
       - image: node:10
@@ -221,7 +216,6 @@ workflows:
               only: master
     jobs:
       - nightly
-
 ```
 
 ## API

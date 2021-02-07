@@ -32,7 +32,7 @@ connectionPool.tx(async (transaction) => {
 Run an SQL Query and get a promise for an array of results. If your query contains multiple statements, only the results of the final statement are returned.
 
 ```ts
-const result = await task.query(sql`SELECT 1 + 1 AS a`);
+const result = await db.query(sql`SELECT 1 + 1 AS a`);
 result[0].a;
 // => 2
 ```
@@ -42,7 +42,7 @@ result[0].a;
 If you pass an array of SQLQueries, they will be run as a single transaction and you will get an array in response where each element of the array is the results of one of the queries.
 
 ```ts
-const [resultA, resultB] = await task.query([
+const [resultA, resultB] = await db.query([
   sql`SELECT 1 + 1 AS a`,
   sql`SELECT 1 + 1 AS b`,
 ]);

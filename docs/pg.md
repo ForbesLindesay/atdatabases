@@ -1,10 +1,12 @@
 ---
 id: pg
-title: Postgres
+title: Getting started with Postgres and Node.js
 sidebar_label: Getting Started
 ---
 
 The `@databases/pg` library provides a safe and convenient API for querying postgres databases in node.js.
+
+Top tip: If you haven't done so already, you may want to [set up syntax highighting in your editor](syntax-highlighting.md) then resume this guide when you've done that.
 
 ## Getting Started
 

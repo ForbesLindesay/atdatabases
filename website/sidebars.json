@@ -1,6 +1,9 @@
 {
   "docs": {
-    "Getting Started": ["sql"],
+    "Getting Started": [
+      "sql",
+      "syntax-highlighting"
+    ],
     "Postgres": [
       {
         "type": "subcategory",
@@ -29,8 +32,30 @@
       }
     ],
     "MySQL": [
-      "mysql",
-      "mysql-test"
+      {
+        "type": "subcategory",
+        "label": "Guides",
+        "ids": [
+          "mysql",
+          "mysql-guide-setup",
+          "mysql-guide-connections",
+          "mysql-guide-query",
+          "mysql-guide-transactions",
+          "mysql-guide-logging",
+          "mysql-test"
+        ]
+      },
+      {
+        "type": "subcategory",
+        "label": "API",
+        "ids": [
+          "mysql-options",
+          "mysql-queryable",
+          "mysql-connection-pool",
+          "mysql-connection",
+          "mysql-transaction"
+        ]
+      }
     ],
     "SQLite": [
       "sqlite",
@@ -41,7 +66,12 @@
       "websql-test"
     ],
     "Utilities": [
-      "connection-pool"
+      "connection-pool",
+      "escape-identifier",
+      "lock",
+      "queue",
+      "split-sql-queries",
+      "validate-unicode"
     ]
   }
 }

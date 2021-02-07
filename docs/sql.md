@@ -141,10 +141,40 @@ db.query(sql`SELECT * FROM users WHERE dob = ${new DayDate(2018, 1, 20)};`);
 // => {text: 'SELECT * FROM users WHERE dob = $1;', values: ['2018-01-20']}
 ```
 
-### `SQLQuery.compile()`
+### `SQLQuery.format(config: FormatConfig)`
 
-This returns an object with `{text: string, values: any[]}` where the `text` field contains the SQL query formatted for postgres. It also minifies the query using `pg-minify` by default. You can pass `SQLQuery.compile({minify: false})` to disable minifying.
+This returns an object with `{text: string, values: any[]}` where the `text` field contains the SQL formatted query, and values contains the parameters.
 
-### `SQLQuery.compileMySql()`
+e.g.
 
-This returns an object with `{text: string, values: any[]}` where the `text` field contains the SQL query formatted for MySQL. We also use this function to generate queries for SQLite as it has a very similar format.
+```typescript
+import {escapePostgresIdentifier} from '@databases/escape-identifier';
+import sql, {SQLQuery, FormatConfig} from '@databases/sql';
+
+const pgFormat: FormatConfig = {
+  escapeIdentifier: (str) => escapePostgresIdentifier(str),
+  formatValue: (value, index) => ({placeholder: `$${index + 1}`, value}),
+};
+
+const userID = 42;
+const query: SQLQuery = sql`
+  SELECT * FROM users WHERE id = ${userID}
+`;
+console.log(query.format(pgFormat));
+```
+
+```javascript
+const {escapePostgresIdentifier} = require('@databases/escape-identifier');
+const sql = require('@databases/sql');
+
+const pgFormat = {
+  escapeIdentifier: (str) => escapePostgresIdentifier(str),
+  formatValue: (value, index) => ({placeholder: `$${index + 1}`, value}),
+};
+
+const userID = 42;
+const query = sql`
+  SELECT * FROM users WHERE id = ${userID}
+`;
+console.log(query.format(pgFormat));
+```

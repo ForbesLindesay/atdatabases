@@ -8,17 +8,17 @@
 const React = require('react');
 
 class Footer extends React.Component {
-  docUrl(doc, language) {
+  docUrl(doc, _language) {
     const baseUrl = this.props.config.baseUrl;
     const docsUrl = this.props.config.docsUrl;
     const docsPart = `${docsUrl ? `${docsUrl}/` : ''}`;
-    const langPart = `${language ? `${language}/` : ''}`;
-    return `${baseUrl}${docsPart}${langPart}${doc}`;
+    // const langPart = `${language ? `${language}/` : ''}`;
+    return `${baseUrl}${docsPart}${doc}`;
   }
 
-  pageUrl(doc, language) {
+  pageUrl(doc, _language) {
     const baseUrl = this.props.config.baseUrl;
-    return baseUrl + (language ? `${language}/` : '') + doc;
+    return baseUrl + doc;
   }
 
   render() {
@@ -37,16 +37,14 @@ class Footer extends React.Component {
           </a>
           <div>
             <h5>Docs</h5>
-            <a href={this.docUrl('pg.html', this.props.language)}>Postgres</a>
-            <a href={this.docUrl('mysql.html', this.props.language)}>MySQL</a>
-            <a href={this.docUrl('sqlite.html', this.props.language)}>SQLite</a>
-            <a href={this.docUrl('websql.html', this.props.language)}>
-              Expo/WebSQL
-            </a>
+            <a href={this.docUrl('pg', this.props.language)}>Postgres</a>
+            <a href={this.docUrl('mysql', this.props.language)}>MySQL</a>
+            <a href={this.docUrl('sqlite', this.props.language)}>SQLite</a>
+            <a href={this.docUrl('websql', this.props.language)}>Expo/WebSQL</a>
           </div>
           <div>
             <h5>Community</h5>
-            <a href={this.pageUrl('users.html', this.props.language)}>
+            <a href={this.pageUrl('users', this.props.language)}>
               User Showcase
             </a>
             {/* <a

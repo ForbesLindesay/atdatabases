@@ -156,6 +156,13 @@ test('logging', async () => {
           'forbes@lindesay.co.uk'
         ]
       })",
+      "onQueryResults(SQLQuery, {
+        'text': 'UPDATE logging.accounts SET balance=$1 WHERE email=$2',
+        'values': [
+          100,
+          'forbes@lindesay.co.uk'
+        ]
+      }, [])",
       "onQueryStart(SQLQuery, {
         'text': 'UPDATE logging.accounts SET balance=$1 WHERE email=$2',
         'values': [
@@ -166,13 +173,6 @@ test('logging', async () => {
       "onQueryResults(SQLQuery, {
         'text': 'UPDATE logging.accounts SET balance=$1 WHERE email=$2',
         'values': [
-          100,
-          'forbes@lindesay.co.uk'
-        ]
-      }, [])",
-      "onQueryResults(SQLQuery, {
-        'text': 'UPDATE logging.accounts SET balance=$1 WHERE email=$2',
-        'values': [
           200,
           'dee@lindesay.co.uk'
         ]
@@ -184,13 +184,6 @@ test('logging', async () => {
           'forbes@lindesay.co.uk'
         ]
       })",
-      "onQueryStart(SQLQuery, {
-        'text': 'UPDATE logging.accounts SET balance=$1 WHERE email=$2',
-        'values': [
-          200,
-          'dee@lindesay.co.uk'
-        ]
-      })",
       "onQueryResults(SQLQuery, {
         'text': 'UPDATE logging.accounts SET balance=$1 WHERE email=$2',
         'values': [
@@ -198,6 +191,13 @@ test('logging', async () => {
           'forbes@lindesay.co.uk'
         ]
       }, [])",
+      "onQueryStart(SQLQuery, {
+        'text': 'UPDATE logging.accounts SET balance=$1 WHERE email=$2',
+        'values': [
+          200,
+          'dee@lindesay.co.uk'
+        ]
+      })",
       "onQueryResults(SQLQuery, {
         'text': 'UPDATE logging.accounts SET balance=$1 WHERE email=$2',
         'values': [

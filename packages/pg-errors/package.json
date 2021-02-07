@@ -13,7 +13,6 @@
     "access": "public"
   },
   "devDependencies": {
-    "@types/node": "^13.13.4",
     "pg-error-constants": "^1.0.0"
   },
   "dependency-check-entries": [

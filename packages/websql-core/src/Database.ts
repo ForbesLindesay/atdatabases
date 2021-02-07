@@ -186,7 +186,7 @@ export default class Database {
         },
         (ex) => reject(convertError(ex, text)),
         () => {
-          resolve(resultSet);
+          resolve(resultSet!);
         },
       );
     });
