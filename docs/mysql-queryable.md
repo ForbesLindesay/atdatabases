@@ -1,10 +1,10 @@
 ---
-id: pg-queryable
-title: Postgres Queryable
+id: mysql-queryable
+title: MySQL Queryable
 sidebar_label: Queryable
 ---
 
-There are three types of `Queryable` in postgres:
+There are three types of `Queryable` in the node.js MySQL driver:
 
 - `ConnectionPool` - represents a set of automatically managed connections to the database
 - `Connection` - represents a single physical connection to the database
@@ -13,7 +13,7 @@ There are three types of `Queryable` in postgres:
 All three share a common API, allowing you to write methods that can be used both inside and outside a transaction. e.g.
 
 ```ts
-import {Queryable} from '@databases/pg';
+import {Queryable} from '@databases/mysql';
 
 async function getUser(id: number, db: Queryable) {
   const users = await db.query(sql`SELECT * FROM users WHERE id=${id}`);
@@ -78,7 +78,7 @@ Executes the callback `fn` within a transaction on that connection.
 
 If the `Queryable` is already a `Transaction`, this will use "savepoints" to create a nested transaction (and any options will be ignored).
 
-If the `Queryable` is a `Connection` or `ConnectionPool`, this will create a true transaction, with the requested isolation level.
+If the `Queryable` is a `Connection` or `ConnectionPool`, this will create a true transaction, with the requested options (e.g. readonly).
 
 ### `Queryable.task(fn): Promise<T>`
 

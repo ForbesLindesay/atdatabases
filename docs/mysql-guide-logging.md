@@ -1,17 +1,17 @@
 ---
-id: pg-guide-logging
-title: Postgres Logging & Debugging with Node.js
+id: mysql-guide-logging
+title: MySQL Logging & Debugging with Node.js
 sidebar_label: Logging & Debugging
 ---
 
-Sometimes it is useful to know about every query that is run on your database. This can help you track down unexpected behaviour, and debug why some of your postgres queries are running slowly. The following examples assume you have your database configuration stored in an environment variable called `DATABASE_URL`. If this is not the case, you may want to read [Managing Connections](pg-guide-connections.md) first.
+Sometimes it is useful to know about every query that is run on your database. This can help you track down unexpected behaviour, and debug why some of your MySQL queries are running slowly. The following examples assume you have your database configuration stored in an environment variable called `DATABASE_URL`. If this is not the case, you may want to read [Managing Connections](mysql-guide-connections.md) first.
 
 To simply log when each query starts and ends:
 
 ```typescript
 // database.ts
 
-import createConnectionPool, {sql} from '@databases/pg';
+import createConnectionPool, {sql} from '@databases/mysql';
 
 export {sql};
 
@@ -43,7 +43,7 @@ export default db;
 ```javascript
 // database.js
 
-const createConnectionPool = require('@databases/pg');
+const createConnectionPool = require('@databases/mysql');
 
 const db = createConnectionPool({
   onQueryStart: (_query, {text, values}) => {
@@ -77,7 +77,7 @@ If you want to track the query duration, one option is to use a tool that can pr
 ```typescript
 // database.ts
 
-import createConnectionPool, {sql} from '@databases/pg';
+import createConnectionPool, {sql} from '@databases/mysql';
 
 export {sql};
 
@@ -108,7 +108,7 @@ export default db;
 ```javascript
 // database.js
 
-const createConnectionPool = require('@databases/pg');
+const createConnectionPool = require('@databases/mysql');
 
 const startTimes = new Map();
 const db = createConnectionPool({
@@ -141,7 +141,7 @@ You can also use the `onConnectionOpened` and `onConnectionClosed` events to tra
 ```typescript
 // database.ts
 
-import createConnectionPool, {sql} from '@databases/pg';
+import createConnectionPool, {sql} from '@databases/mysql';
 
 export {sql};
 
@@ -165,7 +165,7 @@ export default db;
 ```javascript
 // database.js
 
-const createConnectionPool = require('@databases/pg');
+const createConnectionPool = require('@databases/mysql');
 
 let connectionsCount = 0;
 const db = createConnectionPool({

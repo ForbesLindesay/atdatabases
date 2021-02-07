@@ -1,6 +1,6 @@
 ---
-id: pg-connection
-title: Postgres Node.js Connection
+id: mysql-connection
+title: MySQL Node.js Connection
 sidebar_label: Connection
 ---
 
@@ -72,25 +72,11 @@ const result = await db.task(async (task) => {
 
 Options:
 
-| Name             | Type             | <abbr title="Optional">Opt</abbr> | Description                                                                                                                      |
-| ---------------- | ---------------- | --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `isolationLevel` | `IsolationLevel` | ✓                                 | Transaction Isolation Level                                                                                                      |
-| `readOnly`       | `boolean`        | ✓                                 | Sets transaction access mode                                                                                                     |
-| `deferrable`     | `boolean`        | ✓                                 | Sets the transaction deferrable mode. It is only used when `isolationLevel` is `IsolationLevel.serializable` and `readOnly=true` |
+| Name                     | Type      | <abbr title="Optional">Opt</abbr> | Description                                                      |
+| ------------------------ | --------- | --------------------------------- | ---------------------------------------------------------------- |
+| `readOnly`               | `boolean` | ✓                                 | Sets transaction access mode                                     |
+| `withConsistentSnapshot` | `boolean` | ✓                                 | Causes readonly transactions to aquire a snapshot before running |
 
 ### `Connection.task(fn): Promise<T>`
 
 This method exists to mimic the API in `ConnectionPool.task`. It does not allocate a fresh connection, and simply returns `fn(this)`.
-
-### IsolationLevel
-
-```ts
-import {IsolationLevel} from '@databases/pg';
-```
-
-The Isolation Level can be passed to `Connection.tx` as an option. It should be one of:
-
-- `IsolationLeve.none`
-- `IsolationLevel.serializable`
-- `IsolationLevel.repeatableRead`
-- `IsolationLevel.readCommitted`

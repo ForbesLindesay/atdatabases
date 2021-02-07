@@ -1,19 +1,19 @@
 ---
-id: pg-guide-setup
-title: Postgres Installation & Setup
+id: mysql-guide-setup
+title: MySQL Installation & Setup
 sidebar_label: Installation & Setup
 ---
 
 ## Installation
 
-To install the postgress client library, open a new Terminal and run:
+To install the MySQL client library, open a new Terminal and run:
 
 ```sh
-yarn add @databases/pg
+yarn add @databases/mysql
 ```
 
 ```sh
-npm install @databases/pg
+npm install @databases/mysql
 ```
 
 ## Creating a database
@@ -21,18 +21,18 @@ npm install @databases/pg
 If you don't already have a database to connect to, you can create one using pg-test:
 
 ```sh
-yarn add @databases/pg-test
-yarn pg-test start
+yarn add @databases/mysql-test
+yarn mysql-test start
 ```
 
 ```sh
-npx pg-test start
+npx mysql-test start
 ```
 
 This will print a connection string as the last line of it's output, it will look something like:
 
 ```
-postgres://test-user@localhost:5432/test-db
+mysql://test-user:password@localhost:3306/test-db
 ```
 
 > N.B. This database does not have any persistence, it should only be used for testing things out/getting started. Please do not store anything even vaguely important in it.
@@ -40,11 +40,11 @@ postgres://test-user@localhost:5432/test-db
 When you're done testing out your app, you can shut the database down using:
 
 ```sh
-yarn pg-test stop
+yarn mysql-test stop
 ```
 
 ```sh
-npx pg-test stop
+npx mysql-test stop
 ```
 
 ## Running your first query
@@ -52,13 +52,13 @@ npx pg-test stop
 Database queries are always asynchronous, and return Promises, so you will need to `await` them to get the actual resulting vaules.
 
 ```typescript
-import createConnectionPool, {sql} from '@databases/pg';
+import createConnectionPool, {sql} from '@databases/mysql';
 
 async function run() {
   // N.B. you will need to replace this connection
   // string with the correct string for your database.
   const db = createConnectionPool(
-    'postgres://test-user@localhost:5432/test-db',
+    'mysql://test-user:password@localhost:3306/test-db',
   );
 
   const results = await db.query(sql`
@@ -78,14 +78,14 @@ run().catch((err) => {
 ```
 
 ```javascript
-const createConnectionPool = require('@databases/pg');
-const {sql} = require('@databases/pg');
+const createConnectionPool = require('@databases/mysql');
+const {sql} = require('@databases/mysql');
 
 async function run() {
   // N.B. you will need to replace this connection
   // string with the correct string for your database.
   const db = createConnectionPool(
-    'postgres://test-user@localhost:5432/test-db',
+    'mysql://test-user:password@localhost:3306/test-db',
   );
 
   const results = await db.query(sql`
@@ -112,4 +112,4 @@ run().catch((err) => {
 > It is also bad practice to store your connection string in the actual code. You should use an environment
 > variable instead.
 >
-> You can read more about this in [Managing Connections](pg-guide-connections.md) (which is the next section of this guide)
+> You can read more about this in [Managing Connections](mysql-guide-connections.md) (which is the next section of this guide)

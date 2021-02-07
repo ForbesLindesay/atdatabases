@@ -1,14 +1,14 @@
 ---
-id: pg-guide-query
-title: Querying Postgres Databases in Node.js
-sidebar_label: Querying Postgres
+id: mysql-guide-query
+title: Querying MySQL Databases in Node.js
+sidebar_label: Querying MySQL
 ---
 
-This guide will cover creating a table and performing basic CRUD (create, read, update, delete) operations on it. You should make sure you read [Setup & Installation](pg-guide-setup.md) and [Managing Connections](pg-guide-connections.md) first.
+This guide will cover creating a table and performing basic CRUD (create, read, update, delete) operations on it. You should make sure you read [Setup & Installation](mysql-guide-setup.md) and [Managing Connections](mysql-guide-connections.md) first.
 
 ## Creating a table
 
-In a production app, you should use [migrations](pg-migrations.md) to manage your database schema, but to get started, you can create a table directly using the `@databases/pg` API:
+In a production app this isn't a great way to manage your schema, but to get started, you can create a table directly using the `@databases/mysql` API:
 
 ```typescript
 import db, {sql} from './databases';
@@ -32,7 +32,7 @@ run().catch((err) => {
 ```
 
 ```javascript
-const {sql} = require('@databases/pg');
+const {sql} = require('@databases/mysql');
 const db = require('./database');
 
 async function run() {
@@ -112,7 +112,7 @@ run().catch((err) => {
 ```
 
 ```javascript
-const {sql} = require('@databases/pg');
+const {sql} = require('@databases/mysql');
 const db = require('./database');
 
 async function insertUser(email, favouriteColor) {

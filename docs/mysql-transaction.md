@@ -1,10 +1,10 @@
 ---
-id: pg-transaction
-title: Postgres Node.js Transaction
+id: mysql-transaction
+title: MySQL Node.js Transaction
 sidebar_label: Transaction
 ---
 
-The `Transaction` object represents a transaction happening on a single physical connection to the underlying database. You can use it to execute queries, or start "nested transactions". Depending on the `isolationLevel` you specified when creating the `Transaction`, you can get varying levels of guarantee about how well issolated your transactions are, but you can always guarantee that all your changes will either be "committed" or "rolled back" at the end. Your database will never be left in an inconsistent state.
+The `Transaction` object represents a transaction happening on a single physical connection to the underlying database. You can use it to execute queries, or start "nested transactions". If you throw an error within a transaction, it will be automatically aborted and rolled back, otherwise it will be committed when the transaction ends.
 
 ### `Transaction.query(SQLQuery): Promise<any[]>`
 

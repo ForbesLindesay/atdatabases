@@ -1,6 +1,6 @@
 ---
-id: pg-connection-pool
-title: Postgres Node.js Connection Pool
+id: mysql-connection-pool
+title: MySQL Node.js Connection Pool
 sidebar_label: Connection Pool
 ---
 
@@ -46,11 +46,10 @@ const result = await db.tx(async (db) => {
 
 Options:
 
-| Name             | Type             | <abbr title="Optional">Opt</abbr> | Description                                                                                                                      |
-| ---------------- | ---------------- | --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `isolationLevel` | `IsolationLevel` | ✓                                 | Transaction Isolation Level                                                                                                      |
-| `readOnly`       | `boolean`        | ✓                                 | Sets transaction access mode                                                                                                     |
-| `deferrable`     | `boolean`        | ✓                                 | Sets the transaction deferrable mode. It is only used when `isolationLevel` is `IsolationLevel.serializable` and `readOnly=true` |
+| Name                     | Type      | <abbr title="Optional">Opt</abbr> | Description                                                      |
+| ------------------------ | --------- | --------------------------------- | ---------------------------------------------------------------- |
+| `readOnly`               | `boolean` | ✓                                 | Sets transaction access mode                                     |
+| `withConsistentSnapshot` | `boolean` | ✓                                 | Causes readonly transactions to aquire a snapshot before running |
 
 ### `ConnectionPool.dispose(): Promise<void>`
 
@@ -58,12 +57,12 @@ Dispose the connection pool. Once this is called, any subsequent queries will fa
 
 ### `ConnectionPool.query(SQLQuery | SQLQuery[]): Promise<any[]>`
 
-This is a shorthand for getting a connection, and then calling `.query` on the connection. See [`Connection.query`](pg-connection.md) for details.
+This is a shorthand for getting a connection, and then calling `.query` on the connection. See [`Connection.query`](mysql-connection.md) for details.
 
 ### `ConnectionPool.queryStream(SQLQuery): AsyncIterable<any>`
 
-This is a shorthand for getting a connection, and then calling `.queryStream` on the connection. See [`Connection.queryStream`](pg-connection.md) for details.
+This is a shorthand for getting a connection, and then calling `.queryStream` on the connection. See [`Connection.queryStream`](mysql-connection.md) for details.
 
 ### `ConnectionPool.queryNodeStream(SQLQuery): ReadableStream`
 
-This is a shorthand for getting a connection, and then calling `.queryNodeStream` on the connection. See [`Connection.queryNodeStream`](pg-connection.md) for details.
+This is a shorthand for getting a connection, and then calling `.queryNodeStream` on the connection. See [`Connection.queryNodeStream`](mysql-connection.md) for details.

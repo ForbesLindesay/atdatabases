@@ -1,16 +1,16 @@
 ---
 id: pg-guide-transactions
-title: Using Transactions in Postgres
+title: Using Transactions in Postgres with Node.js
 sidebar_label: Using Transactions
 ---
 
-Calling `.query` on a connection pool implicitly allocates a connectio transaction and creates a transaction. To run multiple queries in a single transaction, you can call `.tx`:
+Calling `.query` on a connection pool implicitly allocates a connection and creates a transaction. To run multiple queries in a single transaction, you can call `.tx`:
 
 ```typescript
 import db, {sql} from './database';
 
 async function run() {
-  const total = await db.tx((db) => {
+  const total = await db.tx(async (db) => {
     const resultA = await db.query(sql`
       SELECT 1 + 1 as result;
     `);
@@ -31,11 +31,11 @@ run().catch((err) => {
 ```
 
 ```javascript
+const {sql} = require('@databases/pg');
 const db = require('./database');
-const {sql} = require('./database');
 
 async function run() {
-  const total = await db.tx((db) => {
+  const total = await db.tx(async (db) => {
     const resultA = await db.query(sql`
       SELECT 1 + 1 as result;
     `);
@@ -58,6 +58,10 @@ run().catch((err) => {
 The function you pass to `db.tx` is given a single parameter that represents the transaction. You can use that value exactly like you would use the connection pool, in fact I recommend giving it the same name.
 
 If you give them different names, and refer to the outer connection pool, instead of the transaction, your query will not run as part of the transaction.
+
+## Nested Transactions
+
+Transactions can also be nested. Nothing is actually committed until the top-most transaction ends, but nested transactions allow you to atomically attempt (and then optionally rollback) sequences of operations within a transaction.
 
 ## Isolation Levels
 
@@ -90,7 +94,7 @@ import db, {sql} from './database';
 
 async function run() {
   await db.tx(
-    (db) => {
+    async (db) => {
       const [{sum}] = await db.query(sql`
         SELECT SUM(value) as sum FROM my_table WHERE class=1
       `);
@@ -117,7 +121,7 @@ const db = require('./database');
 
 async function run() {
   await db.tx(
-    (db) => {
+    async (db) => {
       const [{sum}] = await db.query(sql`
         SELECT SUM(value) as sum FROM my_table WHERE class=1
       `);
@@ -148,7 +152,7 @@ import db, {sql} from './database';
 
 async function run() {
   await db.tx(
-    (db) => {
+    async (db) => {
       const [{sum}] = await db.query(sql`
         SELECT SUM(value) as sum FROM my_table WHERE class=1
       `);
@@ -174,7 +178,7 @@ const db = require('./database');
 
 async function run() {
   await db.tx(
-    (db) => {
+    async (db) => {
       const [{sum}] = await db.query(sql`
         SELECT SUM(value) as sum FROM my_table WHERE class=1
       `);
@@ -204,7 +208,7 @@ import db, {sql} from './database';
 
 async function run() {
   await db.tx(
-    (db) => {
+    async (db) => {
       const [{sum}] = await db.query(sql`
         SELECT SUM(value) as sum FROM my_table WHERE class=1
       `);
@@ -231,7 +235,7 @@ const db = require('./database');
 
 async function run() {
   await db.tx(
-    (db) => {
+    async (db) => {
       const [{sum}] = await db.query(sql`
         SELECT SUM(value) as sum FROM my_table WHERE class=1
       `);

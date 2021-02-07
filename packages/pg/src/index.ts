@@ -161,7 +161,7 @@ export interface ConnectionPoolConfig extends ClientConfig, EventHandlers {
    * number of milliseconds a client must sit idle in the pool and not be checked out
    * before it is disconnected from the backend and discarded
    *
-   * default is 10000 (10 seconds) - set to 0 to disable auto-disconnection of idle clients
+   * default is 30_000 (30 seconds) - set to 0 to disable auto-disconnection of idle clients
    */
   idleTimeoutMilliseconds?: number;
 
