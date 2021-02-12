@@ -147,7 +147,7 @@ test('create users', async () => {
     .select('screen_name', 'age')
     .orderByDesc('screen_name')
     .all();
-  await expect(subsetOfFields).toEqual([
+  expect(subsetOfFields).toEqual([
     {screen_name: 'Forbes', age: null},
     {screen_name: 'Ellie', age: null},
   ]);
