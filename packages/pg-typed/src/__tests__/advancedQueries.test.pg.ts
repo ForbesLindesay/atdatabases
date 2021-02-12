@@ -140,6 +140,17 @@ test('create users', async () => {
       .orderByDesc('screen_name')
       .all(),
   ).resolves.toEqual([forbes]);
+
+  // Pick<User, "screen_name" | "age">[]
+  const subsetOfFields = await users(db)
+    .find()
+    .select('screen_name', 'age')
+    .orderByDesc('screen_name')
+    .all();
+  await expect(subsetOfFields).toEqual([
+    {screen_name: 'Forbes', age: null},
+    {screen_name: 'Ellie', age: null},
+  ]);
 });
 
 test('JSON values can be of any type', async () => {
