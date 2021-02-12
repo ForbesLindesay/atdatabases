@@ -5,6 +5,11 @@ export interface SelectQuery<TRecord> {
   all(): Promise<TRecord[]>;
   orderByAsc(key: keyof TRecord): OrderedSelectQuery<TRecord>;
   orderByDesc(key: keyof TRecord): OrderedSelectQuery<TRecord>;
+  select<
+    TKeys extends readonly [keyof TRecord, ...(readonly (keyof TRecord)[])]
+  >(
+    ...fields: TKeys
+  ): SelectQuery<Pick<TRecord, TKeys[number]>>;
 }
 
 export interface OrderedSelectQuery<TRecord> extends SelectQuery<TRecord> {
@@ -129,6 +134,7 @@ class SelectQueryImplementation<TRecord>
   implements OrderedSelectQuery<TRecord> {
   public readonly orderByQueries: SQLQuery[] = [];
   public limitCount: number | undefined;
+  private _selectFields: SQLQuery | undefined;
 
   constructor(
     private readonly _sql: typeof sql,
@@ -146,7 +152,11 @@ class SelectQueryImplementation<TRecord>
     this._methodCalled = mode;
 
     const sql = this._sql;
-    const parts = [sql`SELECT * FROM ${this._tableID} ${this._where}`];
+    const parts = [
+      this._selectFields
+        ? sql`SELECT ${this._selectFields} FROM ${this._tableID} ${this._where}`
+        : sql`SELECT * FROM ${this._tableID} ${this._where}`,
+    ];
     if (this.orderByQueries.length) {
       parts.push(sql`ORDER BY ${sql.join(this.orderByQueries, sql`, `)}`);
     }
@@ -166,6 +176,19 @@ class SelectQueryImplementation<TRecord>
   public orderByDesc(key: keyof TRecord): OrderedSelectQuery<TRecord> {
     const sql = this._sql;
     this.orderByQueries.push(sql`${sql.ident(key)} DESC`);
+    return this;
+  }
+
+  public select<
+    TKeys extends readonly [keyof TRecord, ...(readonly (keyof TRecord)[])]
+  >(...fields: TKeys) {
+    if (this._selectFields) {
+      throw new Error('Cannot call select fields multiple times on one query');
+    }
+    this._selectFields = this._sql.join(
+      fields.map((f) => this._sql.ident(f)),
+      ',',
+    );
     return this;
   }
 
