@@ -1,26 +1,27 @@
-import {readFileSync} from 'fs';
-import type {ConnectionOptions} from 'tls';
-import {QueryableType} from '@databases/shared';
+import Queryable, {
+  Connection,
+  ConnectionPool,
+  Transaction,
+  isConnection,
+  isConnectionPool,
+  isTransaction,
+} from './types/Queryable';
+import {SQLError, SQLErrorCode, isSQLError} from '@databases/pg-errors';
+import TypeOverrides, {TypeOverridesConfig} from './TypeOverrides';
 import parseConnectionString, {
   Configuration as ParsedConnectionString,
 } from '@databases/pg-connection-string';
-import DataTypeID from '@databases/pg-data-type-id';
-import {isSQLError, SQLError, SQLErrorCode} from '@databases/pg-errors';
 import sql, {SQLQuery, isSqlQuery} from '@databases/sql';
-import {getPgConfigSync} from '@databases/pg-config';
+
+import type {ConnectionOptions} from 'tls';
 import ConnectionPoolImplementation from './ConnectionPool';
-import IsolationLevel from './types/IsolationLevel';
-import Queryable, {
-  Transaction,
-  Connection,
-  ConnectionPool,
-  isTransaction,
-  isConnection,
-  isConnectionPool,
-} from './types/Queryable';
-import TypeOverrides, {TypeOverridesConfig} from './TypeOverrides';
+import DataTypeID from '@databases/pg-data-type-id';
 import EventHandlers from './types/EventHandlers';
+import IsolationLevel from './types/IsolationLevel';
 import {PgOptions} from './ConnectionSource';
+import {QueryableType} from '@databases/shared';
+import {getPgConfigSync} from '@databases/pg-config';
+import {readFileSync} from 'fs';
 
 const {connectionStringEnvironmentVariable} = getPgConfigSync();
 
@@ -192,7 +193,7 @@ export interface ConnectionPoolConfig extends ClientConfig, EventHandlers {
    *
    * Defaults to 60 seconds
    */
-  aquireLockTimeoutMilliseconds?: number;
+  acquireLockTimeoutMilliseconds?: number;
 
   onError?: (err: Error) => void;
 }
@@ -243,7 +244,7 @@ export default function createConnectionPool(
           : 1) *
         2,
     ),
-    aquireLockTimeoutMilliseconds = 60_000,
+    acquireLockTimeoutMilliseconds = 60_000,
     applicationName = parsedConnectionString.application_name,
     keepAlive = false,
     keepAliveInitialDelayMilliseconds = 0,
@@ -354,10 +355,10 @@ export default function createConnectionPool(
       onConnectionOpened,
       onConnectionClosed,
     },
-    aquireLockTimeoutMilliseconds:
-      aquireLockTimeoutMilliseconds === 0
+    acquireLockTimeoutMilliseconds:
+      acquireLockTimeoutMilliseconds === 0
         ? Infinity
-        : aquireLockTimeoutMilliseconds,
+        : acquireLockTimeoutMilliseconds,
   });
 }
 

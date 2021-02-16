@@ -1,15 +1,16 @@
 /* tslint:disable:no-void-expression */
 
-import {Readable} from 'stream';
-import {escapeMySqlIdentifier} from '@databases/escape-identifier';
-import {SQLQuery, FormatConfig, isSqlQuery} from '@databases/sql';
-import {Driver} from '@databases/shared';
-import {Connection as MySqlClient} from 'mysql2/promise';
-import pushToAsyncIterable from '@databases/push-to-async-iterable';
-import TransactionOptions from './types/TransactionOptions';
-import EventHandlers from './types/EventHandlers';
+import {FormatConfig, SQLQuery, isSqlQuery} from '@databases/sql';
+
 import {CoreConnection} from './raw';
+import {Driver} from '@databases/shared';
+import EventHandlers from './types/EventHandlers';
+import {Connection as MySqlClient} from 'mysql2/promise';
 import QueryStreamOptions from './types/QueryStreamOptions';
+import {Readable} from 'stream';
+import TransactionOptions from './types/TransactionOptions';
+import {escapeMySqlIdentifier} from '@databases/escape-identifier';
+import pushToAsyncIterable from '@databases/push-to-async-iterable';
 const {codeFrameColumns} = require('@babel/code-frame');
 
 const mysqlFormat: FormatConfig = {
@@ -19,7 +20,7 @@ const mysqlFormat: FormatConfig = {
 
 export default class MySqlDriver
   implements Driver<TransactionOptions, QueryStreamOptions> {
-  public readonly aquireLockTimeoutMilliseconds: number;
+  public readonly acquireLockTimeoutMilliseconds: number;
   public readonly client: MySqlClient;
   private readonly _handlers: EventHandlers;
   private _endCalled = false;
@@ -27,9 +28,9 @@ export default class MySqlDriver
   constructor(
     client: MySqlClient,
     handlers: EventHandlers,
-    aquireLockTimeoutMilliseconds: number,
+    acquireLockTimeoutMilliseconds: number,
   ) {
-    this.aquireLockTimeoutMilliseconds = aquireLockTimeoutMilliseconds;
+    this.acquireLockTimeoutMilliseconds = acquireLockTimeoutMilliseconds;
     this._disposed = new Promise<void>((resolve) => {
       client.on('end', resolve);
     });

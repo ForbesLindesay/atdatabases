@@ -49,7 +49,7 @@ Options:
 | Name                     | Type      | <abbr title="Optional">Opt</abbr> | Description                                                      |
 | ------------------------ | --------- | --------------------------------- | ---------------------------------------------------------------- |
 | `readOnly`               | `boolean` | ✓                                 | Sets transaction access mode                                     |
-| `withConsistentSnapshot` | `boolean` | ✓                                 | Causes readonly transactions to aquire a snapshot before running |
+| `withConsistentSnapshot` | `boolean` | ✓                                 | Causes readonly transactions to acquire a snapshot before running |
 
 ### `ConnectionPool.dispose(): Promise<void>`
 

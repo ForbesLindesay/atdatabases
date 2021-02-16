@@ -57,7 +57,7 @@ test('lock with 20ms timeout', async () => {
   const lock = getLock(20);
   const results = promisesState();
 
-  results.push(lock.aquireLock(), lock.aquireLock(), lock.aquireLock());
+  results.push(lock.acquireLock(), lock.acquireLock(), lock.acquireLock());
   await expectPromises(results).toEqual([
     fulfilled(undefined),
     pending,
@@ -72,7 +72,7 @@ test('lock with 20ms timeout', async () => {
     rejected('Timed out waiting for lock after 20ms'),
   ]);
 
-  results.push(lock.aquireLock('hello world'));
+  results.push(lock.acquireLock('hello world'));
   results.push(lock.pool());
   await expectPromises(results).toEqual([fulfilled('hello world'), pending]);
 
@@ -81,14 +81,14 @@ test('lock with 20ms timeout', async () => {
     rejected('Timed out waiting for lock after 20ms'),
   ]);
 
-  results.push(lock.aquireLock());
+  results.push(lock.acquireLock());
   results.push(lock.pool());
   await expectPromises(results).toEqual([fulfilled(undefined), pending]);
 
   lock.releaseLock();
   await expectPromises(results).toEqual([fulfilled(undefined)]);
 
-  results.push(lock.aquireLock());
+  results.push(lock.acquireLock());
   await expectPromises(results).toEqual([
     rejected('Cannot call Lock after returning the object to the pool.'),
   ]);
@@ -98,7 +98,7 @@ test('lock with no timeout', async () => {
   const lock = getLock();
   const results = promisesState();
 
-  results.push(lock.aquireLock(), lock.aquireLock(), lock.aquireLock());
+  results.push(lock.acquireLock(), lock.acquireLock(), lock.acquireLock());
   await expectPromises(results).toEqual([
     fulfilled(undefined),
     pending,
@@ -115,7 +115,7 @@ test('lock with no timeout', async () => {
   await expectPromises(results).toEqual([fulfilled(undefined)]);
 
   lock.releaseLock();
-  results.push(lock.aquireLock('hello world'));
+  results.push(lock.acquireLock('hello world'));
   results.push(lock.pool());
   await expectPromises(results).toEqual([fulfilled('hello world'), pending]);
 
@@ -125,7 +125,7 @@ test('lock with no timeout', async () => {
   lock.releaseLock();
   await expectPromises(results).toEqual([fulfilled(undefined)]);
 
-  results.push(lock.aquireLock());
+  results.push(lock.acquireLock());
   await expectPromises(results).toEqual([
     rejected('Cannot call Lock after returning the object to the pool.'),
   ]);
@@ -136,9 +136,9 @@ test('locks by key', async () => {
   const results = promisesState();
 
   results.push(
-    lock.aquireLock('a'),
-    lock.aquireLock('a'),
-    lock.aquireLock('b'),
+    lock.acquireLock('a'),
+    lock.acquireLock('a'),
+    lock.acquireLock('b'),
   );
   await expectPromises(results).toEqual([
     fulfilled(undefined),
@@ -151,7 +151,7 @@ test('locks by key', async () => {
 
   lock.releaseLock('a');
   lock.releaseLock('b');
-  results.push(lock.aquireLock('a', 24), lock.aquireLock('b', 42));
+  results.push(lock.acquireLock('a', 24), lock.acquireLock('b', 42));
   await expectPromises(results).toEqual([fulfilled(24), fulfilled(42)]);
   lock.releaseLock('a');
   lock.releaseLock('b');

@@ -1,15 +1,16 @@
 /* tslint:disable:no-void-expression */
 
-import {Readable} from 'stream';
-import {escapePostgresIdentifier} from '@databases/escape-identifier';
-import {isSQLError, SQLErrorCode} from '@databases/pg-errors';
-import {SQLQuery, FormatConfig, isSqlQuery} from '@databases/sql';
+import {FormatConfig, SQLQuery, isSqlQuery} from '@databases/sql';
+import {SQLErrorCode, isSQLError} from '@databases/pg-errors';
+
 import {Driver} from '@databases/shared';
-import PgClient from './types/PgClient';
-import {isolationLevelToString} from './types/IsolationLevel';
-import TransactionOptions from './types/TransactionOptions';
 import EventHandlers from './types/EventHandlers';
+import PgClient from './types/PgClient';
 import QueryStreamOptions from './types/QueryStreamOptions';
+import {Readable} from 'stream';
+import TransactionOptions from './types/TransactionOptions';
+import {escapePostgresIdentifier} from '@databases/escape-identifier';
+import {isolationLevelToString} from './types/IsolationLevel';
 const {codeFrameColumns} = require('@babel/code-frame');
 const Cursor = require('pg-cursor');
 
@@ -22,7 +23,7 @@ type QueryResult = {rows: any[]};
 
 export default class PgDriver
   implements Driver<TransactionOptions, QueryStreamOptions> {
-  public readonly aquireLockTimeoutMilliseconds: number;
+  public readonly acquireLockTimeoutMilliseconds: number;
   public readonly client: PgClient;
   private readonly _handlers: EventHandlers;
   private _endCalled = false;
@@ -30,9 +31,9 @@ export default class PgDriver
   constructor(
     client: PgClient,
     handlers: EventHandlers,
-    aquireLockTimeoutMilliseconds: number,
+    acquireLockTimeoutMilliseconds: number,
   ) {
-    this.aquireLockTimeoutMilliseconds = aquireLockTimeoutMilliseconds;
+    this.acquireLockTimeoutMilliseconds = acquireLockTimeoutMilliseconds;
     this._disposed = new Promise<void>((resolve) => {
       client.on('end', resolve);
     });

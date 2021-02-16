@@ -1,10 +1,11 @@
-import splitSqlQuery from '@databases/split-sql-query';
-import sql, {isSqlQuery, SQLQuery} from '@databases/sql';
-import cuid = require('cuid');
 import {Disposable, TransactionFactory} from './Factory';
+import {Lock, getLock} from '@databases/lock';
+import sql, {SQLQuery, isSqlQuery} from '@databases/sql';
+
 import Driver from './Driver';
 import QueryableType from './QueryableType';
-import {Lock, getLock} from '@databases/lock';
+import splitSqlQuery from '@databases/split-sql-query';
+import cuid = require('cuid');
 
 type QueryStreamOptions<
   TDriver extends Driver<any, any>
@@ -38,7 +39,7 @@ export default class BaseTransaction<
   ) {
     this._driver = driver;
     this._factories = factories;
-    this._lock = getLock(driver.aquireLockTimeoutMilliseconds);
+    this._lock = getLock(driver.acquireLockTimeoutMilliseconds);
   }
 
   async task<T>(fn: (connection: this) => Promise<T>): Promise<T> {
@@ -47,7 +48,7 @@ export default class BaseTransaction<
   }
   async tx<T>(fn: (connection: TTransaction) => Promise<T>): Promise<T> {
     this._throwIfDisposed();
-    await this._lock.aquireLock();
+    await this._lock.acquireLock();
     try {
       const savepointName = cuid();
       await this._driver.createSavepoint(savepointName);
@@ -71,7 +72,7 @@ export default class BaseTransaction<
   async query(query: SQLQuery[]): Promise<any[][]>;
   async query(query: SQLQuery | SQLQuery[]): Promise<any[]> {
     this._throwIfDisposed();
-    await this._lock.aquireLock();
+    await this._lock.acquireLock();
     try {
       if (Array.isArray(query)) {
         if (query.length === 0) return [];
@@ -101,7 +102,7 @@ export default class BaseTransaction<
     options?: QueryStreamOptions<TDriver>,
   ): AsyncGenerator<any, void, unknown> {
     this._throwIfDisposed();
-    await this._lock.aquireLock();
+    await this._lock.acquireLock();
     try {
       for await (const record of this._driver.queryStream(query, options)) {
         yield record;

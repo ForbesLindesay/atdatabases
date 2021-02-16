@@ -1,20 +1,21 @@
 import {BaseConnectionPool, Factory, PoolOptions} from '@databases/shared';
-import {SQLQuery} from '@databases/sql';
-import {escapePostgresIdentifier} from '@databases/escape-identifier';
-import Connection from './Connection';
-import Transaction from './Transaction';
 import {PassThrough, Readable} from 'stream';
-import PgClient from './types/PgClient';
-import {ConnectionPool as IConnectionPool} from './types/Queryable';
 import TypeOverrides, {
-  parseComposite,
-  parseArray,
   getTypeResolver,
+  parseArray,
+  parseComposite,
 } from './TypeOverrides';
-import EventHandlers from './types/EventHandlers';
-import PgDriver from './Driver';
 import createConnectionSource, {PgOptions} from './ConnectionSource';
+
+import Connection from './Connection';
+import EventHandlers from './types/EventHandlers';
+import {ConnectionPool as IConnectionPool} from './types/Queryable';
+import PgClient from './types/PgClient';
+import PgDriver from './Driver';
+import {SQLQuery} from '@databases/sql';
+import Transaction from './Transaction';
 import definePrecondition from './definePrecondition';
+import {escapePostgresIdentifier} from '@databases/escape-identifier';
 
 const factories: Factory<PgDriver, Connection, Transaction> = {
   createTransaction(driver) {
@@ -34,12 +35,12 @@ const getConnectionPoolOptions = (
   >,
   handlers: EventHandlers,
   onError: (err: Error) => void,
-  aquireLockTimeoutMilliseconds: number,
+  acquireLockTimeoutMilliseconds: number,
 ): PoolOptions<PgDriver> => {
   const src = createConnectionSource(
     srcConfig,
     handlers,
-    aquireLockTimeoutMilliseconds,
+    acquireLockTimeoutMilliseconds,
   );
 
   // setting up types requires a connection, but doesn't have to be done separately for each connection,
@@ -111,7 +112,7 @@ export default class ConnectionPool
       poolOptions = {},
       schema,
       handlers: {onError, ...handlers},
-      aquireLockTimeoutMilliseconds,
+      acquireLockTimeoutMilliseconds,
     }: {
       poolOptions?: Omit<
         PoolOptions<PgDriver>,
@@ -121,7 +122,7 @@ export default class ConnectionPool
       handlers: EventHandlers & {
         onError: (err: Error) => void;
       };
-      aquireLockTimeoutMilliseconds: number;
+      acquireLockTimeoutMilliseconds: number;
     },
   ) {
     super(
@@ -131,7 +132,7 @@ export default class ConnectionPool
         poolOptions,
         handlers,
         onError,
-        aquireLockTimeoutMilliseconds,
+        acquireLockTimeoutMilliseconds,
       ),
       factories,
     );

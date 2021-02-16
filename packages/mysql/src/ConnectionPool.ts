@@ -1,12 +1,13 @@
-import {PassThrough, Readable} from 'stream';
 import {BaseConnectionPool, Factory, PoolOptions} from '@databases/shared';
-import {SQLQuery} from '@databases/sql';
-import {createConnection} from 'mysql2/promise';
+import {PassThrough, Readable} from 'stream';
+
 import Connection from './Connection';
-import Transaction from './Transaction';
-import {ConnectionPool as IConnectionPool} from './types/Queryable';
 import EventHandlers from './types/EventHandlers';
+import {ConnectionPool as IConnectionPool} from './types/Queryable';
 import MySqlDriver from './MySqlDriver';
+import {SQLQuery} from '@databases/sql';
+import Transaction from './Transaction';
+import {createConnection} from 'mysql2/promise';
 
 const factories: Factory<MySqlDriver, Connection, Transaction> = {
   createTransaction(driver) {
@@ -43,7 +44,7 @@ const getConnectionPoolOptions = (
   >,
   handlers: EventHandlers,
   onError: (err: Error) => void,
-  aquireLockTimeoutMilliseconds: number,
+  acquireLockTimeoutMilliseconds: number,
   serverTimeZone: 'local' | 'utc' | undefined,
 ): PoolOptions<MySqlDriver> => {
   return {
@@ -53,7 +54,7 @@ const getConnectionPoolOptions = (
       const driver = new MySqlDriver(
         client,
         handlers,
-        aquireLockTimeoutMilliseconds,
+        acquireLockTimeoutMilliseconds,
       );
       try {
         if (serverTimeZone === 'utc') {
@@ -104,7 +105,7 @@ export default class ConnectionPool
     >,
     handlers: EventHandlers,
     onError: (err: Error) => void,
-    aquireLockTimeoutMilliseconds: number,
+    acquireLockTimeoutMilliseconds: number,
     serverTimeZone: 'local' | 'utc' | undefined,
   ) {
     super(
@@ -113,7 +114,7 @@ export default class ConnectionPool
         poolOptions,
         handlers,
         onError,
-        aquireLockTimeoutMilliseconds,
+        acquireLockTimeoutMilliseconds,
         serverTimeZone,
       ),
       factories,
