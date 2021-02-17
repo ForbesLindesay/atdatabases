@@ -185,6 +185,6 @@ test('benchamark', async () => {
     return end - start;
   }
 
-  console.log(`bulk insert = ${bulk}ms`);
-  console.log(`normal insert = ${normal}ms`);
+  console.info(`bulk insert = ${bulk}ms`);
+  console.info(`normal insert = ${normal}ms`);
 });
