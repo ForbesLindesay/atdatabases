@@ -1,4 +1,3 @@
-  
 import {BaseConnectionPool, Factory, PoolOptions} from '@databases/shared';
 import {SQLQuery} from '@databases/sql';
 import {escapePostgresIdentifier} from '@databases/escape-identifier';
