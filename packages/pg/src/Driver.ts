@@ -1,16 +1,15 @@
 /* tslint:disable:no-void-expression */
 
-import {FormatConfig, SQLQuery, isSqlQuery} from '@databases/sql';
-import {SQLErrorCode, isSQLError} from '@databases/pg-errors';
-
-import {Driver} from '@databases/shared';
-import EventHandlers from './types/EventHandlers';
-import PgClient from './types/PgClient';
-import QueryStreamOptions from './types/QueryStreamOptions';
 import {Readable} from 'stream';
-import TransactionOptions from './types/TransactionOptions';
 import {escapePostgresIdentifier} from '@databases/escape-identifier';
+import {isSQLError, SQLErrorCode} from '@databases/pg-errors';
+import {SQLQuery, FormatConfig, isSqlQuery} from '@databases/sql';
+import {Driver} from '@databases/shared';
+import PgClient from './types/PgClient';
 import {isolationLevelToString} from './types/IsolationLevel';
+import TransactionOptions from './types/TransactionOptions';
+import EventHandlers from './types/EventHandlers';
+import QueryStreamOptions from './types/QueryStreamOptions';
 const {codeFrameColumns} = require('@babel/code-frame');
 const Cursor = require('pg-cursor');
 
