@@ -1,16 +1,15 @@
 /* tslint:disable:no-void-expression */
 
-import {FormatConfig, SQLQuery, isSqlQuery} from '@databases/sql';
-
-import {CoreConnection} from './raw';
-import {Driver} from '@databases/shared';
-import EventHandlers from './types/EventHandlers';
-import {Connection as MySqlClient} from 'mysql2/promise';
-import QueryStreamOptions from './types/QueryStreamOptions';
 import {Readable} from 'stream';
-import TransactionOptions from './types/TransactionOptions';
 import {escapeMySqlIdentifier} from '@databases/escape-identifier';
+import {SQLQuery, FormatConfig, isSqlQuery} from '@databases/sql';
+import {Driver} from '@databases/shared';
+import {Connection as MySqlClient} from 'mysql2/promise';
 import pushToAsyncIterable from '@databases/push-to-async-iterable';
+import TransactionOptions from './types/TransactionOptions';
+import EventHandlers from './types/EventHandlers';
+import {CoreConnection} from './raw';
+import QueryStreamOptions from './types/QueryStreamOptions';
 const {codeFrameColumns} = require('@babel/code-frame');
 
 const mysqlFormat: FormatConfig = {
