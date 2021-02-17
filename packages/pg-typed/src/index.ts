@@ -243,32 +243,74 @@ class Table<TRecord, TInsertParameters> {
   }
 
   private async _insert<TRecordsToInsert extends readonly TInsertParameters[]>(
-    onConflict: null | ((row: TInsertParameters) => SQLQuery),
+    onConflict:
+      | null
+      | ((columnNames: Array<keyof TRecordsToInsert[number]>) => SQLQuery),
     ...rows: TRecordsToInsert
   ): Promise<TRecord[]> {
+    if (rows.length === 0) return [];
     const {sql} = this._underlyingDb;
-    const results = await this._underlyingDb.query(
-      rows.map((row) => {
-        const entries = Object.entries(row);
-        const columnNames = sql.join(
-          entries.map(([columnName, _value]) => sql.ident(columnName)),
-          sql`, `,
-        );
-        const values = sql.join(
-          entries.map(([columnName, value]) =>
-            sql.value(this._value(columnName, value)),
-          ),
-          sql`, `,
-        );
-        const query = sql`INSERT INTO ${this._tableID} (${columnNames}) VALUES (${values})`;
-        if (onConflict) {
-          return sql`${query} ${onConflict(row)} RETURNING *`;
-        } else {
-          return sql`${query} RETURNING *`;
-        }
-      }),
+
+    const columnNamesSet = new Set<keyof TRecordsToInsert[number]>();
+    for (const row of rows) {
+      for (const columnName of Object.keys(row)) {
+        columnNamesSet.add(columnName as keyof typeof row);
+      }
+    }
+    const columnNames = [...columnNamesSet].sort();
+    const columnNamesSql = sql.join(
+      columnNames.map((columnName) => sql.ident(columnName)),
+      sql`, `,
     );
-    return results.map((r) => r[0]);
+    const values = rows.map(
+      (row) =>
+        sql`(${sql.join(
+          columnNames.map((columnName) =>
+            columnName in row
+              ? sql.value(this._value(columnName as string, row[columnName]))
+              : sql`DEFAULT`,
+          ),
+          `,`,
+        )})`,
+    );
+
+    const results = await this._underlyingDb.query(
+      onConflict
+        ? sql`INSERT INTO ${
+            this._tableID
+          } (${columnNamesSql}) VALUES ${sql.join(values, `,`)} ${onConflict(
+            columnNames,
+          )} RETURNING *`
+        : sql`INSERT INTO ${
+            this._tableID
+          } (${columnNamesSql}) VALUES ${sql.join(values, `,`)} RETURNING *`,
+    );
+    return results;
+  }
+
+  async bulkInsert(
+    columns: {[key in keyof TInsertParameters]: SQLQuery},
+    rows: TInsertParameters[],
+  ): Promise<TRecord[]> {
+    if (rows.length === 0) return [];
+    const {sql} = this._underlyingDb;
+    const columnNames = Object.keys(columns).sort();
+    const columnNamesSql = sql.join(
+      columnNames.map((columnName) => sql.ident(columnName)),
+      sql`, `,
+    );
+    const columnValuesSql = sql.join(
+      columnNames.map((columnName) => {
+        return sql`${rows.map((r) =>
+          this._value(columnName, r[columnName as keyof typeof r]),
+        )}::${columns[columnName as keyof typeof columns]}[]`;
+      }),
+      ',',
+    );
+    const results = await this._underlyingDb.query(
+      sql`INSERT INTO ${this._tableID} (${columnNamesSql}) SELECT * FROM unnest(${columnValuesSql}) RETURNING *`,
+    );
+    return results;
   }
 
   async insert<TRecordsToInsert extends readonly TInsertParameters[]>(
@@ -283,12 +325,12 @@ class Table<TRecord, TInsertParameters> {
   ): Promise<{[key in keyof TRecordsToInsert]: TRecord}> {
     const {sql} = this._underlyingDb;
     return this._insert(
-      (row) =>
+      (columnNames) =>
         sql`ON CONFLICT (${sql.join(
           conflictKeys.map((k) => sql.ident(k)),
           sql`, `,
         )}) DO UPDATE SET ${sql.join(
-          Object.keys(row).map(
+          columnNames.map(
             (key) => sql`${sql.ident(key)}=EXCLUDED.${sql.ident(key)}`,
           ),
           sql`, `,
@@ -299,11 +341,9 @@ class Table<TRecord, TInsertParameters> {
 
   async insertOrIgnore<TRecordsToInsert extends readonly TInsertParameters[]>(
     ...rows: TRecordsToInsert
-  ): Promise<{[key in keyof TRecordsToInsert]: TRecord | null}> {
+  ): Promise<TRecord[]> {
     const {sql} = this._underlyingDb;
-    return (await this._insert(() => sql`ON CONFLICT DO NOTHING`, ...rows)).map(
-      (row) => row ?? null,
-    ) as any;
+    return await this._insert(() => sql`ON CONFLICT DO NOTHING`, ...rows);
   }
 
   async update(

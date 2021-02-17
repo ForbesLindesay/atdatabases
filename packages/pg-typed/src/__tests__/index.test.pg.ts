@@ -124,13 +124,14 @@ test('create users', async () => {
     ]
   `);
 
-  const [john2, martin] = await users(db).insertOrIgnore(
+  const insertOrIgnoreResults = await users(db).insertOrIgnore(
     {screen_name: 'John', bio: 'Updated bio'},
     {screen_name: 'Martin', bio: 'Updated bio'},
   );
-  expect(john2).toBe(null);
-  expect(martin!.screen_name).toBe('Martin');
-  expect(martin!.bio).toBe('Updated bio');
+  expect(insertOrIgnoreResults.length).toBe(1);
+  const [martin] = insertOrIgnoreResults;
+  expect(martin.screen_name).toBe('Martin');
+  expect(martin.bio).toBe('Updated bio');
 
   expect(
     (await users(db).find().orderByAsc('screen_name').first())?.screen_name,
