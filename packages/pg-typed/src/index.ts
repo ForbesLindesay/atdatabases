@@ -262,7 +262,6 @@ class Table<TRecord, TInsertParameters> {
       columnNames.map((columnName) => sql.ident(columnName)),
       sql`, `,
     );
-
     const values = rows.map(
       (row) =>
         sql`(${sql.join(
@@ -285,6 +284,31 @@ class Table<TRecord, TInsertParameters> {
         : sql`INSERT INTO ${
             this._tableID
           } (${columnNamesSql}) VALUES ${sql.join(values, `,`)} RETURNING *`,
+    );
+    return results;
+  }
+
+  async bulkInsert(
+    columns: {[key in keyof TInsertParameters]: SQLQuery},
+    rows: TInsertParameters[],
+  ): Promise<TRecord[]> {
+    if (rows.length === 0) return [];
+    const {sql} = this._underlyingDb;
+    const columnNames = Object.keys(columns).sort();
+    const columnNamesSql = sql.join(
+      columnNames.map((columnName) => sql.ident(columnName)),
+      sql`, `,
+    );
+    const columnValuesSql = sql.join(
+      columnNames.map((columnName) => {
+        return sql`${rows.map((r) =>
+          this._value(columnName, r[columnName as keyof typeof r]),
+        )}::${columns[columnName as keyof typeof columns]}[]`;
+      }),
+      ',',
+    );
+    const results = await this._underlyingDb.query(
+      sql`INSERT INTO ${this._tableID} (${columnNamesSql}) SELECT * FROM unnest(${columnValuesSql}) RETURNING *`,
     );
     return results;
   }
