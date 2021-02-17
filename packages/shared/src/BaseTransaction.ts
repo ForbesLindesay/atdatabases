@@ -1,11 +1,10 @@
+import splitSqlQuery from '@databases/split-sql-query';
+import sql, {isSqlQuery, SQLQuery} from '@databases/sql';
+import cuid = require('cuid');
 import {Disposable, TransactionFactory} from './Factory';
-import {Lock, getLock} from '@databases/lock';
-import sql, {SQLQuery, isSqlQuery} from '@databases/sql';
-
 import Driver from './Driver';
 import QueryableType from './QueryableType';
-import splitSqlQuery from '@databases/split-sql-query';
-import cuid = require('cuid');
+import {Lock, getLock} from '@databases/lock';
 
 type QueryStreamOptions<
   TDriver extends Driver<any, any>
