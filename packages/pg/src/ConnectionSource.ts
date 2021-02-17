@@ -1,8 +1,8 @@
 import {ConnectionOptions} from 'tls';
-import EventHandlers from './types/EventHandlers';
 import PgDriver from './Driver';
-import TypeOverrides from './TypeOverrides';
 import definePrecondition from './definePrecondition';
+import TypeOverrides from './TypeOverrides';
+import EventHandlers from './types/EventHandlers';
 const {Client} = require('pg');
 
 type SSLConfig = null | {
