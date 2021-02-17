@@ -1,14 +1,13 @@
+import {URL} from 'url';
+import {getMySqlConfigSync} from '@databases/mysql-config';
+import sql, {SQLQuery, isSqlQuery} from '@databases/sql';
 import Queryable, {
   Connection,
   ConnectionPool,
   Transaction,
 } from './types/Queryable';
-import sql, {SQLQuery, isSqlQuery} from '@databases/sql';
-
 import ConnectionPoolImplemenation from './ConnectionPool';
 import EventHandlers from './types/EventHandlers';
-import {URL} from 'url';
-import {getMySqlConfigSync} from '@databases/mysql-config';
 
 export type {SQLQuery};
 export {sql, isSqlQuery};
