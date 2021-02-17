@@ -1,27 +1,26 @@
-import Queryable, {
-  Connection,
-  ConnectionPool,
-  Transaction,
-  isConnection,
-  isConnectionPool,
-  isTransaction,
-} from './types/Queryable';
-import {SQLError, SQLErrorCode, isSQLError} from '@databases/pg-errors';
-import TypeOverrides, {TypeOverridesConfig} from './TypeOverrides';
+import {readFileSync} from 'fs';
+import type {ConnectionOptions} from 'tls';
+import {QueryableType} from '@databases/shared';
 import parseConnectionString, {
   Configuration as ParsedConnectionString,
 } from '@databases/pg-connection-string';
-import sql, {SQLQuery, isSqlQuery} from '@databases/sql';
-
-import type {ConnectionOptions} from 'tls';
-import ConnectionPoolImplementation from './ConnectionPool';
 import DataTypeID from '@databases/pg-data-type-id';
-import EventHandlers from './types/EventHandlers';
-import IsolationLevel from './types/IsolationLevel';
-import {PgOptions} from './ConnectionSource';
-import {QueryableType} from '@databases/shared';
+import {isSQLError, SQLError, SQLErrorCode} from '@databases/pg-errors';
+import sql, {SQLQuery, isSqlQuery} from '@databases/sql';
 import {getPgConfigSync} from '@databases/pg-config';
-import {readFileSync} from 'fs';
+import ConnectionPoolImplementation from './ConnectionPool';
+import IsolationLevel from './types/IsolationLevel';
+import Queryable, {
+  Transaction,
+  Connection,
+  ConnectionPool,
+  isTransaction,
+  isConnection,
+  isConnectionPool,
+} from './types/Queryable';
+import TypeOverrides, {TypeOverridesConfig} from './TypeOverrides';
+import EventHandlers from './types/EventHandlers';
+import {PgOptions} from './ConnectionSource';
 
 const {connectionStringEnvironmentVariable} = getPgConfigSync();
 
