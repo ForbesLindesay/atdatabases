@@ -1,21 +1,21 @@
+  
 import {BaseConnectionPool, Factory, PoolOptions} from '@databases/shared';
-import {PassThrough, Readable} from 'stream';
-import TypeOverrides, {
-  getTypeResolver,
-  parseArray,
-  parseComposite,
-} from './TypeOverrides';
-import createConnectionSource, {PgOptions} from './ConnectionSource';
-
-import Connection from './Connection';
-import EventHandlers from './types/EventHandlers';
-import {ConnectionPool as IConnectionPool} from './types/Queryable';
-import PgClient from './types/PgClient';
-import PgDriver from './Driver';
 import {SQLQuery} from '@databases/sql';
-import Transaction from './Transaction';
-import definePrecondition from './definePrecondition';
 import {escapePostgresIdentifier} from '@databases/escape-identifier';
+import Connection from './Connection';
+import Transaction from './Transaction';
+import {PassThrough, Readable} from 'stream';
+import PgClient from './types/PgClient';
+import {ConnectionPool as IConnectionPool} from './types/Queryable';
+import TypeOverrides, {
+  parseComposite,
+  parseArray,
+  getTypeResolver,
+} from './TypeOverrides';
+import EventHandlers from './types/EventHandlers';
+import PgDriver from './Driver';
+import createConnectionSource, {PgOptions} from './ConnectionSource';
+import definePrecondition from './definePrecondition';
 
 const factories: Factory<PgDriver, Connection, Transaction> = {
   createTransaction(driver) {
