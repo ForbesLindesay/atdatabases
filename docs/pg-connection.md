@@ -4,7 +4,7 @@ title: Postgres Node.js Connection
 sidebar_label: Connection
 ---
 
-The `Conection` object represents a single physical connection to the underlying database. You can use it to execute queries, or start transactions. Only one query or transaction at a time can run on a single connection. If you need to run multiple queries in parallel, you will need to get multiple connections from the ConnectionPool.
+The `Connection` object represents a single physical connection to the underlying database. You can use it to execute queries, or start transactions. Only one query or transaction at a time can run on a single connection. If you need to run multiple queries in parallel, you will need to get multiple connections from the ConnectionPool.
 
 ### `Connection.query(SQLQuery): Promise<any[]>`
 

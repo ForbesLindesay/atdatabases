@@ -107,7 +107,7 @@ run().catch((err) => {
 > ## Connection Pools & Connection Strings
 >
 > You should only create one connection pool for your application, otherwise your server will get slower and
-> slower as more conection pools are created.
+> slower as more connection pools are created.
 >
 > It is also bad practice to store your connection string in the actual code. You should use an environment
 > variable instead.

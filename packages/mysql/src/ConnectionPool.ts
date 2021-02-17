@@ -43,7 +43,7 @@ const getConnectionPoolOptions = (
   >,
   handlers: EventHandlers,
   onError: (err: Error) => void,
-  aquireLockTimeoutMilliseconds: number,
+  acquireLockTimeoutMilliseconds: number,
   serverTimeZone: 'local' | 'utc' | undefined,
 ): PoolOptions<MySqlDriver> => {
   return {
@@ -53,7 +53,7 @@ const getConnectionPoolOptions = (
       const driver = new MySqlDriver(
         client,
         handlers,
-        aquireLockTimeoutMilliseconds,
+        acquireLockTimeoutMilliseconds,
       );
       try {
         if (serverTimeZone === 'utc') {
@@ -104,7 +104,7 @@ export default class ConnectionPool
     >,
     handlers: EventHandlers,
     onError: (err: Error) => void,
-    aquireLockTimeoutMilliseconds: number,
+    acquireLockTimeoutMilliseconds: number,
     serverTimeZone: 'local' | 'utc' | undefined,
   ) {
     super(
@@ -113,7 +113,7 @@ export default class ConnectionPool
         poolOptions,
         handlers,
         onError,
-        aquireLockTimeoutMilliseconds,
+        acquireLockTimeoutMilliseconds,
         serverTimeZone,
       ),
       factories,

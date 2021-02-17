@@ -192,7 +192,7 @@ export interface ConnectionPoolConfig extends ClientConfig, EventHandlers {
    *
    * Defaults to 60 seconds
    */
-  aquireLockTimeoutMilliseconds?: number;
+  acquireLockTimeoutMilliseconds?: number;
 
   onError?: (err: Error) => void;
 }
@@ -243,7 +243,7 @@ export default function createConnectionPool(
           : 1) *
         2,
     ),
-    aquireLockTimeoutMilliseconds = 60_000,
+    acquireLockTimeoutMilliseconds = 60_000,
     applicationName = parsedConnectionString.application_name,
     keepAlive = false,
     keepAliveInitialDelayMilliseconds = 0,
@@ -354,10 +354,10 @@ export default function createConnectionPool(
       onConnectionOpened,
       onConnectionClosed,
     },
-    aquireLockTimeoutMilliseconds:
-      aquireLockTimeoutMilliseconds === 0
+    acquireLockTimeoutMilliseconds:
+      acquireLockTimeoutMilliseconds === 0
         ? Infinity
-        : aquireLockTimeoutMilliseconds,
+        : acquireLockTimeoutMilliseconds,
   });
 }
 

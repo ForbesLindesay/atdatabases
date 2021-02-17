@@ -19,7 +19,7 @@ const mysqlFormat: FormatConfig = {
 
 export default class MySqlDriver
   implements Driver<TransactionOptions, QueryStreamOptions> {
-  public readonly aquireLockTimeoutMilliseconds: number;
+  public readonly acquireLockTimeoutMilliseconds: number;
   public readonly client: MySqlClient;
   private readonly _handlers: EventHandlers;
   private _endCalled = false;
@@ -27,9 +27,9 @@ export default class MySqlDriver
   constructor(
     client: MySqlClient,
     handlers: EventHandlers,
-    aquireLockTimeoutMilliseconds: number,
+    acquireLockTimeoutMilliseconds: number,
   ) {
-    this.aquireLockTimeoutMilliseconds = aquireLockTimeoutMilliseconds;
+    this.acquireLockTimeoutMilliseconds = acquireLockTimeoutMilliseconds;
     this._disposed = new Promise<void>((resolve) => {
       client.on('end', resolve);
     });

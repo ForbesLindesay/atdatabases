@@ -10,7 +10,7 @@ sidebar_label: Connection Options
 - `maxUses` (`number`, default: `Infinity`) - the maximum number of times a connection can be returned from the connection pool before being closed and replaced with a fresh connection
 - `idleTimeoutMilliseconds` (`number`, default: `30_000`ms) - max milliseconds a client can go unused before it is removed from the pool and destroyed
 - `queueTimeoutMilliseconds` (`number`, default: `60_000`ms) - number of milliseconds to wait for a connection from the connection pool before throwing a timeout error
-- `aquireLockTimeoutMilliseconds` (`number`, default: `60_000`ms) - Number of milliseconds to wait for a lock on a connection/transaction. This is helpful for catching cases where you have accidentally attempted to query a connection within a transaction that is on that connection, or attempted to query an outer transaction within a nested transaction
+- `acquireLockTimeoutMilliseconds` (`number`, default: `60_000`ms) - Number of milliseconds to wait for a lock on a connection/transaction. This is helpful for catching cases where you have accidentally attempted to query a connection within a transaction that is on that connection, or attempted to query an outer transaction within a nested transaction
 
 ## Event Handlers
 

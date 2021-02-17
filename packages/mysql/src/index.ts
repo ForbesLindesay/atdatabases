@@ -124,7 +124,7 @@ export interface ConnectionPoolConfig extends EventHandlers {
    *
    * Defaults to 60 seconds
    */
-  aquireLockTimeoutMilliseconds?: number;
+  acquireLockTimeoutMilliseconds?: number;
 
   onError?: (err: Error) => void;
 }
@@ -162,7 +162,7 @@ export default function createConnectionPool(
     maxUses = Infinity,
     idleTimeoutMilliseconds = 30_000,
     queueTimeoutMilliseconds = 60_000,
-    aquireLockTimeoutMilliseconds = 60_000,
+    acquireLockTimeoutMilliseconds = 60_000,
     onConnectionClosed,
     onConnectionOpened,
     onQueryStart,
@@ -218,7 +218,7 @@ export default function createConnectionPool(
       onQueryError,
     },
     onError,
-    aquireLockTimeoutMilliseconds,
+    acquireLockTimeoutMilliseconds,
     serverTimeZone,
   );
 }

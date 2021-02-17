@@ -48,7 +48,7 @@ export default class BaseConnection<
   ) {
     this._driver = driver;
     this._factories = factories;
-    this._lock = getLock(driver.aquireLockTimeoutMilliseconds);
+    this._lock = getLock(driver.acquireLockTimeoutMilliseconds);
   }
 
   async task<T>(fn: (connection: this) => Promise<T>): Promise<T> {
@@ -61,7 +61,7 @@ export default class BaseConnection<
     options?: TransactionOptions<TDriver>,
   ): Promise<TResult> {
     this._throwIfDisposed();
-    await this._lock.aquireLock();
+    await this._lock.acquireLock();
     try {
       return await txInternal(this._driver, this._factories, fn, options);
     } finally {
@@ -75,14 +75,14 @@ export default class BaseConnection<
     this._throwIfDisposed();
     if (Array.isArray(query)) {
       if (query.length === 0) return [];
-      await this._lock.aquireLock();
+      await this._lock.acquireLock();
       try {
         return await queryInternal(this._driver, query, executeAndReturnAll);
       } finally {
         this._lock.releaseLock();
       }
     } else {
-      await this._lock.aquireLock();
+      await this._lock.acquireLock();
       try {
         return await queryInternal(
           this._driver,
@@ -100,7 +100,7 @@ export default class BaseConnection<
     options?: QueryStreamOptions<TDriver>,
   ): AsyncGenerator<any, void, unknown> {
     this._throwIfDisposed();
-    await this._lock.aquireLock();
+    await this._lock.acquireLock();
     try {
       for await (const record of this._driver.queryStream(query, options)) {
         yield record;

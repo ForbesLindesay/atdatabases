@@ -284,7 +284,7 @@ test('ConnectionPool - releaseTimeoutMilliseconds', async () => {
   expect(a.connection).toBe(1);
   expect(b.connection).toBe(2);
 
-  // we'll just try and get 2 more without releasing the original conections
+  // we'll just try and get 2 more without releasing the original connections
   const [c, d] = await Promise.all([
     pool.getConnection(),
     pool.getConnection(),

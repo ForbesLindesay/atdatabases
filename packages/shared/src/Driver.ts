@@ -6,7 +6,7 @@ export default interface Driver<TTransactionOptions, TQueryStreamOptions> {
    * This can help catch cases where you attempt to query using a connection
    * from within a transaction associated with that connection.
    */
-  readonly aquireLockTimeoutMilliseconds: number;
+  readonly acquireLockTimeoutMilliseconds: number;
 
   beginTransaction(options: TTransactionOptions | undefined): Promise<void>;
   commitTransaction(): Promise<void>;

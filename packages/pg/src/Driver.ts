@@ -22,7 +22,7 @@ type QueryResult = {rows: any[]};
 
 export default class PgDriver
   implements Driver<TransactionOptions, QueryStreamOptions> {
-  public readonly aquireLockTimeoutMilliseconds: number;
+  public readonly acquireLockTimeoutMilliseconds: number;
   public readonly client: PgClient;
   private readonly _handlers: EventHandlers;
   private _endCalled = false;
@@ -30,9 +30,9 @@ export default class PgDriver
   constructor(
     client: PgClient,
     handlers: EventHandlers,
-    aquireLockTimeoutMilliseconds: number,
+    acquireLockTimeoutMilliseconds: number,
   ) {
-    this.aquireLockTimeoutMilliseconds = aquireLockTimeoutMilliseconds;
+    this.acquireLockTimeoutMilliseconds = acquireLockTimeoutMilliseconds;
     this._disposed = new Promise<void>((resolve) => {
       client.on('end', resolve);
     });

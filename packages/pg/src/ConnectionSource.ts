@@ -29,7 +29,7 @@ export interface PgOptions {
 export default function createConnectionSource(
   {hosts, ssl, ...partialOptions}: PgOptions,
   handlers: EventHandlers,
-  aquireLockTimeoutMilliseconds: number,
+  acquireLockTimeoutMilliseconds: number,
 ) {
   const options = {
     ...partialOptions,
@@ -58,7 +58,7 @@ export default function createConnectionSource(
             const connection = new PgDriver(
               new Client(options),
               handlers,
-              aquireLockTimeoutMilliseconds,
+              acquireLockTimeoutMilliseconds,
             );
             await connection.connect();
             return connection;
@@ -79,7 +79,7 @@ export default function createConnectionSource(
                 const connection = new PgDriver(
                   new Client(options),
                   handlers,
-                  aquireLockTimeoutMilliseconds,
+                  acquireLockTimeoutMilliseconds,
                 );
                 await connection.connect();
                 return connection;
@@ -107,7 +107,7 @@ export default function createConnectionSource(
         const client = new PgDriver(
           new Client(options),
           handlers,
-          aquireLockTimeoutMilliseconds,
+          acquireLockTimeoutMilliseconds,
         );
         await client.connect();
         return client;

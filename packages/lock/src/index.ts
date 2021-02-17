@@ -31,7 +31,7 @@ const lockPool: PoolLock[] = [];
 
 export interface Lock {
   /**
-   * Aquire a lock, then call the function, and then release the
+   * Acquire a lock, then call the function, and then release the
    * lock. The lock is released if the function successfully returns
    * or if the function throws an error.
    */
@@ -41,23 +41,23 @@ export interface Lock {
   ): Promise<TResult>;
   /**
    * Request a lock. You must call `releaseLock` exaclty once
-   * after calling `aquireLock`, otherwise the lock can end up
+   * after calling `acquireLock`, otherwise the lock can end up
    * in an invalid state.
    */
-  aquireLock(): Promise<void>;
+  acquireLock(): Promise<void>;
   /**
    * Request a lock. You must call `releaseLock` exaclty once
-   * after calling `aquireLock`, otherwise the lock can end up
+   * after calling `acquireLock`, otherwise the lock can end up
    * in an invalid state.
    *
    * You can include the "Task" you wish to perform while the
    * lock is held, to avoid creating closures that can impact
    * performance.
    */
-  aquireLock<T>(task: T): Promise<T>;
+  acquireLock<T>(task: T): Promise<T>;
   /**
    * Release a lock. You MUST call this exactly once for each
-   * successful response from aquireLock
+   * successful response from acquireLock
    */
   releaseLock(): void;
   /**
@@ -99,7 +99,7 @@ class LockImpl implements Lock {
     return this;
   }
   public async pool(): Promise<void> {
-    await this.aquireLock();
+    await this.acquireLock();
     if (this._queue.getLength() !== 0) {
       throw new Error('Cannot pool the lock if it has tasks in the queue.');
     }
@@ -109,9 +109,9 @@ class LockImpl implements Lock {
     this._executing = false;
     lockPool.push(this);
   }
-  public async aquireLock(): Promise<void>;
-  public async aquireLock<T>(task: T): Promise<T>;
-  public async aquireLock<T>(task?: T): Promise<T | void> {
+  public async acquireLock(): Promise<void>;
+  public async acquireLock<T>(task: T): Promise<T>;
+  public async acquireLock<T>(task?: T): Promise<T | void> {
     if (!this._active) {
       throw new Error(
         'Cannot call Lock after returning the object to the pool.',
@@ -147,7 +147,7 @@ class LockImpl implements Lock {
     fn: (...args: TArgs) => Promise<TResult> | TResult,
     ...args: TArgs
   ): Promise<TResult> {
-    return await this.aquireLock(new FunctionCallTask(fn, args)).then(
+    return await this.acquireLock(new FunctionCallTask(fn, args)).then(
       this._onFunctionCallTaskLock,
     );
   }
@@ -225,7 +225,7 @@ export interface LocksByKeyOptions<TKey = string> {
 }
 export interface LocksByKey<TKey = string> {
   /**
-   * Aquire a lock, then call the function, and then release the
+   * Acquire a lock, then call the function, and then release the
    * lock. The lock is released if the function successfully returns
    * or if the function throws an error.
    */
@@ -236,23 +236,23 @@ export interface LocksByKey<TKey = string> {
   ): Promise<TResult>;
   /**
    * Request a lock. You must call `releaseLock` exaclty once
-   * after calling `aquireLock`, otherwise the lock can end up
+   * after calling `acquireLock`, otherwise the lock can end up
    * in an invalid state.
    */
-  aquireLock(key: TKey): Promise<void>;
+  acquireLock(key: TKey): Promise<void>;
   /**
    * Request a lock. You must call `releaseLock` exaclty once
-   * after calling `aquireLock`, otherwise the lock can end up
+   * after calling `acquireLock`, otherwise the lock can end up
    * in an invalid state.
    *
    * You can include the "Task" you wish to perform while the
    * lock is held, to avoid creating closures that can impact
    * performance.
    */
-  aquireLock<T>(key: TKey, task: T): Promise<T>;
+  acquireLock<T>(key: TKey, task: T): Promise<T>;
   /**
    * Release a lock. You MUST call this exactly once for each
-   * successful response from aquireLock
+   * successful response from acquireLock
    */
   releaseLock(key: TKey): void;
 }
@@ -267,12 +267,12 @@ class LocksByKeyImpl<TKey = string> {
     this._store = options.store ?? new Map<TKey, Lock>();
     this._timeoutMilliseconds = options.timeoutMilliseconds;
   }
-  aquireLock(key: TKey): Promise<void>;
-  aquireLock<T>(key: TKey, task: T): Promise<T>;
-  async aquireLock<T>(key: TKey, task?: T): Promise<T | void> {
+  acquireLock(key: TKey): Promise<void>;
+  acquireLock<T>(key: TKey, task: T): Promise<T>;
+  async acquireLock<T>(key: TKey, task?: T): Promise<T | void> {
     const existingLock = this._store.get(key);
     if (existingLock) {
-      return await existingLock.aquireLock(task);
+      return await existingLock.acquireLock(task);
     }
     const newLock = getLockForKey(
       this._timeoutMilliseconds,
@@ -280,7 +280,7 @@ class LocksByKeyImpl<TKey = string> {
       key,
     );
     this._store.set(key, newLock);
-    return await newLock.aquireLock(task);
+    return await newLock.acquireLock(task);
   }
 
   async withLock<TArgs extends any[], TResult>(
