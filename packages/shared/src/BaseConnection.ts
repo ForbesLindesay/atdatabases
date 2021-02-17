@@ -1,16 +1,15 @@
+import splitSqlQuery from '@databases/split-sql-query';
+import sql, {SQLQuery} from '@databases/sql';
 import {Disposable, TransactionFactory} from './Factory';
-import {Lock, getLock} from '@databases/lock';
+import Driver from './Driver';
+import QueryableType from './QueryableType';
 import {
   executeAndReturnAll,
   executeAndReturnLast,
   queryInternal,
   txInternal,
 } from './utils';
-import sql, {SQLQuery} from '@databases/sql';
-
-import Driver from './Driver';
-import QueryableType from './QueryableType';
-import splitSqlQuery from '@databases/split-sql-query';
+import {Lock, getLock} from '@databases/lock';
 
 type TransactionOptions<
   TDriver extends Driver<any, any>
