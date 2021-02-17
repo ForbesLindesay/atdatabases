@@ -1,13 +1,12 @@
-import {BaseConnectionPool, Factory, PoolOptions} from '@databases/shared';
 import {PassThrough, Readable} from 'stream';
-
-import Connection from './Connection';
-import EventHandlers from './types/EventHandlers';
-import {ConnectionPool as IConnectionPool} from './types/Queryable';
-import MySqlDriver from './MySqlDriver';
+import {BaseConnectionPool, Factory, PoolOptions} from '@databases/shared';
 import {SQLQuery} from '@databases/sql';
-import Transaction from './Transaction';
 import {createConnection} from 'mysql2/promise';
+import Connection from './Connection';
+import Transaction from './Transaction';
+import {ConnectionPool as IConnectionPool} from './types/Queryable';
+import EventHandlers from './types/EventHandlers';
+import MySqlDriver from './MySqlDriver';
 
 const factories: Factory<MySqlDriver, Connection, Transaction> = {
   createTransaction(driver) {
