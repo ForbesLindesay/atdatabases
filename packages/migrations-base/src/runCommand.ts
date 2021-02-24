@@ -109,11 +109,13 @@ export default async function runCommand<TMigration, TResult, TError>(
     commandResult = command(ctx);
   }
   if (dryRun) {
-    for (const operation of ctx.operations) {
-      if (await beforeOperation(operation)) {
-        return Result.ok();
+    for (const tx of ctx.transactions) {
+      for (const operation of tx.operations) {
+        if (await beforeOperation(operation)) {
+          return Result.ok();
+        }
+        await afterOperation(operation);
       }
-      await afterOperation(operation);
     }
   } else {
     await applyOperations(ctx, engine, {

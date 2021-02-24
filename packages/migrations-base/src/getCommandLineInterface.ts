@@ -164,6 +164,12 @@ export const commands = {
       printParameters([
         ...config.parameterDocumentation,
         {
+          short: '-c',
+          long: '--commit-after-each-migration',
+          description:
+            'Use a separate transaction for each migration, instead of one transaction for all pendign migrations',
+        },
+        {
           short: '-e',
           long: '--ignore-error',
           description:
@@ -172,25 +178,31 @@ export const commands = {
         ...GLOBAL_PARAMETERS,
       ]);
     },
-    startChain().addParam(
-      param.parsedStringList(
-        ['-e', '--ignore-error'],
-        'ignored_errors',
-        (value, key) => {
-          switch (value) {
-            case 'migration_file_missing':
-            case 'migration_file_edited':
-            case 'migration_order_change':
-              return valid(value);
-            default:
-              return invalid(
-                `Expected ${key} to have a parameter that is one of: 'migration_file_missing' | 'migration_file_edited' | 'migration_order_change'`,
-              );
-              break;
-          }
-        },
+    startChain()
+      .addParam(
+        param.flag(
+          [`-c`, `--commit-after-each-migration`],
+          'commit_after_each_migration',
+        ),
+      )
+      .addParam(
+        param.parsedStringList(
+          ['-e', '--ignore-error'],
+          'ignored_errors',
+          (value, key) => {
+            switch (value) {
+              case 'migration_file_missing':
+              case 'migration_file_edited':
+              case 'migration_order_change':
+                return valid(value);
+              default:
+                return invalid(
+                  `Expected ${key} to have a parameter that is one of: 'migration_file_missing' | 'migration_file_edited' | 'migration_order_change'`,
+                );
+            }
+          },
+        ),
       ),
-    ),
     applyMigrations(),
   ),
   'ignore-error': prepareCommand(
