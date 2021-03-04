@@ -69,7 +69,7 @@ db.query(sql`SELECT * FROM users WHERE id=${id};`);
 
 ### `sql.join(arrayOfFragments, delimiter)`
 
-Joins an array of SQLQuery values using the delimiter (which is treated as a raw SQL string). It properly handles joining the array of values and ensuring that the placeholders match up.
+Joins an array of SQLQuery values using the delimiter (which defaults to an empty string). It properly handles joining the array of values and ensuring that the placeholders match up.
 
 ```ts
 const arrayOfSqlFields = ['a', 'b', 'c', 'd'].map((n) => sql.identifier(n));
