@@ -57,6 +57,14 @@ db.query(sql`SELECT ${fieldName} FROM users AS u;`);
 // => {text: 'SELECT "u"."id" FROM users AS u;', values: []}
 ```
 
+Or dynamically include a table name.
+
+```ts
+const tableName = 'users';
+db.query(sql`SELECT * FROM ${sql.ident(tableName)}`);
+// => {text: 'SELECT * FROM users;', values: []}
+```
+
 ### `sql.value(val)`
 
 `sql.value(val)` acts as a shorthand for `` sql`${val}` ``. It takes a value, and represents it with a placeholder in the resulting query.
