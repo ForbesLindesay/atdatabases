@@ -87,7 +87,23 @@ class Index extends React.Component {
       </Container>
     );
 
+
+    const WhatIsIt = () => (
+      <Block background="dark" layout="twoColumn">
+        {[
+          {
+            title: 'What is @databases?'
+          },
+          {
+            content: '@databases is a set of libraries for SQL databases. Each library provides a _safe_ and _easy_ way to connect to the database and to run sql queries and statements from within javascript or typescript code.  @databases includes safe methods to _in-line parameters_ making the SQL scripts more readable.  It also provides safe ways to parametise sql identifiers, such as table and column names.'
+          },
+        ]}
+      </Block>
+    );
+
     const FeatureCallout = () => (
+      <Container
+      padding={['top']}>
       <div
         className="productShowcaseSection paddingBottom"
         style={{textAlign: 'center'}}
@@ -111,8 +127,9 @@ The query is then passed to your database engine as a separate string and values
 \`\`\`
 `}
         </MarkdownBlock>
-      </div>
+      </div></Container>
     );
+
 
     const TryOut = () => (
       <Block id="try">
@@ -221,6 +238,7 @@ The query is then passed to your database engine as a separate string and values
         <HomeSplash siteConfig={siteConfig} language={language} />
         <div className="mainContainer">
           <Features />
+          <WhatIsIt/>
           <FeatureCallout />
           <LearnHow />
           <TryOut />
