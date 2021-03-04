@@ -92,7 +92,7 @@ class Index extends React.Component {
       <Block background="dark" layout="twoColumn">
         {[
           {
-            title: 'What is @databases?'
+            content: '# What is @databases?'
           },
           {
             content: '@databases is a set of libraries for SQL databases. Each library provides a _safe_ and _easy_ way to connect to the database and to run sql queries and statements from within javascript or typescript code.  @databases includes safe methods to _in-line parameters_ making the SQL scripts more readable.  It also provides safe ways to parametise sql identifiers, such as table and column names.'
