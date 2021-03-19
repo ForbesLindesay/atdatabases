@@ -28,9 +28,7 @@ export default function applyMigrations(): Command<
       if (!ctx.hasAppliedMigration(migration)) {
         ctx.applyMigration(migration);
         ctx.markMigrationAsApplied(migration);
-        if (ctx.parameters.commit_after_each_migration) {
-          ctx.commit();
-        }
+        ctx.commit();
       }
     }
     return Result.ok();

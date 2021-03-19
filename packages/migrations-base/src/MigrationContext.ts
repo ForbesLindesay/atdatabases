@@ -36,7 +36,6 @@ export interface MigrationCommandParameters {
   migration_file?: number;
   error_type?: SequenceErrorIgnoreCode;
   ignored_errors?: SequenceErrorIgnoreCode[];
-  commit_after_each_migration?: boolean;
 }
 export class Transaction {
   readonly originalAppliedMigrations: readonly AppliedMigration[];
