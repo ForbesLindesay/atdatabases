@@ -186,7 +186,6 @@ export const commands = {
               return invalid(
                 `Expected ${key} to have a parameter that is one of: 'migration_file_missing' | 'migration_file_edited' | 'migration_order_change'`,
               );
-              break;
           }
         },
       ),

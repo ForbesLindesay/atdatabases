@@ -37,12 +37,24 @@ export interface MigrationCommandParameters {
   error_type?: SequenceErrorIgnoreCode;
   ignored_errors?: SequenceErrorIgnoreCode[];
 }
+export class Transaction {
+  readonly originalAppliedMigrations: readonly AppliedMigration[];
+  readonly operations: Operation[] = [];
+
+  constructor(originalAppliedMigrations: readonly AppliedMigration[]) {
+    this.originalAppliedMigrations = originalAppliedMigrations;
+  }
+
+  push(op: Operation) {
+    this.operations.push(op);
+  }
+}
 export default class MigrationsContext {
-  public readonly originalAppliedMigrations: readonly AppliedMigration[];
   private readonly _appliedMigrations: AppliedMigration[];
   private readonly _migrationFiles: MigrationFile[];
 
-  private readonly _operations: Operation[] = [];
+  private _currentTransaction: Transaction;
+  private readonly _transactions: Transaction[] = [];
 
   public readonly parameters: MigrationCommandParameters = {};
   constructor(
@@ -50,7 +62,10 @@ export default class MigrationsContext {
     migrationFiles: readonly MigrationFile[],
     parameters: MigrationCommandParameters,
   ) {
-    this.originalAppliedMigrations = sortMigrations(appliedMigrations);
+    this._currentTransaction = new Transaction(
+      sortMigrations(appliedMigrations),
+    );
+    this._transactions.push(this._currentTransaction);
     this._appliedMigrations = sortMigrations(appliedMigrations);
     this._migrationFiles = sortMigrations(migrationFiles);
     this.parameters = parameters;
@@ -62,8 +77,14 @@ export default class MigrationsContext {
   get migrationFiles(): readonly MigrationFile[] {
     return this._migrationFiles;
   }
-  get operations(): readonly Operation[] {
-    return this._operations;
+  get transactions(): readonly Transaction[] {
+    if (
+      this._transactions.length > 1 &&
+      this._transactions[this._transactions.length - 1].operations.length === 0
+    ) {
+      return this._transactions.slice(0, this._transactions.length - 1);
+    }
+    return this._transactions;
   }
 
   migrationIdToString(id: number) {
@@ -105,7 +126,7 @@ export default class MigrationsContext {
       obsolete: false,
     };
     insertMigration(this._appliedMigrations, applied);
-    this._operations.push({kind: 'applied', value: applied});
+    this._currentTransaction.push({kind: 'applied', value: applied});
   }
 
   markAppliedMigrationAsObsolete(migration: AppliedMigration) {
@@ -121,12 +142,12 @@ export default class MigrationsContext {
       obsolete: true,
     };
     this._appliedMigrations[index] = applied;
-    this._operations.push({kind: 'obsolete', value: applied});
+    this._currentTransaction.push({kind: 'obsolete', value: applied});
   }
 
   ignoreErrorPermanently(migration: AppliedMigration, error: string) {
     const applied = this.ignoreErrorTemporarily(migration, error);
-    this._operations.push({kind: 'ignore_error', value: applied});
+    this._currentTransaction.push({kind: 'ignore_error', value: applied});
   }
 
   ignoreErrorTemporarily(migration: AppliedMigration, error: string) {
@@ -142,7 +163,6 @@ export default class MigrationsContext {
       ignored_error: error,
     };
     this._appliedMigrations[index] = applied;
-    this._operations.push({kind: 'obsolete', value: applied});
     return applied;
   }
 
@@ -152,7 +172,7 @@ export default class MigrationsContext {
     }
 
     insertMigration(this._migrationFiles, migration);
-    this._operations.push({kind: 'write', value: migration});
+    this._currentTransaction.push({kind: 'write', value: migration});
   }
 
   changeMigrationFileIndex(migration: MigrationFile, newIndex: number) {
@@ -177,7 +197,7 @@ export default class MigrationsContext {
       index: newIndex,
     });
     insertMigration(this._migrationFiles, newMigration);
-    this._operations.push({
+    this._currentTransaction.push({
       kind: 'rename',
       value: {
         from: migration,
@@ -194,14 +214,21 @@ export default class MigrationsContext {
       this._migrationFiles.findIndex((m) => m.index === migration.index),
       1,
     );
-    this._operations.push({kind: 'delete', value: migration});
+    this._currentTransaction.push({kind: 'delete', value: migration});
   }
 
   applyMigration(migration: MigrationFile) {
     if (this.hasAppliedMigration(migration)) {
       throw new Error(`${migration.name} is already applied`);
     }
-    this._operations.push({kind: 'apply', value: migration});
+    this._currentTransaction.push({kind: 'apply', value: migration});
+  }
+
+  commit() {
+    this._currentTransaction = new Transaction(
+      sortMigrations(this._appliedMigrations),
+    );
+    this._transactions.push(this._currentTransaction);
   }
 
   // async resolveMigrationFilename(
