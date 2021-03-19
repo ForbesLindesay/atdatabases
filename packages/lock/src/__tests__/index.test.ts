@@ -1,4 +1,4 @@
-import {getLock, getLocksByKey} from '..';
+import {createLock, createLocksByKey} from '..';
 
 type PromiseState<T> = ['pending'] | ['fulfilled', T] | ['rejected', string];
 const pending: ['pending'] = ['pending'];
@@ -54,7 +54,7 @@ function promisesState() {
 }
 
 test('lock with 20ms timeout', async () => {
-  const lock = getLock(20);
+  const lock = createLock(20);
   const results = promisesState();
 
   results.push(lock.acquireLock(), lock.acquireLock(), lock.acquireLock());
@@ -95,7 +95,7 @@ test('lock with 20ms timeout', async () => {
 });
 
 test('lock with no timeout', async () => {
-  const lock = getLock();
+  const lock = createLock();
   const results = promisesState();
 
   results.push(lock.acquireLock(), lock.acquireLock(), lock.acquireLock());
@@ -132,7 +132,7 @@ test('lock with no timeout', async () => {
 });
 
 test('locks by key', async () => {
-  const lock = getLocksByKey();
+  const lock = createLocksByKey();
   const results = promisesState();
 
   results.push(

@@ -194,7 +194,7 @@ class LockImpl implements Lock {
   };
 }
 
-export function getLock(timeoutMilliseconds?: number): Lock {
+export function createLock(timeoutMilliseconds?: number): Lock {
   if (lockPool.length) {
     const record = lockPool.pop()!;
     return record.unpool(timeoutMilliseconds, undefined, undefined);
@@ -202,7 +202,12 @@ export function getLock(timeoutMilliseconds?: number): Lock {
     return new LockImpl(timeoutMilliseconds, undefined, undefined);
   }
 }
-function getLockForKey<TKey>(
+/**
+ * @deprecated use createLock
+ */
+export const getLock = createLock;
+
+function createLockForKey<TKey>(
   timeoutMilliseconds: number | undefined,
   onEmpty: (lock: Lock, key: TKey) => void,
   key: TKey,
@@ -274,7 +279,7 @@ class LocksByKeyImpl<TKey = string> {
     if (existingLock) {
       return await existingLock.acquireLock(task);
     }
-    const newLock = getLockForKey(
+    const newLock = createLockForKey(
       this._timeoutMilliseconds,
       this._onEmpty,
       key,
@@ -292,7 +297,7 @@ class LocksByKeyImpl<TKey = string> {
     if (existingLock) {
       return await existingLock.withLock(fn, ...args);
     }
-    const newLock = getLockForKey(
+    const newLock = createLockForKey(
       this._timeoutMilliseconds,
       this._onEmpty,
       key,
@@ -311,8 +316,13 @@ class LocksByKeyImpl<TKey = string> {
     void lock.pool();
   };
 }
-export function getLocksByKey<TKey = string>(
+export function createLocksByKey<TKey = string>(
   options: LocksByKeyOptions<TKey> = {},
 ): LocksByKey<TKey> {
   return new LocksByKeyImpl<TKey>(options);
 }
+
+/**
+ * @deprecated use createLocksByKey
+ */
+export const getLocksByKey = createLocksByKey;
