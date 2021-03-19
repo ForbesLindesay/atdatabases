@@ -14,7 +14,7 @@ The `@databases/escape-identifier` package escapes identifiers for use in SQL st
  *
  * https://www.postgresql.org/docs/9.1/sql-syntax-lexical.html
  */
-export declare function escapePostgresIdentifier(
+export function escapePostgresIdentifier(
   str: string,
   {
     extended,
@@ -28,7 +28,7 @@ export declare function escapePostgresIdentifier(
  *
  * https://dev.mysql.com/doc/refman/5.7/en/identifiers.html
  */
-export declare function escapeMySqlIdentifier(
+export function escapeMySqlIdentifier(
   str: string,
   {
     extended,
@@ -42,5 +42,5 @@ export declare function escapeMySqlIdentifier(
  *
  * https://sqlite.org/lang_keywords.html
  */
-export declare function escapeSQLiteIdentifier(str: string): string;
+export function escapeSQLiteIdentifier(str: string): string;
 ```

@@ -97,6 +97,10 @@
         "title": "Using Transactions in Postgres with Node.js",
         "sidebar_label": "Using Transactions"
       },
+      "pg-guide-typescript": {
+        "title": "Postgres with TypeScript",
+        "sidebar_label": "TypeScript"
+      },
       "pg-migrations": {
         "title": "Maintaining a Postgres schema using migrations",
         "sidebar_label": "Migrations"
@@ -116,6 +120,10 @@
       "pg-transaction": {
         "title": "Postgres Node.js Transaction",
         "sidebar_label": "Transaction"
+      },
+      "pg-typed": {
+        "title": "@databases/pg-typed",
+        "sidebar_label": "PG Typed"
       },
       "pg": {
         "title": "Getting started with Postgres and Node.js",

@@ -11,13 +11,14 @@ This guide will cover creating a table and performing basic CRUD (create, read, 
 In a production app, you should use [migrations](pg-migrations.md) to manage your database schema, but to get started, you can create a table directly using the `@databases/pg` API:
 
 ```typescript
-import db, {sql} from './databases';
+import db, {sql} from './database';
 
 async function run() {
   await db.query(sql`
     CREATE TABLE IF NOT EXISTS users (
       id SERIAL NOT NULL PRIMARY KEY,
-      email TEXT NOT NULL
+      email TEXT NOT NULL,
+      favorite_color TEXT NOT NULL,
       UNIQUE(email)
     )
   `);
@@ -40,7 +41,7 @@ async function run() {
     CREATE TABLE IF NOT EXISTS users (
       id SERIAL NOT NULL PRIMARY KEY,
       email TEXT NOT NULL,
-      favourite_color TEXT NOT NULL,
+      favorite_color TEXT NOT NULL,
       UNIQUE(email)
     )
   `);
@@ -59,19 +60,19 @@ run().catch((err) => {
 You can include values in your queries using the `${}` syntax for tagged template literals
 
 ```typescript
-import db, {sql} from './databases';
+import db, {sql} from './database';
 
-async function insertUser(email, favouriteColor) {
+async function insertUser(email, favoriteColor) {
   await db.query(sql`
-    INSERT INTO users (email, favourite_color)
-    VALUES (${email}, ${favouriteColor})
+    INSERT INTO users (email, favorite_color)
+    VALUES (${email}, ${favoriteColor})
   `);
 }
 
-async function updateUser(email, favouriteColor) {
+async function updateUser(email, favoriteColor) {
   await db.query(sql`
     UPDATE users
-    SET favourite_color=${favouriteColor}
+    SET favorite_color=${favoriteColor}
     WHERE email=${email}
   `);
 }
@@ -85,7 +86,7 @@ async function deleteUser(email) {
 
 async function getUser(email) {
   const users = await db.query(sql`
-    SELET * FROM users
+    SELECT * FROM users
     WHERE email=${email}
   `);
   if (users.length === 0) {
@@ -115,17 +116,17 @@ run().catch((err) => {
 const {sql} = require('@databases/pg');
 const db = require('./database');
 
-async function insertUser(email, favouriteColor) {
+async function insertUser(email, favoriteColor) {
   await db.query(sql`
-    INSERT INTO users (email, favourite_color)
-    VALUES (${email}, ${favouriteColor})
+    INSERT INTO users (email, favorite_color)
+    VALUES (${email}, ${favoriteColor})
   `);
 }
 
-async function updateUser(email, favouriteColor) {
+async function updateUser(email, favoriteColor) {
   await db.query(sql`
     UPDATE users
-    SET favourite_color=${favouriteColor}
+    SET favorite_color=${favoriteColor}
     WHERE email=${email}
   `);
 }
@@ -139,7 +140,7 @@ async function deleteUser(email) {
 
 async function getUser(email) {
   const users = await db.query(sql`
-    SELET * FROM users
+    SELECT * FROM users
     WHERE email=${email}
   `);
   if (users.length === 0) {

@@ -4,7 +4,7 @@ title: Expo / WebSQL Testing
 sidebar_label: Testing
 ---
 
-The `@databases/websql` module defaults to an in-memory database in node.js, meaning you can get an issolated database for every test run.
+The `@databases/websql` module defaults to an in-memory database in node.js, meaning you can get an isolated database for every test run.
 
 ## Jest
 
@@ -40,12 +40,10 @@ import db, {sql} from '../db';
 
 test('createUser', async () => {
   await createUser('Joe Blogs', 'joe.blogs@example.com');
-  expect(
-    await db.query(sql`SELECT name, email FROM users`),
-  ).toEqual(
-    [{name: 'Joe Blogs', email: 'joe.blogs@example.com'}],
-  );
+  expect(await db.query(sql`SELECT name, email FROM users`)).toEqual([
+    {name: 'Joe Blogs', email: 'joe.blogs@example.com'},
+  ]);
 });
 ```
 
-The nice thing about this is every test gets its own issolated copy of the database.
+The nice thing about this is every test gets its own isolated copy of the database.

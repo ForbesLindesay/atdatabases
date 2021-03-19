@@ -15,7 +15,7 @@ If you're new to `@databases`, the best way to start is by following our guide i
 1. [Installation & Setup](mysql-guide-setup.md) - install `@databases/mysql` and run your first query
 1. [Managing Connections](mysql-guide-connections.md) - manage the connection pool and connection configuration securely
 1. [Querying Postgres](mysql-guide-query.md) - perform CRUD (create, read, update, delete) operations in Postgres
-1. [Using Transactions](mysql-guide-transactions.md) - issolate concurrent queries using transactions
+1. [Using Transactions](mysql-guide-transactions.md) - isolate concurrent queries using transactions
 
 > ## TypeScript vs. JavaScript
 >

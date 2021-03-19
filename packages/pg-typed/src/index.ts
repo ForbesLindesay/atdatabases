@@ -147,7 +147,7 @@ class SelectQueryImplementation<TRecord>
   private async _getResults(mode: string) {
     invariant(
       !this._methodCalled,
-      `You cannot use the same query multiple times. ${this._methodCalled} has alread been called on this query.`,
+      `You cannot use the same query multiple times. ${this._methodCalled} has already been called on this query.`,
     );
     this._methodCalled = mode;
 
@@ -382,6 +382,15 @@ class Table<TRecord, TInsertParameters> {
     return rows[0];
   }
 
+  async count(whereValues: WhereCondition<TRecord> = {}): Promise<number> {
+    const {sql} = this._underlyingDb;
+    const where = this._rowToWhere(whereValues);
+    const [result] = await this._underlyingDb.query(
+      sql`SELECT count(*) AS count FROM ${this._tableID} ${where}`,
+    );
+    return parseInt(result.count, 10);
+  }
+
   async untypedQuery(query: SQLQuery): Promise<TRecord[]> {
     return await this._underlyingDb.query(query);
   }
@@ -468,7 +477,7 @@ export default function tables<TTables>(
           tableName,
           options.defaultConnection,
           options.schemaName,
-          getTableserializeValue(tableName, options.serializeValue),
+          getTableSerializeValue(tableName, options.serializeValue),
         );
       },
     },
@@ -481,7 +490,7 @@ type PropertyOf<T, TProp extends string> = T extends {
   ? TValue
   : never;
 
-function getTableserializeValue(
+function getTableSerializeValue(
   tableName: string,
   serializeValue?: (
     tableName: string,
@@ -493,3 +502,12 @@ function getTableserializeValue(
     ? (columnName, value) => serializeValue(tableName, columnName, value)
     : (_, value) => value;
 }
+
+module.exports = Object.assign(tables, {
+  default: tables,
+  anyOf,
+  not,
+  inQueryResults,
+  lessThan,
+  greaterThan,
+});

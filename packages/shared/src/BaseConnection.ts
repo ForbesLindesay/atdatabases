@@ -9,7 +9,7 @@ import {
   queryInternal,
   txInternal,
 } from './utils';
-import {Lock, getLock} from '@databases/lock';
+import {Lock, createLock} from '@databases/lock';
 
 type TransactionOptions<
   TDriver extends Driver<any, any>
@@ -48,7 +48,7 @@ export default class BaseConnection<
   ) {
     this._driver = driver;
     this._factories = factories;
-    this._lock = getLock(driver.acquireLockTimeoutMilliseconds);
+    this._lock = createLock(driver.acquireLockTimeoutMilliseconds);
   }
 
   async task<T>(fn: (connection: this) => Promise<T>): Promise<T> {
