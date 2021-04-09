@@ -1,6 +1,6 @@
 ---
 id: pg-typed
-title: @databases/pg-typed
+title: '@databases/pg-typed'
 sidebar_label: PG Typed
 ---
 
@@ -8,7 +8,7 @@ pg-typed provides APIs to query Postgres databases with genuine type safety via 
 
 ## Setup
 
-For detailed instructions on how to generate the types you need for pg-typed, start by reading the [Postgres with TypeScript Guide](http://localhost:3000/docs/pg-guide-typescript).
+For detailed instructions on how to generate the types you need for pg-typed, start by reading the [Postgres with TypeScript Guide](pg-guide-typescript.md).
 
 The `tables` function returns an object for each database table, allowing you to insert, query, update & delete records in that table. To use each table, you pass in the database connection or transaction, and then call the relevant method. Taking the connection at this late stage allows you to use pg-typed within transactions that span multiple tables.
 

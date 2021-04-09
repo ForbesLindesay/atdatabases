@@ -72,11 +72,11 @@ const result = await db.task(async (task) => {
 
 Options:
 
-| Name             | Type             | <abbr title="Optional">Opt</abbr> | Description                                                                                                                      |
-| ---------------- | ---------------- | --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `isolationLevel` | `IsolationLevel` | ✓                                 | Transaction Isolation Level                                                                                                      |
-| `readOnly`       | `boolean`        | ✓                                 | Sets transaction access mode                                                                                                     |
-| `deferrable`     | `boolean`        | ✓                                 | Sets the transaction deferrable mode. It is only used when `isolationLevel` is `IsolationLevel.serializable` and `readOnly=true` |
+| Name             | Type             | Optional | Description                                                                                                                      |
+| ---------------- | ---------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `isolationLevel` | `IsolationLevel` | ✓        | Transaction Isolation Level                                                                                                      |
+| `readOnly`       | `boolean`        | ✓        | Sets transaction access mode                                                                                                     |
+| `deferrable`     | `boolean`        | ✓        | Sets the transaction deferrable mode. It is only used when `isolationLevel` is `IsolationLevel.serializable` and `readOnly=true` |
 
 ### `Connection.task(fn): Promise<T>`
 

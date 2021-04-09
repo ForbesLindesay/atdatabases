@@ -1,4 +1,4 @@
-import sql, {SQLQuery} from '@databases/sql';
+import type {SQLQuery} from '@databases/sql';
 import {Lock} from '@databases/lock';
 import Factory, {
   Disposable,
@@ -14,7 +14,6 @@ import BaseConnectionPool, {PoolOptions} from './BaseConnectionPool';
 export type {Lock};
 
 export type {SQLQuery, PoolOptions};
-export {sql};
 
 export type {
   Driver,

@@ -14,11 +14,11 @@ In this guide we will be setting up `@databases/pg-typed`. Everything in `@datab
 
 In addition to the packages you've already installed, you will need to install 2 more:
 
-```sh
+```yarn
 yarn add @databases/pg-typed @databases/pg-schema-cli
 ```
 
-```sh
+```npm
 npm install @databases/pg-typed @databases/pg-schema-cli
 ```
 
@@ -31,7 +31,7 @@ To generate the types, you will need your database connection string from [Insta
 
 You can then generate types by running:
 
-```sh
+```npm
 npx @databases/pg-schema-cli --database postgres://test-user@localhost:5432/test-db --directory src/__generated__
 ```
 

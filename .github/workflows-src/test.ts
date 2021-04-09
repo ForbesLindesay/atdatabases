@@ -1,10 +1,12 @@
 import {readdirSync, statSync} from 'fs';
 import createWorkflow, {Job, Steps} from 'github-actions-workflow-builder';
-import {runner} from 'github-actions-workflow-builder/context';
+import {github, runner, secrets} from 'github-actions-workflow-builder/context';
 import {
+  eq,
   Expression,
   hashFiles,
   interpolate,
+  neq,
 } from 'github-actions-workflow-builder/expression';
 
 export function yarnInstallWithCache(nodeVersion: Expression<string>): Steps {
@@ -109,10 +111,39 @@ export function buildJob(): Job<{output: string}> {
 export default createWorkflow(({setWorkflowName, addTrigger, addJob}) => {
   setWorkflowName('Test');
 
-  addTrigger('push', {branches: ['master']});
+  const p = addTrigger('push', {branches: ['master']});
   addTrigger('pull_request', {branches: ['master']});
 
   const build = addJob('build', buildJob());
+
+  addJob('publish_website', ({addDependencies, add, run, when}) => {
+    const {
+      outputs: {output: buildOutput},
+    } = addDependencies(build);
+
+    add(setup());
+
+    add(loadOutput(buildOutput, 'packages/'));
+
+    run('yarn workspace @databases/website build');
+
+    when(eq(github.event_name, `push`), () => {
+      run(`netlify deploy --prod --dir=packages/website/out`, {
+        env: {
+          NETLIFY_SITE_ID: secrets.NETLIFY_SITE_ID,
+          NETLIFY_AUTH_TOKEN: secrets.NETLIFY_AUTH_TOKEN,
+        },
+      });
+    });
+    when(neq(github.event_name, `push`), () => {
+      run(`netlify deploy --dir=packages/website/out`, {
+        env: {
+          NETLIFY_SITE_ID: secrets.NETLIFY_SITE_ID,
+          NETLIFY_AUTH_TOKEN: secrets.NETLIFY_AUTH_TOKEN,
+        },
+      });
+    });
+  });
 
   addJob('test_node', ({setBuildMatrix, addDependencies, add, run}) => {
     const {

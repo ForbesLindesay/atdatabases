@@ -1,6 +1,6 @@
 import {PassThrough, Readable} from 'stream';
 import {BaseConnectionPool, Factory, PoolOptions} from '@databases/shared';
-import {SQLQuery} from '@databases/sql';
+import sql, {SQLQuery} from '@databases/sql';
 import {createConnection} from 'mysql2/promise';
 import Connection from './Connection';
 import Transaction from './Transaction';
@@ -96,6 +96,7 @@ const getConnectionPoolOptions = (
 export default class ConnectionPool
   extends BaseConnectionPool<Connection, Transaction, MySqlDriver>
   implements IConnectionPool {
+  public readonly sql = sql;
   constructor(
     srcConfig: MySqlConnectionOptions,
     poolOptions: Omit<

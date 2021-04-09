@@ -1,5 +1,3 @@
-// @public
-
 import {getMySqlConfigSync} from '@databases/mysql-config';
 import getDatabase, {Options} from '../';
 import {spawnBuffered, execBuffered} from 'modern-spawn';

@@ -14,7 +14,7 @@ The [`vscode-sql-template-literal` extension](https://marketplace.visualstudio.c
 
 ## Atom Syntax Highlighting Plugin
 
-> This doesn't seem to be working at the moment: https://github.com/gandm/language-babel/issues/525
+> This doesn't seem to be working at the moment, see [gandm/language-babel#525](https://github.com/gandm/language-babel/issues/525)
 
 To enable highlighting, you need to:
 

@@ -1,7 +1,25 @@
 import type {SQLQuery} from '@databases/sql';
+import {isSqlQuery} from '@databases/sql/web';
 import type Driver from './Driver';
 import {ConnectionFactory, Disposable, TransactionFactory} from './Factory';
 
+export function assertSql(query: SQLQuery | SQLQuery[]) {
+  if (Array.isArray(query)) {
+    for (const q of query) {
+      if (!isSqlQuery(q)) {
+        throw new Error(
+          'Invalid query, you must use @databases/sql to create your queries.',
+        );
+      }
+    }
+  } else {
+    if (!isSqlQuery(query)) {
+      throw new Error(
+        'Invalid query, you must use @databases/sql to create your queries.',
+      );
+    }
+  }
+}
 export async function executeAndReturnAll<TTransactionOptions>(
   driver: Driver<TTransactionOptions, any>,
   queries: SQLQuery[],

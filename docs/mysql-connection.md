@@ -72,10 +72,10 @@ const result = await db.task(async (task) => {
 
 Options:
 
-| Name                     | Type      | <abbr title="Optional">Opt</abbr> | Description                                                      |
-| ------------------------ | --------- | --------------------------------- | ---------------------------------------------------------------- |
-| `readOnly`               | `boolean` | ✓                                 | Sets transaction access mode                                     |
-| `withConsistentSnapshot` | `boolean` | ✓                                 | Causes readonly transactions to acquire a snapshot before running |
+| Name                     | Type      | Optional | Description                                                       |
+| ------------------------ | --------- | -------- | ----------------------------------------------------------------- |
+| `readOnly`               | `boolean` | ✓        | Sets transaction access mode                                      |
+| `withConsistentSnapshot` | `boolean` | ✓        | Causes readonly transactions to acquire a snapshot before running |
 
 ### `Connection.task(fn): Promise<T>`
 

@@ -282,9 +282,9 @@ export const PgConfigSchema = {
 };
 export type ValidateFunction<T> = ((data: unknown) => data is T) &
   Pick<Ajv.ValidateFunction, 'errors'>;
-const rawValidatePgConfig = ajv.compile(PgConfigSchema) as ValidateFunction<
-  PgConfig
->;
+const rawValidatePgConfig = ajv.compile(
+  PgConfigSchema,
+) as ValidateFunction<PgConfig>;
 export default function validate(value: unknown): PgConfig {
   if (rawValidatePgConfig(value)) {
     return value;

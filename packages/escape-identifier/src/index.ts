@@ -98,7 +98,7 @@ function assertAscii(str: string, db: string, unicodeAvailable: boolean) {
     throw new Error(
       `${db} identifiers may only contain ASCII characters${
         unicodeAvailable
-          ? ` (to use unicode, pass {extended: true} when escaping the idnetifier)`
+          ? ` (to use unicode, pass {extended: true} when escaping the identifier)`
           : ``
       }`,
     );

@@ -1,9 +1,10 @@
 import splitSqlQuery from '@databases/split-sql-query';
-import sql, {SQLQuery} from '@databases/sql';
+import type {SQLQuery} from '@databases/sql';
 import {Disposable, TransactionFactory} from './Factory';
 import Driver from './Driver';
 import QueryableType from './QueryableType';
 import {
+  assertSql,
   executeAndReturnAll,
   executeAndReturnLast,
   queryInternal,
@@ -27,7 +28,6 @@ export default class BaseConnection<
   TDriver extends Driver<any, any>
 > {
   public readonly type = QueryableType.Connection;
-  public readonly sql = sql;
 
   protected readonly _lock: Lock;
 
@@ -72,6 +72,7 @@ export default class BaseConnection<
   async query(query: SQLQuery): Promise<any[]>;
   async query(query: SQLQuery[]): Promise<any[][]>;
   async query(query: SQLQuery | SQLQuery[]): Promise<any[]> {
+    assertSql(query);
     this._throwIfDisposed();
     if (Array.isArray(query)) {
       if (query.length === 0) return [];
@@ -99,6 +100,7 @@ export default class BaseConnection<
     query: SQLQuery,
     options?: QueryStreamOptions<TDriver>,
   ): AsyncGenerator<any, void, unknown> {
+    assertSql(query);
     this._throwIfDisposed();
     await this._lock.acquireLock();
     try {

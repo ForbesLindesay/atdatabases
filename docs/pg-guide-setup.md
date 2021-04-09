@@ -8,11 +8,11 @@ sidebar_label: Installation & Setup
 
 To install the postgress client library, open a new Terminal and run:
 
-```sh
+```yarn
 yarn add @databases/pg
 ```
 
-```sh
+```npm
 npm install @databases/pg
 ```
 
@@ -20,12 +20,12 @@ npm install @databases/pg
 
 If you don't already have a database to connect to, you can create one using pg-test:
 
-```sh
+```yarn
 yarn add @databases/pg-test
 yarn pg-test start
 ```
 
-```sh
+```npm
 npx pg-test start
 ```
 
@@ -39,11 +39,11 @@ postgres://test-user@localhost:5432/test-db
 
 When you're done testing out your app, you can shut the database down using:
 
-```sh
+```yarn
 yarn pg-test stop
 ```
 
-```sh
+```npm
 npx pg-test stop
 ```
 

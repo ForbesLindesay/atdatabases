@@ -17,8 +17,8 @@ import connect, {sql} from '@databases/websql';
 const db = connect();
 
 db.query(sql`SELECT * FROM users;`).then(
-  results => console.log(results),
-  err => console.error(err),
+  (results) => console.log(results),
+  (err) => console.error(err),
 );
 ```
 
@@ -26,7 +26,7 @@ db.query(sql`SELECT * FROM users;`).then(
 
 ## API
 
-### ``` connect(connection) ```
+### `connect(connection)`
 
 Create a `Database` connection for a given database. You should only create one connection per database for your entire applicaiton. Normally this means having one module that creates and exports the connection pool.
 
@@ -48,7 +48,7 @@ import connect from '@databases/websql';
 const db = connect(FILE_NAME);
 ```
 
-> N.B. We provide the WebSQL implementation for node.js primarily for testing/compatibility with Expo apps. It is generally better to directly use SQLite, which better designed APIs, unless you specifically need to match the behaviour of Expo/WebSQL.
+> N.B. We provide the WebSQL implementation for node.js primarily for testing/compatibility with Expo apps. It is generally better to directly use SQLite, which better designed APIs, unless you specifically need to match the behavior of Expo/WebSQL.
 
 Web:
 
@@ -66,16 +66,16 @@ export interface Options {
 export default function connect(
   name: string = IN_MEMORY,
   options: Options = {},
-)
+);
 ```
 
-On node.js the options are ignored. On the web you can suply the following options:
+On node.js the options are ignored. On the web you can supply the following options:
 
-Name | Type | <abbr title="Optional">Opt</abbr>
------|-------|---------
-`version` | `string` | ✓
-`displayName` | `string` | ✓
-`estimatedSize` | `number` | ✓
+| Name            | Type     | Optional |
+| --------------- | -------- | -------- |
+| `version`       | `string` | ✓        |
+| `displayName`   | `string` | ✓        |
+| `estimatedSize` | `number` | ✓        |
 
 > N.B. WebSQL is not well supported in modern browsers, and we do not polyfill it. You should use IndexDB instead where possible.
 
@@ -89,11 +89,11 @@ const db = connect(NAME);
 
 The expo `connect` function just takes the `name` of the database you would like to connect to as the only parameter, and returns a database connection.
 
-### ``` Database.query(SQLQuery, options?): Promise<any[]> ```
+### `Database.query(SQLQuery, options?): Promise<any[]>`
 
 Run an SQL Query and get a promise for an array of results. If your query does not update any records, you can pass `{readOnly: true}` as the options so that only a read lock is taken out for the transaction.
 
-### ``` Database.tx(fn, options?): Promise<T> ```
+### `Database.tx(fn, options?): Promise<T>`
 
 Executes a callback function as a transaction.
 

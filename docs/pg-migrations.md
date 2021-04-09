@@ -10,21 +10,21 @@ The `@databases/pg-migrations` CLI helps you maintain your database schema.
 
 You can install it globally
 
-```sh
+```yarn
 yarn global add @databases/pg-migrations
 ```
 
-```sh
+```npm
 npm i -g @databases/pg-migrations
 ```
 
 or locally
 
-```sh
+```yarn
 yarn add -D @databases/pg-migrations
 ```
 
-```sh
+```npm
 npm install --save-dev @databases/pg-migrations
 ```
 

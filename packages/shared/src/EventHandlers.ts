@@ -1,4 +1,4 @@
-import {SQLQuery} from '@databases/sql';
+import type {SQLQuery} from '@databases/sql';
 
 export default interface EventHandlers {
   onQueryStart?: (

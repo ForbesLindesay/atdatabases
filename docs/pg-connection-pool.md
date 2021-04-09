@@ -46,11 +46,11 @@ const result = await db.tx(async (db) => {
 
 Options:
 
-| Name             | Type             | <abbr title="Optional">Opt</abbr> | Description                                                                                                                      |
-| ---------------- | ---------------- | --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `isolationLevel` | `IsolationLevel` | ✓                                 | Transaction Isolation Level                                                                                                      |
-| `readOnly`       | `boolean`        | ✓                                 | Sets transaction access mode                                                                                                     |
-| `deferrable`     | `boolean`        | ✓                                 | Sets the transaction deferrable mode. It is only used when `isolationLevel` is `IsolationLevel.serializable` and `readOnly=true` |
+| Name             | Type             | Optional | Description                                                                                                                      |
+| ---------------- | ---------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `isolationLevel` | `IsolationLevel` | ✓        | Transaction Isolation Level                                                                                                      |
+| `readOnly`       | `boolean`        | ✓        | Sets transaction access mode                                                                                                     |
+| `deferrable`     | `boolean`        | ✓        | Sets the transaction deferrable mode. It is only used when `isolationLevel` is `IsolationLevel.serializable` and `readOnly=true` |
 
 ### `ConnectionPool.dispose(): Promise<void>`
 

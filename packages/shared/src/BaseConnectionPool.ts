@@ -3,11 +3,12 @@ import createConnectionPool, {
   PoolOptions,
 } from '@databases/connection-pool';
 import splitSqlQuery from '@databases/split-sql-query';
-import sql, {SQLQuery} from '@databases/sql';
+import type {SQLQuery} from '@databases/sql';
 import Factory, {Disposable} from './Factory';
 import Driver from './Driver';
 import QueryableType from './QueryableType';
 import {
+  assertSql,
   executeAndReturnAll,
   executeAndReturnLast,
   queryInternal,
@@ -35,7 +36,6 @@ export default class BaseConnectionPool<
   TDriver extends Driver<any, any>
 > {
   public readonly type = QueryableType.ConnectionPool;
-  public readonly sql = sql;
 
   protected readonly _pool: ConnectionPool<TDriver>;
   private readonly _factories: Factory<TDriver, TConnection, TTransaction>;
@@ -102,6 +102,7 @@ export default class BaseConnectionPool<
   async query(query: SQLQuery): Promise<any[]>;
   async query(query: SQLQuery[]): Promise<any[][]>;
   async query(query: SQLQuery | SQLQuery[]): Promise<any[]> {
+    assertSql(query);
     this._throwIfDisposed();
     if (Array.isArray(query)) {
       if (query.length === 0) return [];
@@ -123,6 +124,7 @@ export default class BaseConnectionPool<
     query: SQLQuery,
     options?: QueryStreamOptions<TDriver>,
   ): AsyncGenerator<any, void, unknown> {
+    assertSql(query);
     this._throwIfDisposed();
     const poolRecord = await this._pool.getConnection();
     try {
