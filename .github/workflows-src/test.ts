@@ -116,7 +116,7 @@ export default createWorkflow(({setWorkflowName, addTrigger, addJob}) => {
 
   const build = addJob('build', buildJob());
 
-  addJob('publish_website', ({addDependencies, add, run, when}) => {
+  addJob('publish_website', ({addDependencies, add, run, use, when}) => {
     const {
       outputs: {output: buildOutput},
     } = addDependencies(build);
@@ -124,6 +124,14 @@ export default createWorkflow(({setWorkflowName, addTrigger, addJob}) => {
     add(setup());
 
     add(loadOutput(buildOutput, 'packages/'));
+
+    use('Enable NextJS Cache', 'actions/cache@v2', {
+      with: {
+        path: ['packages/website/.next/cache'].join('\n'),
+        key: interpolate`next-${hashFiles('yarn.lock')}`,
+        'restore-keys': [`next-`].join('\n'),
+      },
+    });
 
     run('yarn workspace @databases/website build');
 

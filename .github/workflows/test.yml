@@ -155,6 +155,12 @@ jobs:
         with:
           name: ${{ needs.build.outputs.output }}
           path: packages/
+      - name: Enable NextJS Cache
+        uses: actions/cache@v2
+        with:
+          path: packages/website/.next/cache
+          key: next-${{hashFiles('yarn.lock')}}
+          restore-keys: next-
       - run: yarn workspace @databases/website build
       - if: ${{ github.event_name == 'push' }}
         run: netlify deploy --prod --dir=packages/website/out
