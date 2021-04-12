@@ -7,8 +7,8 @@ export default function NavBar({children}: {children: React.ReactNode}) {
   const [isMenuOpen, setMenuOpen] = useState(false);
   return (
     <div>
-      <div tw="h-16" />
-      <div tw="fixed top-0 left-0 right-0 z-20 bg-red-900 h-16 px-4 sm:px-6">
+      <div tw="h-12 sm:h-14" />
+      <div tw="fixed top-0 left-0 right-0 z-20 bg-red-900 h-12 sm:h-14 px-4 sm:px-6">
         <nav
           tw="max-w-8xl mx-auto h-full flex justify-between md:justify-center"
           aria-label="Global"
@@ -18,7 +18,7 @@ export default function NavBar({children}: {children: React.ReactNode}) {
               <a tw="flex items-center" className="group" href="/">
                 <span tw="sr-only">@databases</span>
                 <svg
-                  tw="h-8 w-auto sm:h-10 text-red-50 transition-transform ease-in-out transform group-hover:text-white group-hover:scale-105"
+                  tw="h-6 w-auto sm:h-8 text-red-50 transition-transform ease-in-out transform group-hover:text-white group-hover:scale-105"
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 776 152"
                 >
@@ -48,10 +48,10 @@ export default function NavBar({children}: {children: React.ReactNode}) {
               aria-expanded="false"
               onClick={() => setMenuOpen(true)}
             >
-              <div tw="bg-gray-50 rounded-md p-2 inline-flex items-center justify-center text-gray-400 group-hover:text-gray-500 group-hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500">
+              <div tw="bg-gray-50 rounded-md p-1 sm:p-2 inline-flex items-center justify-center text-gray-400 group-hover:text-gray-500 group-hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500">
                 <span tw="sr-only">Open main menu</span>
                 <svg
-                  tw="h-6 w-6"
+                  tw="h-6 sm:h-6 w-auto"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
