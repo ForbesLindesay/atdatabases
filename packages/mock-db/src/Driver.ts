@@ -37,11 +37,10 @@ export default class MockDbDriver
     this.client = client;
     this._handlers = handlers;
   }
-  onAddingToPool() {}
-  onActive() {}
-  onIdle() {}
 
-  async dispose(): Promise<void> {}
+  async dispose(): Promise<void> {
+    // no-op
+  }
 
   async canRecycleConnectionAfterError(_err: Error) {
     return true;
@@ -64,8 +63,12 @@ export default class MockDbDriver
     return false;
   }
 
-  async createSavepoint(_savepointName: string) {}
-  async releaseSavepoint(_savepointName: string) {}
+  async createSavepoint(_savepointName: string) {
+    throw new Error(`Savepoints are not supported by mock-db`);
+  }
+  async releaseSavepoint(_savepointName: string) {
+    throw new Error(`Savepoints are not supported by mock-db`);
+  }
   async rollbackToSavepoint(_savepointName: string) {
     throw new Error(`Savepoints are not supported by mock-db`);
   }

@@ -33,15 +33,15 @@
       {
         "displayName": "pg",
         "testRegex": "/__tests__/.+\\.test\\.pg\\.(tsx?)$",
-        "globalSetup": "./packages/pg-test/jest/globalSetup.js",
-        "globalTeardown": "./packages/pg-test/jest/globalTeardown.js",
+        "globalSetup": "./packages/pg-test/jest/globalSetup",
+        "globalTeardown": "./packages/pg-test/jest/globalTeardown",
         "preset": "ts-jest"
       },
       {
         "displayName": "mysql",
         "testRegex": "/__tests__/.+\\.test\\.mysql\\.(tsx?)$",
-        "globalSetup": "./packages/mysql-test/jest/globalSetup.js",
-        "globalTeardown": "./packages/mysql-test/jest/globalTeardown.js",
+        "globalSetup": "./packages/mysql-test/jest/globalSetup",
+        "globalTeardown": "./packages/mysql-test/jest/globalTeardown",
         "preset": "ts-jest"
       }
     ]

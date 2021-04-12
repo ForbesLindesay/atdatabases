@@ -10,6 +10,7 @@ function withDefault<TValue, TDefault = TValue>(
       parse() {
         return {success: true, value: defaultValue};
       },
+      name: `undefined`,
     }),
   );
 }
@@ -96,16 +97,18 @@ export interface TestConfig {
   pgDb: string;
 }
 
-export const TestConfigSchema: ft.Runtype<TestConfig> = ft.Object({
-  debug: withDefault(ft.Boolean, false),
-  migrationsScript: ft.Union(ft.String, ft.Array(ft.String), ft.Undefined),
-  image: withDefault(ft.String, `postgres:10.6-alpine`),
-  containerName: withDefault(ft.String, `pg-test`),
-  connectTimeoutSeconds: withDefault(integer({min: 0}), 20),
-  port: withDefault(integer({min: 0, max: 65535}), undefined),
-  pgUser: withDefault(ft.String, `test-user`),
-  pgDb: withDefault(ft.String, `test-db`),
-});
+export const TestConfigSchema: ft.Runtype<TestConfig> = ft
+  .Object({
+    debug: withDefault(ft.Boolean, false),
+    migrationsScript: ft.Union(ft.String, ft.Array(ft.String), ft.Undefined),
+    image: withDefault(ft.String, `postgres:10.6-alpine`),
+    containerName: withDefault(ft.String, `pg-test`),
+    connectTimeoutSeconds: withDefault(integer({min: 0}), 20),
+    port: withDefault(integer({min: 0, max: 65535}), undefined),
+    pgUser: withDefault(ft.String, `test-user`),
+    pgDb: withDefault(ft.String, `test-db`),
+  })
+  .withConstraint((value) => true, {name: `TestConfig`});
 
 export enum PgTypesDomainTypeMode {
   strict_brand = 'strict_brand',
@@ -271,50 +274,55 @@ export interface TypesConfig {
   typeOverrides: {[x: string]: string | undefined};
 }
 
-export const TypesConfigSchema: ft.Runtype<TypesConfig> = ft.Object({
-  directory: withDefault(ft.String, `__generated__`),
-  domainTypeMode: withDefault(
-    ft.Enum(`PgTypesDomainTypeMode`, PgTypesDomainTypeMode),
-    PgTypesDomainTypeMode.loose_brand,
-  ),
-  domainTypeName: withDefault(ft.String, `{{ TYPE_NAME | pascal-case }}`),
-  domainFileName: withDefault(ft.String, `_custom_types.ts`),
-  enumTypeMode: withDefault(
-    ft.Enum(`PgTypesEnumTypeMode`, PgTypesEnumTypeMode),
-    PgTypesEnumTypeMode.union_alias,
-  ),
-  enumTypeName: withDefault(ft.String, `{{ TYPE_NAME | pascal-case }}`),
-  enumFileName: withDefault(ft.String, `_enums.ts`),
-  primaryKeyTypeMode: withDefault(
-    ft.Enum(`PgTypesPrimaryKeyTypeMode`, PgTypesPrimaryKeyTypeMode),
-    PgTypesPrimaryKeyTypeMode.inline_loose_brand,
-  ),
-  primaryKeyTypeName: withDefault(
-    ft.String,
-    `{{ TABLE_NAME | pascal-case }}_{{ COLUMN_NAME | pascal-case }}`,
-  ),
-  primaryKeyFileName: withDefault(ft.String, `{{ TABLE_NAME }}.ts`),
-  tableTypeName: withDefault(ft.String, `{{ TABLE_NAME | pascal-case }}`),
-  tableFileName: withDefault(ft.String, `{{ TABLE_NAME }}.ts`),
-  tableInsertParametersTypeName: withDefault(
-    ft.String,
-    `{{ TABLE_NAME | pascal-case }}_InsertParameters`,
-  ),
-  tableInsertParametersFileName: withDefault(ft.String, `{{ TABLE_NAME }}.ts`),
-  schemaTypeName: withDefault(ft.String, `DatabaseSchema`),
-  schemaFileName: withDefault(ft.String, `index.ts`),
-  serializeValueTypeName: withDefault(ft.String, `serializeValue`),
-  serializeValueFileName: withDefault(ft.String, `index.ts`),
+export const TypesConfigSchema: ft.Runtype<TypesConfig> = ft
+  .Object({
+    directory: withDefault(ft.String, `__generated__`),
+    domainTypeMode: withDefault(
+      ft.Enum(`PgTypesDomainTypeMode`, PgTypesDomainTypeMode),
+      PgTypesDomainTypeMode.loose_brand,
+    ),
+    domainTypeName: withDefault(ft.String, `{{ TYPE_NAME | pascal-case }}`),
+    domainFileName: withDefault(ft.String, `_custom_types.ts`),
+    enumTypeMode: withDefault(
+      ft.Enum(`PgTypesEnumTypeMode`, PgTypesEnumTypeMode),
+      PgTypesEnumTypeMode.union_alias,
+    ),
+    enumTypeName: withDefault(ft.String, `{{ TYPE_NAME | pascal-case }}`),
+    enumFileName: withDefault(ft.String, `_enums.ts`),
+    primaryKeyTypeMode: withDefault(
+      ft.Enum(`PgTypesPrimaryKeyTypeMode`, PgTypesPrimaryKeyTypeMode),
+      PgTypesPrimaryKeyTypeMode.inline_loose_brand,
+    ),
+    primaryKeyTypeName: withDefault(
+      ft.String,
+      `{{ TABLE_NAME | pascal-case }}_{{ COLUMN_NAME | pascal-case }}`,
+    ),
+    primaryKeyFileName: withDefault(ft.String, `{{ TABLE_NAME }}.ts`),
+    tableTypeName: withDefault(ft.String, `{{ TABLE_NAME | pascal-case }}`),
+    tableFileName: withDefault(ft.String, `{{ TABLE_NAME }}.ts`),
+    tableInsertParametersTypeName: withDefault(
+      ft.String,
+      `{{ TABLE_NAME | pascal-case }}_InsertParameters`,
+    ),
+    tableInsertParametersFileName: withDefault(
+      ft.String,
+      `{{ TABLE_NAME }}.ts`,
+    ),
+    schemaTypeName: withDefault(ft.String, `DatabaseSchema`),
+    schemaFileName: withDefault(ft.String, `index.ts`),
+    serializeValueTypeName: withDefault(ft.String, `serializeValue`),
+    serializeValueFileName: withDefault(ft.String, `index.ts`),
 
-  columnTypeOverrides: withDefault<{[x: string]: string | undefined}>(
-    ft.Record(ft.String, ft.String),
-    {},
-  ),
-  typeOverrides: withDefault<{[x: string]: string | undefined}>(
-    ft.Record(ft.String, ft.String),
-    {},
-  ),
-});
+    columnTypeOverrides: withDefault<{[x: string]: string | undefined}>(
+      ft.Record(ft.String, ft.String),
+      {},
+    ),
+    typeOverrides: withDefault<{[x: string]: string | undefined}>(
+      ft.Record(ft.String, ft.String),
+      {},
+    ),
+  })
+  .withConstraint((value) => true, {name: `TypesConfig`});
 
 interface PgConfig {
   /**

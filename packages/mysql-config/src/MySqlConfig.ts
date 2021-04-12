@@ -10,6 +10,7 @@ function withDefault<TValue, TDefault>(
       parse() {
         return {success: true, value: defaultValue};
       },
+      name: `undefined`,
     }),
   );
 }
@@ -104,17 +105,19 @@ export interface TestConfig {
   mySqlDb: string;
 }
 
-export const TestConfigSchema: ft.Runtype<TestConfig> = ft.Object({
-  debug: withDefault(ft.Boolean, false),
-  migrationsScript: ft.Union(ft.String, ft.Array(ft.String), ft.Undefined),
-  image: withDefault(ft.String, `mysql:5.7.24`),
-  containerName: withDefault(ft.String, `mysql-test`),
-  connectTimeoutSeconds: withDefault(integer({min: 0}), 20),
-  port: withDefault(integer({min: 0, max: 65535}), undefined),
-  mySqlUser: withDefault(ft.String, `test-user`),
-  mySqlPassword: withDefault(ft.String, `password`),
-  mySqlDb: withDefault(ft.String, `test-db`),
-});
+export const TestConfigSchema: ft.Runtype<TestConfig> = ft
+  .Object({
+    debug: withDefault(ft.Boolean, false),
+    migrationsScript: ft.Union(ft.String, ft.Array(ft.String), ft.Undefined),
+    image: withDefault(ft.String, `mysql:5.7.24`),
+    containerName: withDefault(ft.String, `mysql-test`),
+    connectTimeoutSeconds: withDefault(integer({min: 0}), 20),
+    port: withDefault(integer({min: 0, max: 65535}), undefined),
+    mySqlUser: withDefault(ft.String, `test-user`),
+    mySqlPassword: withDefault(ft.String, `password`),
+    mySqlDb: withDefault(ft.String, `test-db`),
+  })
+  .withConstraint((value) => true, {name: `TestConfig`});
 
 interface MySqlConfig {
   /**
