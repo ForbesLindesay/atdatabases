@@ -38,7 +38,7 @@ refs:
   - &build
     run:
       name: Build
-      command: yarn build:all
+      command: yarn build
   - &test
     run:
       name: Test
