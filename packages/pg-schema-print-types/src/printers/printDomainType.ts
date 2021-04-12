@@ -1,3 +1,4 @@
+import {PgTypesDomainTypeMode} from '@databases/pg-config';
 import {DomainType} from '@databases/pg-schema-introspect';
 import PrintContext, {FileContext} from '../PrintContext';
 
@@ -13,9 +14,9 @@ export default function printDomainType(
   file: FileContext,
 ): string {
   switch (context.options.domainTypeMode) {
-    case 'strict_brand':
-    case 'loose_brand':
-    case 'alias':
+    case PgTypesDomainTypeMode.strict_brand:
+    case PgTypesDomainTypeMode.loose_brand:
+    case PgTypesDomainTypeMode.alias:
       return file.getImport(
         context.pushTypeDeclaration(
           {type: 'domain', name: type.typeName},
@@ -27,7 +28,7 @@ export default function printDomainType(
           ],
         ),
       );
-    case 'inline':
+    case PgTypesDomainTypeMode.inline:
       return `${context.getTypeScriptType(type.basetypeID, file)}${getBrand(
         type.typeName,
         context,
@@ -37,12 +38,12 @@ export default function printDomainType(
 
 function getBrand(typeName: string, context: PrintContext): string {
   switch (context.options.domainTypeMode) {
-    case 'strict_brand':
+    case PgTypesDomainTypeMode.strict_brand:
       return ` & {readonly __brand: '${typeName}'}`;
-    case 'loose_brand':
+    case PgTypesDomainTypeMode.loose_brand:
       return ` & {readonly __brand?: '${typeName}'}`;
-    case 'alias':
-    case 'inline':
+    case PgTypesDomainTypeMode.alias:
+    case PgTypesDomainTypeMode.inline:
       return '';
   }
 }

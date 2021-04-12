@@ -112,7 +112,8 @@ readdirSync(__dirname + '/../packages').forEach((directory) => {
   "compilerOptions": {
     "composite": true,
     "rootDir": "src",
-    "outDir": "lib"
+    "outDir": "lib",
+    "tsBuildInfoFile": "lib/tsconfig.tsbuildinfo",
   },
   "references": ${deps.length ? `[${deps}\n  ],` : `[],`}
 }

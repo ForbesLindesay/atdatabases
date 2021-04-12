@@ -1,3 +1,40 @@
+import * as ft from 'funtypes';
+
+function withDefault<TValue, TDefault>(
+  type: ft.Runtype<TValue>,
+  defaultValue: TDefault,
+): ft.Runtype<TValue | TDefault> {
+  return ft.Union(
+    type,
+    ft.Undefined.withParser({
+      parse() {
+        return {success: true, value: defaultValue};
+      },
+    }),
+  );
+}
+
+function integer({
+  min = -Math.pow(2, 31),
+  max = Math.pow(2, 32),
+}: {
+  min?: number;
+  max?: number;
+}) {
+  return ft.Number.withConstraint(
+    (value) => {
+      if (value !== Math.floor(value)) {
+        return `Expected an integer but got ${value}`;
+      }
+      if (value < min || value > max) {
+        return `Expected an integer between ${min} and ${max} but got ${value}`;
+      }
+      return true;
+    },
+    {name: `Integer`},
+  );
+}
+
 export interface TestConfig {
   /**
    * Whether to output logs to stdout/stderr from docker
@@ -66,6 +103,19 @@ export interface TestConfig {
    */
   mySqlDb: string;
 }
+
+export const TestConfigSchema: ft.Runtype<TestConfig> = ft.Object({
+  debug: withDefault(ft.Boolean, false),
+  migrationsScript: ft.Union(ft.String, ft.Array(ft.String), ft.Undefined),
+  image: withDefault(ft.String, `mysql:5.7.24`),
+  containerName: withDefault(ft.String, `mysql-test`),
+  connectTimeoutSeconds: withDefault(integer({min: 0}), 20),
+  port: withDefault(integer({min: 0, max: 65535}), undefined),
+  mySqlUser: withDefault(ft.String, `test-user`),
+  mySqlPassword: withDefault(ft.String, `password`),
+  mySqlDb: withDefault(ft.String, `test-db`),
+});
+
 interface MySqlConfig {
   /**
    * The environment variable containing the
@@ -82,5 +132,10 @@ interface MySqlConfig {
    */
   test: TestConfig;
 }
+
+export const MySqlConfigSchema: ft.Runtype<MySqlConfig> = ft.Object({
+  connectionStringEnvironmentVariable: withDefault(ft.String, `DATABASE_URL`),
+  test: withDefault(TestConfigSchema, TestConfigSchema.parse({})),
+});
 
 export default MySqlConfig;

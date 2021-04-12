@@ -5,17 +5,13 @@
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {
-    "@types/cosmiconfig": "^5.0.3",
-    "ajv": "^6.7.0",
-    "cosmiconfig": "^5.0.7"
+    "cosmiconfig": "^5.0.7",
+    "funtypes": "^4.1.0"
   },
   "devDependencies": {
-    "typescript-json-validator": "^1.0.0"
+    "@types/cosmiconfig": "^5.0.3"
   },
-  "scripts": {
-    "schema": "typescript-json-validator src/MySqlConfig.ts MySqlConfig",
-    "build": "yarn schema"
-  },
+  "scripts": {},
   "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/mysql-config",
   "bugs": "https://github.com/ForbesLindesay/atdatabases/issues",
   "license": "MIT",
