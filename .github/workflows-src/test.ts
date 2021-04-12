@@ -111,7 +111,7 @@ export function buildJob(): Job<{output: string}> {
 export default createWorkflow(({setWorkflowName, addTrigger, addJob}) => {
   setWorkflowName('Test');
 
-  const p = addTrigger('push', {branches: ['master']});
+  addTrigger('push', {branches: ['master']});
   addTrigger('pull_request', {branches: ['master']});
 
   const build = addJob('build', buildJob());
