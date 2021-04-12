@@ -10,7 +10,7 @@ export interface SidebarGroupProps {
 const SidebarGroup = memo(({children, label}: SidebarGroupProps) => {
   return (
     <li>
-      <div tw="font-semibold pt-4">{label}</div>
+      <div tw="font-semibold pt-4 text-gray-700">{label}</div>
       <ul tw="ml-4">{children}</ul>
     </li>
   );

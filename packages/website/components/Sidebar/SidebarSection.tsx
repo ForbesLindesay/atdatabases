@@ -22,12 +22,13 @@ const SidebarSection = ({
   }, [defaultExpanded, activeDoc]);
   return (
     <li>
-      <div tw="pt-8">
-        <button
-          tw="w-full flex items-center text-left text-2xl font-semibold rounded-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400"
-          type="button"
-          onClick={() => setExpanded((e) => !e)}
-        >
+      <button
+        className="group"
+        tw="pt-8 w-full focus:outline-none"
+        type="button"
+        onClick={() => setExpanded((e) => !e)}
+      >
+        <div tw="flex items-center text-left text-2xl text-gray-700 font-semibold rounded-sm group-hover:text-black group-focus:ring-2 group-focus:ring-offset-2 group-focus:ring-gray-300">
           <span tw="flex-grow">{label}</span>
 
           <svg
@@ -43,8 +44,8 @@ const SidebarSection = ({
             ></path>
             <path d="M0 0h24v24H0z" fill="none"></path>
           </svg>
-        </button>
-      </div>
+        </div>
+      </button>
       <ul tw="ml-4" css={[expanded && tw`block`, !expanded && tw`hidden`]}>
         {children}
       </ul>

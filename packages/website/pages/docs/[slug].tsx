@@ -14,6 +14,7 @@ import Document from '../../components/Document';
 import {parseMarkdown} from '../../utils/markdown2';
 import DocumentTableOfContents from '../../components/DocumentTableOfContents';
 import Footer from '../../components/Footer';
+import {useRouter} from 'next/router';
 
 type Props = {
   nav: IDocumentationSection[];
@@ -22,6 +23,24 @@ type Props = {
 
 const Post = ({nav, doc}: Props) => {
   const [expandNav, setNavExpanded] = useState(false);
+  const [docID, setDocID] = useState(doc?.id);
+
+  useEffect(() => {
+    setDocID(doc?.id);
+  }, [doc?.id]);
+
+  const router = useRouter();
+  useEffect(() => {
+    setNavExpanded(false);
+    const handleRouteChange = (url: string) => {
+      setDocID(url.substr(`/docs/`.length));
+      setNavExpanded(false);
+    };
+    router.events.on('routeChangeStart', handleRouteChange);
+    return () => {
+      router.events.off('routeChangeStart', handleRouteChange);
+    };
+  }, [router.events]);
 
   useEffect(() => {
     setNavExpanded(false);
@@ -119,7 +138,7 @@ const Post = ({nav, doc}: Props) => {
                   !expandNav && tw`hidden xl:block`,
                 ]}
               >
-                <Sidebar sections={nav} activeDoc={doc.id} />
+                <Sidebar sections={nav} activeDoc={docID ?? doc.id} />
               </div>
             </nav>
             <div
@@ -151,7 +170,7 @@ const Post = ({nav, doc}: Props) => {
                 {doc.previous && (
                   <Link href={`/docs/${doc.previous.id}`} prefetch={false}>
                     <a
-                      tw="rounded-md px-6 py-4 border border-red-900 text-red-900 bg-white shadow-md hover:bg-red-900 hover:text-red-100"
+                      tw="rounded-md px-6 py-4 border border-red-900 text-red-900 bg-white shadow-md hover:bg-red-900 hover:text-red-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-gray-400"
                       href={`/docs/${doc.previous.id}`}
                     >
                       ← {doc.previous.label}
@@ -162,7 +181,7 @@ const Post = ({nav, doc}: Props) => {
                 {doc.next && (
                   <Link href={`/docs/${doc.next.id}`}>
                     <a
-                      tw="text-right rounded-md px-6 py-4 border border-red-900 text-red-900 bg-white shadow-md hover:bg-red-900 hover:text-red-100"
+                      tw="text-right rounded-md px-6 py-4 border border-red-900 text-red-900 bg-white shadow-md hover:bg-red-900 hover:text-red-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-gray-400"
                       href={`/docs/${doc.next.id}`}
                     >
                       {doc.next.label} →

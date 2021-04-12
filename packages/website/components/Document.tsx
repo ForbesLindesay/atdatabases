@@ -114,11 +114,13 @@ function DocumentHeading({index, node}: {index: number; node: m.Heading}) {
         aria-hidden
         id={id}
         tw="absolute top-0 transform -translate-y-32 xl:-translate-y-16"
+        tabIndex={-1}
       />
       <a
         href="#cli"
         aria-hidden
         tw="flex flex-shrink-0 justify-center items-center -ml-6 w-6 opacity-0 group-hover:opacity-100"
+        tabIndex={-1}
       >
         <svg
           aria-hidden
@@ -242,7 +244,7 @@ function DocumentInlineCode({node}: {node: m.InlineCode}) {
 function DocumentLink({node}: {node: m.Link}) {
   return (
     <a
-      tw="text-red-700 hover:underline hover:text-red-900"
+      tw="text-red-700 hover:underline hover:text-red-900 focus-visible:outline-none rounded-sm focus-visible:ring-2 focus-visible:ring-offset-4 focus-visible:ring-gray-400"
       title={node.title}
       href={node.url}
     >
