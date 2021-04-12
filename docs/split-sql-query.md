@@ -1,6 +1,6 @@
 ---
 id: split-sql-query
-title: @databases/split-sql-query
+title: '@databases/split-sql-query'
 sidebar_label: split-sql-query
 ---
 

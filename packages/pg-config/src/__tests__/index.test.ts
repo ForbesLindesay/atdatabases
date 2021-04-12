@@ -116,9 +116,14 @@ test('valid config', () => {
 });
 
 test('invalid config', () => {
-  expect(() =>
-    readPgConfigSync(__dirname + '/fixtures/invalid.json'),
-  ).toThrowError(
-    /PgConfig.connectionStringEnvironmentVariable should be string/,
-  );
+  expect(() => readPgConfigSync(__dirname + '/fixtures/invalid.json'))
+    .toThrowErrorMatchingInlineSnapshot(`
+    "Unable to assign {connectionStringEnvironmentVariable: 10} to { connectionStringEnvironmentVariable: string | undefined; migrationsDirectory: string | undefined; test: TestConfig | undefined; types: TypesConfig | undefined; }
+      The types of \\"connectionStringEnvironmentVariable\\" are not compatible
+        Unable to assign 10 to string | undefined
+          Unable to assign 10 to string
+            Expected string, but was 10
+          And unable to assign 10 to undefined
+            Expected literal undefined, but was 10 (i.e. a number)"
+  `);
 });

@@ -14,8 +14,12 @@ You should install docker: [Guide to installing docker](https://gist.github.com/
 
 Then you can simply run:
 
-```
+```yarn
 yarn add @databases/mysql-test
+```
+
+```npm
+npm install @databases/mysql-test
 ```
 
 to take care of the rest.
@@ -24,7 +28,7 @@ to take care of the rest.
 
 To setup jest, add the following keys to your jest config:
 
-```
+```json
 "globalSetup": "<rootDir>/node_modules/@databases/mysql-test/jest/globalSetup.js",
 "globalTeardown": "<rootDir>/node_modules/@databases/mysql-test/jest/globalTeardown.js",
 ```
@@ -49,8 +53,8 @@ expect(
 
 If you need to run migrations before your tests run, e.g. to create database tables/setup test data, you can add a command to run in your mysql config. e.g. add the following to package.json:
 
-```
-"scripts" {
+```json
+"scripts": {
   "migrations:test": "...run db migrations..."
 },
 "mysql": {
@@ -66,7 +70,7 @@ Your migrations script will run with the `DATABASE_URL` set to the same value as
 
 To install as a CLI:
 
-```
+```npm
 npm i -g @databases/mysql-test
 ```
 

@@ -41,6 +41,8 @@ jobs:
             packages/expo/lib
             packages/lock/lib
             packages/migrations-base/lib
+            packages/mock-db/lib
+            packages/mock-db-typed/lib
             packages/mysql/lib
             packages/mysql-config/lib
             packages/mysql-test/lib
@@ -71,6 +73,8 @@ jobs:
             packages/expo/.last_build
             packages/lock/.last_build
             packages/migrations-base/.last_build
+            packages/mock-db/.last_build
+            packages/mock-db-typed/.last_build
             packages/mysql/.last_build
             packages/mysql-config/.last_build
             packages/mysql-test/.last_build
@@ -99,6 +103,7 @@ jobs:
           key: v2-build-output-${{hashFiles('yarn.lock', 'packages/connection-pool/src',
             'packages/escape-identifier/src', 'packages/expo/src',
             'packages/lock/src', 'packages/migrations-base/src',
+            'packages/mock-db/src', 'packages/mock-db-typed/src',
             'packages/mysql/src', 'packages/mysql-config/src',
             'packages/mysql-test/src', 'packages/pg/src',
             'packages/pg-config/src', 'packages/pg-connection-string/src',
@@ -123,6 +128,44 @@ jobs:
             packages/*/.last_build
     outputs:
       output: build
+  publish_website:
+    needs:
+      - build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 14.x
+          registry-url: https://registry.npmjs.org
+      - name: Get yarn cache directory path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+        id: step_3
+      - name: Enable Cache
+        uses: actions/cache@v2
+        with:
+          path: |-
+            ${{steps.step_3.outputs.dir}}
+            node_modules
+            packages/*/node_modules
+          key: ${{runner.os}}-14.x-${{hashFiles('yarn.lock')}}-2
+      - run: yarn install --prefer-offline
+      - name: "Load output: ${{needs.build.outputs.output}}"
+        uses: actions/download-artifact@v2
+        with:
+          name: ${{ needs.build.outputs.output }}
+          path: packages/
+      - run: yarn workspace @databases/website build
+      - if: ${{ github.event_name == 'push' }}
+        run: netlify deploy --prod --dir=packages/website/out
+        env:
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+      - if: ${{ github.event_name != 'push' }}
+        run: netlify deploy --dir=packages/website/out
+        env:
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
   test_node:
     needs:
       - build

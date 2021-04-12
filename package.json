@@ -8,10 +8,8 @@
   "scripts": {
     "update-workflows": "github-actions-workflow-builder --cleanup --directory .github/workflows-src",
     "postinstall": "node scripts/postinstall",
-    "prebuild": "wsrun --stages --exclude-missing build",
-    "prebuild:all": "wsrun --stages --exclude-missing build",
-    "build": "node scripts/build-all --only-changed",
-    "build:all": "node scripts/build-all",
+    "prebuild": "wsrun --stages --exclude-missing -x @databases/website build",
+    "build": "tsc --build scripts",
     "prerelease": "yarn build:all",
     "prettier:check": "prettier --list-different \"packages/*/src/**/*.{ts,tsx}\"",
     "prettier:write": "prettier --write \"packages/*/src/**/*.{ts,tsx}\"",
@@ -35,15 +33,15 @@
       {
         "displayName": "pg",
         "testRegex": "/__tests__/.+\\.test\\.pg\\.(tsx?)$",
-        "globalSetup": "./packages/pg-test/jest/globalSetup.js",
-        "globalTeardown": "./packages/pg-test/jest/globalTeardown.js",
+        "globalSetup": "./packages/pg-test/jest/globalSetup",
+        "globalTeardown": "./packages/pg-test/jest/globalTeardown",
         "preset": "ts-jest"
       },
       {
         "displayName": "mysql",
         "testRegex": "/__tests__/.+\\.test\\.mysql\\.(tsx?)$",
-        "globalSetup": "./packages/mysql-test/jest/globalSetup.js",
-        "globalTeardown": "./packages/mysql-test/jest/globalTeardown.js",
+        "globalSetup": "./packages/mysql-test/jest/globalSetup",
+        "globalTeardown": "./packages/mysql-test/jest/globalTeardown",
         "preset": "ts-jest"
       }
     ]

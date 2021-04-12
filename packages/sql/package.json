@@ -16,7 +16,6 @@
   "homepage": "https://www.atdatabases.org/docs/sql",
   "files": [
     "lib/",
-    "web.js",
-    "web.d.ts"
+    "web/"
   ]
 }

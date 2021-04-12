@@ -1,5 +1,3 @@
-// @public
-
 import getDatabase, {Options} from '../';
 import {getPgConfigSync} from '@databases/pg-config';
 import {spawnBuffered, execBuffered} from 'modern-spawn';

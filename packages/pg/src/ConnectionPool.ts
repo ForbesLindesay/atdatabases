@@ -1,5 +1,5 @@
 import {BaseConnectionPool, Factory, PoolOptions} from '@databases/shared';
-import {SQLQuery} from '@databases/sql';
+import sql, {SQLQuery} from '@databases/sql';
 import {escapePostgresIdentifier} from '@databases/escape-identifier';
 import Connection from './Connection';
 import Transaction from './Transaction';
@@ -104,6 +104,7 @@ const getConnectionPoolOptions = (
 export default class ConnectionPool
   extends BaseConnectionPool<Connection, Transaction, PgDriver>
   implements IConnectionPool {
+  public readonly sql = sql;
   private readonly _types: TypeOverrides;
   constructor(
     options: PgOptions,

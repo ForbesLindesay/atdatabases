@@ -45,9 +45,14 @@ test('valid config', () => {
 });
 
 test('invalid config', () => {
-  expect(() =>
-    _testReadMySqlConfigSync(__dirname + '/fixtures/invalid.json'),
-  ).toThrowError(
-    /MySqlConfig.connectionStringEnvironmentVariable should be string/,
-  );
+  expect(() => _testReadMySqlConfigSync(__dirname + '/fixtures/invalid.json'))
+    .toThrowErrorMatchingInlineSnapshot(`
+    "Unable to assign {connectionStringEnvironmentVariable: 10} to { connectionStringEnvironmentVariable: string | undefined; test: TestConfig | undefined; }
+      The types of \\"connectionStringEnvironmentVariable\\" are not compatible
+        Unable to assign 10 to string | undefined
+          Unable to assign 10 to string
+            Expected string, but was 10
+          And unable to assign 10 to undefined
+            Expected literal undefined, but was 10 (i.e. a number)"
+  `);
 });

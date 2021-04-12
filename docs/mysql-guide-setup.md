@@ -8,11 +8,11 @@ sidebar_label: Installation & Setup
 
 To install the MySQL client library, open a new Terminal and run:
 
-```sh
+```yarn
 yarn add @databases/mysql
 ```
 
-```sh
+```npm
 npm install @databases/mysql
 ```
 
@@ -20,12 +20,12 @@ npm install @databases/mysql
 
 If you don't already have a database to connect to, you can create one using pg-test:
 
-```sh
+```yarn
 yarn add @databases/mysql-test
 yarn mysql-test start
 ```
 
-```sh
+```npm
 npx mysql-test start
 ```
 
@@ -39,11 +39,11 @@ mysql://test-user:password@localhost:3306/test-db
 
 When you're done testing out your app, you can shut the database down using:
 
-```sh
+```yarn
 yarn mysql-test stop
 ```
 
-```sh
+```npm
 npx mysql-test stop
 ```
 

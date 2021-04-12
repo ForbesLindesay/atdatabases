@@ -1,5 +1,3 @@
-// @public
-
 export enum SQLItemType {
   RAW,
   VALUE,

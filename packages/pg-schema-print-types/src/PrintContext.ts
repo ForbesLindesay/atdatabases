@@ -198,14 +198,16 @@ export default class PrintContext {
     );
   }
 
-  public getTypeScriptType(id: number, file: FileContext) {
-    if (id in this.options.typeOverrides) {
-      return this.options.typeOverrides[id];
+  public getTypeScriptType(id: number, file: FileContext): string {
+    const override = this.options.typeOverrides[id];
+    if (override !== undefined) {
+      return override;
     }
     if (id in PgDataTypeID) {
       const str = PgDataTypeID[id];
-      if (str in this.options.typeOverrides) {
-        return this.options.typeOverrides[str];
+      const override = this.options.typeOverrides[str];
+      if (override !== undefined) {
+        return override;
       }
     }
     const builtin = DefaultTypeScriptMapping.get(id);

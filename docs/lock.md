@@ -1,6 +1,6 @@
 ---
 id: lock
-title: @databases/lock
+title: '@databases/lock'
 sidebar_label: lock
 ---
 

@@ -8,22 +8,14 @@ const {
 
 const LICENSE = readFileSync(__dirname + '/../LICENSE.md');
 
-const tsconfigBuild = `{
-  "extends": "../../tsconfig.base.json",
-  "compilerOptions": {
-    "rootDir": "src",
-    "outDir": "lib"
-  }
-}`;
-const tsconfig = `{
-  "extends": "../../tsconfig.json"
-}`;
-
 const packageNames = [];
 const packageDocs = new Map([
   ['@databases/expo', 'https://www.atdatabases.org/docs/websql'],
 ]);
 readdirSync(__dirname + '/../packages').forEach((directory) => {
+  if (directory === 'website') {
+    return;
+  }
   if (!statSync(__dirname + '/../packages/' + directory).isDirectory()) {
     return;
   }
@@ -33,14 +25,6 @@ readdirSync(__dirname + '/../packages').forEach((directory) => {
       LICENSE,
     );
   }
-  writeFileSync(
-    __dirname + '/../packages/' + directory + '/tsconfig.json',
-    tsconfig,
-  );
-  writeFileSync(
-    __dirname + '/../packages/' + directory + '/tsconfig.build.json',
-    tsconfigBuild,
-  );
   let pkg = {};
   try {
     pkg = JSON.parse(
@@ -102,15 +86,55 @@ readdirSync(__dirname + '/../packages').forEach((directory) => {
     };
   }
   const after = JSON.stringify(pkg);
-  if (before === after) {
-    return;
+  if (before !== after) {
+    writeFileSync(
+      __dirname + '/../packages/' + directory + '/package.json',
+      JSON.stringify(pkg, null, '  ') + '\n',
+    );
   }
+  const deps = [
+    ...Object.keys(pkg.dependencies || {}),
+    ...Object.keys(pkg.devDependencies || {}),
+  ]
+    .filter((dep) => dep.startsWith(`@databases/`))
+    .map(
+      (dep) =>
+        `\n    {"path": ${JSON.stringify(
+          `../${dep.substr(`@databases/`.length)}`,
+        )}},`,
+    )
+    .join(``);
   writeFileSync(
-    __dirname + '/../packages/' + directory + '/package.json',
-    JSON.stringify(pkg, null, '  ') + '\n',
+    __dirname + '/../packages/' + directory + '/tsconfig.json',
+    `{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "composite": true,
+    "rootDir": "src",
+    "outDir": "lib",
+    "tsBuildInfoFile": "lib/tsconfig.tsbuildinfo",
+  },
+  "references": ${deps.length ? `[${deps}\n  ],` : `[],`}
+}
+`,
   );
 });
 
+writeFileSync(
+  `scripts/tsconfig.json`,
+  `{
+  "extends": "../tsconfig.json",
+  "references": [${packageNames
+    .map(
+      (n) =>
+        `\n    {"path": ${JSON.stringify(
+          `../packages/${n.substr(`@databases/`.length)}`,
+        )}},`,
+    )
+    .join(``)}
+  ],
+}`,
+);
 const [README_HEADER, _table, README_FOOTER] = readFileSync(
   __dirname + '/../README.md',
   'utf8',

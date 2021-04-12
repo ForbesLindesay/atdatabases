@@ -44,6 +44,7 @@ Package Name | Version | Docs
 @databases/pg | [![NPM version](https://img.shields.io/npm/v/@databases/pg?style=for-the-badge)](https://www.npmjs.com/package/@databases/pg) | [https://www.atdatabases.org/docs/pg](https://www.atdatabases.org/docs/pg)
 @databases/pg-migrations | [![NPM version](https://img.shields.io/npm/v/@databases/pg-migrations?style=for-the-badge)](https://www.npmjs.com/package/@databases/pg-migrations) | [https://www.atdatabases.org/docs/pg-migrations](https://www.atdatabases.org/docs/pg-migrations)
 @databases/pg-test | [![NPM version](https://img.shields.io/npm/v/@databases/pg-test?style=for-the-badge)](https://www.npmjs.com/package/@databases/pg-test) | [https://www.atdatabases.org/docs/pg-test](https://www.atdatabases.org/docs/pg-test)
+@databases/pg-typed | [![NPM version](https://img.shields.io/npm/v/@databases/pg-typed?style=for-the-badge)](https://www.npmjs.com/package/@databases/pg-typed) | [https://www.atdatabases.org/docs/pg-typed](https://www.atdatabases.org/docs/pg-typed)
 @databases/queue | [![NPM version](https://img.shields.io/npm/v/@databases/queue?style=for-the-badge)](https://www.npmjs.com/package/@databases/queue) | [https://www.atdatabases.org/docs/queue](https://www.atdatabases.org/docs/queue)
 @databases/split-sql-query | [![NPM version](https://img.shields.io/npm/v/@databases/split-sql-query?style=for-the-badge)](https://www.npmjs.com/package/@databases/split-sql-query) | [https://www.atdatabases.org/docs/split-sql-query](https://www.atdatabases.org/docs/split-sql-query)
 @databases/sql | [![NPM version](https://img.shields.io/npm/v/@databases/sql?style=for-the-badge)](https://www.npmjs.com/package/@databases/sql) | [https://www.atdatabases.org/docs/sql](https://www.atdatabases.org/docs/sql)
@@ -51,6 +52,8 @@ Package Name | Version | Docs
 @databases/validate-unicode | [![NPM version](https://img.shields.io/npm/v/@databases/validate-unicode?style=for-the-badge)](https://www.npmjs.com/package/@databases/validate-unicode) | [https://www.atdatabases.org/docs/validate-unicode](https://www.atdatabases.org/docs/validate-unicode)
 @databases/websql | [![NPM version](https://img.shields.io/npm/v/@databases/websql?style=for-the-badge)](https://www.npmjs.com/package/@databases/websql) | [https://www.atdatabases.org/docs/websql](https://www.atdatabases.org/docs/websql)
 @databases/migrations-base | [![NPM version](https://img.shields.io/npm/v/@databases/migrations-base?style=for-the-badge)](https://www.npmjs.com/package/@databases/migrations-base) | Not documented yet
+@databases/mock-db | [![NPM version](https://img.shields.io/npm/v/@databases/mock-db?style=for-the-badge)](https://www.npmjs.com/package/@databases/mock-db) | Not documented yet
+@databases/mock-db-typed | [![NPM version](https://img.shields.io/npm/v/@databases/mock-db-typed?style=for-the-badge)](https://www.npmjs.com/package/@databases/mock-db-typed) | Not documented yet
 @databases/mysql-config | [![NPM version](https://img.shields.io/npm/v/@databases/mysql-config?style=for-the-badge)](https://www.npmjs.com/package/@databases/mysql-config) | Not documented yet
 @databases/pg-config | [![NPM version](https://img.shields.io/npm/v/@databases/pg-config?style=for-the-badge)](https://www.npmjs.com/package/@databases/pg-config) | Not documented yet
 @databases/pg-connection-string | [![NPM version](https://img.shields.io/npm/v/@databases/pg-connection-string?style=for-the-badge)](https://www.npmjs.com/package/@databases/pg-connection-string) | Not documented yet
@@ -60,7 +63,6 @@ Package Name | Version | Docs
 @databases/pg-schema-cli | [![NPM version](https://img.shields.io/npm/v/@databases/pg-schema-cli?style=for-the-badge)](https://www.npmjs.com/package/@databases/pg-schema-cli) | Not documented yet
 @databases/pg-schema-introspect | [![NPM version](https://img.shields.io/npm/v/@databases/pg-schema-introspect?style=for-the-badge)](https://www.npmjs.com/package/@databases/pg-schema-introspect) | Not documented yet
 @databases/pg-schema-print-types | [![NPM version](https://img.shields.io/npm/v/@databases/pg-schema-print-types?style=for-the-badge)](https://www.npmjs.com/package/@databases/pg-schema-print-types) | Not documented yet
-@databases/pg-typed | [![NPM version](https://img.shields.io/npm/v/@databases/pg-typed?style=for-the-badge)](https://www.npmjs.com/package/@databases/pg-typed) | Not documented yet
 @databases/push-to-async-iterable | [![NPM version](https://img.shields.io/npm/v/@databases/push-to-async-iterable?style=for-the-badge)](https://www.npmjs.com/package/@databases/push-to-async-iterable) | Not documented yet
 @databases/shared | [![NPM version](https://img.shields.io/npm/v/@databases/shared?style=for-the-badge)](https://www.npmjs.com/package/@databases/shared) | Not documented yet
 @databases/websql-core | [![NPM version](https://img.shields.io/npm/v/@databases/websql-core?style=for-the-badge)](https://www.npmjs.com/package/@databases/websql-core) | Not documented yet

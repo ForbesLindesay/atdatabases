@@ -1,6 +1,6 @@
 ---
 id: validate-unicode
-title: @databases/validate-unicode
+title: '@databases/validate-unicode'
 sidebar_label: validate-unicode
 ---
 

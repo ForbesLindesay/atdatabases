@@ -95,24 +95,15 @@ function getAttributeType(
     )}) | null`;
   }
 
-  if (
+  const columnTypeOverride =
     context.options.columnTypeOverrides[
       `${type.schemaName}.${type.className}.${attribute.attributeName}`
-    ]
-  ) {
-    return context.options.columnTypeOverrides[
-      `${type.schemaName}.${type.className}.${attribute.attributeName}`
-    ];
-  }
-
-  if (
+    ] ||
     context.options.columnTypeOverrides[
       `${type.className}.${attribute.attributeName}`
-    ]
-  ) {
-    return context.options.columnTypeOverrides[
-      `${type.className}.${attribute.attributeName}`
     ];
+  if (columnTypeOverride) {
+    return columnTypeOverride;
   }
 
   for (const constraint of type.constraints) {

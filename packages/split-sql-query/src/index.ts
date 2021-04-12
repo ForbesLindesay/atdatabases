@@ -1,4 +1,4 @@
-import sql, {SQLQuery, SQLItem, SQLItemType} from '@databases/sql';
+import sql, {SQLQuery, SQLItem, SQLItemType} from '@databases/sql/web';
 
 function hasValuesFormatter(query: readonly SQLItem[]): boolean {
   return query.some((q) => q.type === SQLItemType.VALUE);

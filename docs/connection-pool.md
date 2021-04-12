@@ -1,6 +1,6 @@
 ---
 id: connection-pool
-title: @databases/connection-pool
+title: '@databases/connection-pool'
 sidebar_label: connection-pool
 ---
 
@@ -57,7 +57,7 @@ async function connect(connectionString) {
       }
       // execute some query here
     },
-    dispose: () => {
+    dispose: async () => {
       disposed = true;
       // simulate time spent disconnecting from a database:
       await new Promise((r) => setTimeout(r, 1000));
@@ -108,7 +108,7 @@ async function connect(connectionString) {
       }
       // execute some query here
     },
-    dispose: () => {
+    dispose: async () => {
       disposed = true;
       // simulate time spent disconnecting from a database:
       await new Promise((r) => setTimeout(r, 1000));

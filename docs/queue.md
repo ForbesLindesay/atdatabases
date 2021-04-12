@@ -1,6 +1,6 @@
 ---
 id: queue
-title: @databases/queue
+title: '@databases/queue'
 sidebar_label: queue
 ---
 

@@ -26,10 +26,7 @@
   "homepage": "https://www.atdatabases.org/docs/mysql-test",
   "files": [
     "lib/",
-    "jest/globalSetup.js",
-    "jest/globalSetup.d.ts",
-    "jest/globalTeardown.js",
-    "jest/globalTeardown.d.ts"
+    "jest/"
   ],
   "devDependencies": {
     "@types/ms": "^0.7.31"
