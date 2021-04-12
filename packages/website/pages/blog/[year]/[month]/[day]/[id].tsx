@@ -153,8 +153,8 @@ export async function getStaticPaths(): Promise<{
     paths: posts.map((post) => ({
       params: {
         year: post.year.toString(10),
-        month: post.month.toString(10),
-        day: post.day.toString(10),
+        month: post.month.toString(10).padStart(2, `0`),
+        day: post.day.toString(10).padStart(2, `0`),
         id: post.id,
       },
     })),

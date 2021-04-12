@@ -38,9 +38,10 @@ export async function getBlogPosts() {
   }
 }
 async function readFiles() {
-  const filenames = (await fs.readdir(`../../docs/blog`)).filter((filename) =>
-    filename.endsWith(`.md`),
-  );
+  const filenames = (await fs.readdir(`../../docs/blog`))
+    .sort()
+    .reverse()
+    .filter((filename) => filename.endsWith(`.md`));
   return await Promise.all(filenames.map((fileName) => readFile(fileName)));
 }
 
