@@ -70,27 +70,28 @@ const Post = ({nav, doc}: Props) => {
         <div tw="px-4 xl:px-6">
           <div tw="mx-auto max-w-8xl lg:grid lg:gap-6 lg:grid-cols-nav-2 xl:grid-cols-nav-3">
             <nav tw="col-span-2 xl:col-span-1 -mx-4 xl:mx-0">
-              <div tw="flex h-14 z-10 relative xl:hidden">
+              <div tw="flex h-12 z-10 relative xl:hidden">
                 <button
-                  tw="fixed w-full h-14 flex flex-grow items-center bg-gray-300"
+                  tw="fixed w-full h-12 flex flex-grow items-center bg-gray-300"
+                  className="group"
                   type="button"
                   onClick={() => setNavExpanded((e) => !e)}
                 >
                   <div tw="flex flex-col justify-around w-12 h-12 p-2">
                     <div
-                      tw="h-1 bg-gray-700 transform origin-left transition-transform duration-75 ease-in-out"
+                      tw="h-1 bg-gray-600 group-hover:bg-gray-800 transform origin-left transition-transform duration-75 ease-in-out"
                       css={[expandNav && tw`rotate-45`]}
                     ></div>
                     <div
-                      tw="h-1 bg-gray-700 transition-opacity duration-75 ease-in-out"
+                      tw="h-1 bg-gray-600 group-hover:bg-gray-800 transition-opacity duration-75 ease-in-out"
                       css={[expandNav && tw`opacity-0`]}
                     ></div>
                     <div
-                      tw="h-1 bg-gray-700 transform origin-left transition-transform duration-75 ease-in-out"
+                      tw="h-1 bg-gray-600 group-hover:bg-gray-800 transform origin-left transition-transform duration-75 ease-in-out"
                       css={[expandNav && tw`-rotate-45`]}
                     ></div>
                   </div>
-                  <div tw="ml-2 flex items-center text-gray-900 text-lg">
+                  <div tw="ml-2 flex items-center text-gray-700 group-hover:text-gray-900 text-lg">
                     {doc.path?.map((p, i) => (
                       <React.Fragment key={i}>
                         {i !== 0 ? (

@@ -17,7 +17,7 @@ export default function Features() {
                 Type Safe
               </p>
             </dt>
-            <dd tw="mt-2 text-base text-gray-500">
+            <dd tw="mt-2 text-base text-gray-600">
               @databases is written in TypeScript, so every module has type
               safety and type definitions built in. In addition to that, we also
               have CLIs that let you generate types for your database tables.
@@ -31,7 +31,7 @@ export default function Features() {
                 Modular
               </p>
             </dt>
-            <dd tw="mt-2 text-base text-gray-500">
+            <dd tw="mt-2 text-base text-gray-600">
               Each database driver is published as a separate module. Each
               problem we solve get its own reusable package. This means that
               even if you don't want to use @databases to connect to your SQL
@@ -51,7 +51,7 @@ export default function Features() {
                 Promises
               </p>
             </dt>
-            <dd tw="mt-2 text-base text-gray-500">
+            <dd tw="mt-2 text-base text-gray-600">
               All the @databases APIs are designed with promises in mind from
               the get go. You won't need to mess around with old callback
               styles. This keeps your code clean and simple.
