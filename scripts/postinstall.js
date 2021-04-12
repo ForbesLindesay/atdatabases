@@ -94,8 +94,8 @@ readdirSync(__dirname + '/../packages').forEach((directory) => {
     );
   }
   const deps = [
-    ...Object.keys(pkg.dependencies ?? {}),
-    ...Object.keys(pkg.devDependencies ?? {}),
+    ...Object.keys(pkg.dependencies || {}),
+    ...Object.keys(pkg.devDependencies || {}),
   ]
     .filter((dep) => dep.startsWith(`@databases/`))
     .map(
