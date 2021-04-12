@@ -15,6 +15,7 @@
   "bugs": "https://github.com/ForbesLindesay/atdatabases/issues",
   "homepage": "https://www.atdatabases.org/docs/sql",
   "files": [
-    "lib/"
+    "lib/",
+    "web/"
   ]
 }
