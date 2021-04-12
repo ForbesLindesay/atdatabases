@@ -4,7 +4,6 @@ const {
   statSync,
   readFileSync,
   existsSync,
-  rmSync,
 } = require('fs');
 
 const LICENSE = readFileSync(__dirname + '/../LICENSE.md');
@@ -119,10 +118,6 @@ readdirSync(__dirname + '/../packages').forEach((directory) => {
 }
 `,
   );
-  rmSync(__dirname + '/../packages/' + directory + '/tsconfig.build.json', {
-    force: true,
-    recursive: true,
-  });
 });
 
 writeFileSync(
