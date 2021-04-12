@@ -41,12 +41,6 @@ const getConnectionPoolOptions = ({
         console.warn(ex.message);
       }
     },
-    onActive(driver) {
-      driver.onActive();
-    },
-    onIdle(driver) {
-      driver.onIdle();
-    },
   };
 };
 
