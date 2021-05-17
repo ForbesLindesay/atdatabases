@@ -25,6 +25,7 @@ export default interface Queryable {
     fn: (connection: Transaction) => Promise<T>,
     options?: TransactionOptions,
   ): Promise<T>;
+  addPostCommitStep(fn: () => Promise<void>): Promise<void>;
 }
 
 /**

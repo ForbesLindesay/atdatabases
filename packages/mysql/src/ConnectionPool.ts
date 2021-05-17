@@ -9,8 +9,8 @@ import EventHandlers from './types/EventHandlers';
 import MySqlDriver from './MySqlDriver';
 
 const factories: Factory<MySqlDriver, Connection, Transaction> = {
-  createTransaction(driver) {
-    return new Transaction(driver, factories);
+  createTransaction(driver, transactionParentContext) {
+    return new Transaction(driver, factories, transactionParentContext);
   },
   createConnection(driver) {
     return new Connection(driver, factories);

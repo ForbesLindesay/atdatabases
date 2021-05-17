@@ -1,8 +1,15 @@
+export interface TransactionParentContext {
+  addPostCommitStep: (fn: () => Promise<void>) => void;
+}
+
 export interface Disposable {
   dispose(): Promise<void>;
 }
 export interface TransactionFactory<TDriver, TTransaction extends Disposable> {
-  createTransaction(driver: TDriver): TTransaction;
+  createTransaction(
+    driver: TDriver,
+    ctx: TransactionParentContext,
+  ): TTransaction;
 }
 export interface ConnectionFactory<TDriver, TConnection extends Disposable> {
   createConnection(driver: TDriver): TConnection;

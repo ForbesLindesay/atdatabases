@@ -89,12 +89,17 @@ export async function txInternal<
   let failureCount = 0;
   await driver.beginTransaction(options);
   while (true) {
-    const tx = factories.createTransaction(driver);
+    const postCommitSteps: (() => Promise<void>)[] = [];
+    const tx = factories.createTransaction(driver, {
+      addPostCommitStep: (fn) => {
+        postCommitSteps.push(fn);
+      },
+    });
+    let result;
     try {
-      const result = await fn(tx);
+      result = await fn(tx);
       await tx.dispose();
       await driver.commitTransaction();
-      return result;
     } catch (ex) {
       await tx.dispose();
       await driver.rollbackTransaction();
@@ -105,5 +110,9 @@ export async function txInternal<
       }
       throw ex;
     }
+    for (const step of postCommitSteps) {
+      await step();
+    }
+    return result;
   }
 }

@@ -9,8 +9,8 @@ import MockDbDriver from './Driver';
 import MockDbOptions from './types/MockDbOptions';
 
 const factories: Factory<MockDbDriver, Connection, Transaction> = {
-  createTransaction(driver) {
-    return new Transaction(driver, factories);
+  createTransaction(driver, transactionParentContext) {
+    return new Transaction(driver, factories, transactionParentContext);
   },
   createConnection(driver) {
     return new Connection(driver, factories);
