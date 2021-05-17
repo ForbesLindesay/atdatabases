@@ -162,16 +162,15 @@ export function help(command?: string) {
       console.info(``);
       console.info(`Optional arguments:`);
       console.info(`  -d, --debug                  Print all the output of child commands.`);
-      console.info(`  --image            <string>  Override the MySQL docker image.`);
+      console.info(`  --image            <string>  Override the Postgres docker image.`);
       console.info(`  --containerName    <string>  Specify a custom name for the container.`);
       console.info(`  -p, --externalPort <integer> Specify the port to run on.`);
       console.info(`  --connectTimeout   <seconds> How long should we allow for the container`);
       console.info(`                               to start. You can specify a raw number in`);
       console.info(`                               seconds, or a time string like "1 minute"`);
       console.info(`  -r, --refresh                Update the cached docker conatiner`);
-      console.info(`  -user              <string>  The pg user`);
-      console.info(`  -password          <string>  The pg password`);
-      console.info(`  -db                <string>  The pg database`);
+      console.info(`  --user              <string> The Postgres user`);
+      console.info(`  --db                <string> The Postgres database`);
       console.info(`  -h, --help                   Show this help message and exit.`);
       break;
     case 'run':
@@ -188,8 +187,8 @@ export function help(command?: string) {
       console.info(`                               to start. You can specify a raw number in`);
       console.info(`                               seconds, or a time string like "1 minute"`);
       console.info(`  -r, --refresh                Update the cached docker conatiner`);
-      console.info(`  -user              <string>  The postgres user`);
-      console.info(`  -db                <string>  The postgres database`);
+      console.info(`  --user              <string> The Postgres user`);
+      console.info(`  --db                <string> The Postgres database`);
       console.info(`  -h, --help                   Show this help message and exit.`);
       break;
     case 'stop':
