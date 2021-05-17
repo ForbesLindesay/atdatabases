@@ -120,6 +120,10 @@ export default class BaseConnectionPool<
     }
   }
 
+  async addPostCommitStep(fn: () => Promise<void>): Promise<void> {
+    await fn();
+  }
+
   async *queryStream(
     query: SQLQuery,
     options?: QueryStreamOptions<TDriver>,

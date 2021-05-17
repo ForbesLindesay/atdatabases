@@ -85,3 +85,11 @@ If the `Queryable` is a `Connection` or `ConnectionPool`, this will create a tru
 If the `Queryable` is a `ConnectionPool`, this will allocate a connection for the duration of the callback function.
 
 If the `Queryable` is already a `Connection` or `Transaction`, this will simply call the callaback with the existing connection.
+
+### `Queryable.addPostCommitStep(fn): Promise<void>`
+
+If the Queryable is part of a transaction, queue `fn` to be called after the top-level transaction is successfully committed.
+
+If the Queryable is not part of a transaction, call `fn` immediately and `await` the result.
+
+This function can be useful for clearing caches after transactions are committed.

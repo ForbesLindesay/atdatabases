@@ -17,8 +17,8 @@ import createConnectionSource, {PgOptions} from './ConnectionSource';
 import definePrecondition from './definePrecondition';
 
 const factories: Factory<PgDriver, Connection, Transaction> = {
-  createTransaction(driver) {
-    return new Transaction(driver, factories);
+  createTransaction(driver, transactionParentContext) {
+    return new Transaction(driver, factories, transactionParentContext);
   },
   createConnection(driver) {
     return new Connection(driver, factories);

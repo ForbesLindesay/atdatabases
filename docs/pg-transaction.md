@@ -75,3 +75,7 @@ const result = await db.task(async (db) => {
 ### `Transaction.task(fn): Promise<T>`
 
 This method exists to mimic the API in `ConnectionPool.task`. It does not allocate a fresh connection or transaction, and simply returns `fn(this)`.
+
+### `Transaction.addPostCommitStep(fn): Promise<void>`
+
+Queue `fn` to be called after the top-level transaction is successfully committed. If this transaction is nested inside another transaction, `fn` will not be called until the outer most transaction has been committed. This can be used to clear caches after updating values.

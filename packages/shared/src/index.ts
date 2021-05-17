@@ -1,6 +1,7 @@
 import type {SQLQuery} from '@databases/sql';
 import {Lock} from '@databases/lock';
 import Factory, {
+  TransactionParentContext,
   Disposable,
   ConnectionFactory,
   TransactionFactory,
@@ -18,6 +19,7 @@ export type {SQLQuery, PoolOptions};
 export type {
   Driver,
   Disposable,
+  TransactionParentContext,
   TransactionFactory,
   ConnectionFactory,
   Factory,

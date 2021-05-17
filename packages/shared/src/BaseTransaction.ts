@@ -1,7 +1,11 @@
 import splitSqlQuery from '@databases/split-sql-query';
 import type {SQLQuery} from '@databases/sql';
 import cuid = require('cuid');
-import {Disposable, TransactionFactory} from './Factory';
+import {
+  Disposable,
+  TransactionFactory,
+  TransactionParentContext,
+} from './Factory';
 import Driver from './Driver';
 import QueryableType from './QueryableType';
 import {Lock, createLock} from '@databases/lock';
@@ -32,13 +36,16 @@ export default class BaseTransaction<
 
   protected readonly _driver: TDriver;
   private readonly _factories: TransactionFactory<TDriver, TTransaction>;
+  private readonly _parentContext: TransactionParentContext;
   constructor(
     driver: TDriver,
     factories: TransactionFactory<TDriver, TTransaction>,
+    parentContext: TransactionParentContext,
   ) {
     this._driver = driver;
     this._factories = factories;
     this._lock = createLock(driver.acquireLockTimeoutMilliseconds);
+    this._parentContext = parentContext;
   }
 
   async task<T>(fn: (connection: this) => Promise<T>): Promise<T> {
@@ -51,7 +58,10 @@ export default class BaseTransaction<
     try {
       const savepointName = cuid();
       await this._driver.createSavepoint(savepointName);
-      const subTransaction = this._factories.createTransaction(this._driver);
+      const subTransaction = this._factories.createTransaction(
+        this._driver,
+        this._parentContext,
+      );
       try {
         const result = await fn(subTransaction);
         await subTransaction.dispose();
@@ -83,6 +93,10 @@ export default class BaseTransaction<
     } finally {
       this._lock.releaseLock();
     }
+  }
+
+  async addPostCommitStep(fn: () => Promise<void>): Promise<void> {
+    this._parentContext.addPostCommitStep(fn);
   }
 
   async *queryStream(
