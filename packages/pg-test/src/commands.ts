@@ -170,7 +170,6 @@ export function help(command?: string) {
       console.info(`                               seconds, or a time string like "1 minute"`);
       console.info(`  -r, --refresh                Update the cached docker conatiner`);
       console.info(`  --user              <string> The Postgres user`);
-      console.info(`  -password          <string>  The Postgres password`);
       console.info(`  --db                <string> The Postgres database`);
       console.info(`  -h, --help                   Show this help message and exit.`);
       break;
