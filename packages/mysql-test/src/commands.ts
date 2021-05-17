@@ -171,9 +171,9 @@ export function help(command?: string) {
       console.info(`                               to start. You can specify a raw number in`);
       console.info(`                               seconds, or a time string like "1 minute"`);
       console.info(`  -r, --refresh                Update the cached docker conatiner`);
-      console.info(`  -user              <string>  The mysql user`);
-      console.info(`  -password          <string>  The mysql password`);
-      console.info(`  -db                <string>  The mysql database`);
+      console.info(`  --user              <string>  The mysql user`);
+      console.info(`  --password          <string>  The mysql password`);
+      console.info(`  --db                <string>  The mysql database`);
       console.info(`  -h, --help                   Show this help message and exit.`);
       break;
     case 'run':
@@ -190,9 +190,9 @@ export function help(command?: string) {
       console.info(`                               to start. You can specify a raw number in`);
       console.info(`                               seconds, or a time string like "1 minute"`);
       console.info(`  -r, --refresh                Update the cached docker conatiner`);
-      console.info(`  -user              <string>  The mysql user`);
-      console.info(`  -password          <string>  The mysql password`);
-      console.info(`  -db                <string>  The mysql database`);
+      console.info(`  --user              <string>  The mysql user`);
+      console.info(`  --password          <string>  The mysql password`);
+      console.info(`  --db                <string>  The mysql database`);
       console.info(`  -h, --help                   Show this help message and exit.`);
       break;
     case 'stop':
