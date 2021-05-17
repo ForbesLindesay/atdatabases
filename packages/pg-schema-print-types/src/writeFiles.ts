@@ -45,7 +45,7 @@ export default async function writeFiles(
           throw ex;
         }
       }
-      console.info(`Updaing: ${f.filename}`);
+      console.info(`Updating: ${f.filename}`);
       await promises.writeFile(
         filename,
         [
