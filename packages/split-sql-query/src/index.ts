@@ -45,6 +45,9 @@ function splitSqlQueryParts(query: readonly SQLItem[]): SQLQuery[] {
   let isBlockCommentPrinted = false;
   let isBlockCommentFirstChar = false;
   let isBlockCommentEnd = false;
+  // https://www.postgresql.org/docs/current/sql-syntax-lexical.html#SQL-SYNTAX-DOLLAR-QUOTING
+  let dollarQuoteStart = false;
+  let dollarQuote = false;
   for (const part of query) {
     if (part.type === SQLItemType.RAW) {
       let str = '';
@@ -65,6 +68,15 @@ function splitSqlQueryParts(query: readonly SQLItem[]): SQLQuery[] {
             isBlockComment = true;
           } else {
             str += '/';
+          }
+        }
+
+        if (dollarQuoteStart && !dollarQuote) {
+          dollarQuoteStart = false;
+          if (char === `$`) {
+            dollarQuote = true;
+            str += char;
+            continue;
           }
         }
 
@@ -99,12 +111,26 @@ function splitSqlQueryParts(query: readonly SQLItem[]): SQLQuery[] {
           str += char;
         } else if (quoteChar) {
           str += char;
+        } else if (dollarQuote) {
+          if (char === `$` && dollarQuoteStart) {
+            dollarQuoteStart = false;
+            dollarQuote = false;
+          } else if (char === `$`) {
+            dollarQuoteStart = true;
+          } else {
+            dollarQuoteStart = false;
+          }
+          str += char;
         } else {
           switch (char) {
             case `'`:
             case `"`:
             case '`':
               quoteChar = char;
+              str += char;
+              break;
+            case `$`:
+              dollarQuoteStart = true;
               str += char;
               break;
             case `-`:
