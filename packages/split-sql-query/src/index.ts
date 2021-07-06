@@ -45,6 +45,12 @@ function splitSqlQueryParts(query: readonly SQLItem[]): SQLQuery[] {
   let isBlockCommentPrinted = false;
   let isBlockCommentFirstChar = false;
   let isBlockCommentEnd = false;
+  // https://www.postgresql.org/docs/current/sql-syntax-lexical.html#SQL-SYNTAX-DOLLAR-QUOTING
+  // The tag, if any, of a dollar-quoted string follows the same rules as an unquoted identifier,
+  // except that it cannot contain a dollar sign. Tags are case sensitive, so $tag$String content$tag$
+  // is correct, but $TAG$String content$tag$ is not.
+  let dollarQuoteStart = ``;
+  let dollarQuote = ``;
   for (const part of query) {
     if (part.type === SQLItemType.RAW) {
       let str = '';
@@ -65,6 +71,23 @@ function splitSqlQueryParts(query: readonly SQLItem[]): SQLQuery[] {
             isBlockComment = true;
           } else {
             str += '/';
+          }
+        }
+
+        if (dollarQuoteStart && !dollarQuote) {
+          if (char === `$`) {
+            dollarQuote = `${dollarQuoteStart}$`;
+            dollarQuoteStart = ``;
+            str += char;
+            continue;
+          } else if (
+            /[0-9_]/i.test(char) ||
+            // we allow letters with diacritical marks
+            char.toLowerCase() !== char.toUpperCase()
+          ) {
+            dollarQuoteStart += char;
+          } else {
+            dollarQuoteStart = ``;
           }
         }
 
@@ -99,12 +122,28 @@ function splitSqlQueryParts(query: readonly SQLItem[]): SQLQuery[] {
           str += char;
         } else if (quoteChar) {
           str += char;
+        } else if (dollarQuote) {
+          if (dollarQuoteStart) {
+            dollarQuoteStart += char;
+            if (dollarQuoteStart === dollarQuote) {
+              dollarQuote = ``;
+              dollarQuoteStart = ``;
+            }
+          }
+          if (dollarQuote && char === `$`) {
+            dollarQuoteStart = `$`;
+          }
+          str += char;
         } else {
           switch (char) {
             case `'`:
             case `"`:
             case '`':
               quoteChar = char;
+              str += char;
+              break;
+            case `$`:
+              dollarQuoteStart = `$`;
               str += char;
               break;
             case `-`:
