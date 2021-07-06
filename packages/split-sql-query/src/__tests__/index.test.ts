@@ -116,36 +116,11 @@ test('regression - 2', () => {
       $$ language 'plpgsql';
 
       CREATE TRIGGER <trigger_name> BEFORE UPDATE ON <table_name> FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
-    `).map((q) => q.format(testFormatter)),
-  ).toMatchInlineSnapshot(`
-    Array [
-      Object {
-        "text": "CREATE OR REPLACE FUNCTION update_updated_at_column()
-    RETURNS TRIGGER AS $$
-    BEGIN
-        NEW.updated_at = now();
-        RETURN NEW;
-    END;
-    $$ language 'plpgsql'",
-        "values": Array [],
-      },
-      Object {
-        "text": "CREATE TRIGGER <trigger_name> BEFORE UPDATE ON <table_name> FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column()",
-        "values": Array [],
-      },
-    ]
-  `);
-  expect(
-    splitSqlQuery(sql`
-      CREATE OR REPLACE FUNCTION update_updated_at_column()
-      RETURNS TRIGGER AS $$
-      BEGIN
-          NEW.updated_at = now();
-          RETURN NEW;
-      END;
-      $$ language 'plpgsql';
-
-      CREATE TRIGGER <trigger_name> BEFORE UPDATE ON <table_name> FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
     `).length,
+  ).toBe(2);
+  expect(
+    splitSqlQuery(
+      sql`$SomeTag$Dianne's$WrongTag$;$some non tag an$identifier;; horse$SomeTag$;$SomeTag$Dianne's horse$SomeTag$`,
+    ).length,
   ).toBe(2);
 });
