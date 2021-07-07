@@ -57,6 +57,14 @@ db.query(sql`SELECT ${fieldName} FROM users AS u;`);
 // => {text: 'SELECT "u"."id" FROM users AS u;', values: []}
 ```
 
+Or dynamically include a table name.
+
+```ts
+const tableName = 'users';
+db.query(sql`SELECT * FROM ${sql.ident(tableName)}`);
+// => {text: 'SELECT * FROM users;', values: []}
+```
+
 ### `sql.value(val)`
 
 `sql.value(val)` acts as a shorthand for `` sql`${val}` ``. It takes a value, and represents it with a placeholder in the resulting query.
@@ -69,7 +77,7 @@ db.query(sql`SELECT * FROM users WHERE id=${id};`);
 
 ### `sql.join(arrayOfFragments, delimiter)`
 
-Joins an array of SQLQuery values using the delimiter (which is treated as a raw SQL string). It properly handles joining the array of values and ensuring that the placeholders match up.
+Joins an array of SQLQuery values using the delimiter (which defaults to an empty string). It properly handles joining the array of values and ensuring that the placeholders match up.
 
 ```ts
 const arrayOfSqlFields = ['a', 'b', 'c', 'd'].map((n) => sql.identifier(n));
