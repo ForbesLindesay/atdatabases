@@ -56,7 +56,7 @@ export default async function writeFiles(
           ` * ${checksum}`,
           ' */',
           '',
-          `// eslint:disable`,
+          `/* eslint-disable */`,
           `// tslint:disable`,
           ``,
           content,
