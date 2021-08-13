@@ -4,9 +4,7 @@
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
-  "dependencies": {
-    "tiny-invariant": "^1.1.0"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@databases/mock-db": "^0.0.0"
   },
