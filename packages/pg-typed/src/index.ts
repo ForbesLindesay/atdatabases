@@ -1,5 +1,4 @@
 import type {sql, SQLQuery, Queryable} from '@databases/pg';
-import invariant from 'tiny-invariant';
 
 export interface SelectQuery<TRecord> {
   all(): Promise<TRecord[]>;
@@ -145,10 +144,11 @@ class SelectQueryImplementation<TRecord>
 
   private _methodCalled: string | undefined;
   private async _getResults(mode: string) {
-    invariant(
-      !this._methodCalled,
-      `You cannot use the same query multiple times. ${this._methodCalled} has already been called on this query.`,
-    );
+    if (this._methodCalled) {
+      throw new Error(
+        `You cannot use the same query multiple times. ${this._methodCalled} has already been called on this query.`,
+      );
+    }
     this._methodCalled = mode;
 
     const sql = this._sql;
@@ -375,7 +375,11 @@ class Table<TRecord, TInsertParameters> {
   // throws if > 1 row matches
   async findOne(whereValues: WhereCondition<TRecord>): Promise<TRecord | null> {
     const rows = await this.find(whereValues).all();
-    invariant(rows.length < 2, 'more than one row matched this query');
+    if (rows.length >= 2) {
+      throw new Error(
+        'More than one row matched this query but you used `.findOne`.',
+      );
+    }
     if (rows.length !== 1) {
       return null;
     }

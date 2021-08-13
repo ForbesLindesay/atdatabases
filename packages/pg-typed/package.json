@@ -4,9 +4,7 @@
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
-  "dependencies": {
-    "tiny-invariant": "^1.1.0"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@databases/pg": "^0.0.0",
     "@databases/pg-schema-print-types": "^0.0.0"
