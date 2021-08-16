@@ -14,10 +14,11 @@
     "prettier:check": "prettier --list-different \"packages/*/src/**/*.{ts,tsx}\"",
     "prettier:write": "prettier --write \"packages/*/src/**/*.{ts,tsx}\"",
     "pretest": "yarn build",
-    "test": "TZ=Australia/Adelaide jest",
+    "test": "TZ=Australia/Adelaide jest --selectProjects node,pg,mysql",
     "test:node": "TZ=Australia/Adelaide jest --selectProjects node",
     "test:pg": "TZ=Australia/Adelaide jest --selectProjects pg",
     "test:mysql": "TZ=Australia/Adelaide jest --selectProjects mysql",
+    "test:bigquery": "TZ=Australia/Adelaide jest --selectProjects bigquery",
     "posttest": "wsrun --parallel --exclude-missing test",
     "watch:jest": "jest --watch",
     "clean": "rimraf packages/*/lib && rimraf packages/*/.last_build && rimraf packages/*/.cache && rimraf packages/*/build && rimraf packages/*/node_modules && rimraf node_modules",
@@ -42,6 +43,11 @@
         "testRegex": "/__tests__/.+\\.test\\.mysql\\.(tsx?)$",
         "globalSetup": "./packages/mysql-test/jest/globalSetup",
         "globalTeardown": "./packages/mysql-test/jest/globalTeardown",
+        "preset": "ts-jest"
+      },
+      {
+        "displayName": "bigquery",
+        "testRegex": "/__tests__/.+\\.test\\.bigquery\\.(tsx?)$",
         "preset": "ts-jest"
       }
     ]

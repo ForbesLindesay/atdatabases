@@ -38,11 +38,11 @@ readdirSync(__dirname + '/../packages').forEach((directory) => {
       throw ex;
     }
   }
-  packageNames.push(pkg.name);
   const before = JSON.stringify(pkg);
   if (!pkg.name) {
     pkg.name = '@databases/' + directory;
   }
+  packageNames.push(pkg.name);
   if (!pkg.version) {
     pkg.version = '0.0.0';
   }

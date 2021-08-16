@@ -51,6 +51,7 @@ Package Name | Version | Docs
 @databases/sqlite | [![NPM version](https://img.shields.io/npm/v/@databases/sqlite?style=for-the-badge)](https://www.npmjs.com/package/@databases/sqlite) | [https://www.atdatabases.org/docs/sqlite](https://www.atdatabases.org/docs/sqlite)
 @databases/validate-unicode | [![NPM version](https://img.shields.io/npm/v/@databases/validate-unicode?style=for-the-badge)](https://www.npmjs.com/package/@databases/validate-unicode) | [https://www.atdatabases.org/docs/validate-unicode](https://www.atdatabases.org/docs/validate-unicode)
 @databases/websql | [![NPM version](https://img.shields.io/npm/v/@databases/websql?style=for-the-badge)](https://www.npmjs.com/package/@databases/websql) | [https://www.atdatabases.org/docs/websql](https://www.atdatabases.org/docs/websql)
+@databases/bigquery | [![NPM version](https://img.shields.io/npm/v/@databases/bigquery?style=for-the-badge)](https://www.npmjs.com/package/@databases/bigquery) | Not documented yet
 @databases/migrations-base | [![NPM version](https://img.shields.io/npm/v/@databases/migrations-base?style=for-the-badge)](https://www.npmjs.com/package/@databases/migrations-base) | Not documented yet
 @databases/mock-db | [![NPM version](https://img.shields.io/npm/v/@databases/mock-db?style=for-the-badge)](https://www.npmjs.com/package/@databases/mock-db) | Not documented yet
 @databases/mock-db-typed | [![NPM version](https://img.shields.io/npm/v/@databases/mock-db-typed?style=for-the-badge)](https://www.npmjs.com/package/@databases/mock-db-typed) | Not documented yet

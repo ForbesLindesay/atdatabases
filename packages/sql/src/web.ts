@@ -82,19 +82,25 @@ class SQLQuery {
               );
             }
             for (const item of formatted._items) items.push(item);
-          } else if (typeof value === 'bigint') {
-            items.push({type: SQLItemType.VALUE, value: value.toString(10)});
           } else {
+            const before = strings[i][strings[i].length - 1];
+            const after =
+              strings.length > i + 1 ? strings[i + 1][0] : undefined;
             if (
-              strings[i + 1] &&
-              strings[i + 1].startsWith("'") &&
-              strings[i].endsWith("'")
+              after &&
+              ((before === `'` && after === `'`) ||
+                (before === `"` && after === `"`) ||
+                (before === '`' && after === '`'))
             ) {
               throw new Error(
                 `You do not need to wrap values in 'quotes' when using @databases. Any JavaScript string passed via \${...} syntax is already treated as a string. Please remove the quotes around this value.`,
               );
             }
-            items.push({type: SQLItemType.VALUE, value});
+            if (typeof value === 'bigint') {
+              items.push({type: SQLItemType.VALUE, value: value.toString(10)});
+            } else {
+              items.push({type: SQLItemType.VALUE, value});
+            }
           }
         }
       }
