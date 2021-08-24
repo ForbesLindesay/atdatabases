@@ -14,7 +14,7 @@
     "prettier:check": "prettier --list-different \"packages/*/src/**/*.{ts,tsx}\"",
     "prettier:write": "prettier --write \"packages/*/src/**/*.{ts,tsx}\"",
     "pretest": "yarn build",
-    "test": "TZ=Australia/Adelaide jest --selectProjects node,pg,mysql",
+    "test": "TZ=Australia/Adelaide jest --selectProjects node --selectProjects pg --selectProjects mysql",
     "test:node": "TZ=Australia/Adelaide jest --selectProjects node",
     "test:pg": "TZ=Australia/Adelaide jest --selectProjects pg",
     "test:mysql": "TZ=Australia/Adelaide jest --selectProjects mysql",
