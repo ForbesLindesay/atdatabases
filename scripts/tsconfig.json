@@ -1,6 +1,7 @@
 {
   "extends": "../tsconfig.json",
   "references": [
+    {"path": "../packages/bigquery"},
     {"path": "../packages/connection-pool"},
     {"path": "../packages/escape-identifier"},
     {"path": "../packages/expo"},

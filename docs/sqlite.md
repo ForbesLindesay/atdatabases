@@ -10,7 +10,7 @@ N.B. you should only have one process connected to a given SQLite database at a 
 
 ## Usage
 
-```ts
+```typescript
 import connect, {sql} from '@databases/sqlite';
 // or in CommonJS:
 // const connect = require('@databases/sqlite');
@@ -19,8 +19,20 @@ import connect, {sql} from '@databases/sqlite';
 const db = connect();
 
 db.query(sql`SELECT * FROM users;`).then(
-  results => console.log(results),
-  err => console.error(err),
+  (results) => console.log(results),
+  (err) => console.error(err),
+);
+```
+
+```javascript
+const connect = require('@databases/sqlite');
+const {sql} = require('@databases/sqlite');
+
+const db = connect();
+
+db.query(sql`SELECT * FROM users;`).then(
+  (results) => console.log(results),
+  (err) => console.error(err),
 );
 ```
 
@@ -35,14 +47,14 @@ Create a database connection for a given database. You should only create one co
 In memory:
 
 ```ts
-import connect from '@databases/websql';
+import connect from '@databases/sqlite';
 const db = connect();
 ```
 
 File system:
 
 ```ts
-import connect from '@databases/websql';
+import connect from '@databases/sqlite';
 const db = connect(FILE_NAME);
 ```
 
@@ -75,7 +87,7 @@ A transaction wraps a regular task with additional queries:
 3. it executes `ROLLBACK`, if the callback did throw an error or return a rejected promise
 
 ```ts
-const result = await db.tx(async transaction => {
+const result = await db.tx(async (transaction) => {
   const resultA = await transaction.query(sql`SELECT 1 + 1 AS a`);
   const resultB = await transaction.query(sql`SELECT 1 + 1 AS b`);
   return resultA[0].a + resultB[0].b;

@@ -50,6 +50,16 @@ export default function DatabaseCloud() {
               <img tw="max-h-12" src="/expo.svg" alt="Expo" />
               <div>Expo</div>
             </a>
+            <a
+              href="/docs/bigquery"
+              tw="col-span-1 flex justify-center items-center space-x-2 text-gray-600 text-2xl  py-8 px-8 bg-gray-50 hover:bg-gray-100"
+            >
+              <img tw="max-h-12" src="/bigquery.svg" alt="Google BigQuery" />
+              <div>BigQuery</div>
+            </a>
+            <div tw="col-span-1 flex justify-center items-center space-x-2 text-gray-600 text-2xl  py-8 px-8 bg-gray-50">
+              <div tw="text-gray-500">More Soon...</div>
+            </div>
           </div>
         </div>
       </div>

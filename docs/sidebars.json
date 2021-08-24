@@ -67,6 +67,11 @@
       "websql",
       "websql-test"
     ],
+    "Google BigQuery": [
+      "bigquery",
+      "bigquery-client",
+      "bigquery-dataset"
+    ],
     "Utilities": [
       "connection-pool",
       "escape-identifier",
