@@ -37,6 +37,6 @@ export function attemptHook<TArgs extends any[]>(
     }
     return undefined;
   } catch (ex) {
-    return ex;
+    return ex as Error;
   }
 }

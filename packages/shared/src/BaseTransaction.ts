@@ -11,15 +11,14 @@ import QueryableType from './QueryableType';
 import {Lock, createLock} from '@databases/lock';
 import {assertSql} from './utils';
 
-type QueryStreamOptions<
-  TDriver extends Driver<any, any>
-> = TDriver extends Driver<any, infer TQueryStreamOptions>
-  ? TQueryStreamOptions
-  : unknown;
+type QueryStreamOptions<TDriver extends Driver<any, any>> =
+  TDriver extends Driver<any, infer TQueryStreamOptions>
+    ? TQueryStreamOptions
+    : unknown;
 
 export default class BaseTransaction<
   TTransaction extends Disposable,
-  TDriver extends Driver<any, any>
+  TDriver extends Driver<any, any>,
 > {
   public readonly type = QueryableType.Transaction;
 

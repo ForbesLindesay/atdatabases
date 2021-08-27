@@ -4,7 +4,7 @@ import Operation from './types/Operation';
 import {SequenceErrorIgnoreCode} from './methods/validateMigrationsSequence';
 
 export function sortMigrations<
-  T extends {readonly index: number; readonly applied_at?: Date}
+  T extends {readonly index: number; readonly applied_at?: Date},
 >(migrations: readonly T[]): T[] {
   return migrations
     .slice()

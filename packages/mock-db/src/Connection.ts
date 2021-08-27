@@ -6,6 +6,7 @@ import Transaction from './Transaction';
 
 export default class Connection
   extends BaseConnection<Transaction, MockDbDriver>
-  implements IConnection {
+  implements IConnection
+{
   public readonly sql = sql;
 }

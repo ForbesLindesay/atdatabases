@@ -51,7 +51,7 @@ test('parseConnectionString', () => {
         },
       );
     } catch (ex) {
-      results[key] = ex.message;
+      results[key] = (ex as Error).message;
     }
   }
   if (process.env.CI) {

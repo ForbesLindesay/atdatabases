@@ -21,7 +21,8 @@ const pgFormat: FormatConfig = {
 type QueryResult = {rows: any[]};
 
 export default class PgDriver
-  implements Driver<TransactionOptions, QueryStreamOptions> {
+  implements Driver<TransactionOptions, QueryStreamOptions>
+{
   public readonly acquireLockTimeoutMilliseconds: number;
   public readonly client: PgClient;
   private readonly _handlers: EventHandlers;
@@ -86,16 +87,15 @@ export default class PgDriver
   async canRecycleConnectionAfterError(_err: Error) {
     try {
       let timeout: any | undefined;
-      const result:
-        | undefined
-        | {1?: {rows?: {0?: {result?: number}}}} = await Promise.race([
-        this.client.query(
-          'BEGIN TRANSACTION READ ONLY;SELECT 1 AS result;COMMIT;',
-        ) as any,
-        new Promise((r) => {
-          timeout = setTimeout(r, 100);
-        }),
-      ]);
+      const result: undefined | {1?: {rows?: {0?: {result?: number}}}} =
+        await Promise.race([
+          this.client.query(
+            'BEGIN TRANSACTION READ ONLY;SELECT 1 AS result;COMMIT;',
+          ) as any,
+          new Promise((r) => {
+            timeout = setTimeout(r, 100);
+          }),
+        ]);
       if (timeout !== undefined) {
         clearTimeout(timeout);
       }

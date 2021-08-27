@@ -24,7 +24,8 @@ interface MockDatabase {
 }
 
 export default class MockDbDriver
-  implements Driver<TransactionOptions, QueryStreamOptions> {
+  implements Driver<TransactionOptions, QueryStreamOptions>
+{
   public readonly acquireLockTimeoutMilliseconds: number;
   public readonly client: MockDatabase;
   private readonly _handlers: EventHandlers;

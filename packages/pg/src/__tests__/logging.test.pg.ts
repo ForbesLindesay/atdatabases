@@ -7,19 +7,21 @@ jest.setTimeout(30000);
 
 test('logging', async () => {
   const events: string[] = [];
-  const eventCatcher = (name: string) => (query: SQLQuery, ...args: any[]) => {
-    expect(isSqlQuery(query)).toBe(true);
-    events.push(
-      `${name}(SQLQuery, ${args
-        .map((a) =>
-          a instanceof Error ? a.message : JSON.stringify(a, null, '  '),
-        )
-        .join(', ')
-        // .replace(/\\n/g, '\n')
-        .replace(/\"/g, `'`)
-        .replace(/\n/gm, '\n  ')})`,
-    );
-  };
+  const eventCatcher =
+    (name: string) =>
+    (query: SQLQuery, ...args: any[]) => {
+      expect(isSqlQuery(query)).toBe(true);
+      events.push(
+        `${name}(SQLQuery, ${args
+          .map((a) =>
+            a instanceof Error ? a.message : JSON.stringify(a, null, '  '),
+          )
+          .join(', ')
+          // .replace(/\\n/g, '\n')
+          .replace(/\"/g, `'`)
+          .replace(/\n/gm, '\n  ')})`,
+      );
+    };
 
   const db = connect({
     bigIntMode: 'bigint',

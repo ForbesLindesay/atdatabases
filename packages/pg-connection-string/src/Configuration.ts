@@ -630,9 +630,7 @@ function parseEnum<TValue>(
     }
     if (options.invalidOptionMode === 'error') {
       throw new Error(
-        `Expected "${
-          options.envVarName ?? paramName
-        }" to be one of ${mapping
+        `Expected "${options.envVarName ?? paramName}" to be one of ${mapping
           .map((value) =>
             typeof value === 'string'
               ? `"${value}"`

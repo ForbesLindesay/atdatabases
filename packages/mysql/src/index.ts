@@ -138,9 +138,8 @@ export default function createConnectionPool(
       ? connectionConfig
       : {connectionString: connectionConfig};
 
-  const {
-    connectionString = process.env[connectionStringEnvironmentVariable],
-  } = connectionConfigObject;
+  const {connectionString = process.env[connectionStringEnvironmentVariable]} =
+    connectionConfigObject;
 
   if (!connectionString) {
     throw new Error(
@@ -310,9 +309,10 @@ function getDateTimeParser(
       return (f) => f.string();
     case 'date-object':
       return (f) => {
-        const match = /^(\d{4})\-(\d{2})\-(\d{2}) (\d{2})\:(\d{2})\:(\d{2})(?:\.(\d+))?$/.exec(
-          f.string(),
-        );
+        const match =
+          /^(\d{4})\-(\d{2})\-(\d{2}) (\d{2})\:(\d{2})\:(\d{2})(?:\.(\d+))?$/.exec(
+            f.string(),
+          );
         if (!match) {
           throw new Error('Expected yyyy-mm-dd HH:MM:SS');
         }

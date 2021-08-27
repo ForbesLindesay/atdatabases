@@ -7,7 +7,8 @@ import Transaction from './Transaction';
 
 export default class Connection
   extends BaseConnection<Transaction, MySqlDriver>
-  implements IConnection {
+  implements IConnection
+{
   public readonly sql = sql;
   queryNodeStream(
     query: SQLQuery,

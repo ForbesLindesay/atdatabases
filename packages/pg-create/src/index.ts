@@ -88,9 +88,10 @@ export default async function run(
   if (await isWorking(dbConnection)) {
     return;
   }
-  const match = /postgres\:\/\/([a-zA-Z0-9_\-]+)\@localhost\/([a-zA-Z0-9_\-]+)/.exec(
-    dbConnection,
-  );
+  const match =
+    /postgres\:\/\/([a-zA-Z0-9_\-]+)\@localhost\/([a-zA-Z0-9_\-]+)/.exec(
+      dbConnection,
+    );
   if (!match) {
     console.warn(
       'Unable to connect to the database: ' + chalk.cyan(dbConnection),

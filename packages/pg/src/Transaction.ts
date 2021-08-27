@@ -6,7 +6,8 @@ import PgDriver from './Driver';
 
 export default class Transaction
   extends BaseTransaction<Transaction, PgDriver>
-  implements ITransaction {
+  implements ITransaction
+{
   public readonly sql = sql;
   queryNodeStream(
     query: SQLQuery,

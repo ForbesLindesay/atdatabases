@@ -34,8 +34,7 @@ export default async function handleError(
         [
           {
             value: 'restore',
-            name:
-              'Restore the migration on your filesystem using the migration script in the database',
+            name: 'Restore the migration on your filesystem using the migration script in the database',
             short: 'restore local file',
           },
           {
@@ -52,8 +51,7 @@ export default async function handleError(
           },
           {
             value: 'delete',
-            name:
-              'Delete the record of the database migration having been run (if the migration is re-added to your file system it will get re-applied and could fail)',
+            name: 'Delete the record of the database migration having been run (if the migration is re-added to your file system it will get re-applied and could fail)',
             short: 'delete record',
           },
         ] as const,
@@ -96,8 +94,7 @@ export default async function handleError(
         [
           {
             value: 'delete',
-            name:
-              'Attempt to reapply the migration that is on your local filesystem',
+            name: 'Attempt to reapply the migration that is on your local filesystem',
           },
           {
             value: 'abort',
@@ -113,8 +110,7 @@ export default async function handleError(
           },
           {
             value: 'restore',
-            name:
-              'Restore the migration on your filesystem using the migration script in the database',
+            name: 'Restore the migration on your filesystem using the migration script in the database',
             short: 'restore local file',
           },
         ] as const,
@@ -181,8 +177,7 @@ export default async function handleError(
         [
           {
             value: 'ignore_temporary',
-            name:
-              'Apply the migrations that have not yet been applied, even though they may be out of order',
+            name: 'Apply the migrations that have not yet been applied, even though they may be out of order',
           },
           {
             value: 'abort',

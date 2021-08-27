@@ -154,7 +154,7 @@ class LockImpl implements Lock {
 
   private readonly _onFunctionCallTaskLock = async <
     TArgs extends any[],
-    TResult
+    TResult,
   >(
     task: FunctionCallTask<TArgs, TResult>,
   ): Promise<TResult> => {
