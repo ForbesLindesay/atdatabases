@@ -67,7 +67,7 @@ async function whenStarted<T>(fn: () => Promise<T>): Promise<T> {
   while (Date.now() < timeout) {
     try {
       return await fn();
-    } catch (ex) {
+    } catch (ex: any) {
       if (!/the database system is starting up/.test(ex.message)) {
         throw ex;
       }
@@ -88,10 +88,9 @@ export default async function run(
   if (await isWorking(dbConnection)) {
     return;
   }
-  const match =
-    /postgres\:\/\/([a-zA-Z0-9_\-]+)\@localhost\/([a-zA-Z0-9_\-]+)/.exec(
-      dbConnection,
-    );
+  const match = /postgres\:\/\/([a-zA-Z0-9_\-]+)\@localhost\/([a-zA-Z0-9_\-]+)/.exec(
+    dbConnection,
+  );
   if (!match) {
     console.warn(
       'Unable to connect to the database: ' + chalk.cyan(dbConnection),
@@ -140,7 +139,7 @@ export default async function run(
       console.info('Initialising database...');
       try {
         await runCommand('initdb', ['/usr/local/var/postgres', '-E', 'utf8']);
-      } catch (ex) {
+      } catch (ex: any) {
         if (ex.code !== 'ENOENT') {
           throw ex;
         }
@@ -159,7 +158,7 @@ export default async function run(
     await whenStarted(
       async () => await runCommand('createuser', [userName], true),
     );
-  } catch (ex) {
+  } catch (ex: any) {
     if (
       hasBrew &&
       /createuser\: could not connect to database postgres\: could not connect to server\: No such file or directory/i.test(
@@ -179,7 +178,7 @@ export default async function run(
   try {
     console.info('Creating database...');
     await runCommand('createdb', [dbName], true);
-  } catch (ex) {
+  } catch (ex: any) {
     if (!/already exists/.test(ex.message)) {
       throw ex;
     }

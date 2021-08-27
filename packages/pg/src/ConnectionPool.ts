@@ -88,7 +88,7 @@ const getConnectionPoolOptions = (
         if (handlers.onConnectionClosed) {
           handlers.onConnectionClosed();
         }
-      } catch (ex) {
+      } catch (ex: any) {
         console.warn(ex.message);
       }
     },
@@ -103,8 +103,7 @@ const getConnectionPoolOptions = (
 
 export default class ConnectionPool
   extends BaseConnectionPool<Connection, Transaction, PgDriver>
-  implements IConnectionPool
-{
+  implements IConnectionPool {
   public readonly sql = sql;
   private readonly _types: TypeOverrides;
   constructor(

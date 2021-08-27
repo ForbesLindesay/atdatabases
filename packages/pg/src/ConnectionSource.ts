@@ -36,61 +36,67 @@ export default function createConnectionSource(
     ...hosts[0],
     ssl: ssl?.connectionOptions ?? false,
   };
-  const precondition = definePrecondition(async (): Promise<PgDriver> => {
-    const start = Date.now();
-    let error: {message: string} | undefined;
-    let attemptCount = 0;
-    do {
-      attemptCount++;
-      if (attemptCount) {
-        await new Promise((resolve) => setTimeout(resolve, attemptCount * 100));
-      }
-
-      for (const {host, port} of hosts) {
-        options.host = host;
-        options.port = port;
-        options.ssl = ssl?.connectionOptions ?? false;
-
-        try {
-          const connection = new PgDriver(
-            new Client(options),
-            handlers,
-            acquireLockTimeoutMilliseconds,
+  const precondition = definePrecondition(
+    async (): Promise<PgDriver> => {
+      const start = Date.now();
+      let error: {message: string} | undefined;
+      let attemptCount = 0;
+      do {
+        attemptCount++;
+        if (attemptCount) {
+          await new Promise((resolve) =>
+            setTimeout(resolve, attemptCount * 100),
           );
-          await connection.connect();
-          return connection;
-        } catch (ex) {
-          error = ex;
-          if (
-            options.ssl &&
-            ssl?.allowFallback &&
-            /the server does not support ssl connections/i.test(error!.message)
-          ) {
-            // The Postgres server does not support SSL and our sslmode is "prefer"
-            // (which is the default). In this case we immediately retry without
-            // ssl.
-            try {
-              options.ssl = false;
-              const connection = new PgDriver(
-                new Client(options),
-                handlers,
-                acquireLockTimeoutMilliseconds,
-              );
-              await connection.connect();
-              return connection;
-            } catch (ex) {
-              error = ex;
+        }
+
+        for (const {host, port} of hosts) {
+          options.host = host;
+          options.port = port;
+          options.ssl = ssl?.connectionOptions ?? false;
+
+          try {
+            const connection = new PgDriver(
+              new Client(options),
+              handlers,
+              acquireLockTimeoutMilliseconds,
+            );
+            await connection.connect();
+            return connection;
+          } catch (ex) {
+            error = ex as Error;
+            if (
+              options.ssl &&
+              ssl?.allowFallback &&
+              /the server does not support ssl connections/i.test(
+                error!.message,
+              )
+            ) {
+              // The Postgres server does not support SSL and our sslmode is "prefer"
+              // (which is the default). In this case we immediately retry without
+              // ssl.
+              try {
+                options.ssl = false;
+                const connection = new PgDriver(
+                  new Client(options),
+                  handlers,
+                  acquireLockTimeoutMilliseconds,
+                );
+                await connection.connect();
+                return connection;
+              } catch (ex: any) {
+                error = ex;
+              }
             }
           }
         }
-      }
 
-      // If you try to connect very quickly after postgres boots (e.g. intesting environments)
-      // you can get an error of "Connection terminated unexpectedly". For this reason, we retry
-      // all possible connections for up to 2 seconds
-    } while (Date.now() - start < 2000);
-    throw error;
-  });
+        // If you try to connect very quickly after postgres boots (e.g. intesting environments)
+        // you can get an error of "Connection terminated unexpectedly". For this reason, we retry
+        // all possible connections for up to 2 seconds
+      } while (Date.now() - start < 2000);
+      throw error;
+    },
+  );
 
   const getConnection = async (): Promise<PgDriver> => {
     const firstClient = await precondition.callPrecondition();

@@ -18,8 +18,7 @@ const mysqlFormat: FormatConfig = {
 };
 
 export default class MySqlDriver
-  implements Driver<TransactionOptions, QueryStreamOptions>
-{
+  implements Driver<TransactionOptions, QueryStreamOptions> {
   public readonly acquireLockTimeoutMilliseconds: number;
   public readonly client: MySqlClient;
   private readonly _handlers: EventHandlers;
@@ -40,7 +39,7 @@ export default class MySqlDriver
   private _removeFromPool: undefined | (() => void);
   private _idleErrorEventHandler: undefined | ((err: Error) => void);
   private readonly _onIdleError = (err: Error) => {
-    if (this._disposed) {
+    if (this._endCalled) {
       return;
     }
     this.client.removeListener('error', this._onIdleError);
@@ -71,20 +70,22 @@ export default class MySqlDriver
       this.client.on('error', this._onIdleError);
       this.client.destroy();
     }
+    await this._disposed;
   }
 
   async canRecycleConnectionAfterError(_err: Error) {
     try {
       let timeout: any | undefined;
-      const result: undefined | {1?: {rows?: {0?: {result?: number}}}} =
-        await Promise.race([
-          this.client.query(
-            'BEGIN TRANSACTION READ ONLY;SELECT 1 AS result;COMMIT;',
-          ) as any,
-          new Promise((r) => {
-            timeout = setTimeout(r, 100);
-          }),
-        ]);
+      const result:
+        | undefined
+        | {1?: {rows?: {0?: {result?: number}}}} = await Promise.race([
+        this.client.query(
+          'BEGIN TRANSACTION READ ONLY;SELECT 1 AS result;COMMIT;',
+        ) as any,
+        new Promise((r) => {
+          timeout = setTimeout(r, 100);
+        }),
+      ]);
       if (timeout !== undefined) {
         clearTimeout(timeout);
       }
@@ -232,7 +233,7 @@ export default class MySqlDriver
 async function execute(client: MySqlClient, query: string): Promise<void> {
   try {
     await client.query(query);
-  } catch (ex) {
+  } catch (ex: any) {
     throw Object.assign(new Error(ex.message), ex);
   }
 }

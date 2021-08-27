@@ -16,14 +16,16 @@ import {
   txInternal,
 } from './utils';
 
-type TransactionOptions<TDriver extends Driver<any, any>> =
-  TDriver extends Driver<infer TTransactionOptions, any>
-    ? TTransactionOptions
-    : unknown;
-type QueryStreamOptions<TDriver extends Driver<any, any>> =
-  TDriver extends Driver<any, infer TQueryStreamOptions>
-    ? TQueryStreamOptions
-    : unknown;
+type TransactionOptions<
+  TDriver extends Driver<any, any>
+> = TDriver extends Driver<infer TTransactionOptions, any>
+  ? TTransactionOptions
+  : unknown;
+type QueryStreamOptions<
+  TDriver extends Driver<any, any>
+> = TDriver extends Driver<any, infer TQueryStreamOptions>
+  ? TQueryStreamOptions
+  : unknown;
 
 const returnFalse = () => false;
 
@@ -31,7 +33,7 @@ export {PoolOptions};
 export default class BaseConnectionPool<
   TConnection extends Disposable,
   TTransaction extends Disposable,
-  TDriver extends Driver<any, any>,
+  TDriver extends Driver<any, any>
 > {
   public readonly type = QueryableType.ConnectionPool;
 
@@ -57,7 +59,7 @@ export default class BaseConnectionPool<
       releasing = true;
       driver.release();
       return result;
-    } catch (ex) {
+    } catch (ex: any) {
       if (releasing) {
         throw ex;
       }

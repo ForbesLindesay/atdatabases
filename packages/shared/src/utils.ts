@@ -62,7 +62,7 @@ export async function taskInternal<
   TConnection extends Disposable,
   TTransactionOptions,
   TDriver extends Driver<TTransactionOptions, any>,
-  TResult,
+  TResult
 >(
   driver: TDriver,
   factories: ConnectionFactory<TDriver, TConnection>,
@@ -79,7 +79,7 @@ export async function txInternal<
   TTransaction extends Disposable,
   TTransactionOptions,
   TDriver extends Driver<TTransactionOptions, any>,
-  TResult,
+  TResult
 >(
   driver: TDriver,
   factories: TransactionFactory<TDriver, TTransaction>,
@@ -100,7 +100,7 @@ export async function txInternal<
       result = await fn(tx);
       await tx.dispose();
       await driver.commitTransaction();
-    } catch (ex) {
+    } catch (ex: any) {
       await tx.dispose();
       await driver.rollbackTransaction();
       if (

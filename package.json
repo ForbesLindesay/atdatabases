@@ -10,6 +10,7 @@
     "postinstall": "node scripts/postinstall",
     "prebuild": "wsrun --stages --exclude-missing -x @databases/website build",
     "build": "tsc --build scripts",
+    "build:watch": "yarn build --watch",
     "prerelease": "yarn build:all",
     "prettier:check": "prettier --list-different \"packages/*/src/**/*.{ts,tsx}\"",
     "prettier:write": "prettier --write \"packages/*/src/**/*.{ts,tsx}\"",
