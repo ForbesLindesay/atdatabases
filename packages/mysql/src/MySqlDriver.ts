@@ -24,16 +24,12 @@ export default class MySqlDriver
   public readonly client: MySqlClient;
   private readonly _handlers: EventHandlers;
   private _endCalled = false;
-  private readonly _disposed: Promise<void>;
   constructor(
     client: MySqlClient,
     handlers: EventHandlers,
     acquireLockTimeoutMilliseconds: number,
   ) {
     this.acquireLockTimeoutMilliseconds = acquireLockTimeoutMilliseconds;
-    this._disposed = new Promise<void>((resolve) => {
-      client.on('end', resolve);
-    });
     this.client = client;
     this._handlers = handlers;
   }
@@ -71,7 +67,6 @@ export default class MySqlDriver
       this.client.on('error', this._onIdleError);
       this.client.destroy();
     }
-    await this._disposed;
   }
 
   async canRecycleConnectionAfterError(_err: Error) {
