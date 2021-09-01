@@ -56,7 +56,7 @@ async function writeIfDifferent(filename: string, content: string) {
     if (currentContent === formatted) {
       return;
     }
-  } catch (ex) {
+  } catch (ex: any) {
     if (ex.code !== 'ENOENT') throw ex;
   }
   if (process.env.CI) {
@@ -98,7 +98,7 @@ async function writeJsonIfDifferent(
     if (currentContent === formatted) {
       return;
     }
-  } catch (ex) {
+  } catch (ex: any) {
     if (ex.code !== 'ENOENT') throw ex;
   }
   if (process.env.CI) {

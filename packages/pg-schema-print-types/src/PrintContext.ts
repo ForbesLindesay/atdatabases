@@ -68,9 +68,7 @@ class FileContent {
     return this._defaultName;
   }
 
-  private _getImportState(
-    file: FileName,
-  ): {
+  private _getImportState(file: FileName): {
     getImport: (fileExport: FileExport) => string;
   } {
     if (file === this.file) {

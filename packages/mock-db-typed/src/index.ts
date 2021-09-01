@@ -5,7 +5,7 @@ export interface SelectQuery<TRecord> {
   orderByAsc(key: keyof TRecord): OrderedSelectQuery<TRecord>;
   orderByDesc(key: keyof TRecord): OrderedSelectQuery<TRecord>;
   select<
-    TKeys extends readonly [keyof TRecord, ...(readonly (keyof TRecord)[])]
+    TKeys extends readonly [keyof TRecord, ...(readonly (keyof TRecord)[])],
   >(
     ...fields: TKeys
   ): SelectQuery<Pick<TRecord, TKeys[number]>>;
@@ -130,7 +130,8 @@ export function greaterThan<T>(value: T) {
 }
 
 class SelectQueryImplementation<TRecord>
-  implements OrderedSelectQuery<TRecord> {
+  implements OrderedSelectQuery<TRecord>
+{
   public readonly orderByQueries: SQLQuery[] = [];
   public limitCount: number | undefined;
   private _selectFields: SQLQuery | undefined;
@@ -180,7 +181,7 @@ class SelectQueryImplementation<TRecord>
   }
 
   public select<
-    TKeys extends readonly [keyof TRecord, ...(readonly (keyof TRecord)[])]
+    TKeys extends readonly [keyof TRecord, ...(readonly (keyof TRecord)[])],
   >(...fields: TKeys) {
     if (this._selectFields) {
       throw new Error('Cannot call select fields multiple times on one query');
@@ -446,9 +447,7 @@ export default function tables<TTables>(
     PropertyOf<TTables[TTableName], 'insert'>
   >;
 };
-export default function tables<TTables>(
-  options?: PgTypedOptions,
-): {
+export default function tables<TTables>(options?: PgTypedOptions): {
   [TTableName in keyof TTables]: (
     connectionOrTransaction: Queryable,
   ) => Table<

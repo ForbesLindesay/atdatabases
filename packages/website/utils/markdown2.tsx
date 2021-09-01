@@ -1,4 +1,4 @@
-import {Content, PhrasingContent} from 'mdast';
+import {Content, PhrasingContent, Image} from 'mdast';
 import fromMarkdown from 'mdast-util-from-markdown';
 import GithubSlugger from 'github-slugger';
 import {CodeTokenType} from '../components/CodeBlock';
@@ -76,7 +76,10 @@ async function prepareParent<TNode extends {children: readonly Content[]}>(
     ).flat(1),
   } as any;
 }
-async function prepare(node: Content, ctx: Context): Promise<Content> {
+async function prepare(
+  node: Content,
+  ctx: Context,
+): Promise<Content | (Image & {width: number; height: number})> {
   switch (node.type) {
     case 'code':
       return node;

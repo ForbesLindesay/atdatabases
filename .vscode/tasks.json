@@ -54,7 +54,7 @@
 		},
 		{
 			"type": "npm",
-			"script": "build",
+			"script": "build:watch",
 			"group": "build",
 			"label": "Build - TypeScript",
 			"detail": "Compile all TypeScript",

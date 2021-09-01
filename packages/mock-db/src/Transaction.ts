@@ -5,6 +5,7 @@ import MockDbDriver from './Driver';
 
 export default class Transaction
   extends BaseTransaction<Transaction, MockDbDriver>
-  implements ITransaction {
+  implements ITransaction
+{
   public readonly sql = sql;
 }

@@ -15,7 +15,9 @@ export default async function writeFiles(
 
   // delete files that would no longer be output
   await Promise.all(
-    (await promises.readdir(directory))
+    (
+      await promises.readdir(directory)
+    )
       .filter((e) => !filenames.has(e))
       .map((e) => join(directory, e))
       .map(async (e) => {
@@ -40,7 +42,7 @@ export default async function writeFiles(
         if (existingSource.includes(checksum)) {
           return;
         }
-      } catch (ex) {
+      } catch (ex: any) {
         if (ex.code !== 'ENOENT') {
           throw ex;
         }

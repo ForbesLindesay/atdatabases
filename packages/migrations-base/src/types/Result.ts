@@ -10,18 +10,21 @@ type Result<TSuccess, TError> =
   | {readonly ok: false; readonly reason: TError};
 
 export function ok(): {readonly ok: true; readonly value: void};
-export function ok<TSuccess>(
-  value: TSuccess,
-): {readonly ok: true; readonly value: TSuccess};
-export function ok<TSuccess>(
-  value?: TSuccess,
-): {readonly ok: true; readonly value?: TSuccess} {
+export function ok<TSuccess>(value: TSuccess): {
+  readonly ok: true;
+  readonly value: TSuccess;
+};
+export function ok<TSuccess>(value?: TSuccess): {
+  readonly ok: true;
+  readonly value?: TSuccess;
+} {
   return {ok: true, value};
 }
 
-export function fail<TError>(
-  reason: TError,
-): {readonly ok: false; readonly reason: TError} {
+export function fail<TError>(reason: TError): {
+  readonly ok: false;
+  readonly reason: TError;
+} {
   return {ok: false, reason};
 }
 

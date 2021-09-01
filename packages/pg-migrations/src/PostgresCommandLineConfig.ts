@@ -13,10 +13,8 @@ import PostgresDatabaseEngine, {
 } from './PostgresDatabaseEngine';
 import assertIsDirectory from './assertIsDirectory';
 
-const {
-  connectionStringEnvironmentVariable,
-  migrationsDirectory,
-} = getPgConfigSync();
+const {connectionStringEnvironmentVariable, migrationsDirectory} =
+  getPgConfigSync();
 
 export interface Parameters extends MigrationsConfig {
   database: string;

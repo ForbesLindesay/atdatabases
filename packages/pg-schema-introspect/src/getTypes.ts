@@ -110,75 +110,73 @@ export default async function getTypes(
   `)) as TypeRecord[];
 
   return Promise.all(
-    typeRecords.map(
-      async (tr): Promise<Type> => {
-        const base: TypeBase = {
-          schemaID: tr.schemaID,
-          schemaName: tr.schemaName,
-          typeID: tr.typeID,
-          typeName: tr.typeName,
-          kind: tr.kind,
-          category: tr.category,
-          comment: tr.comment,
-        };
-        switch (base.kind) {
-          case TypeKind.Array:
-          case TypeKind.Base:
-            if (tr.category === TypeCateogry.Array) {
-              return {
-                ...base,
-                kind: TypeKind.Array,
-                subtypeID: tr.subtypeID!,
-                subtypeName: tr.subtypeName!,
-              };
-            } else {
-              return {
-                ...base,
-                kind: TypeKind.Base,
-                subtypeID: tr.subtypeID,
-                subtypeName: tr.subtypeName,
-              };
-            }
-          case TypeKind.Composite:
+    typeRecords.map(async (tr): Promise<Type> => {
+      const base: TypeBase = {
+        schemaID: tr.schemaID,
+        schemaName: tr.schemaName,
+        typeID: tr.typeID,
+        typeName: tr.typeName,
+        kind: tr.kind,
+        category: tr.category,
+        comment: tr.comment,
+      };
+      switch (base.kind) {
+        case TypeKind.Array:
+        case TypeKind.Base:
+          if (tr.category === TypeCateogry.Array) {
             return {
               ...base,
-              kind: TypeKind.Composite,
+              kind: TypeKind.Array,
+              subtypeID: tr.subtypeID!,
+              subtypeName: tr.subtypeName!,
+            };
+          } else {
+            return {
+              ...base,
+              kind: TypeKind.Base,
+              subtypeID: tr.subtypeID,
+              subtypeName: tr.subtypeName,
+            };
+          }
+        case TypeKind.Composite:
+          return {
+            ...base,
+            kind: TypeKind.Composite,
+            classID: tr.classID!,
+            attributes: await getAttributes(connection, {
               classID: tr.classID!,
-              attributes: await getAttributes(connection, {
-                classID: tr.classID!,
-              }),
-            };
-          case TypeKind.Domain:
-            return {
-              ...base,
-              kind: TypeKind.Domain,
-              basetypeID: tr.basetypeID!,
-              basetypeName: tr.basetypeName!,
-            };
-          case TypeKind.Enum:
-            return {
-              ...base,
-              kind: TypeKind.Enum,
-              values: (
-                await getEnumValues(connection, {
-                  typeID: tr.typeID,
-                })
-              ).map((v) => v.value),
-            };
-          case TypeKind.Pseudo:
-            return {
-              ...base,
-              kind: TypeKind.Pseudo,
-            };
-          default:
-            const kind: never = base.kind;
-            return {
-              ...base,
-              kind,
-            };
-        }
-      },
-    ),
+            }),
+          };
+        case TypeKind.Domain:
+          return {
+            ...base,
+            kind: TypeKind.Domain,
+            basetypeID: tr.basetypeID!,
+            basetypeName: tr.basetypeName!,
+          };
+        case TypeKind.Enum:
+          return {
+            ...base,
+            kind: TypeKind.Enum,
+            values: (
+              await getEnumValues(connection, {
+                typeID: tr.typeID,
+              })
+            ).map((v) => v.value),
+          };
+        case TypeKind.Pseudo:
+          return {
+            ...base,
+            kind: TypeKind.Pseudo,
+          };
+        default:
+          const kind: never = base.kind;
+          return {
+            ...base,
+            kind,
+          };
+      }
+    }),
   );
 }
 

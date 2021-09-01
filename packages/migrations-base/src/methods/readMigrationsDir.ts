@@ -17,31 +17,31 @@ export default async function readMigrationsDir(
 
   const migrations = (
     await Promise.all(
-      (await migrationsDirectory.listFiles()).map(
-        async (fileName): Promise<MigrationFile | null> => {
-          if (fileName[0] === '_') return null;
+      (
+        await migrationsDirectory.listFiles()
+      ).map(async (fileName): Promise<MigrationFile | null> => {
+        if (fileName[0] === '_') return null;
 
-          if (
-            IGNORED_EXTENSIONS.some((e) => fileName.endsWith(e)) ||
-            !INCLUDED_EXTENSIONS.some((e) => fileName.endsWith(e))
-          ) {
-            return null;
-          }
-          const match = /^(\d+)\-/.exec(fileName);
-          if (!match) {
-            invalidFilenames.push(fileName);
-            return null;
-          }
-          const index = parseInt(match[1], 10);
-          const src = await migrationsDirectory.read(fileName);
+        if (
+          IGNORED_EXTENSIONS.some((e) => fileName.endsWith(e)) ||
+          !INCLUDED_EXTENSIONS.some((e) => fileName.endsWith(e))
+        ) {
+          return null;
+        }
+        const match = /^(\d+)\-/.exec(fileName);
+        if (!match) {
+          invalidFilenames.push(fileName);
+          return null;
+        }
+        const index = parseInt(match[1], 10);
+        const src = await migrationsDirectory.read(fileName);
 
-          return {
-            index,
-            name: fileName,
-            script: src,
-          };
-        },
-      ),
+        return {
+          index,
+          name: fileName,
+          script: src,
+        };
+      }),
     )
   ).filter(notNull);
 

@@ -15,7 +15,7 @@ test('error messages', async function testErrorMessages() {
       WHERE id = ${'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'}
       INER JOIN bar ON bar.id=foo.bar_id;
     `);
-  } catch (ex) {
+  } catch (ex: any) {
     expect(ex).toHaveProperty('severity', 'ERROR');
     expect(ex).toHaveProperty('code', '42601');
     expect(ex).toHaveProperty('position', '33');
@@ -48,7 +48,7 @@ test('non sql error messages in a transaction', async function testErrorMessages
       await new Promise<void>((resolve) => setTimeout(resolve, 1000));
       throw new Error('Some Error');
     });
-  } catch (ex) {
+  } catch (ex: any) {
     expect(ex.message).toBe('Some Error');
 
     if (!process.version.startsWith('v12.')) {
@@ -70,7 +70,7 @@ test('error messages in a transaction', async function testErrorMessages() {
         INER JOIN bar ON bar.id=foo.bar_id;
       `);
     });
-  } catch (ex) {
+  } catch (ex: any) {
     expect(ex).toHaveProperty('severity', 'ERROR');
     expect(ex).toHaveProperty('code', '42601');
     expect(ex).toHaveProperty('position', '33');

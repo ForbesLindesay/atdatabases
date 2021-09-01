@@ -24,7 +24,8 @@ interface MockDatabase {
 }
 
 export default class MockDbDriver
-  implements Driver<TransactionOptions, QueryStreamOptions> {
+  implements Driver<TransactionOptions, QueryStreamOptions>
+{
   public readonly acquireLockTimeoutMilliseconds: number;
   public readonly client: MockDatabase;
   private readonly _handlers: EventHandlers;
@@ -126,7 +127,7 @@ export default class MockDbDriver
 async function execute(client: MockDatabase, query: string): Promise<void> {
   try {
     client.exec(query, []);
-  } catch (ex) {
+  } catch (ex: any) {
     throw Object.assign(new Error(ex.message), ex);
   }
 }

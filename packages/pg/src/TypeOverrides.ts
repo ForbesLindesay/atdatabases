@@ -204,9 +204,8 @@ export function parseComposite(value: string): string[] {
   return values;
 }
 
-const parseStringArray: (
-  value: string,
-) => (string | null)[] = types.getTypeParser(PgDataTypeID._text);
+const parseStringArray: (value: string) => (string | null)[] =
+  types.getTypeParser(PgDataTypeID._text);
 
 export function parseArray<T>(
   value: string,

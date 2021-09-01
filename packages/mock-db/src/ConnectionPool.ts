@@ -37,7 +37,7 @@ const getConnectionPoolOptions = ({
         if (handlers.onConnectionClosed) {
           handlers.onConnectionClosed();
         }
-      } catch (ex) {
+      } catch (ex: any) {
         console.warn(ex.message);
       }
     },
@@ -46,7 +46,8 @@ const getConnectionPoolOptions = ({
 
 export default class ConnectionPool
   extends BaseConnectionPool<Connection, Transaction, MockDbDriver>
-  implements IConnectionPool {
+  implements IConnectionPool
+{
   public readonly sql = sql;
   constructor(options: MockDbOptions) {
     super(getConnectionPoolOptions(options), factories);

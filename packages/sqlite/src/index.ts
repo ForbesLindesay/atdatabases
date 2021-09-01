@@ -201,9 +201,8 @@ async function* runQueryStream(
   database: sqlite.Database,
   lock: <T>(fn: () => Promise<T>) => Promise<T>,
 ): AsyncIterableIterator<any> {
-  const queue: Queue<
-    {done: false; value: any} | {done: true; err: any}
-  > = new Queue();
+  const queue: Queue<{done: false; value: any} | {done: true; err: any}> =
+    new Queue();
   const {text, values} = query.format(sqliteFormat);
   lock(async () => {
     await new Promise<void>((releaseMutex) => {

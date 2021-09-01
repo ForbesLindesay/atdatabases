@@ -310,7 +310,8 @@ export default function createConnectionPool(
       : {}),
     ...(idleInTransactionSessionTimeoutMilliseconds
       ? {
-          idle_in_transaction_session_timeout: idleInTransactionSessionTimeoutMilliseconds,
+          idle_in_transaction_session_timeout:
+            idleInTransactionSessionTimeoutMilliseconds,
         }
       : {}),
     application_name:

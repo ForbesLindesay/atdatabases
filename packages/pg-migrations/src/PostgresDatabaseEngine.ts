@@ -25,7 +25,8 @@ export interface MigrationsConfig {
 
 export type Migration = (tx: Transaction) => Promise<void>;
 export default class PostgresDatabaseEngine
-  implements DatabaseEngine<Migration> {
+  implements DatabaseEngine<Migration>
+{
   private readonly _connection: ConnectionPool;
   private readonly _config: MigrationsConfig;
   public readonly directory: IDirectoryContext<Migration>;

@@ -78,9 +78,8 @@ function getTableMetadata(options: CreateTableOptions): TableMetadata {
           materializedView: {
             query: options.query,
             enableRefresh: options.enableRefresh,
-            refreshIntervalMs: options.refreshIntervalMilliseconds?.toString(
-              10,
-            ),
+            refreshIntervalMs:
+              options.refreshIntervalMilliseconds?.toString(10),
           },
         },
         options.partition,

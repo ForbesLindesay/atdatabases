@@ -7,7 +7,8 @@ import QueryStreamOptions from './types/QueryStreamOptions';
 
 export default class Transaction
   extends BaseTransaction<Transaction, MySqlDriver>
-  implements ITransaction {
+  implements ITransaction
+{
   public readonly sql = sql;
   queryNodeStream(query: SQLQuery, options?: QueryStreamOptions): Readable {
     return this._driver.queryNodeStream(query, options);

@@ -80,7 +80,7 @@ const getConnectionPoolOptions = (
         if (handlers.onConnectionClosed) {
           handlers.onConnectionClosed();
         }
-      } catch (ex) {
+      } catch (ex: any) {
         console.warn(ex.message);
       }
     },
@@ -95,7 +95,8 @@ const getConnectionPoolOptions = (
 
 export default class ConnectionPool
   extends BaseConnectionPool<Connection, Transaction, MySqlDriver>
-  implements IConnectionPool {
+  implements IConnectionPool
+{
   public readonly sql = sql;
   constructor(
     srcConfig: MySqlConnectionOptions,

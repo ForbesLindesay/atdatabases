@@ -17,7 +17,7 @@ test('error messages', async () => {
       SELECT * FRM 'baz;
       SELECT * FROM bing;
     `);
-  } catch (ex) {
+  } catch (ex: any) {
     expect(ex.message).toMatchInlineSnapshot(`
       "You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near:
 

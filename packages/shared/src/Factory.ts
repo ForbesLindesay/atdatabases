@@ -17,6 +17,6 @@ export interface ConnectionFactory<TDriver, TConnection extends Disposable> {
 export default interface Factory<
   TDriver,
   TConnection extends Disposable,
-  TTransaction extends Disposable
+  TTransaction extends Disposable,
 > extends ConnectionFactory<TDriver, TConnection>,
     TransactionFactory<TDriver, TTransaction> {}
