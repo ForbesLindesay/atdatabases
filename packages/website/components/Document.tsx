@@ -245,7 +245,7 @@ function DocumentLink({node}: {node: m.Link}) {
   return (
     <a
       tw="text-red-700 hover:underline hover:text-red-900 focus-visible:outline-none rounded-sm focus-visible:ring-2 focus-visible:ring-offset-4 focus-visible:ring-gray-400"
-      title={node.title}
+      title={node.title ?? undefined}
       href={node.url}
     >
       <DocumentChildren>{node}</DocumentChildren>

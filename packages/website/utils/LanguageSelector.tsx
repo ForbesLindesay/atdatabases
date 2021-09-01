@@ -30,7 +30,7 @@ export function useLanguagePreference() {
         }
       }
     } catch (ex) {
-      console.error(ex.stack);
+      console.error((ex as Error).stack);
       // ignore error
     }
     return () => {
