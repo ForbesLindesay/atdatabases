@@ -208,7 +208,7 @@ function DocumentImage({
     <img
       tw="rounded shadow-sm"
       src={node.url}
-      alt={node.alt}
+      alt={node.alt ?? undefined}
       width={node.width}
       height={node.height}
     />
