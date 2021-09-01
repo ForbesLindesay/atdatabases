@@ -95,7 +95,8 @@ const getConnectionPoolOptions = (
 
 export default class ConnectionPool
   extends BaseConnectionPool<Connection, Transaction, MySqlDriver>
-  implements IConnectionPool {
+  implements IConnectionPool
+{
   public readonly sql = sql;
   constructor(
     srcConfig: MySqlConnectionOptions,
