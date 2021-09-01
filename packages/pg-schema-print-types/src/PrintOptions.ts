@@ -26,6 +26,18 @@ function parseTemplate(str: string) {
           throw new Error(`Unrecognized variable ${variable} in ${str}`);
         }
         return filters.reduce((value, filter) => {
+          if (filter.startsWith(`replace`)) {
+            const parts = filter.split(` `);
+            if (parts.length !== 3 || parts[0] !== 'replace') {
+              throw new Error(
+                `Unrecognized filter in type generation config, "${filter}". Replace filters should be in the format {{ variable | replace "some-regex" "some-string" }}: ${str}`,
+              );
+            }
+            return `${value}`.replace(
+              new RegExp(JSON.parse(parts[1]), `g`),
+              JSON.parse(parts[2]),
+            );
+          }
           switch (filter) {
             case 'pascal-case':
               return pascalcase(value);
