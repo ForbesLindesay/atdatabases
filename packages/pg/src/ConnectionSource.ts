@@ -64,7 +64,7 @@ export default function createConnectionSource(
           if (
             options.ssl &&
             ssl?.allowFallback &&
-            /the server does not support ssl connections/i.test(error!.message)
+            /the server does not support ssl connections/i.test(error.message)
           ) {
             // The Postgres server does not support SSL and our sslmode is "prefer"
             // (which is the default). In this case we immediately retry without
