@@ -232,6 +232,6 @@ test('use a default connection', async () => {
   expect(() =>
     unconnectedUsers(undefined as any),
   ).toThrowErrorMatchingInlineSnapshot(
-    `"You must either provide a \\"defaultConnection\\" to pg-typed, or specify a connection when accessing the table."`,
+    `"You must either provide a \\"defaultConnection\\" to pg-typed, or specify a list of connections when accessing the table."`,
   );
 });

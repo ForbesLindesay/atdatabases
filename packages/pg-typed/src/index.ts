@@ -218,19 +218,35 @@ class SelectQueryImplementation<TRecord>
 }
 
 class Table<TRecord, TInsertParameters> {
+  private readonly _connections: Queryable[];
   private readonly _tableID: SQLQuery;
   private readonly _value: (columnName: string, value: any) => unknown;
+
   constructor(
-    private readonly _underlyingDb: Queryable,
+    connections: Queryable | Queryable[],
     tableName: SQLQuery,
     serializeValue: (columnName: string, value: unknown) => unknown,
   ) {
+    this._connections = Array.isArray(connections)
+      ? connections
+      : [connections];
     this._tableID = tableName;
     this._value = (c, v) => serializeValue(c, v);
   }
 
+  private _connection(writeable: boolean): Queryable {
+    if (writeable || this._connections.length === 1) {
+      return this._connections[0];
+    }
+
+    // We skip the first connection, which is the connection to the primary node
+    return this._connections[
+      1 + Math.floor(Math.random() * (this._connections.length - 1))
+    ];
+  }
+
   private _rowToWhere(row: WhereCondition<TRecord>) {
-    const {sql} = this._underlyingDb;
+    const {sql} = this._connection(true);
     const entries = Object.entries(row).filter((row) => row[1] !== undefined);
     if (entries.length === 0) {
       return sql``;
@@ -250,7 +266,7 @@ class Table<TRecord, TInsertParameters> {
     ...rows: TRecordsToInsert
   ): Promise<TRecord[]> {
     if (rows.length === 0) return [];
-    const {sql} = this._underlyingDb;
+    const {sql} = this._connection(true);
 
     const columnNamesSet = new Set<keyof TRecordsToInsert[number]>();
     for (const row of rows) {
@@ -275,7 +291,7 @@ class Table<TRecord, TInsertParameters> {
         )})`,
     );
 
-    const results = await this._underlyingDb.query(
+    const results = await this._connection(true).query(
       onConflict
         ? sql`INSERT INTO ${
             this._tableID
@@ -299,7 +315,7 @@ class Table<TRecord, TInsertParameters> {
     conflictKeys: [keyof TRecord, ...(keyof TRecord)[]],
     ...rows: TRecordsToInsert
   ): Promise<{[key in keyof TRecordsToInsert]: TRecord}> {
-    const {sql} = this._underlyingDb;
+    const {sql} = this._connection(true);
     return this._insert(
       (columnNames) =>
         sql`ON CONFLICT (${sql.join(
@@ -318,7 +334,7 @@ class Table<TRecord, TInsertParameters> {
   async insertOrIgnore<TRecordsToInsert extends readonly TInsertParameters[]>(
     ...rows: TRecordsToInsert
   ): Promise<TRecord[]> {
-    const {sql} = this._underlyingDb;
+    const {sql} = this._connection(true);
     return await this._insert(() => sql`ON CONFLICT DO NOTHING`, ...rows);
   }
 
@@ -326,7 +342,7 @@ class Table<TRecord, TInsertParameters> {
     whereValues: WhereCondition<TRecord>,
     updateValues: Partial<TRecord>,
   ): Promise<TRecord[]> {
-    const {sql} = this._underlyingDb;
+    const {sql} = this._connection(true);
     const where = this._rowToWhere(whereValues);
     const setClause = sql.join(
       Object.entries(updateValues).map(([columnName, value]) => {
@@ -343,7 +359,7 @@ class Table<TRecord, TInsertParameters> {
   }
 
   async delete(whereValues: WhereCondition<TRecord>): Promise<void> {
-    const {sql} = this._underlyingDb;
+    const {sql} = this._connection(true);
     const where = this._rowToWhere(whereValues);
     await this.untypedQuery(sql`DELETE FROM ${this._tableID} ${where}`);
   }
@@ -355,13 +371,14 @@ class Table<TRecord, TInsertParameters> {
     return this.find(whereValues);
   }
   find(whereValues: WhereCondition<TRecord> = {}): SelectQuery<TRecord> {
-    const {sql} = this._underlyingDb;
+    const connection = this._connection(false);
+    const {sql} = connection;
     const where = this._rowToWhere(whereValues);
     return new SelectQueryImplementation(
       sql,
       this._tableID,
       where,
-      async (query) => await this._underlyingDb.query(query),
+      async (query) => await connection.query(query),
     );
   }
 
@@ -388,16 +405,17 @@ class Table<TRecord, TInsertParameters> {
   }
 
   async count(whereValues: WhereCondition<TRecord> = {}): Promise<number> {
-    const {sql} = this._underlyingDb;
+    const connection = this._connection(false);
+    const {sql} = connection;
     const where = this._rowToWhere(whereValues);
-    const [result] = await this._underlyingDb.query(
+    const [result] = await connection.query(
       sql`SELECT count(*) AS count FROM ${this._tableID} ${where}`,
     );
     return parseInt(result.count, 10);
   }
 
   async untypedQuery(query: SQLQuery): Promise<TRecord[]> {
-    return await this._underlyingDb.query(query);
+    return await this._connection(true).query(query);
   }
 }
 
@@ -408,18 +426,19 @@ function getTable<TRecord, TInsertParameters>(
   serializeValue: (columnName: string, value: unknown) => unknown,
 ) {
   return (
-    queryable: Queryable | undefined = defaultConnection,
+    connections: Queryable | Queryable[] | undefined = defaultConnection,
   ): Table<TRecord, TInsertParameters> => {
-    if (!queryable) {
+    if (!connections || (Array.isArray(connections) && !connections.length)) {
       throw new Error(
-        'You must either provide a "defaultConnection" to pg-typed, or specify a connection when accessing the table.',
+        'You must either provide a "defaultConnection" to pg-typed, or specify a list of connections when accessing the table.',
       );
     }
+
+    const {sql} = Array.isArray(connections) ? connections[0] : connections;
+
     return new Table<TRecord, TInsertParameters>(
-      queryable,
-      schemaName
-        ? queryable.sql.ident(schemaName, tableName)
-        : queryable.sql.ident(tableName),
+      connections,
+      schemaName ? sql.ident(schemaName, tableName) : sql.ident(tableName),
       serializeValue,
     );
   };
@@ -444,7 +463,7 @@ export default function tables<TTables>(
   options: PgTypedOptionsWithDefaultConnection,
 ): {
   [TTableName in keyof TTables]: (
-    connectionOrTransaction?: Queryable,
+    connectionsOrTransactions?: Queryable | Queryable[],
   ) => Table<
     PropertyOf<TTables[TTableName], 'record'>,
     PropertyOf<TTables[TTableName], 'insert'>
@@ -452,7 +471,7 @@ export default function tables<TTables>(
 };
 export default function tables<TTables>(options?: PgTypedOptions): {
   [TTableName in keyof TTables]: (
-    connectionOrTransaction: Queryable,
+    connectionsOrTransactions?: Queryable | Queryable[],
   ) => Table<
     PropertyOf<TTables[TTableName], 'record'>,
     PropertyOf<TTables[TTableName], 'insert'>
@@ -462,7 +481,7 @@ export default function tables<TTables>(
   options: Partial<PgTypedOptionsWithDefaultConnection> = {},
 ): {
   [TTableName in keyof TTables]: (
-    connectionOrTransaction?: Queryable,
+    connectionsOrTransactions?: Queryable | Queryable[],
   ) => Table<
     PropertyOf<TTables[TTableName], 'record'>,
     PropertyOf<TTables[TTableName], 'insert'>

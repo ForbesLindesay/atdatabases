@@ -39,6 +39,32 @@ module.exports = {users, posts};
 
 ## Table
 
+### initializer
+
+The objects returned by the `tables` function are initialized with an optional argument represeting the connection(s) for the queries.
+
+The initializer argument can be a single `ConnectionPool`, `Connection` or `Transaction`.
+
+The initializer argument can also be an array of the same types. If an array is sent, then the first value in the array is treated as the primary connection and is being used only for write queries, while the rest of the connections are used only for read queries. This is useful in a PostgreSQL cluster with primary and read replicas.
+
+```typescript
+import db, {users} from './database';
+
+export async function initialize() {
+  // both queries are run on the same connection
+  await users(db).find().all();
+  await users(db).insert({email: `alice@example.com`, favorite_color: `blue`});
+
+  // read queries are run on the replica connection(s)
+  await users([primary, replica]).find().all();
+  // write queries are run on the primary connection
+  await users([primary, replica]).insert({
+    email: `alice@example.com`,
+    favorite_color: `blue`,
+  });
+}
+```
+
 ### insert(...records)
 
 Inserts records into the database table. If you pass multiple records to `insert`, they will all be added "atomically", i.e. either all of the records will be added, or none of them will be added.
