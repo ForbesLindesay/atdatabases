@@ -121,6 +121,14 @@ export default interface PoolOptions<T> {
 
   onTimeoutClosingConnection?: () => void;
   onErrorClosingConnection?: (err: Error) => void;
+
+  isConnectionLimitError?: (err: Error) => void;
+  /**
+   * How long to wait before retrying on a connection limit error.
+   *
+   * @default 5_000
+   */
+  connectionLimitBackoffMilliseconds?: number;
 }
 
 export class PoolOptionsObject<T> {
@@ -132,7 +140,7 @@ export class PoolOptionsObject<T> {
    *
    * @default Infinity
    */
-  readonly maxSize: number;
+  maxSize: number;
 
   /**
    * The maximum number of times a connection can be returned
@@ -171,6 +179,13 @@ export class PoolOptionsObject<T> {
    */
   readonly queueTimeoutMilliseconds: number;
 
+  /**
+   * How long to wait before retrying on a connection limit error.
+   *
+   * @default 5_000
+   */
+  readonly connectionLimitBackoffMilliseconds: number;
+
   private readonly _openConnectionTimeoutMilliseconds: number;
   private readonly _closeConnectionTimeoutMilliseconds: number;
 
@@ -195,6 +210,8 @@ export class PoolOptionsObject<T> {
       options.closeConnectionTimeoutMilliseconds,
       60_000,
     );
+    this.connectionLimitBackoffMilliseconds =
+      options.connectionLimitBackoffMilliseconds || 5_000;
 
     if (
       this._options.releaseTimeoutMilliseconds !== undefined &&
@@ -266,5 +283,16 @@ export class PoolOptionsObject<T> {
     )
       .then(this._onConnectionClosed, this._onConnectionError)
       .catch(globalError);
+  }
+
+  public isConnectionLimitError(err: Error) {
+    try {
+      return this._options.isConnectionLimitError
+        ? this._options.isConnectionLimitError(err)
+        : false;
+    } catch (ex: any) {
+      globalError(ex);
+      return false;
+    }
   }
 }

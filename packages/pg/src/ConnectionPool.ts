@@ -15,6 +15,7 @@ import EventHandlers from './types/EventHandlers';
 import PgDriver from './Driver';
 import createConnectionSource, {PgOptions} from './ConnectionSource';
 import definePrecondition from './definePrecondition';
+import {SQLErrorCode} from '@databases/pg-errors';
 
 const factories: Factory<PgDriver, Connection, Transaction> = {
   createTransaction(driver, transactionParentContext) {
@@ -30,7 +31,7 @@ const getConnectionPoolOptions = (
   schema: string | string[] | undefined,
   poolOptions: Omit<
     PoolOptions<PgDriver>,
-    'openConnection' | 'closeConnection'
+    'openConnection' | 'closeConnection' | 'isConnectionLimitError'
   >,
   handlers: EventHandlers,
   onError: (err: Error) => void,
@@ -50,6 +51,13 @@ const getConnectionPoolOptions = (
 
   return {
     ...poolOptions,
+    isConnectionLimitError: (err: any) => {
+      if (err.code === SQLErrorCode.TOO_MANY_CONNECTIONS) {
+        onError(err);
+        return true;
+      }
+      return false;
+    },
     openConnection: async (removeFromPool) => {
       const driver = await src();
       try {

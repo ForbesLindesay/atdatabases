@@ -1,6 +1,8 @@
 import Queue from '@databases/queue';
 import defer from './utils/defer';
 import {
+  ConnectionLimitExceeded,
+  connectionLimitExceeded,
   doubleReleaseError,
   openTimeout,
   queueTimeoutError,
@@ -87,7 +89,7 @@ class ConnectionPoolState<T> implements ConnectionPool<T> {
     IIdlePoolRecord<T> | IDisposedPoolRecord<T>
   >();
   private readonly _waiters = new Queue<
-    Waiter<IActivePoolRecord<T> | IIdlePoolRecord<T>>
+    Waiter<IActivePoolRecord<T> | IIdlePoolRecord<T> | ConnectionLimitExceeded>
   >();
 
   private readonly _drained: Promise<void>;
@@ -127,7 +129,9 @@ class ConnectionPoolState<T> implements ConnectionPool<T> {
     if (!this._options.maxSize) return true;
     return this._totalConnectionsCount < this._options.maxSize;
   }
-  private async _openConnection(): Promise<IIdlePoolRecord<T>> {
+  private async _openConnection(): Promise<
+    IIdlePoolRecord<T> | ConnectionLimitExceeded
+  > {
     const [destroyed, destroy] = defer<void>();
     this._increaseTotalConnectionsCount();
     return RESOLVED_PROMISE.then(() => this._options.openConnection(destroy))
@@ -147,6 +151,22 @@ class ConnectionPoolState<T> implements ConnectionPool<T> {
         return record;
       })
       .catch((err) => {
+        if (
+          this._totalConnectionsCount > 1 &&
+          this._options.isConnectionLimitError(err)
+        ) {
+          this._totalConnectionsCount--;
+          const maxSizeReduction =
+            this._options.maxSize - this._totalConnectionsCount;
+          this._options.maxSize -= maxSizeReduction;
+          setTimeout(() => {
+            this._totalConnectionsCount++;
+            this._options.maxSize += maxSizeReduction;
+            this._decreaseTotalConnectionsCount();
+            return connectionLimitExceeded;
+          }, this._options.connectionLimitBackoffMilliseconds);
+          return connectionLimitExceeded;
+        }
         this._decreaseTotalConnectionsCount();
         throw err;
       });
@@ -210,7 +230,9 @@ class ConnectionPoolState<T> implements ConnectionPool<T> {
   }
 
   private _getNextWaiter():
-    | Waiter<IActivePoolRecord<T> | IIdlePoolRecord<T>>
+    | Waiter<
+        IActivePoolRecord<T> | IIdlePoolRecord<T> | ConnectionLimitExceeded
+      >
     | undefined {
     while (true) {
       const record = this._waiters.shift();
@@ -233,12 +255,18 @@ class ConnectionPoolState<T> implements ConnectionPool<T> {
       (this._canOpenConnection()
         ? await this._openConnection()
         : await new Promise<
-            IActivePoolRecord<T> | IIdlePoolRecord<T> | Timeout
+            | IActivePoolRecord<T>
+            | IIdlePoolRecord<T>
+            | ConnectionLimitExceeded
+            | Timeout
           >((resolve) => {
             this._waiters.push(
               new Waiter(resolve, this._options.queueTimeoutMilliseconds),
             );
           }));
+    if (record === connectionLimitExceeded) {
+      return await this.getConnection();
+    }
 
     if (isTimeout(record)) {
       throw queueTimeoutError();
