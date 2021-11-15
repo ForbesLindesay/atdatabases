@@ -1,4 +1,4 @@
-import connect, {sql} from '@databases/pg';
+import connect, {pgFormat, sql} from '@databases/pg';
 import Schema from './__generated__';
 import tables from '..';
 
@@ -28,6 +28,18 @@ test('create schema', async () => {
         metadata JSONB NOT NULL
       );
     `,
+  );
+});
+
+test('attributes', () => {
+  expect(users(db).tableName).toBe('users');
+  expect(users(db).tableId.format(pgFormat).text).toBe(
+    '"typed_queries_tests"."users"',
+  );
+
+  expect(photos(db).tableName).toBe('photos');
+  expect(photos(db).tableId.format(pgFormat).text).toBe(
+    '"typed_queries_tests"."photos"',
   );
 });
 
@@ -194,6 +206,21 @@ test('create users', async () => {
       },
     ]
   `);
+});
+
+test('uses tableId in custom queries', async () => {
+  const result = await db.query(sql`
+    SELECT p.cdn_url, u.screen_name FROM ${photos(db).tableId} AS p
+    JOIN ${users(db).tableId} AS u
+    ON p.owner_user_id = u.id
+  `);
+
+  // Based on the data inserted in the previous test
+  expect(result).toHaveLength(3);
+  expect(result).toContainEqual({
+    cdn_url: 'http://example.com/1',
+    screen_name: 'Forbes',
+  });
 });
 
 test('use a default connection', async () => {

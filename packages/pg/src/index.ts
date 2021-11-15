@@ -21,6 +21,7 @@ import Queryable, {
 import TypeOverrides, {TypeOverridesConfig} from './TypeOverrides';
 import EventHandlers from './types/EventHandlers';
 import {PgOptions} from './ConnectionSource';
+import pgFormat from './format';
 
 const {connectionStringEnvironmentVariable} = getPgConfigSync();
 
@@ -33,6 +34,7 @@ export type {
   ConnectionPool,
 };
 export {
+  pgFormat,
   sql,
   isSqlQuery,
   isSQLError,
@@ -410,6 +412,7 @@ function getSSLConfig(
 
 module.exports = Object.assign(createConnectionPool, {
   default: createConnectionPool,
+  pgFormat,
   sql,
   isSqlQuery,
   isSQLError,

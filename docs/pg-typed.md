@@ -220,6 +220,37 @@ export async function deleteUsers(emails: string[]) {
 }
 ```
 
+### tableId
+
+Returns the table name of the table, including the schema if provided, as a `SQLQuery`.
+
+Useful to build complex SQL queries using JOINs, which currently can't be expressed using the `Table` methods.
+
+```typescript
+import db, {users} from './database';
+
+export async function selectWithJoin() {
+  const result = await db.query(sql`
+    SELECT *
+    FROM ${photos(db).tableId} AS p
+    JOIN ${users(db).tableId} AS u
+    ON p.owner_user_id = u.id
+  `);
+}
+```
+
+### tableName
+
+Returns only the table name of the table, without any schema, as a string.
+
+Useful to build complex SQL queries using JOINs, which currently can't be expressed using the `Table` methods.
+
+```typescript
+import db, {users} from './database';
+
+users(db).tableName; // 'users'
+```
+
 ## SelectQuery
 
 A `SelectQuery` is a query for records within a table. The actual query is sent when you call one of the methods that returns a `Promise`, i.e. `all()`, `first()` or `limit(count)`.
