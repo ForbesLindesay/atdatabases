@@ -430,7 +430,7 @@ function getTable<TRecord, TInsertParameters>(
   ): Table<TRecord, TInsertParameters> => {
     if (!connections || (Array.isArray(connections) && !connections.length)) {
       throw new Error(
-        'You must either provide a "defaultConnection" to pg-typed, or specify a list of connections when accessing the table.',
+        'You must either provide a "defaultConnection" to pg-typed, or specify a connection when accessing the table.',
       );
     }
 
