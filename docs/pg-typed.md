@@ -45,7 +45,7 @@ The objects returned by the `tables` function are initialized with an optional a
 
 The initializer argument can be a single `ConnectionPool`, `Connection` or `Transaction`.
 
-The initializer argument can also be an array of the same types. If an array is sent, then the first value in the array is treated as the primary connection and is being used only for write queries, while the rest of the connections are used only for read queries. This is useful in a PostgreSQL cluster with primary and read replicas.
+The initializer argument can also be an array of the same types. If an array is sent, then the first value in the array is treated as the primary connection and is only used for write queries, while the rest of the connections are used for read queries. This is useful in a PostgreSQL cluster with primary and read replicas.
 
 ```typescript
 import db, {users} from './database';
