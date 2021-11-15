@@ -40,3 +40,12 @@ export function attemptHook<TArgs extends any[]>(
     return ex as Error;
   }
 }
+
+export const connectionLimitExceeded = Symbol('CONNECTION_LIMIT_EXCEEDED');
+export type ConnectionLimitExceeded = typeof connectionLimitExceeded;
+
+export function isConnectionLimitExceeded<T>(
+  value: T | ConnectionLimitExceeded,
+): value is ConnectionLimitExceeded {
+  return value === connectionLimitExceeded;
+}
