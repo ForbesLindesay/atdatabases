@@ -1,4 +1,4 @@
-import type {sql, SQLQuery, Queryable} from '@databases/pg';
+import {sql, SQLQuery, Queryable} from '@databases/pg';
 
 export interface SelectQuery<TRecord> {
   all(): Promise<TRecord[]>;
@@ -218,14 +218,13 @@ class SelectQueryImplementation<TRecord>
 }
 
 class Table<TRecord, TInsertParameters> {
-  private readonly _tableID: SQLQuery;
   private readonly _value: (columnName: string, value: any) => unknown;
   constructor(
     private readonly _underlyingDb: Queryable,
-    tableName: SQLQuery,
+    public readonly tableId: SQLQuery,
+    public readonly tableName: string,
     serializeValue: (columnName: string, value: unknown) => unknown,
   ) {
-    this._tableID = tableName;
     this._value = (c, v) => serializeValue(c, v);
   }
 
@@ -277,14 +276,14 @@ class Table<TRecord, TInsertParameters> {
 
     const results = await this._underlyingDb.query(
       onConflict
-        ? sql`INSERT INTO ${
-            this._tableID
-          } (${columnNamesSql}) VALUES ${sql.join(values, `,`)} ${onConflict(
-            columnNames,
-          )} RETURNING *`
-        : sql`INSERT INTO ${
-            this._tableID
-          } (${columnNamesSql}) VALUES ${sql.join(values, `,`)} RETURNING *`,
+        ? sql`INSERT INTO ${this.tableId} (${columnNamesSql}) VALUES ${sql.join(
+            values,
+            `,`,
+          )} ${onConflict(columnNames)} RETURNING *`
+        : sql`INSERT INTO ${this.tableId} (${columnNamesSql}) VALUES ${sql.join(
+            values,
+            `,`,
+          )} RETURNING *`,
     );
     return results;
   }
@@ -338,14 +337,14 @@ class Table<TRecord, TInsertParameters> {
       sql`, `,
     );
     return await this.untypedQuery(
-      sql`UPDATE ${this._tableID} SET ${setClause} ${where} RETURNING *`,
+      sql`UPDATE ${this.tableId} SET ${setClause} ${where} RETURNING *`,
     );
   }
 
   async delete(whereValues: WhereCondition<TRecord>): Promise<void> {
     const {sql} = this._underlyingDb;
     const where = this._rowToWhere(whereValues);
-    await this.untypedQuery(sql`DELETE FROM ${this._tableID} ${where}`);
+    await this.untypedQuery(sql`DELETE FROM ${this.tableId} ${where}`);
   }
 
   /**
@@ -359,7 +358,7 @@ class Table<TRecord, TInsertParameters> {
     const where = this._rowToWhere(whereValues);
     return new SelectQueryImplementation(
       sql,
-      this._tableID,
+      this.tableId,
       where,
       async (query) => await this._underlyingDb.query(query),
     );
@@ -391,7 +390,7 @@ class Table<TRecord, TInsertParameters> {
     const {sql} = this._underlyingDb;
     const where = this._rowToWhere(whereValues);
     const [result] = await this._underlyingDb.query(
-      sql`SELECT count(*) AS count FROM ${this._tableID} ${where}`,
+      sql`SELECT count(*) AS count FROM ${this.tableId} ${where}`,
     );
     return parseInt(result.count, 10);
   }
@@ -420,6 +419,7 @@ function getTable<TRecord, TInsertParameters>(
       schemaName
         ? queryable.sql.ident(schemaName, tableName)
         : queryable.sql.ident(tableName),
+      tableName,
       serializeValue,
     );
   };

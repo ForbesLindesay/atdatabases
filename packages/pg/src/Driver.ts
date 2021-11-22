@@ -1,22 +1,17 @@
 /* tslint:disable:no-void-expression */
 
 import {Readable} from 'stream';
-import {escapePostgresIdentifier} from '@databases/escape-identifier';
 import {isSQLError, SQLErrorCode} from '@databases/pg-errors';
-import {SQLQuery, FormatConfig, isSqlQuery} from '@databases/sql';
+import {SQLQuery, isSqlQuery} from '@databases/sql';
 import {Driver} from '@databases/shared';
 import PgClient from './types/PgClient';
 import {isolationLevelToString} from './types/IsolationLevel';
 import TransactionOptions from './types/TransactionOptions';
 import EventHandlers from './types/EventHandlers';
 import QueryStreamOptions from './types/QueryStreamOptions';
+import pgFormat from './format';
 const {codeFrameColumns} = require('@babel/code-frame');
 const Cursor = require('pg-cursor');
-
-const pgFormat: FormatConfig = {
-  escapeIdentifier: (str) => escapePostgresIdentifier(str),
-  formatValue: (value, index) => ({placeholder: `$${index + 1}`, value}),
-};
 
 type QueryResult = {rows: any[]};
 
