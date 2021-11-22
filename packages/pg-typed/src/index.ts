@@ -289,7 +289,7 @@ class Table<TRecord, TInsertParameters> {
     return results;
   }
 
-  insert<TRecordsToInsert extends readonly TInsertParameters[]>(
+  async insert<TRecordsToInsert extends readonly TInsertParameters[]>(
     ...rows: keyof TRecordsToInsert[number] extends keyof TInsertParameters
       ? TRecordsToInsert
       : readonly ({[key in keyof TInsertParameters]: TInsertParameters[key]} &
