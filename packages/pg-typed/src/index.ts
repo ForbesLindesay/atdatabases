@@ -289,15 +289,35 @@ class Table<TRecord, TInsertParameters> {
   }
 
   async insert<TRecordsToInsert extends readonly TInsertParameters[]>(
-    ...rows: TRecordsToInsert
-  ): Promise<{[key in keyof TRecordsToInsert]: TRecord}> {
+    ...rows: keyof TRecordsToInsert[number] extends keyof TInsertParameters
+      ? TRecordsToInsert
+      : readonly ({[key in keyof TInsertParameters]: TInsertParameters[key]} &
+          {
+            [key in Exclude<
+              keyof TRecordsToInsert[number],
+              keyof TInsertParameters
+            >]: never;
+          })[]
+  ): Promise<
+    {
+      -readonly [key in keyof TRecordsToInsert]: TRecord;
+    }
+  > {
     return this._insert(null, ...rows) as any;
   }
 
   async insertOrUpdate<TRecordsToInsert extends readonly TInsertParameters[]>(
     conflictKeys: [keyof TRecord, ...(keyof TRecord)[]],
-    ...rows: TRecordsToInsert
-  ): Promise<{[key in keyof TRecordsToInsert]: TRecord}> {
+    ...rows: keyof TRecordsToInsert[number] extends keyof TInsertParameters
+      ? TRecordsToInsert
+      : readonly ({[key in keyof TInsertParameters]: TInsertParameters[key]} &
+          {
+            [key in Exclude<
+              keyof TRecordsToInsert[number],
+              keyof TInsertParameters
+            >]: never;
+          })[]
+  ): Promise<{-readonly [key in keyof TRecordsToInsert]: TRecord}> {
     const {sql} = this._underlyingDb;
     return this._insert(
       (columnNames) =>
@@ -315,7 +335,15 @@ class Table<TRecord, TInsertParameters> {
   }
 
   async insertOrIgnore<TRecordsToInsert extends readonly TInsertParameters[]>(
-    ...rows: TRecordsToInsert
+    ...rows: keyof TRecordsToInsert[number] extends keyof TInsertParameters
+      ? TRecordsToInsert
+      : readonly ({[key in keyof TInsertParameters]: TInsertParameters[key]} &
+          {
+            [key in Exclude<
+              keyof TRecordsToInsert[number],
+              keyof TInsertParameters
+            >]: never;
+          })[]
   ): Promise<TRecord[]> {
     const {sql} = this._underlyingDb;
     return await this._insert(() => sql`ON CONFLICT DO NOTHING`, ...rows);

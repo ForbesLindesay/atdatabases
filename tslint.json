@@ -89,7 +89,7 @@
       true,
       "allow-fast-null-checks"
     ],
-    "no-use-before-declare": true,
+    "no-use-before-declare": false,
     "no-var-keyword": true,
     "no-void-expression": [
       true,
@@ -103,7 +103,7 @@
       "allow-null-check"
     ],
     "use-isnan": true,
-    "deprecation": true,
+    "deprecation": false,
     "no-duplicate-imports": true,
     "no-mergeable-namespace": true,
     "prefer-const": true,
