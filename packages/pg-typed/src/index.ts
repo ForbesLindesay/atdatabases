@@ -243,16 +243,16 @@ class Table<TRecord, TInsertParameters> {
     )}`;
   }
 
-  private async _insert<TRecordsToInsert extends readonly TInsertParameters[]>(
+  private async _insert(
     onConflict:
       | null
-      | ((columnNames: Array<keyof TRecordsToInsert[number]>) => SQLQuery),
-    ...rows: TRecordsToInsert
+      | ((columnNames: Array<keyof TInsertParameters>) => SQLQuery),
+    ...rows: readonly TInsertParameters[]
   ): Promise<TRecord[]> {
     if (rows.length === 0) return [];
     const {sql} = this._underlyingDb;
 
-    const columnNamesSet = new Set<keyof TRecordsToInsert[number]>();
+    const columnNamesSet = new Set<keyof TInsertParameters>();
     for (const row of rows) {
       for (const columnName of Object.keys(row)) {
         columnNamesSet.add(columnName as keyof typeof row);
@@ -289,16 +289,14 @@ class Table<TRecord, TInsertParameters> {
     return results;
   }
 
-  async insert<TRecordsToInsert extends readonly TInsertParameters[]>(
-    ...rows: TRecordsToInsert
-  ): Promise<{[key in keyof TRecordsToInsert]: TRecord}> {
-    return this._insert(null, ...rows) as any;
+  async insert(...rows: readonly TInsertParameters[]): Promise<TRecord[]> {
+    return this._insert(null, ...rows);
   }
 
-  async insertOrUpdate<TRecordsToInsert extends readonly TInsertParameters[]>(
+  async insertOrUpdate(
     conflictKeys: [keyof TRecord, ...(keyof TRecord)[]],
-    ...rows: TRecordsToInsert
-  ): Promise<{[key in keyof TRecordsToInsert]: TRecord}> {
+    ...rows: readonly TInsertParameters[]
+  ): Promise<TRecord[]> {
     const {sql} = this._underlyingDb;
     return this._insert(
       (columnNames) =>
@@ -312,11 +310,11 @@ class Table<TRecord, TInsertParameters> {
           sql`, `,
         )}`,
       ...rows,
-    ) as any;
+    );
   }
 
-  async insertOrIgnore<TRecordsToInsert extends readonly TInsertParameters[]>(
-    ...rows: TRecordsToInsert
+  async insertOrIgnore(
+    ...rows: readonly TInsertParameters[]
   ): Promise<TRecord[]> {
     const {sql} = this._underlyingDb;
     return await this._insert(() => sql`ON CONFLICT DO NOTHING`, ...rows);
