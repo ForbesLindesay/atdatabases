@@ -11,6 +11,7 @@
     {"path": "../packages/mock-db-typed"},
     {"path": "../packages/mysql"},
     {"path": "../packages/mysql-config"},
+    {"path": "../packages/mysql-schema-introspect"},
     {"path": "../packages/mysql-test"},
     {"path": "../packages/pg"},
     {"path": "../packages/pg-config"},
