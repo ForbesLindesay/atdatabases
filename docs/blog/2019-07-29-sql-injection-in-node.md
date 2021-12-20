@@ -11,7 +11,7 @@ SQL Injection remains one of the most prevalent and easily exploitable security 
 
 <!--truncate-->
 
-# What's the big deal?
+## What's the big deal?
 
 The problem with SQL is that it mixes code with data. Consider the following statement:
 
@@ -58,7 +58,7 @@ INSERT INTO posts (body, username)
 VALUES ("@[[[I am stupid", "someone_else") --]]]@", "my_username")
 ```
 
-# Separating Code From Data
+## Separating Code From Data
 
 If the problem is that SQL combines code with data, the solution is to separate the code from the data. To continue with the example from before, we could have written our JavaScript function as:
 
@@ -89,7 +89,7 @@ along with the values:
 
 This is totally safe. If you can be disciplined about writing your queries this way, your code will be secure.
 
-# Why @databases
+## Why @databases
 
 There are a few downsides to the approach above that I wanted to fix with @databases:
 
@@ -117,7 +117,7 @@ VALUES (?, ?)
 
 along with the values for `body` and `username`. The great thing about using `@databases` consistently is that `@databases` will throw an exception if you try to pass it anything that's not been tagged as `sql` so you can't accidentally pass it a string (and neither can your team mates). If you're using TypeScript, you even get a type error at build time if you forget to tag your SQL statements. You can use `@databases` with Postgres, MySQL, SQLite and WebSQL.
 
-# Alternatives
+## Alternatives
 
 There are a couple of alternative approaches:
 
