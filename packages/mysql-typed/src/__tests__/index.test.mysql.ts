@@ -157,7 +157,18 @@ test('create users', async () => {
       u.screen_name,
       u.bio,
     ]),
-  ).toMatchInlineSnapshot();
+  ).toMatchInlineSnapshot(`
+    Array [
+      Array [
+        "Ellie",
+        null,
+      ],
+      Array [
+        "Forbes",
+        null,
+      ],
+    ]
+  `);
 
   await photos(db).update(
     {cdn_url: 'http://example.com/3'},
