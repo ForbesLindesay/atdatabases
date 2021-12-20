@@ -151,26 +151,18 @@ function getColumnTypeInternal(column: {
       };
 
     case DataType.decimal:
-      if (
-        typeof column.numeric_precision !== 'number' ||
-        column.numeric_precision !== (column.numeric_precision | 0)
-      ) {
+      const match = /^decimal\((\d+),(\d+)\)/.exec(column.column_type);
+      if (!match) {
         throw new Error(
-          `Missing column.numeric_precision for ${
-            column.data_type
-          }: ${JSON.stringify(column)}`,
+          `Missing precision for ${column.data_type}: ${JSON.stringify(
+            column,
+          )}`,
         );
-      }
-      if (
-        typeof column.numeric_scale !== 'number' ||
-        column.numeric_scale !== (column.numeric_scale | 0)
-      ) {
-        throw new Error(`Missing column.numeric_scale for ${column.data_type}`);
       }
       return {
         kind: column.data_type,
-        digits: column.numeric_precision,
-        decimals: column.numeric_scale,
+        digits: parseInt(match[1], 10),
+        decimals: parseInt(match[2], 10),
       };
     case DataType.enum:
       return {
