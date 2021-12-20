@@ -19,7 +19,9 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>@databases</title>
+        <title>
+          @databases · Query SQL Databases using Node.js and TypeScript
+        </title>
         <link rel="canonical" href={`https://www.atdatabases.org`} />
         <meta
           name="description"

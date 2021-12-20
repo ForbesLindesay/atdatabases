@@ -8,7 +8,7 @@ export default function Users() {
   return (
     <>
       <Head>
-        <title>@databases - users</title>
+        <title>Thank You</title>
       </Head>
       <Background>
         <NavBar>
