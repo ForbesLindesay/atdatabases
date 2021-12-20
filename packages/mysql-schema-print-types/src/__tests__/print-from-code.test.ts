@@ -1,37 +1,33 @@
-import {ClassKind, Schema} from '@databases/pg-schema-introspect';
-import PgPrintContext from '../PgPrintContext';
-import getTypeScriptType from '../getTypeScriptType';
-import PrintOptions from '../PgPrintOptions';
+import {Schema, TableType} from '@databases/mysql-schema-introspect';
 import printSchema from '../printers/printSchema';
+import MySqlPrintOptions from '../MySqlPrintOptions';
+import {PrintContext} from '@databases/shared-print-types';
 
 test('replace filter', async () => {
   const schema: Schema = {
-    types: [],
-    classes: [
+    tables: [
       {
-        schemaID: 42,
         schemaName: `my_schema`,
-        classID: 10,
-        className: `my_table_my_name`,
-        kind: ClassKind.OrdinaryTable,
-        comment: null,
-        attributes: [],
+        tableType: TableType.BaseTable,
+        tableName: `my_table_my_name`,
+        comment: ``,
+        columns: [],
         constraints: [],
       },
     ],
   };
-  const printContext = new PgPrintContext(
-    getTypeScriptType,
-    schema,
-    new PrintOptions({
+  const options = new MySqlPrintOptions(
+    {
       tableTypeName:
         '{{ TABLE_NAME | replace "my_" "" | singular | pascal-case }}',
       tableInsertParametersTypeName:
         '{{ TABLE_NAME | replace "^my_" "" | singular | pascal-case }}Insert',
-    }),
+    },
+    schema,
   );
-  printSchema(schema, printContext);
-  expect(printContext.printer.getFiles()).toMatchInlineSnapshot(`
+  const printContext = new PrintContext(options);
+  printSchema(schema, printContext, options);
+  expect(printContext.getFiles()).toMatchInlineSnapshot(`
     Array [
       Object {
         "content": "import TableName, {TableMyNameInsert} from './my_table_my_name'

@@ -1,11 +1,11 @@
 import {relative, dirname} from 'path';
-import {Schema, ClassDetails, Type} from '@databases/pg-schema-introspect';
-import PrintOptions from './PrintOptions';
+import PrintOptions, {
+  isDefaultExportCandidate,
+  resolveExportName,
+  resolveFilename,
+} from './PrintOptions';
 import FileName from './FileName';
-import TypeID, {DEFAULT_EXPORT_PRIORITY} from './TypeID';
-import DefaultTypeScriptMapping from './DefaultTypeScriptMapping';
 import IdentifierName from './IdentifierName';
-import PgDataTypeID from '@databases/pg-data-type-id';
 
 export interface FileContext {
   // asExport: (declaration: string[]) => string[];
@@ -47,13 +47,13 @@ class ImportState {
   }
 }
 
-class FileContent {
+class FileContent<TypeID> {
   public readonly file: FileName;
-  private readonly _options: PrintOptions;
+  private readonly _options: PrintOptions<TypeID>;
   private readonly _imports = new Map<FileName, ImportState>();
   private readonly _declarationNames = new Set<string>();
   private readonly _declarations: (() => string[])[] = [];
-  constructor(file: FileName, options: PrintOptions) {
+  constructor(file: FileName, options: PrintOptions<TypeID>) {
     this.file = file;
     this._options = options;
   }
@@ -62,7 +62,7 @@ class FileContent {
   private getDefaultName(): IdentifierName | null {
     if (this._defaultName === undefined) {
       this._defaultName = this._defaultCandidate
-        ? this._options.resolveExportName(this._defaultCandidate)
+        ? resolveExportName(this._defaultCandidate, this._options)
         : null;
     }
     return this._defaultName;
@@ -92,18 +92,19 @@ class FileContent {
     mode: 'type' | 'value',
     declaration: (identifier: IdentifierName, imp: FileContext) => string[],
   ): FileExport {
-    const identifierName = this._options.resolveExportName(typeID);
+    const identifierName = resolveExportName(typeID, this._options);
     if (!this._declarationNames.has(identifierName)) {
       if (
         this._defaultName === undefined &&
-        this._options.isDefaultExportCandidate(typeID)
+        isDefaultExportCandidate(typeID, this._options)
       ) {
         if (this._defaultCandidate === undefined) {
           this._defaultCandidate = typeID;
         } else {
-          const oldWeight =
-            DEFAULT_EXPORT_PRIORITY[this._defaultCandidate.type];
-          const newWeight = DEFAULT_EXPORT_PRIORITY[typeID.type];
+          const oldWeight = this._options.getExportPriority(
+            this._defaultCandidate,
+          );
+          const newWeight = this._options.getExportPriority(typeID);
           if (oldWeight === newWeight) {
             this._defaultName = null;
           } else if (oldWeight > newWeight) {
@@ -154,95 +155,40 @@ class FileContent {
   }
 }
 
-export default class PrintContext {
-  private readonly _files = new Map<FileName, FileContent>();
-  private readonly _classes: Map<number, ClassDetails>;
-  private readonly _types: Map<number, Type>;
+export default class PrintContext<TypeID> {
+  private readonly _files = new Map<FileName, FileContent<TypeID>>();
 
-  private readonly _getTypeScriptType: (
-    type: Type,
-    context: PrintContext,
-    file: FileContext,
-  ) => string;
-
-  public readonly options: PrintOptions;
-  constructor(
-    getTypeScriptType: (
-      type: Type,
-      context: PrintContext,
-      file: FileContext,
-    ) => string,
-    schema: Schema,
-    options: PrintOptions,
-    overrides: Map<string, string> = new Map(),
-  ) {
-    this._getTypeScriptType = getTypeScriptType;
-
-    this._classes = new Map(schema.classes.map((c) => [c.classID, c]));
-    this._types = new Map(schema.types.map((t) => [t.typeID, t]));
-
+  public readonly options: PrintOptions<TypeID>;
+  constructor(options: PrintOptions<TypeID>) {
     this.options = options;
   }
 
-  public getClass(id: number) {
-    return this._classes.get(id);
-  }
-
-  private _getTypeOverride(type: Type): string | null {
-    return (
-      this.options.typeOverrides[`${type.schemaName}.${type.typeName}`] ??
-      this.options.typeOverrides[`${type.typeName}`] ??
-      null
-    );
-  }
-
-  public getTypeScriptType(id: number, file: FileContext): string {
-    const override = this.options.typeOverrides[id];
-    if (override !== undefined) {
-      return override;
-    }
-    if (id in PgDataTypeID) {
-      const str = PgDataTypeID[id];
-      const override = this.options.typeOverrides[str];
-      if (override !== undefined) {
-        return override;
-      }
-    }
-    const builtin = DefaultTypeScriptMapping.get(id);
-    if (builtin) return builtin;
-    const type = this._types.get(id);
-    if (!type) return 'string';
-    return (
-      this._getTypeOverride(type) ?? this._getTypeScriptType(type, this, file)
-    );
-  }
-
   private _pushDeclaration(
-    fileID: TypeID,
+    id: TypeID,
     mode: 'type' | 'value',
     declaration: (identifier: IdentifierName, imp: FileContext) => string[],
   ): FileExport {
-    const file = this.options.resolveFilename(fileID);
+    const file = resolveFilename(id, this.options);
     const fileContent = mapGetOrSet(
       this._files,
       file,
       () => new FileContent(file, this.options),
     );
-    return fileContent.pushDeclaration(fileID, mode, declaration);
+    return fileContent.pushDeclaration(id, mode, declaration);
   }
 
   public pushTypeDeclaration(
-    fileID: TypeID,
+    id: TypeID,
     declaration: (identifier: IdentifierName, imp: FileContext) => string[],
   ): FileExport {
-    return this._pushDeclaration(fileID, 'type', declaration);
+    return this._pushDeclaration(id, 'type', declaration);
   }
 
   public pushValueDeclaration(
-    fileID: TypeID,
+    id: TypeID,
     declaration: (identifier: IdentifierName, imp: FileContext) => string[],
   ): FileExport {
-    return this._pushDeclaration(fileID, 'value', declaration);
+    return this._pushDeclaration(id, 'value', declaration);
   }
 
   public getFiles() {

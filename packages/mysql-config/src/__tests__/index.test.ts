@@ -1,4 +1,4 @@
-import {getMySqlConfigSync, _testReadMySqlConfigSync} from '..';
+import {DEFAULT_CONFIG, getMySqlConfigSync, _testReadMySqlConfigSync} from '..';
 
 test('get root config', () => {
   expect(getMySqlConfigSync()).toEqual({
@@ -12,6 +12,7 @@ test('get root config', () => {
       mySqlPassword: 'password',
       mySqlUser: 'test-user',
     },
+    types: DEFAULT_CONFIG.types,
   });
 });
 
@@ -27,6 +28,7 @@ test('valid config', () => {
       mySqlPassword: 'password',
       mySqlUser: 'test-user',
     },
+    types: DEFAULT_CONFIG.types,
   });
   expect(
     _testReadMySqlConfigSync(__dirname + '/fixtures/override.json'),
@@ -41,13 +43,14 @@ test('valid config', () => {
       mySqlPassword: 'password',
       mySqlUser: 'test-user',
     },
+    types: DEFAULT_CONFIG.types,
   });
 });
 
 test('invalid config', () => {
   expect(() => _testReadMySqlConfigSync(__dirname + '/fixtures/invalid.json'))
     .toThrowErrorMatchingInlineSnapshot(`
-    "Unable to assign {connectionStringEnvironmentVariable: 10} to { connectionStringEnvironmentVariable: string | undefined; test: TestConfig | undefined; }
+    "Unable to assign {connectionStringEnvironmentVariable: 10} to { connectionStringEnvironmentVariable: string | undefined; test: TestConfig | undefined; types: TypesConfig | undefined; }
       The types of \\"connectionStringEnvironmentVariable\\" are not compatible
         Unable to assign 10 to string | undefined
           Unable to assign 10 to string

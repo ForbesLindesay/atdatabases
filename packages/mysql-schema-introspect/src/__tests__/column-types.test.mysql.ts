@@ -1,5 +1,6 @@
 import connect, {sql} from '@databases/mysql';
 import {readFileSync, writeFileSync} from 'fs';
+import {DataType} from '..';
 import getColumns from '../getColumns';
 
 const db = connect({bigIntMode: 'number'});
@@ -81,7 +82,10 @@ test('column-types', async () => {
     SELECT DATA_TYPE as "data_type"
     FROM INFORMATION_SCHEMA.COLUMNS
   `);
-  const dataTypes = new Set(dataTypeRows.map((d: any): string => d.data_type));
+  const dataTypes = new Set([
+    ...dataTypeRows.map((d: any): string => d.data_type),
+    ...Object.values(DataType),
+  ]);
   const actualString = `enum DataType {\n${[...dataTypes]
     .sort()
     .map((dt) => `  ${dt} = '${dt}',`)

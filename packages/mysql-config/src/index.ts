@@ -20,3 +20,4 @@ function parseResult(result: cosmiconfig.CosmiconfigResult): MySqlConfig {
 }
 
 export default MySqlConfig;
+export const DEFAULT_CONFIG = MySqlConfigSchema.parse({});

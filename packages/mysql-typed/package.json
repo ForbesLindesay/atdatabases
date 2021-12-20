@@ -1,0 +1,26 @@
+{
+  "name": "@databases/mysql-typed",
+  "version": "0.0.0",
+  "description": "",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "dependencies": {},
+  "devDependencies": {
+    "@databases/mysql": "^0.0.0",
+    "@databases/mysql-schema-print-types": "^0.0.0"
+  },
+  "peerDependencies": {
+    "@databases/mysql": "*"
+  },
+  "scripts": {},
+  "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/pg-typed",
+  "bugs": "https://github.com/ForbesLindesay/atdatabases/issues",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "lib/"
+  ],
+  "homepage": "https://www.atdatabases.org/docs/pg-typed"
+}

@@ -19,6 +19,7 @@ const SimpleColumnTypeSchema = t.Named(
       t.Literal(DataType.double),
       t.Literal(DataType.float),
       t.Literal(DataType.geometry),
+      t.Literal(DataType.geomcollection),
       t.Literal(DataType.geometrycollection),
       t.Literal(DataType.int),
       t.Literal(DataType.json),
@@ -119,13 +120,6 @@ function getColumnTypeInternal(column: {
   numeric_scale: number;
 }): ColumnType {
   switch (column.data_type) {
-    case DataType.bigint:
-    case DataType.int:
-    case DataType.mediumint:
-    case DataType.smallint:
-    case DataType.tinyint:
-    case DataType.year:
-      return {kind: column.data_type};
     case DataType.binary:
     case DataType.char:
     case DataType.varbinary:
@@ -146,7 +140,9 @@ function getColumnTypeInternal(column: {
         column.numeric_precision !== (column.numeric_precision | 0)
       ) {
         throw new Error(
-          `Missing column.numeric_precision for ${column.data_type}`,
+          `Missing column.numeric_precision for ${
+            column.data_type
+          }: ${JSON.stringify(column)}`,
         );
       }
       return {
@@ -160,7 +156,9 @@ function getColumnTypeInternal(column: {
         column.numeric_precision !== (column.numeric_precision | 0)
       ) {
         throw new Error(
-          `Missing column.numeric_precision for ${column.data_type}`,
+          `Missing column.numeric_precision for ${
+            column.data_type
+          }: ${JSON.stringify(column)}`,
         );
       }
       if (
@@ -185,10 +183,17 @@ function getColumnTypeInternal(column: {
         values: parseValuesList(column.column_type.substring(`set`.length)),
       };
 
+    // case DataType.bigint:
+    // case DataType.int:
+    // case DataType.mediumint:
+    // case DataType.smallint:
+    // case DataType.tinyint:
+    // case DataType.year:
+    //   return {kind: column.data_type};
     default:
-      if (column.data_type !== column.column_type) {
-        throw new Error(`Unexpected column format: ${JSON.stringify(column)}`);
-      }
+      // if (column.data_type !== column.column_type) {
+      //   throw new Error(`Unexpected column format: ${JSON.stringify(column)}`);
+      // }
       return {kind: column.data_type};
   }
 }
