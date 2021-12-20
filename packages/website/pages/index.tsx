@@ -20,6 +20,32 @@ export default function Home() {
     <>
       <Head>
         <title>@databases</title>
+        <link rel="canonical" href={`https://www.atdatabases.org`} />
+        <meta
+          name="description"
+          content="Use SQL in node.js to read and write data to Postgres, MySQL, SQLite and other databases, with parameters automatically escaped to prevent SQL injection."
+        />
+        <meta property="og:site_name" content="@databases" />
+        <meta
+          property="og:title"
+          content="Query SQL Databases using Node.js and TypeScript"
+        />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={`https://www.atdatabases.org`} />
+        <meta
+          property="og:description"
+          content="Use SQL in node.js to read and write data to Postgres, MySQL, SQLite and others."
+        />
+        <meta
+          property="og:image"
+          content="https://www.atdatabases.org/favicon.png"
+        />
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:creator" content="@ForbesLindesay" />
+        <meta
+          name="twitter:image"
+          content="https://www.atdatabases.org/favicon.png"
+        />
       </Head>
       <Background>
         <NavBar>

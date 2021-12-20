@@ -16,7 +16,7 @@ export default function HeroUnit() {
       </h1>
       <p tw="mt-3 max-w-md mx-auto text-base text-gray-700 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
         @databases lets you read and write data to Postgres, MySQL, SQLite and
-        other databases in Node.js using ordinary SQL with parameters
+        other databases in Node.js using ordinary SQL, with parameters
         automatically escaped to prevent SQL injection.
       </p>
       <div tw="mt-5 max-w-md mx-auto sm:flex sm:justify-center md:mt-8">

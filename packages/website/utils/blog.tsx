@@ -4,6 +4,9 @@ import fm from 'front-matter';
 import {resolve} from 'path';
 
 export interface IBlogAttributes {
+  summary?: string;
+  ogSummary?: string;
+  googleSummary?: string;
   title: string;
   author?: string;
   authorURL?: string;

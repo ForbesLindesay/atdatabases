@@ -28,6 +28,9 @@ export interface IDocumentAttributes {
   id: string;
   title: string;
   sidebar_label?: string;
+  summary?: string;
+  ogSummary?: string;
+  googleSummary?: string;
 }
 export interface IDocument<TBody = string> extends IDocumentAttributes {
   filename: string;
@@ -71,20 +74,20 @@ async function getDocsUncached() {
     (sectionLabel): IDocumentationSection => ({
       type: 'section',
       label: sectionLabel,
-      elements: sidebars.docs[sectionLabel].map((group):
-        | IDocumentationLink
-        | IDocumentationGroup => {
-        if (typeof group === 'string') {
-          return resolveLink(group, [sectionLabel]);
-        }
-        return {
-          type: 'group',
-          label: group.label,
-          elements: group.ids.map((id) =>
-            resolveLink(id, [sectionLabel, group.label]),
-          ),
-        };
-      }),
+      elements: sidebars.docs[sectionLabel].map(
+        (group): IDocumentationLink | IDocumentationGroup => {
+          if (typeof group === 'string') {
+            return resolveLink(group, [sectionLabel]);
+          }
+          return {
+            type: 'group',
+            label: group.label,
+            elements: group.ids.map((id) =>
+              resolveLink(id, [sectionLabel, group.label]),
+            ),
+          };
+        },
+      ),
     }),
   );
   return {nav, docs};

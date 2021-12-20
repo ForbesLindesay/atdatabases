@@ -3,9 +3,11 @@ title: SQL Injection in Node.js
 author: Forbes Lindesay
 authorURL: http://twitter.com/ForbesLindesay
 authorTwitter: ForbesLindesay
+googleSummary: SQL Injection remains one of the most prevalent and easily exploitable security vulnerabilities in modern web applications. It doesn't have to be!
+ogSummary: SQL Injection shouldn't be your responsibility to prevent.
 ---
 
-SQL Injection remains one of the most prevalent and easily exploitable security vulnerabilities in modern web applications. It think a lot of that is that SQL libraries make it so easy to get this wrong, and it's not always obvious why it's such a big deal.
+SQL Injection remains one of the most prevalent and easily exploitable security vulnerabilities in modern web applications. The main reason for this is SQL libraries making it so easy to get this wrong.
 
 <!--truncate-->
 
