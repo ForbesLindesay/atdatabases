@@ -11,14 +11,17 @@ import NavBar from '../../components/NavBar';
 import Sidebar from '../../components/Sidebar/Sidebar';
 import {getDocs, IDocument, IDocumentationSection} from '../../utils/docs';
 import Document from '../../components/Document';
-import {parseMarkdown} from '../../utils/markdown2';
+import {parseMarkdown, printSummaryFromMarkdown} from '../../utils/markdown2';
 import DocumentTableOfContents from '../../components/DocumentTableOfContents';
 import Footer from '../../components/Footer';
 import {useRouter} from 'next/router';
 
 type Props = {
   nav: IDocumentationSection[];
-  doc?: IDocument<Root>;
+  doc?: IDocument<Root> & {
+    googleSummary: string;
+    ogSummary: string;
+  };
 };
 
 const Post = ({nav, doc}: Props) => {
@@ -59,10 +62,7 @@ const Post = ({nav, doc}: Props) => {
           rel="canonical"
           href={`https://www.atdatabases.org/docs/${doc.id}`}
         />
-        <meta
-          name="description"
-          content="Query SQL Databases using Node.js and TypeScript"
-        />
+        <meta name="description" content={doc.googleSummary} />
         <meta property="og:site_name" content="@databases" />
         <meta property="og:title" content={doc.title} />
         <meta property="og:type" content="website" />
@@ -70,10 +70,7 @@ const Post = ({nav, doc}: Props) => {
           property="og:url"
           content={`https://www.atdatabases.org/docs/${doc.id}`}
         />
-        <meta
-          property="og:description"
-          content="Query SQL Databases using Node.js and TypeScript"
-        />
+        <meta property="og:description" content={doc.ogSummary} />
         <meta
           property="og:image"
           content="https://www.atdatabases.org/favicon.png"
@@ -223,12 +220,18 @@ export async function getStaticProps({
     return {props: {nav}};
   }
 
+  const truncatedBody = await parseMarkdown(
+    doc.body.split(`<!--truncate-->`)[0],
+    doc.filename,
+  );
   return {
     props: {
       nav,
       doc: {
         ...doc,
         body: await parseMarkdown(doc.body, doc.filename),
+        googleSummary: printSummaryFromMarkdown(truncatedBody, 'google'),
+        ogSummary: printSummaryFromMarkdown(truncatedBody, 'og'),
       },
     },
   };

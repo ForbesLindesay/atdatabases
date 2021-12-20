@@ -1,4 +1,5 @@
-import {Content, PhrasingContent, Image} from 'mdast';
+import assertNever from 'assert-never';
+import {Content, PhrasingContent, Image, Root} from 'mdast';
 import fromMarkdown from 'mdast-util-from-markdown';
 import GithubSlugger from 'github-slugger';
 import {CodeTokenType} from '../components/CodeBlock';
@@ -19,6 +20,76 @@ export async function parseMarkdown(src: string, filename: string) {
     mdastExtensions: [tableExtension.fromMarkdown],
   });
   return await prepareParent(ast, {filename, slugger: new GithubSlugger()});
+}
+export function printSummaryFromMarkdown(node: Root, purpose: 'google' | 'og') {
+  const result: string[] = [];
+  for (const child of node.children) {
+    const currentLength = result.join(`\n\n`).length;
+    const nextString = printMarkdownElementAsString(child);
+    const newLength = currentLength + nextString.length + 2;
+    if (
+      (purpose === 'google'
+        ? newLength > 160 && currentLength > 50
+        : newLength > 55 && currentLength > 20) ||
+      child.type === 'heading'
+    ) {
+      break;
+    }
+    result.push(nextString);
+  }
+  return result.join(`\n\n`);
+}
+function printMarkdownElementAsString(
+  node:
+    | Content
+    | {
+        type: 'codeBlocks';
+        blocks: {
+          lang: string;
+          code: {
+            type: CodeTokenType;
+            value: string;
+          }[];
+        }[];
+      },
+): string {
+  switch (node.type) {
+    case 'code':
+    case 'text':
+    case 'inlineCode':
+      return node.value;
+    case 'paragraph':
+    case 'heading':
+    case 'link':
+    case 'linkReference':
+    case 'emphasis':
+    case 'strong':
+      return node.children.map((c) => printMarkdownElementAsString(c)).join(``);
+    case 'blockquote':
+    case 'list':
+      return node.children
+        .map((c) => printMarkdownElementAsString(c))
+        .join(`\n\n`);
+    case 'table':
+    case 'html':
+    case 'yaml':
+    case 'definition':
+    case 'footnoteDefinition':
+    case 'listItem':
+    case 'tableRow':
+    case 'tableCell':
+    case 'break':
+    case 'image':
+    case 'delete':
+    case 'footnote':
+    case 'codeBlocks':
+    case 'thematicBreak':
+    case 'imageReference':
+    case 'footnoteReference':
+      return ``;
+    default:
+      return assertNever(node);
+  }
 }
 async function prepareParent<TNode extends {children: readonly Content[]}>(
   node: TNode,

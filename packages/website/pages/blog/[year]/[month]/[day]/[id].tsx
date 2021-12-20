@@ -7,14 +7,17 @@ import {Root} from 'mdast';
 
 import NavBar from '../../../../../components/NavBar';
 import Document from '../../../../../components/Document';
-import {parseMarkdown} from '../../../../../utils/markdown2';
+import {
+  parseMarkdown,
+  printSummaryFromMarkdown,
+} from '../../../../../utils/markdown2';
 import DocumentTableOfContents from '../../../../../components/DocumentTableOfContents';
 import Footer from '../../../../../components/Footer';
 import {getBlogPosts, IBlogPost} from '../../../../../utils/blog';
 
 type Props = {
   recentPosts: IBlogPost[];
-  post?: IBlogPost<Root>;
+  post?: IBlogPost<Root> & {googleSummary: string; ogSummary: string};
 };
 
 const BlogPost = ({post: doc}: Props) => {
@@ -22,28 +25,20 @@ const BlogPost = ({post: doc}: Props) => {
     return <ErrorPage statusCode={404} />;
   }
 
-  const url = `https://www.atdatabases.org/blog/${
-    doc.year
-  }/${doc.month.toString(10).padStart(2, `0`)}/${doc.day
+  const url = `https://www.atdatabases.org/blog/${doc.year}/${doc.month
     .toString(10)
-    .padStart(2, `0`)}/${doc.id}`;
+    .padStart(2, `0`)}/${doc.day.toString(10).padStart(2, `0`)}/${doc.id}`;
   return (
     <>
       <Head>
         <title>{doc.title}</title>
         <link rel="canonical" href={url} />
-        <meta
-          name="description"
-          content="Query SQL Databases using Node.js and TypeScript"
-        />
+        <meta name="description" content={doc.googleSummary} />
         <meta property="og:site_name" content="@databases" />
         <meta property="og:title" content={doc.title} />
         <meta property="og:type" content="website" />
         <meta property="og:url" content={url} />
-        <meta
-          property="og:description"
-          content="Query SQL Databases using Node.js and TypeScript"
-        />
+        <meta property="og:description" content={doc.ogSummary} />
         <meta
           property="og:image"
           content="https://www.atdatabases.org/favicon.png"
@@ -133,12 +128,18 @@ export async function getStaticProps({
     return {props: {recentPosts: posts.slice(0, 20)}};
   }
 
+  const truncatedBody = await parseMarkdown(
+    post.body.split(`<!--truncate-->`)[0],
+    post.filename,
+  );
   return {
     props: {
       recentPosts: posts.slice(0, 20),
       post: {
         ...post,
         body: await parseMarkdown(post.body, post.filename),
+        googleSummary: printSummaryFromMarkdown(truncatedBody, 'google'),
+        ogSummary: printSummaryFromMarkdown(truncatedBody, 'og'),
       },
     },
   };
