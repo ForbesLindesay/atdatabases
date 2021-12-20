@@ -284,7 +284,7 @@ test('column-types', async () => {
         "schemaName": "test-db",
         "tableName": "column_types_test",
         "type": Object {
-          "kind": "geometrycollection",
+          "kind": "geomcollection",
         },
       },
       Object {
@@ -532,8 +532,8 @@ test('column-types', async () => {
       Object {
         "columnName": "val_timestamp",
         "comment": "",
-        "default": "CURRENT_TIMESTAMP",
-        "isNullable": false,
+        "default": null,
+        "isNullable": true,
         "isPrimaryKey": false,
         "ordinalPosition": 13,
         "schemaName": "test-db",

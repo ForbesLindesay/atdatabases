@@ -33,7 +33,17 @@ interface DatabaseSchema {
   typed_queries_tests_photos: {record: Photo; insert: Photos_InsertParameters};
   typed_queries_tests_users: {record: User; insert: Users_InsertParameters};
 }
-const tables = declareTables<DatabaseSchema>();
+const tables = declareTables<DatabaseSchema>({
+  serializeValue(tableName, columnName, value) {
+    if (
+      tableName === `typed_queries_tests_photos` &&
+      columnName === `metadata`
+    ) {
+      return JSON.stringify(value);
+    }
+    return value;
+  },
+});
 const users = tables.typed_queries_tests_users;
 const photos = tables.typed_queries_tests_photos;
 
@@ -112,6 +122,8 @@ test('create users', async () => {
   expect(await users(db).findOne({id: 2})).toEqual({
     id: 2,
     screen_name: 'Ellie',
+    age: null,
+    bio: null,
   });
 
   await photos(db).update(
