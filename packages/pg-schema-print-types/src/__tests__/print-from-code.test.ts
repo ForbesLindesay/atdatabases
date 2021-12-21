@@ -1,7 +1,7 @@
 import {ClassKind, Schema} from '@databases/pg-schema-introspect';
-import PrintContext from '../PrintContext';
+import PgPrintContext from '../PgPrintContext';
 import getTypeScriptType from '../getTypeScriptType';
-import PrintOptions from '../PrintOptions';
+import PrintOptions from '../PgPrintOptions';
 import printSchema from '../printers/printSchema';
 
 test('replace filter', async () => {
@@ -20,7 +20,7 @@ test('replace filter', async () => {
       },
     ],
   };
-  const printContext = new PrintContext(
+  const printContext = new PgPrintContext(
     getTypeScriptType,
     schema,
     new PrintOptions({
@@ -31,7 +31,7 @@ test('replace filter', async () => {
     }),
   );
   printSchema(schema, printContext);
-  expect(printContext.getFiles()).toMatchInlineSnapshot(`
+  expect(printContext.printer.getFiles()).toMatchInlineSnapshot(`
     Array [
       Object {
         "content": "import TableName, {TableMyNameInsert} from './my_table_my_name'

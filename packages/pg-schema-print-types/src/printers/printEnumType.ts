@@ -1,5 +1,6 @@
 import {EnumType} from '@databases/pg-schema-introspect';
-import PrintContext, {FileContext} from '../PrintContext';
+import {FileContext} from '@databases/shared-print-types';
+import PgPrintContext from '../PgPrintContext';
 
 export enum EnumTypeMode {
   EnumType,
@@ -9,13 +10,13 @@ export enum EnumTypeMode {
 }
 export default function printEnumType(
   type: EnumType,
-  context: PrintContext,
+  context: PgPrintContext,
   file: FileContext,
 ): string {
   switch (context.options.enumTypeMode) {
     case 'enum':
       return file.getImport(
-        context.pushValueDeclaration(
+        context.printer.pushValueDeclaration(
           {type: 'enum', name: type.typeName},
           (identifierName) => [
             `enum ${identifierName} {`,
@@ -26,14 +27,14 @@ export default function printEnumType(
       );
     case 'union_alias':
       return file.getImport(
-        context.pushTypeDeclaration(
+        context.printer.pushTypeDeclaration(
           {type: 'enum', name: type.typeName},
           (identifierName) => [`type ${identifierName} = ${getUnion(type)};`],
         ),
       );
     case 'union_alias_with_object':
       return file.getImport(
-        context.pushValueDeclaration(
+        context.printer.pushValueDeclaration(
           {type: 'enum', name: type.typeName},
           (identifierName) => [
             `type ${identifierName} = ${getUnion(type)};`,

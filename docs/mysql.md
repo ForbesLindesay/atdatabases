@@ -16,6 +16,7 @@ If you're new to `@databases`, the best way to start is by following our guide i
 1. [Managing Connections](mysql-guide-connections.md) - manage the connection pool and connection configuration securely
 1. [Querying Postgres](mysql-guide-query.md) - perform CRUD (create, read, update, delete) operations in Postgres
 1. [Using Transactions](mysql-guide-transactions.md) - isolate concurrent queries using transactions
+1. [TypeScript](mysql-guide-typescript.md) - generate TypeScript types for your database tables
 
 > ## TypeScript vs. JavaScript
 >

@@ -1,6 +1,7 @@
 import {PgTypesDomainTypeMode} from '@databases/pg-config';
 import {DomainType} from '@databases/pg-schema-introspect';
-import PrintContext, {FileContext} from '../PrintContext';
+import {FileContext} from '@databases/shared-print-types';
+import PgPrintContext from '../PgPrintContext';
 
 export enum DomainTypeMode {
   StrictBrand,
@@ -10,7 +11,7 @@ export enum DomainTypeMode {
 }
 export default function printDomainType(
   type: DomainType,
-  context: PrintContext,
+  context: PgPrintContext,
   file: FileContext,
 ): string {
   switch (context.options.domainTypeMode) {
@@ -18,7 +19,7 @@ export default function printDomainType(
     case PgTypesDomainTypeMode.loose_brand:
     case PgTypesDomainTypeMode.alias:
       return file.getImport(
-        context.pushTypeDeclaration(
+        context.printer.pushTypeDeclaration(
           {type: 'domain', name: type.typeName},
           (identifierName, file) => [
             `type ${identifierName} = ${context.getTypeScriptType(
@@ -36,7 +37,7 @@ export default function printDomainType(
   }
 }
 
-function getBrand(typeName: string, context: PrintContext): string {
+function getBrand(typeName: string, context: PgPrintContext): string {
   switch (context.options.domainTypeMode) {
     case PgTypesDomainTypeMode.strict_brand:
       return ` & {readonly __brand: '${typeName}'}`;

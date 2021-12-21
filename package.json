@@ -19,6 +19,8 @@
     "test:node": "TZ=Australia/Adelaide jest --selectProjects node",
     "test:pg": "TZ=Australia/Adelaide jest --selectProjects pg",
     "test:mysql": "TZ=Australia/Adelaide jest --selectProjects mysql",
+    "test:mysql:5.6": "MYSQL_TEST_IMAGE=mysql:5.6.51 TZ=Australia/Adelaide jest --selectProjects mysql",
+    "test:mysql:5.7": "MYSQL_TEST_IMAGE=mysql:5.7.33 TZ=Australia/Adelaide jest --selectProjects mysql",
     "test:bigquery": "TZ=Australia/Adelaide jest --selectProjects bigquery",
     "posttest": "wsrun --parallel --exclude-missing test",
     "watch:jest": "jest --watch",

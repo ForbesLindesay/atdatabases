@@ -1,12 +1,13 @@
 import {Type, TypeKind} from '@databases/pg-schema-introspect';
-import PrintContext, {FileContext} from './PrintContext';
+import {FileContext} from '@databases/shared-print-types';
+import PgPrintContext from './PgPrintContext';
 import printArrayType from './printers/printArrayType';
 import printDomainType from './printers/printDomainType';
 import printEnumType from './printers/printEnumType';
 
 export default function getTypeScriptType(
   type: Type,
-  context: PrintContext,
+  context: PgPrintContext,
   file: FileContext,
 ): string {
   switch (type.kind) {

@@ -7,13 +7,3 @@ type TypeID =
   | {type: 'schema'}
   | {type: 'serializeValue'};
 export default TypeID;
-
-export const DEFAULT_EXPORT_PRIORITY = {
-  schema: 0,
-  class: 1,
-  insert_parameters: 2,
-  primary_key: 2,
-  enum: 2,
-  domain: 2,
-  serializeValue: 3,
-};

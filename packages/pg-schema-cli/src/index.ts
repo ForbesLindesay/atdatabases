@@ -20,8 +20,8 @@ export default async function run(
     connectionStringEnvironmentVariable,
     types: {directory, ...types},
   } = params.configFilename
-    ? readPgConfigSync(params.configFilename)
-    : getPgConfigSync();
+    ? readPgConfigSync(resolve(cwd, params.configFilename))
+    : getPgConfigSync(cwd);
   let database =
     params.database ?? process.env[connectionStringEnvironmentVariable];
   if (!database) {
@@ -54,10 +54,6 @@ export default async function run(
       // ignore the error if it's just disposing the database connection
     });
   }
-  await writeSchema(
-    schema,
-    resolve(process.cwd(), params.directory ?? directory),
-    types,
-  );
+  await writeSchema(schema, resolve(cwd, params.directory ?? directory), types);
   return 0;
 }

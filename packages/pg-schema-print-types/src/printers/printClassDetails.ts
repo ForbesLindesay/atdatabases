@@ -4,18 +4,19 @@ import {
   ConstraintType,
   ClassKind,
 } from '@databases/pg-schema-introspect';
-import PrintContext, {FileContext} from '../PrintContext';
+import {FileContext} from '@databases/shared-print-types';
+import PgPrintContext from '../PgPrintContext';
 
 export default function printClassDetails(
   type: ClassDetails,
-  context: PrintContext,
+  context: PgPrintContext,
 ) {
   if (type.kind !== ClassKind.OrdinaryTable) {
     throw new Error(
       'printClassDetails only supports ordinary tables at the moment.',
     );
   }
-  const DatabaseRecord = context.pushTypeDeclaration(
+  const DatabaseRecord = context.printer.pushTypeDeclaration(
     {type: 'class', name: type.className},
     (identifierName, file) => [
       ...getClassComment(type),
@@ -34,7 +35,7 @@ export default function printClassDetails(
       `}`,
     ],
   );
-  const InsertParameters = context.pushTypeDeclaration(
+  const InsertParameters = context.printer.pushTypeDeclaration(
     {type: 'insert_parameters', name: type.className},
     (identifierName, file) => [
       ...getClassComment(type),
@@ -83,7 +84,7 @@ function getAttributeComment(attribute: Attribute): string[] {
 function getAttributeType(
   type: ClassDetails,
   attribute: Attribute,
-  context: PrintContext,
+  context: PgPrintContext,
   file: FileContext,
 ): string {
   if (!attribute.notNull) {
@@ -150,14 +151,14 @@ function optionalOnInsert(attribute: Attribute): string {
 function handleBrand(
   className: string,
   attribute: Attribute,
-  context: PrintContext,
+  context: PgPrintContext,
   file: FileContext,
 ): string {
   switch (context.options.primaryKeyTypeMode) {
     case 'strict_brand':
     case 'loose_brand':
       return file.getImport(
-        context.pushTypeDeclaration(
+        context.printer.pushTypeDeclaration(
           {
             type: 'primary_key',
             name: className,
@@ -183,7 +184,7 @@ function handleBrand(
 }
 
 function getBrand(
-  context: PrintContext,
+  context: PgPrintContext,
   className: string,
   attribute: Attribute,
 ): string {

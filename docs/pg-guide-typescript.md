@@ -80,6 +80,7 @@ async function deleteUser(email: string) {
 async function getUser(email: string) {
   return await users(db).findOne({email});
 }
+
 async function run() {
   await insertUser('me@example.com', 'red');
   await updateUser('me@example.com', 'blue');

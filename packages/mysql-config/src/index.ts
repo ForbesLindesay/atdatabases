@@ -11,7 +11,7 @@ export function getMySqlConfigSync(searchFrom?: string): MySqlConfig {
   return parseResult(explorer.searchSync(searchFrom));
 }
 
-export function _testReadMySqlConfigSync(filename: string): MySqlConfig {
+export function readMySqlConfigSync(filename: string): MySqlConfig {
   return parseResult(explorer.loadSync(filename));
 }
 
@@ -20,3 +20,4 @@ function parseResult(result: cosmiconfig.CosmiconfigResult): MySqlConfig {
 }
 
 export default MySqlConfig;
+export const DEFAULT_CONFIG = MySqlConfigSchema.parse({});

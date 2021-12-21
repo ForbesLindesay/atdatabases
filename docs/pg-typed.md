@@ -31,6 +31,7 @@ export {users, posts};
 ```javascript
 // Using pg-typed with JavaScript is not recommended, but in theory it will still work.
 
+const tables = require('@databases/pg-typed');
 const db = require('./database');
 
 const {users, posts} = tables();
