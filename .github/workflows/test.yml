@@ -46,6 +46,7 @@ jobs:
             packages/mock-db-typed/lib
             packages/mysql/lib
             packages/mysql-config/lib
+            packages/mysql-schema-cli/lib
             packages/mysql-schema-introspect/lib
             packages/mysql-schema-print-types/lib
             packages/mysql-test/lib
@@ -83,6 +84,7 @@ jobs:
             packages/mock-db-typed/.last_build
             packages/mysql/.last_build
             packages/mysql-config/.last_build
+            packages/mysql-schema-cli/.last_build
             packages/mysql-schema-introspect/.last_build
             packages/mysql-schema-print-types/.last_build
             packages/mysql-test/.last_build
@@ -115,7 +117,8 @@ jobs:
             'packages/expo/src', 'packages/lock/src',
             'packages/migrations-base/src', 'packages/mock-db/src',
             'packages/mock-db-typed/src', 'packages/mysql/src',
-            'packages/mysql-config/src', 'packages/mysql-schema-introspect/src',
+            'packages/mysql-config/src', 'packages/mysql-schema-cli/src',
+            'packages/mysql-schema-introspect/src',
             'packages/mysql-schema-print-types/src', 'packages/mysql-test/src',
             'packages/mysql-typed/src', 'packages/pg/src',
             'packages/pg-config/src', 'packages/pg-connection-string/src',
