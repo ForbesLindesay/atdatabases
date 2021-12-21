@@ -16,6 +16,7 @@ refs:
           MYSQL_USER: test-user
           MYSQL_PASSWORD: password
           MYSQL_DATABASE: test-db
+          MYSQL_ALLOW_EMPTY_PASSWORD: 'true'
     working_directory: ~/repo
   - &restore_cache
     restore_cache:
