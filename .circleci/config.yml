@@ -11,7 +11,7 @@ refs:
         environment:
           POSTGRES_USER: test-user
           POSTGRES_DB: test-db
-      - image: circleci/mysql:5.7.24
+      - image: mysql:8.0.23
         environment:
           MYSQL_USER: test-user
           MYSQL_PASSWORD: password
