@@ -1,7 +1,7 @@
 import connect, {sql} from '@databases/mysql';
 import {readFileSync, writeFileSync} from 'fs';
 import {DataType} from '..';
-import getColumns from '../getColumns';
+import getColumns, {Column} from '../getColumns';
 
 const db = connect({bigIntMode: 'number'});
 
@@ -49,6 +49,9 @@ const TYPE_NAMES = [
 const TYPE_NAMES_WITH_TWO_LENGTHS = ['DECIMAL', 'NUMERIC'];
 const TYPE_NAMES_WITH_LENGTH = ['VARCHAR', 'VARBINARY'];
 const TYPE_NAMES_WITH_VALUES = ['ENUM', 'SET'];
+
+// Newer versions of MySQL have renamed some types
+const aliases = new Map([[`geometrycollection`, `geomcollection`]]);
 function getSuffix(typeName: string) {
   if (TYPE_NAMES_WITH_TWO_LENGTHS.includes(typeName)) {
     return `(10,5)`;
@@ -83,7 +86,9 @@ test('column-types', async () => {
     FROM INFORMATION_SCHEMA.COLUMNS
   `);
   const dataTypes = new Set([
-    ...dataTypeRows.map((d: any): string => d.data_type),
+    ...dataTypeRows.map(
+      (d: any): string => aliases.get(d.data_type) ?? d.data_type,
+    ),
     ...Object.values(DataType),
   ]);
   const actualString = `enum DataType {\n${[...dataTypes]
@@ -101,10 +106,19 @@ test('column-types', async () => {
   }
 
   expect(
-    await getColumns(db, {
-      schemaName: 'test-db',
-      tableName: `column_types_test`,
-    }),
+    (
+      await getColumns(db, {
+        schemaName: 'test-db',
+        tableName: `column_types_test`,
+      })
+    ).map(
+      (column): Column =>
+        // Older versions of MySQL give `timestamp` columns a default value of `CURRENT_TIMESTAMP` and
+        // make them non nullable by default.
+        column.columnName === `val_timestamp`
+          ? {...column, default: null, isNullable: true}
+          : column,
+    ),
   ).toMatchInlineSnapshot(`
     Array [
       Object {

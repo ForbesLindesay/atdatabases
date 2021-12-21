@@ -12,7 +12,6 @@ enum DataType {
   float = 'float',
   geomcollection = 'geomcollection',
   geometry = 'geometry',
-  geometrycollection = 'geometrycollection',
   int = 'int',
   json = 'json',
   linestring = 'linestring',

@@ -8,6 +8,9 @@ const IntegerSchema = t.Number.withConstraint(
       : true,
   {name: `Integer`},
 );
+const aliases = new Map<string | DataType, DataType>([
+  [`geometrycollection`, DataType.geomcollection],
+]);
 const SimpleColumnTypeSchema = t.Named(
   `SimpleColumnType`,
   t.Object({
@@ -20,7 +23,6 @@ const SimpleColumnTypeSchema = t.Named(
       t.Literal(DataType.float),
       t.Literal(DataType.geometry),
       t.Literal(DataType.geomcollection),
-      t.Literal(DataType.geometrycollection),
       t.Literal(DataType.int),
       t.Literal(DataType.json),
       t.Literal(DataType.linestring),
@@ -109,6 +111,10 @@ export default function getColumnType(column: {
   numeric_precision: number;
   numeric_scale: number;
 }): ColumnType {
+  const alias = aliases.get(column.data_type);
+  if (alias) {
+    return getColumnType({...column, data_type: alias});
+  }
   return ColumnTypeSchema.parse(getColumnTypeInternal(column));
 }
 
