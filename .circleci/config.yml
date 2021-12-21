@@ -75,7 +75,7 @@ jobs:
       - *test
       - run:
           name: Release
-          command: npx rollingversions publish --dry-run
+          command: npx rollingversions publish --canary $CIRCLE_BUILD_NUM
 
   publish:
     <<: *container
