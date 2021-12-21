@@ -11,7 +11,7 @@ export function getMySqlConfigSync(searchFrom?: string): MySqlConfig {
   return parseResult(explorer.searchSync(searchFrom));
 }
 
-export function _testReadMySqlConfigSync(filename: string): MySqlConfig {
+export function readMySqlConfigSync(filename: string): MySqlConfig {
   return parseResult(explorer.loadSync(filename));
 }
 

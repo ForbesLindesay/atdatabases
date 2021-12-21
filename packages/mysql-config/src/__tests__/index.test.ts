@@ -1,4 +1,4 @@
-import {DEFAULT_CONFIG, getMySqlConfigSync, _testReadMySqlConfigSync} from '..';
+import {DEFAULT_CONFIG, getMySqlConfigSync, readMySqlConfigSync} from '..';
 
 test('get root config', () => {
   expect(getMySqlConfigSync()).toEqual({
@@ -17,7 +17,7 @@ test('get root config', () => {
 });
 
 test('valid config', () => {
-  expect(_testReadMySqlConfigSync(__dirname + '/fixtures/empty.json')).toEqual({
+  expect(readMySqlConfigSync(__dirname + '/fixtures/empty.json')).toEqual({
     connectionStringEnvironmentVariable: 'DATABASE_URL',
     test: {
       connectTimeoutSeconds: 20,
@@ -30,9 +30,7 @@ test('valid config', () => {
     },
     types: DEFAULT_CONFIG.types,
   });
-  expect(
-    _testReadMySqlConfigSync(__dirname + '/fixtures/override.json'),
-  ).toEqual({
+  expect(readMySqlConfigSync(__dirname + '/fixtures/override.json')).toEqual({
     connectionStringEnvironmentVariable: 'PG_CONNECTION',
     test: {
       connectTimeoutSeconds: 20,
@@ -48,7 +46,7 @@ test('valid config', () => {
 });
 
 test('invalid config', () => {
-  expect(() => _testReadMySqlConfigSync(__dirname + '/fixtures/invalid.json'))
+  expect(() => readMySqlConfigSync(__dirname + '/fixtures/invalid.json'))
     .toThrowErrorMatchingInlineSnapshot(`
     "Unable to assign {connectionStringEnvironmentVariable: 10} to { connectionStringEnvironmentVariable: string | undefined; test: TestConfig | undefined; types: TypesConfig | undefined; }
       The types of \\"connectionStringEnvironmentVariable\\" are not compatible

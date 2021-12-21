@@ -56,8 +56,10 @@ Package Name | Version | Docs
 @databases/mock-db | [![NPM version](https://img.shields.io/npm/v/@databases/mock-db?style=for-the-badge)](https://www.npmjs.com/package/@databases/mock-db) | Not documented yet
 @databases/mock-db-typed | [![NPM version](https://img.shields.io/npm/v/@databases/mock-db-typed?style=for-the-badge)](https://www.npmjs.com/package/@databases/mock-db-typed) | Not documented yet
 @databases/mysql-config | [![NPM version](https://img.shields.io/npm/v/@databases/mysql-config?style=for-the-badge)](https://www.npmjs.com/package/@databases/mysql-config) | Not documented yet
+@databases/mysql-schema-cli | [![NPM version](https://img.shields.io/npm/v/@databases/mysql-schema-cli?style=for-the-badge)](https://www.npmjs.com/package/@databases/mysql-schema-cli) | Not documented yet
 @databases/mysql-schema-introspect | [![NPM version](https://img.shields.io/npm/v/@databases/mysql-schema-introspect?style=for-the-badge)](https://www.npmjs.com/package/@databases/mysql-schema-introspect) | Not documented yet
 @databases/mysql-schema-print-types | [![NPM version](https://img.shields.io/npm/v/@databases/mysql-schema-print-types?style=for-the-badge)](https://www.npmjs.com/package/@databases/mysql-schema-print-types) | Not documented yet
+@databases/mysql-typed | [![NPM version](https://img.shields.io/npm/v/@databases/mysql-typed?style=for-the-badge)](https://www.npmjs.com/package/@databases/mysql-typed) | Not documented yet
 @databases/pg-config | [![NPM version](https://img.shields.io/npm/v/@databases/pg-config?style=for-the-badge)](https://www.npmjs.com/package/@databases/pg-config) | Not documented yet
 @databases/pg-connection-string | [![NPM version](https://img.shields.io/npm/v/@databases/pg-connection-string?style=for-the-badge)](https://www.npmjs.com/package/@databases/pg-connection-string) | Not documented yet
 @databases/pg-create | [![NPM version](https://img.shields.io/npm/v/@databases/pg-create?style=for-the-badge)](https://www.npmjs.com/package/@databases/pg-create) | Not documented yet
