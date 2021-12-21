@@ -43,6 +43,7 @@
           "mysql-guide-connections",
           "mysql-guide-query",
           "mysql-guide-transactions",
+          "mysql-guide-typescript",
           "mysql-guide-logging",
           "mysql-test"
         ]
@@ -55,7 +56,8 @@
           "mysql-queryable",
           "mysql-connection-pool",
           "mysql-connection",
-          "mysql-transaction"
+          "mysql-transaction",
+          "mysql-typed"
         ]
       }
     ],

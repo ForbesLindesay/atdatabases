@@ -1,22 +1,22 @@
 ---
-id: pg-typed
-title: '@databases/pg-typed'
-sidebar_label: PG Typed
+id: mysql-typed
+title: '@databases/mysql-typed'
+sidebar_label: MySQL Typed
 ---
 
-pg-typed provides APIs to query Postgres databases with genuine type safety via TypeScript.
+mysql-typed provides APIs to query MySQL databases with genuine type safety via TypeScript.
 
 ## Setup
 
-For detailed instructions on how to generate the types you need for pg-typed, start by reading the [Postgres with TypeScript Guide](pg-guide-typescript.md).
+For detailed instructions on how to generate the types you need for mysql-typed, start by reading the [MySQL with TypeScript Guide](mysql-guide-typescript.md).
 
-The `tables` function returns an object for each database table, allowing you to insert, query, update & delete records in that table. To use each table, you pass in the database connection or transaction, and then call the relevant method. Taking the connection at this late stage allows you to use pg-typed within transactions that span multiple tables.
+The `tables` function returns an object for each database table, allowing you to insert, query, update & delete records in that table. To use each table, you pass in the database connection or transaction, and then call the relevant method. Taking the connection at this late stage allows you to use mysql-typed within transactions that span multiple tables.
 
 ```typescript
 // database.ts
 
-import createConnectionPool, {sql} from '@databases/pg';
-import tables from '@databases/pg-typed';
+import createConnectionPool, {sql} from '@databases/mysql';
+import tables from '@databases/mysql-typed';
 import DatabaseSchema, {serializeValue} from './__generated__';
 
 export {sql};
@@ -29,9 +29,9 @@ export {users, posts};
 ```
 
 ```javascript
-// Using pg-typed with JavaScript is not recommended, but in theory it will still work.
+// Using mysql-typed with JavaScript is not recommended, but in theory it will still work.
 
-const tables = require('@databases/pg-typed');
+const tables = require('@databases/mysql-typed');
 const db = require('./database');
 
 const {users, posts} = tables();
@@ -48,12 +48,11 @@ Inserts records into the database table. If you pass multiple records to `insert
 import db, {users} from './database';
 
 export async function createUsers() {
-  const [alice, ben, cathy] = await users(db).insert(
+  await users(db).insert(
     {email: `alice@example.com`, favorite_color: `blue`},
     {email: `ben@example.com`, favorite_color: `blue`},
     {email: `cathy@example.com`, favorite_color: `blue`},
   );
-  console.log(alice, ben, cathy);
 }
 ```
 
@@ -63,69 +62,12 @@ You can also use the `...spread` syntax if you want to insert an unknown number 
 import db, {users} from './database';
 
 export async function createUsers(emails: string[]) {
-  const users = await users(db).insert(
+  await users(db).insert(
     ...emails.map((email) => ({
       email,
       favorite_color: `blue`,
     })),
   );
-  console.log(users);
-}
-```
-
-### insertOrUpdate(keys, ...records)
-
-This method is sometimes called **"upsert"**, we call it **"insertOrUpdate"** because we think that is easier to understand.
-
-If you have a unique constraint on certain columns within your table, e.g. the `email` column in our `users` table, you can use `insertOrUpdate` to create a record if it does not exist, and update it if it does. You must pass the list of columns you want to check for conflicts on as the first parameter.
-
-```typescript
-import db, {users} from './database';
-
-export async function setFavoriteColor(email: string, favoriteColor: string) {
-  const [insertedOrUpdatedUser] = await users(db).insertOrUpdate([`email`], {
-    email,
-    favorite_color: favoriteColor,
-  });
-  console.log(insertedOrUpdatedUser);
-}
-```
-
-Just like with `insert`, you can use spread to insert/update many records at once.
-
-```typescript
-import db, {users} from './database';
-
-export async function setFavoriteColor(
-  emails: string[],
-  favoriteColor: string,
-) {
-  const insertedOrUpdatedUsers = await users(db).insertOrUpdate(
-    [`email`],
-    ...emails.map((email) => ({
-      email,
-      favorite_color: favoriteColor,
-    })),
-  );
-  console.log(insertedOrUpdatedUsers);
-}
-```
-
-### insertOrIgnore(...records)
-
-This is similar to `insertOrUpdate`, except that when a conflict is encountered, it simply ignores the record. Only the records that were successfully inserted are returned.
-
-```typescript
-import db, {users} from './database';
-
-export async function checkUsersExist(emails: string[]) {
-  const insertedUsers = await users(db).insertOrIgnore(
-    ...emails.map((email) => ({
-      email,
-      favorite_color: `blue`,
-    })),
-  );
-  console.log(insertedUsers);
 }
 ```
 
@@ -163,7 +105,7 @@ export async function getNumberOfUsersWhoLike(color: string): Promise<number> {
 
 ### update(whereValues, updateValues)
 
-Finds all the records that match the `whereValues` condition and sets all the properties specified in `updateValues`. Any properties you do not include in `updateValues` will not be modified. The updated records are returned.
+Finds all the records that match the `whereValues` condition and sets all the properties specified in `updateValues`. Any properties you do not include in `updateValues` will not be modified.
 
 ```typescript
 import db, {users} from './database';
@@ -172,29 +114,24 @@ export async function updateFavoriteColor(
   email: string,
   favoriteColor: string,
 ) {
-  const updatedUsers = await users(db).update(
-    {email},
-    {favorite_color: favoriteColor},
-  );
-  console.log(updatedUsers);
+  await users(db).update({email}, {favorite_color: favoriteColor});
 }
 ```
 
 You can use more complex queries to update many records in one go:
 
 ```typescript
-import {anyOf} from '@databases/pg-typed';
+import {anyOf} from '@databases/mysql-typed';
 import db, {users} from './database';
 
 export async function updateFavoriteColor(
   emails: string[],
   favoriteColor: string,
 ) {
-  const updatedUsers = await users(db).update(
+  await users(db).update(
     {email: anyOf(emails)},
     {favorite_color: favoriteColor},
   );
-  console.log(updatedUsers);
 }
 ```
 
@@ -213,7 +150,7 @@ export async function deleteUser(email: string) {
 You can use more complex queries to delete many records in one go:
 
 ```typescript
-import {anyOf} from '@databases/pg-typed';
+import {anyOf} from '@databases/mysql-typed';
 import db, {users} from './database';
 
 export async function deleteUsers(emails: string[]) {
@@ -349,7 +286,7 @@ export async function getEmails() {
 Match any of the supplied values. For example, to get users who like blue or green:
 
 ```typescript
-import {anyOf} from '@databases/pg-typed';
+import {anyOf} from '@databases/mysql-typed';
 import db, {users} from './database';
 
 export async function getUsersWhoLikeBlueOrGreen() {
@@ -367,7 +304,7 @@ export async function getUsersWhoLikeBlueOrGreen() {
 Match any value except the supplied value. You can combine this with any of the other FieldQuery utilities.
 
 ```typescript
-import {anyOf, not} from '@databases/pg-typed';
+import {anyOf, not} from '@databases/mysql-typed';
 import db, {users} from './database';
 
 export async function getCountOfUsersWhoDoNotLike(color: string) {
@@ -389,7 +326,7 @@ export async function getCountOfUsersWhoDoNotLikeAnyOf(colors: string[]) {
 Match values less than the supplied value.
 
 ```typescript
-import {lt} from '@databases/pg-typed';
+import {lt} from '@databases/mysql-typed';
 import db, {users} from './database';
 
 const HOUR = 60 * 60 * 1000;
@@ -407,7 +344,7 @@ export async function getInactiveUsers(color: string) {
 Match values greater than the supplied value.
 
 ```typescript
-import {gt} from '@databases/pg-typed';
+import {gt} from '@databases/mysql-typed';
 import db, {users} from './database';
 
 const HOUR = 60 * 60 * 1000;
@@ -425,7 +362,7 @@ export async function getActiveUsers(color: string) {
 This is sometimes useful as an escape hatch. Normally there is a better way to handle these, but sometimes you just need a complex join on the database to figure out which records you want to return.
 
 ```typescript
-import {inQueryResults} from '@databases/pg-typed';
+import {inQueryResults} from '@databases/mysql-typed';
 import db, {users, sql} from './database';
 
 export async function getUsersWithValidPreference() {
