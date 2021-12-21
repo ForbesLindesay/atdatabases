@@ -36,6 +36,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: |-
+            packages/bigquery/lib
             packages/connection-pool/lib
             packages/escape-identifier/lib
             packages/expo/lib
@@ -45,7 +46,10 @@ jobs:
             packages/mock-db-typed/lib
             packages/mysql/lib
             packages/mysql-config/lib
+            packages/mysql-schema-introspect/lib
+            packages/mysql-schema-print-types/lib
             packages/mysql-test/lib
+            packages/mysql-typed/lib
             packages/pg/lib
             packages/pg-config/lib
             packages/pg-connection-string/lib
@@ -61,6 +65,7 @@ jobs:
             packages/push-to-async-iterable/lib
             packages/queue/lib
             packages/shared/lib
+            packages/shared-print-types/lib
             packages/split-sql-query/lib
             packages/sql/lib
             packages/sqlite/lib
@@ -68,6 +73,7 @@ jobs:
             packages/websql/lib
             packages/websql-core/lib
             packages/with-container/lib
+            packages/bigquery/.last_build
             packages/connection-pool/.last_build
             packages/escape-identifier/.last_build
             packages/expo/.last_build
@@ -77,7 +83,10 @@ jobs:
             packages/mock-db-typed/.last_build
             packages/mysql/.last_build
             packages/mysql-config/.last_build
+            packages/mysql-schema-introspect/.last_build
+            packages/mysql-schema-print-types/.last_build
             packages/mysql-test/.last_build
+            packages/mysql-typed/.last_build
             packages/pg/.last_build
             packages/pg-config/.last_build
             packages/pg-connection-string/.last_build
@@ -93,6 +102,7 @@ jobs:
             packages/push-to-async-iterable/.last_build
             packages/queue/.last_build
             packages/shared/.last_build
+            packages/shared-print-types/.last_build
             packages/split-sql-query/.last_build
             packages/sql/.last_build
             packages/sqlite/.last_build
@@ -100,12 +110,14 @@ jobs:
             packages/websql/.last_build
             packages/websql-core/.last_build
             packages/with-container/.last_build
-          key: v2-build-output-${{hashFiles('yarn.lock', 'packages/connection-pool/src',
-            'packages/escape-identifier/src', 'packages/expo/src',
-            'packages/lock/src', 'packages/migrations-base/src',
-            'packages/mock-db/src', 'packages/mock-db-typed/src',
-            'packages/mysql/src', 'packages/mysql-config/src',
-            'packages/mysql-test/src', 'packages/pg/src',
+          key: v2-build-output-${{hashFiles('yarn.lock', 'packages/bigquery/src',
+            'packages/connection-pool/src', 'packages/escape-identifier/src',
+            'packages/expo/src', 'packages/lock/src',
+            'packages/migrations-base/src', 'packages/mock-db/src',
+            'packages/mock-db-typed/src', 'packages/mysql/src',
+            'packages/mysql-config/src', 'packages/mysql-schema-introspect/src',
+            'packages/mysql-schema-print-types/src', 'packages/mysql-test/src',
+            'packages/mysql-typed/src', 'packages/pg/src',
             'packages/pg-config/src', 'packages/pg-connection-string/src',
             'packages/pg-create/src', 'packages/pg-data-type-id/src',
             'packages/pg-errors/src', 'packages/pg-migrations/src',
@@ -113,10 +125,10 @@ jobs:
             'packages/pg-schema-print-types/src', 'packages/pg-test/src',
             'packages/pg-typed/src', 'packages/push-to-async-iterable/src',
             'packages/queue/src', 'packages/shared/src',
-            'packages/split-sql-query/src', 'packages/sql/src',
-            'packages/sqlite/src', 'packages/validate-unicode/src',
-            'packages/websql/src', 'packages/websql-core/src',
-            'packages/with-container/src')}}
+            'packages/shared-print-types/src', 'packages/split-sql-query/src',
+            'packages/sql/src', 'packages/sqlite/src',
+            'packages/validate-unicode/src', 'packages/websql/src',
+            'packages/websql-core/src', 'packages/with-container/src')}}
           restore-keys: v2-build-output-
       - run: yarn build
       - name: "Save output: build"

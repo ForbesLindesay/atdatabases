@@ -1,9 +1,16 @@
 import connect, {sql} from '@databases/mysql';
 import {readFileSync, writeFileSync} from 'fs';
 import {DataType} from '..';
-import getColumns, {Column} from '../getColumns';
+import getColumns from '../getColumns';
 
 const db = connect({bigIntMode: 'number'});
+
+// JSON added in 5.7
+const SUPPORTS_JSON_TYPE = !process.env.MYSQL_TEST_IMAGE?.includes(`:5.6`);
+
+// Older versions of MySQL give `timestamp` columns a default value of `CURRENT_TIMESTAMP` and
+// make them non nullable by default.
+const SUPPORTS_MODERN_TIMESTAMP = !process.env.MYSQL_TEST_IMAGE?.includes(`:5`);
 
 const TYPE_NAMES = [
   'TINYINT',
@@ -43,7 +50,7 @@ const TYPE_NAMES = [
   'MULTILINESTRING',
   'MULTIPOLYGON',
   'GEOMETRYCOLLECTION',
-  'JSON',
+  ...(SUPPORTS_JSON_TYPE ? ['JSON'] : []),
 ];
 
 const TYPE_NAMES_WITH_TWO_LENGTHS = ['DECIMAL', 'NUMERIC'];
@@ -105,21 +112,66 @@ test('column-types', async () => {
     writeFileSync(`${__dirname}/../enums/DataType.ts`, actualString);
   }
 
-  expect(
-    (
-      await getColumns(db, {
-        schemaName: 'test-db',
-        tableName: `column_types_test`,
-      })
-    ).map(
-      (column): Column =>
-        // Older versions of MySQL give `timestamp` columns a default value of `CURRENT_TIMESTAMP` and
-        // make them non nullable by default.
-        column.columnName === `val_timestamp`
-          ? {...column, default: null, isNullable: true}
-          : column,
-    ),
-  ).toMatchInlineSnapshot(`
+  let columns = await getColumns(db, {
+    schemaName: 'test-db',
+    tableName: `column_types_test`,
+  });
+  if (SUPPORTS_JSON_TYPE) {
+    expect(columns.find((c) => c.columnName === `val_json`))
+      .toMatchInlineSnapshot(`
+      Object {
+        "columnName": "val_json",
+        "comment": "",
+        "default": null,
+        "isNullable": true,
+        "isPrimaryKey": false,
+        "ordinalPosition": 38,
+        "schemaName": "test-db",
+        "tableName": "column_types_test",
+        "type": Object {
+          "kind": "json",
+        },
+      }
+    `);
+    columns = columns.filter((c) => c.columnName !== `val_json`);
+  }
+  if (SUPPORTS_MODERN_TIMESTAMP) {
+    expect(columns.find((c) => c.columnName === `val_timestamp`))
+      .toMatchInlineSnapshot(`
+      Object {
+        "columnName": "val_timestamp",
+        "comment": "",
+        "default": null,
+        "isNullable": true,
+        "isPrimaryKey": false,
+        "ordinalPosition": 13,
+        "schemaName": "test-db",
+        "tableName": "column_types_test",
+        "type": Object {
+          "kind": "timestamp",
+        },
+      }
+    `);
+  } else {
+    expect(columns.find((c) => c.columnName === `val_timestamp`))
+      .toMatchInlineSnapshot(`
+      Object {
+        "columnName": "val_timestamp",
+        "comment": "",
+        "default": "CURRENT_TIMESTAMP",
+        "isNullable": false,
+        "isPrimaryKey": false,
+        "ordinalPosition": 13,
+        "schemaName": "test-db",
+        "tableName": "column_types_test",
+        "type": Object {
+          "kind": "timestamp",
+        },
+      }
+    `);
+  }
+  columns = columns.filter((c) => c.columnName !== `val_timestamp`);
+  expect(columns).toMatchInlineSnapshot(`
     Array [
       Object {
         "columnName": "val_bigint",
@@ -312,19 +364,6 @@ test('column-types', async () => {
         "tableName": "column_types_test",
         "type": Object {
           "kind": "int",
-        },
-      },
-      Object {
-        "columnName": "val_json",
-        "comment": "",
-        "default": null,
-        "isNullable": true,
-        "isPrimaryKey": false,
-        "ordinalPosition": 38,
-        "schemaName": "test-db",
-        "tableName": "column_types_test",
-        "type": Object {
-          "kind": "json",
         },
       },
       Object {
@@ -541,19 +580,6 @@ test('column-types', async () => {
         "tableName": "column_types_test",
         "type": Object {
           "kind": "time",
-        },
-      },
-      Object {
-        "columnName": "val_timestamp",
-        "comment": "",
-        "default": null,
-        "isNullable": true,
-        "isPrimaryKey": false,
-        "ordinalPosition": 13,
-        "schemaName": "test-db",
-        "tableName": "column_types_test",
-        "type": Object {
-          "kind": "timestamp",
         },
       },
       Object {

@@ -1,6 +1,9 @@
 import connect, {sql} from '@databases/mysql';
 import declareTables from '..';
 
+// JSON added in 5.7
+const SUPPORTS_JSON_TYPE = !process.env.MYSQL_TEST_IMAGE?.includes(`:5.6`);
+
 interface Photo {
   caption: string | null;
   cdn_url: string & {__brand?: 'url'};
@@ -53,7 +56,10 @@ afterAll(async () => {
   await db.dispose();
 });
 
-test('create schema', async () => {
+let t = test;
+
+if (!SUPPORTS_JSON_TYPE) t = test.skip;
+t('create schema', async () => {
   await db.query(
     sql`
       CREATE TABLE typed_queries_tests_users (
@@ -73,7 +79,7 @@ test('create schema', async () => {
   );
 });
 
-test('create users', async () => {
+t('create users', async () => {
   await users(db).insert({screen_name: 'Forbes'}, {screen_name: 'Ellie'});
   await photos(db).insert(
     {

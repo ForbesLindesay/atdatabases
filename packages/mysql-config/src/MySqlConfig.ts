@@ -51,11 +51,9 @@ export interface TestConfig {
   migrationsScript?: string | string[];
   /**
    * The docker image to use when testing
-   * using @databases/mysql-test. When I
-   * tried using the ream image it didn't
-   * work very well.
+   * using @databases/mysql-test.
    *
-   * @default "mysql:5.7.24"
+   * @default "mysql:8.0.23"
    */
   image: string;
   /**
@@ -109,7 +107,7 @@ export const TestConfigSchema: ft.Runtype<TestConfig> = ft
   .Object({
     debug: withDefault(ft.Boolean, false),
     migrationsScript: ft.Union(ft.String, ft.Array(ft.String), ft.Undefined),
-    image: withDefault(ft.String, `mysql:5.7.24`),
+    image: withDefault(ft.String, `mysql:8.0.23`),
     containerName: withDefault(ft.String, `mysql-test`),
     connectTimeoutSeconds: withDefault(integer({min: 0}), 20),
     port: withDefault(integer({min: 0, max: 65535}), undefined),

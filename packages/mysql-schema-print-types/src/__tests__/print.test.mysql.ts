@@ -3,12 +3,15 @@ import {PrintContext} from '@databases/shared-print-types';
 import MySqlPrintOptions from '../MySqlPrintOptions';
 import printSchema from '../printers/printSchema';
 
+// JSON added in 5.7
+const SUPPORTS_JSON_TYPE = !process.env.MYSQL_TEST_IMAGE?.includes(`:5.6`);
+
 const db = connect({bigIntMode: 'number'});
 
 afterAll(async () => {
   await db.dispose();
 });
-test('print', async () => {
+(SUPPORTS_JSON_TYPE ? test : test.skip)('print', async () => {
   await db.query(
     sql`
       CREATE TABLE print_types_users (
