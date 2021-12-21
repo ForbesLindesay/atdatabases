@@ -11,7 +11,7 @@ interface Photo {
   metadata: unknown;
   owner_user_id: User['id'];
 }
-interface Photos_InsertParameters {
+interface PhotosInsertParameters {
   caption?: string | null;
   cdn_url: string & {__brand?: 'url'};
   id?: number & {readonly __brand?: 'photos_id'};
@@ -25,7 +25,7 @@ interface User {
   id: number & {readonly __brand?: 'users_id'};
   screen_name: string;
 }
-interface Users_InsertParameters {
+interface UsersInsertParameters {
   age?: number | null;
   bio?: string | null;
   id?: number & {readonly __brand?: 'users_id'};
@@ -33,8 +33,8 @@ interface Users_InsertParameters {
 }
 
 interface DatabaseSchema {
-  typed_queries_tests_photos: {record: Photo; insert: Photos_InsertParameters};
-  typed_queries_tests_users: {record: User; insert: Users_InsertParameters};
+  typed_queries_tests_photos: {record: Photo; insert: PhotosInsertParameters};
+  typed_queries_tests_users: {record: User; insert: UsersInsertParameters};
 }
 const tables = declareTables<DatabaseSchema>({
   serializeValue(tableName, columnName, value) {

@@ -3,7 +3,10 @@ import DataType from './enums/DataType';
 
 const IntegerSchema = t.Number.withConstraint(
   (value) =>
-    value !== (value | 0)
+    value !== Math.floor(value) ||
+    Number.isNaN(value) ||
+    value > Number.MAX_SAFE_INTEGER ||
+    value < Number.MIN_SAFE_INTEGER
       ? `Expected an integer but got ${value.toString()}`
       : true,
   {name: `Integer`},
@@ -130,21 +133,14 @@ function getColumnTypeInternal(column: {
     case DataType.char:
     case DataType.varbinary:
     case DataType.varchar:
-      if (
-        typeof column.character_maximum_length !== 'number' ||
-        column.character_maximum_length !==
-          (column.character_maximum_length | 0)
-      ) {
+      if (!IntegerSchema.test(column.character_maximum_length)) {
         throw new Error(
           `Missing column.character_maximum_length for ${column.data_type}`,
         );
       }
       return {kind: column.data_type, length: column.character_maximum_length};
     case DataType.bit:
-      if (
-        typeof column.numeric_precision !== 'number' ||
-        column.numeric_precision !== (column.numeric_precision | 0)
-      ) {
+      if (!IntegerSchema.test(column.numeric_precision)) {
         throw new Error(
           `Missing column.numeric_precision for ${
             column.data_type
