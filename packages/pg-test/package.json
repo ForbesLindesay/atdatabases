@@ -10,6 +10,8 @@
   "dependencies": {
     "@databases/pg-config": "^0.0.0",
     "@databases/with-container": "^0.0.0",
+    "@types/cross-spawn": "^6.0.0",
+    "cross-spawn": "^6.0.5",
     "modern-spawn": "^1.0.0",
     "ms": "^2.1.2",
     "parameter-reducers": "^2.0.0",

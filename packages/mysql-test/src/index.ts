@@ -29,9 +29,9 @@ const DEFAULT_MYSQL_PASSWORD =
 const DEFAULT_MYSQL_DB = process.env.MYSQL_TEST_DB || config.test.mySqlDb;
 
 export interface Options
-  extends Pick<
+  extends Omit<
     WithContainerOptions,
-    Exclude<keyof WithContainerOptions, 'internalPort'>
+    'internalPort' | 'enableDebugInstructions' | 'testConnection'
   > {
   mysqlUser: string;
   mysqlPassword: string;
@@ -141,6 +141,7 @@ export default async function getDatabase(options: Partial<Options> = {}) {
       MYSQL_PASSWORD: mysqlPassword,
       MYSQL_DATABASE: mysqlDb,
     },
+    enableDebugInstructions: `To view logs, run with MYSQL_TEST_DEBUG=true environment variable.`,
   });
 
   const databaseURL = `mysql://${mysqlUser}:${mysqlPassword}@localhost:${externalPort}/${mysqlDb}`;
