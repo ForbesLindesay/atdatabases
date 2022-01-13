@@ -23,6 +23,10 @@ export interface Options {
    */
   refreshImage?: boolean;
   detached?: boolean;
+  enableDebugInstructions?: string;
+  testConnection?: (
+    opts: NormalizedOptions & {testPortConnection: () => Promise<boolean>},
+  ) => Promise<boolean>;
 }
 
 export interface NormalizedOptions
@@ -111,7 +115,13 @@ export async function waitForDatabaseToStart(options: NormalizedOptions) {
       finished = true;
       reject(
         new Error(
-          `Unable to connect to database after ${options.connectTimeoutSeconds} seconds. To view logs, run with DEBUG_PG_DOCKER=true environment variable`,
+          `Unable to connect to database after ${
+            options.connectTimeoutSeconds
+          } seconds.${
+            options.enableDebugInstructions
+              ? ` ${options.enableDebugInstructions}`
+              : ``
+          }`,
         ),
       );
     }, options.connectTimeoutSeconds * 1000);
@@ -119,19 +129,41 @@ export async function waitForDatabaseToStart(options: NormalizedOptions) {
       console.warn(
         `Waiting for ${options.containerName} on port ${options.externalPort}...`,
       );
-      const connection = connect(options.externalPort)
-        .on('error', () => {
+      (options.testConnection
+        ? options.testConnection({
+            ...options,
+            testPortConnection: async () => await testConnection(options),
+          })
+        : testConnection(options)
+      ).then(
+        (isConnected) => {
           if (finished) return;
-          setTimeout(test, 500);
-        })
-        .on('connect', () => {
-          finished = true;
-          clearTimeout(timeout);
-          connection.end();
-          setTimeout(resolve, 1000);
-        });
+          if (isConnected) {
+            finished = true;
+            clearTimeout(timeout);
+            setTimeout(resolve, 1000);
+          } else {
+            setTimeout(test, 500);
+          }
+        },
+        (err) => {
+          reject(err);
+        },
+      );
     }
     test();
+  });
+}
+async function testConnection(options: NormalizedOptions): Promise<boolean> {
+  return new Promise<boolean>((resolve) => {
+    const connection = connect(options.externalPort)
+      .on('error', () => {
+        resolve(false);
+      })
+      .on('connect', () => {
+        connection.end();
+        resolve(true);
+      });
   });
 }
 

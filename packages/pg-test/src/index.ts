@@ -3,6 +3,7 @@ import startContainer, {
   killOldContainers,
 } from '@databases/with-container';
 import {getPgConfigSync} from '@databases/pg-config';
+import spawn = require('cross-spawn');
 
 const config = getPgConfigSync();
 const DEFAULT_PG_DEBUG = !!process.env.PG_TEST_DEBUG || config.test.debug;
@@ -26,9 +27,9 @@ const DEFAULT_PG_USER = process.env.PG_TEST_USER || config.test.pgUser;
 const DEFAULT_PG_DB = process.env.PG_TEST_DB || config.test.pgDb;
 
 export interface Options
-  extends Pick<
+  extends Omit<
     WithContainerOptions,
-    Exclude<keyof WithContainerOptions, 'internalPort'>
+    'internalPort' | 'enableDebugInstructions' | 'testConnection'
   > {
   pgUser: string;
   pgDb: string;
@@ -63,6 +64,32 @@ export default async function getDatabase(options: Partial<Options> = {}) {
       ...environment,
       POSTGRES_USER: pgUser,
       POSTGRES_DB: pgDb,
+    },
+
+    enableDebugInstructions: `To view logs, run with PG_TEST_DEBUG=true environment variable.`,
+    async testConnection({
+      debug,
+      containerName,
+      testPortConnection,
+    }): Promise<boolean> {
+      if (!(await testPortConnection())) return false;
+      return await new Promise<boolean>((resolve) => {
+        spawn(
+          `docker`,
+          [
+            `exec`,
+            containerName,
+            `psql`,
+            `--username=${pgUser}`,
+            `--dbname=${pgDb}`,
+            `-c`,
+            `select 1`,
+          ],
+          debug ? {stdio: 'inherit'} : {},
+        )
+          .on(`error`, () => resolve(false))
+          .on(`exit`, (code) => resolve(code === 0));
+      });
     },
   });
 
