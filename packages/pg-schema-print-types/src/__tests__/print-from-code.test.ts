@@ -62,6 +62,11 @@ test('replace filter', async () => {
       },
     ];
     export {databaseSchema}
+
+    export type {
+    TableName,
+    TableMyNameInsert,
+    }
     ",
         "filename": "index.ts",
       },
