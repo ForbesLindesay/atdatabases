@@ -60,7 +60,7 @@ In addition to the new `bulkOperation` methods, [`@databases/pg-typed`](/docs/pg
 You can now use `.findOneRequired` in place of `.findOne` to throw an error instead of returning `null` when a record is missing. This can simplify/clean up your app code for cases where you can be sure that the record does exist.
 
 ```typescript
-function getPostWithAuthor(id: DbPost['id']) {
+async function getPostWithAuthor(id: DbPost['id']) {
   const post = await posts(database).findOne({id});
   if (!post) return null;
   const author = await users(database).findOneRequired({id: post.author_id});
@@ -71,7 +71,7 @@ function getPostWithAuthor(id: DbPost['id']) {
 You can append `.one()` or `.oneRequired()` onto `SelectQuery`s. This lets you more easily load a subset of a single record. e.g.
 
 ```typescript
-function getPostWithAuthorName(id: DbPost['id']) {
+async function getPostWithAuthorName(id: DbPost['id']) {
   const post = await posts(database).findOne({id});
   if (!post) return null;
   const author = await users(database)
@@ -85,7 +85,7 @@ function getPostWithAuthorName(id: DbPost['id']) {
 There's also a new type safe alternative to `inQueryResults`, making it easier to load related records in a single database round trip . e.g.
 
 ```typescript
-function getPostAuthor(postId: DbPost['id']) {
+async function getPostAuthor(postId: DbPost['id']) {
   return await users(database).findOne({
     // find users where the id matches the
     // author_id field in posts where the post's
