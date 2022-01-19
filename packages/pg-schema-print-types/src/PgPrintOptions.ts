@@ -1,3 +1,4 @@
+import assertNever from 'assert-never';
 import {PrintOptions} from '@databases/shared-print-types';
 import PgConfig, {DEFAULT_CONFIG} from '@databases/pg-config';
 import TypeID from './TypeID';
@@ -91,7 +92,7 @@ export default class PgPrintOptions implements PrintOptions<TypeID> {
       case 're_export':
         switch (id.of.type) {
           case 'class': {
-            if (this._config['tableReExportFileName'] === null) {
+            if (this._config.tableReExportFileName === null) {
               return this.getFilenameTemplate(id.of);
             }
             return (
@@ -100,15 +101,15 @@ export default class PgPrintOptions implements PrintOptions<TypeID> {
             );
           }
           case 'insert_parameters':
-            if (
-              this._config['tableInsertParametersReExportFileName'] === null
-            ) {
+            if (this._config.tableInsertParametersReExportFileName === null) {
               return this.getFilenameTemplate(id.of);
             }
             return (
               this._v('tableInsertParametersReExportFileName') ??
               this.getFilenameTemplate(id.of)
             );
+          default:
+            return assertNever(id.of);
         }
     }
   }

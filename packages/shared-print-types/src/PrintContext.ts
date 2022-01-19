@@ -230,7 +230,7 @@ export default class PrintContext<TypeID> {
       file,
       () => new FileContent(file, this.options),
     );
-    return fileContent.pushReExport(id, from);
+    fileContent.pushReExport(id, from);
   }
 
   public pushValueDeclaration(
