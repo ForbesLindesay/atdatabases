@@ -9,7 +9,7 @@ Postgres is very fast, but one limitation you may run into when dealing with big
 
 <!--truncate-->
 
-That all changes today. The newly released [`@databases/pg-bulk`](/docs/pg-bulk) lets you use the powerful `UNNEST` utility to write very high performance queries without all the difficult parts. For example, you can update multiple users in a single statement:
+That all changes today. The newly released [`@databases/pg-bulk`](https://www.atdatabases.org/docs/pg-bulk) lets you use the powerful `UNNEST` utility to write very high performance queries without all the difficult parts. For example, you can update multiple users in a single statement:
 
 ```typescript
 async function updateUsers() {
@@ -33,11 +33,11 @@ async function updateUsers() {
 
 To do this without `bulkUpdate` you'd either have to do 3 separate SQL statements, or hand code SQL while trying to remember how `UNNEST` works.
 
-> If you'd like all the details of how `@databases/pg-bulk` uses `UNNEST` to make these statements work, you can find examples with the SQL statements that they would run in [the documentation for `@databases/pg-bulk`](/docs/pg-bulk)
+> If you'd like all the details of how `@databases/pg-bulk` uses `UNNEST` to make these statements work, you can find examples with the SQL statements that they would run in [the documentation for `@databases/pg-bulk`](https://www.atdatabases.org/docs/pg-bulk)
 
 ## pg-typed
 
-If you're using TypeScript, you can make this even easier by using [`@databases/pg-typed`](/docs/pg-typed). `pg-typed` exposes all the same APIs as `bulkUpdate` but with the added bonus of type safety and being able to auto-generate the `columnTypes` using `pg-schema-cli`. If you use that, the above example simplifies to just:
+If you're using TypeScript, you can make this even easier by using [`@databases/pg-typed`](https://www.atdatabases.org/docs/pg-typed). `pg-typed` exposes all the same APIs as `bulkUpdate` but with the added bonus of type safety and being able to auto-generate the `columnTypes` using `pg-schema-cli`. If you use that, the above example simplifies to just:
 
 ```typescript
 async function updateUsers() {
@@ -55,7 +55,7 @@ async function updateUsers() {
 
 ## Other new pg-typed features
 
-In addition to the new `bulkOperation` methods, [`@databases/pg-typed`](/docs/pg-typed) gained a few other small features.
+In addition to the new `bulkOperation` methods, [`@databases/pg-typed`](https://www.atdatabases.org/docs/pg-typed) gained a few other small features.
 
 You can now use `.findOneRequired` in place of `.findOne` to throw an error instead of returning `null` when a record is missing. This can simplify/clean up your app code for cases where you can be sure that the record does exist.
 
