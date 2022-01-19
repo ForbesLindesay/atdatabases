@@ -8,12 +8,12 @@
 /* eslint-disable */
 // tslint:disable
 
-import Photo, {Photos_InsertParameters} from './photos'
-import User, {Users_InsertParameters} from './users'
+import Photo, {Photos_InsertParameters} from './photos';
+import User, {Users_InsertParameters} from './users';
 
 interface DatabaseSchema {
-  photos: {record: Photo, insert: Photos_InsertParameters};
-  users: {record: User, insert: Users_InsertParameters};
+  photos: {record: Photo; insert: Photos_InsertParameters};
+  users: {record: User; insert: Users_InsertParameters};
 }
 export default DatabaseSchema;
 
@@ -24,12 +24,12 @@ export default DatabaseSchema;
  * in a JSON or JSONB column.
  */
 function serializeValue(t: string, c: string, v: unknown): unknown {
-  if (t === "photos" && c === "metadata") {
+  if (t === 'photos' && c === 'metadata') {
     return JSON.stringify(v);
   }
   return v;
 }
-export {serializeValue}
+export {serializeValue};
 
 /**
  * The table names and column names (along with their types) can help to
@@ -41,77 +41,77 @@ export {serializeValue}
  */
 const databaseSchema = [
   {
-    name: "photos",
+    name: 'photos',
     columns: [
       {
-        name: "caption",
+        name: 'caption',
         isNullable: true,
         hasDefault: false,
         typeId: 25,
-        typeName: "TEXT",
+        typeName: 'TEXT',
       },
       {
-        name: "cdn_url",
+        name: 'cdn_url',
         isNullable: false,
         hasDefault: false,
         typeId: 25,
-        typeName: "TEXT",
+        typeName: 'TEXT',
       },
       {
-        name: "id",
+        name: 'id',
         isNullable: false,
         hasDefault: true,
         typeId: 20,
-        typeName: "BIGINT",
+        typeName: 'BIGINT',
       },
       {
-        name: "metadata",
+        name: 'metadata',
         isNullable: false,
         hasDefault: false,
         typeId: 3802,
-        typeName: "JSONB",
+        typeName: 'JSONB',
       },
       {
-        name: "owner_user_id",
+        name: 'owner_user_id',
         isNullable: false,
         hasDefault: false,
         typeId: 20,
-        typeName: "BIGINT",
+        typeName: 'BIGINT',
       },
     ],
   },
   {
-    name: "users",
+    name: 'users',
     columns: [
       {
-        name: "age",
+        name: 'age',
         isNullable: true,
         hasDefault: false,
         typeId: 23,
-        typeName: "INTEGER",
+        typeName: 'INTEGER',
       },
       {
-        name: "bio",
+        name: 'bio',
         isNullable: true,
         hasDefault: false,
         typeId: 25,
-        typeName: "TEXT",
+        typeName: 'TEXT',
       },
       {
-        name: "id",
+        name: 'id',
         isNullable: false,
         hasDefault: true,
         typeId: 20,
-        typeName: "BIGINT",
+        typeName: 'BIGINT',
       },
       {
-        name: "screen_name",
+        name: 'screen_name',
         isNullable: false,
         hasDefault: false,
         typeId: 25,
-        typeName: "TEXT",
+        typeName: 'TEXT',
       },
     ],
   },
 ];
-export {databaseSchema}
+export {databaseSchema};
