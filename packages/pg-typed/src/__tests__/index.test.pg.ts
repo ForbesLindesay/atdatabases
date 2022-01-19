@@ -1,8 +1,10 @@
 import connect, {pgFormat, sql} from '@databases/pg';
 import Schema from './__generated__';
-import tables from '..';
+import defineTables from '..';
 
-const {users, photos} = tables<Schema>({schemaName: 'typed_queries_tests'});
+const {users, photos} = defineTables<Schema>({
+  schemaName: 'typed_queries_tests',
+});
 
 const db = connect({bigIntMode: 'number'});
 
@@ -224,7 +226,7 @@ test('uses tableId in custom queries', async () => {
 });
 
 test('use a default connection', async () => {
-  const {users} = tables<Schema>({
+  const {users} = defineTables<Schema>({
     schemaName: 'typed_queries_tests',
     defaultConnection: db,
   });
@@ -234,7 +236,7 @@ test('use a default connection', async () => {
   expect(inserted.screen_name).toBe('Inserted with default connection');
   const defaultConnectionQuery = jest.fn().mockResolvedValue([]);
   const transactionQuery = jest.fn().mockResolvedValue([]);
-  const {users: mockUsers} = tables<Schema>({
+  const {users: mockUsers} = defineTables<Schema>({
     schemaName: 'typed_queries_tests',
     defaultConnection: {
       query: defaultConnectionQuery,
@@ -252,7 +254,7 @@ test('use a default connection', async () => {
   expect(defaultConnectionQuery).toBeCalledTimes(1);
   expect(transactionQuery).toBeCalledTimes(1);
 
-  const {users: unconnectedUsers} = tables<Schema>({
+  const {users: unconnectedUsers} = defineTables<Schema>({
     schemaName: 'typed_queries_tests',
   });
 

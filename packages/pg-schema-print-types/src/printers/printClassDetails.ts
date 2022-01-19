@@ -35,6 +35,12 @@ export default function printClassDetails(
       `}`,
     ],
   );
+
+  context.printer.pushReExport(
+    {type: 're_export', of: {type: 'class', name: type.className}},
+    DatabaseRecord,
+  );
+
   const InsertParameters = context.printer.pushTypeDeclaration(
     {type: 'insert_parameters', name: type.className},
     (identifierName, file) => [
@@ -51,6 +57,12 @@ export default function printClassDetails(
       `}`,
     ],
   );
+
+  context.printer.pushReExport(
+    {type: 're_export', of: {type: 'insert_parameters', name: type.className}},
+    InsertParameters,
+  );
+
   return {DatabaseRecord, InsertParameters};
 }
 

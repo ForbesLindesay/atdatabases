@@ -1,6 +1,51 @@
-import {sql, SQLQuery, Queryable} from '@databases/pg';
+import {SQLQuery, Queryable} from '@databases/pg';
+import {
+  bulkInsert,
+  bulkSelect,
+  bulkUpdate,
+  bulkDelete,
+  BulkOperationOptions,
+} from '@databases/pg-bulk';
+
+const NO_RESULT_FOUND = `NO_RESULT_FOUND`;
+const MULTIPLE_RESULTS_FOUND = `MULTIPLE_RESULTS_FOUND`;
+export function isNoResultFoundError(
+  err: unknown,
+): err is Error & {code: typeof NO_RESULT_FOUND} {
+  return (
+    typeof err === 'object' &&
+    err !== null &&
+    err instanceof Error &&
+    (err as any).code === NO_RESULT_FOUND
+  );
+}
+
+export function isMultipleResultsFoundError(
+  err: unknown,
+): err is Error & {code: typeof MULTIPLE_RESULTS_FOUND} {
+  return (
+    typeof err === 'object' &&
+    err !== null &&
+    err instanceof Error &&
+    (err as any).code === MULTIPLE_RESULTS_FOUND
+  );
+}
+
+export interface DatabaseSchemaColumn {
+  readonly name: string;
+  readonly isNullable: boolean;
+  readonly hasDefault: boolean;
+  readonly typeId: number;
+  readonly typeName: string | null;
+}
+export interface DatabaseSchemaTable {
+  readonly name: string;
+  readonly columns: readonly DatabaseSchemaColumn[];
+}
 
 export interface SelectQuery<TRecord> {
+  one(): Promise<TRecord | null>;
+  oneRequired(): Promise<TRecord>;
   all(): Promise<TRecord[]>;
   orderByAsc(key: keyof TRecord): OrderedSelectQuery<TRecord>;
   orderByDesc(key: keyof TRecord): OrderedSelectQuery<TRecord>;
@@ -109,10 +154,14 @@ export function not<T>(value: T | FieldQuery<T>) {
   );
 }
 
-export function inQueryResults(query: SQLQuery) {
+function internalInQueryResults(query: (sql: Queryable['sql']) => SQLQuery) {
   return new FieldQuery<any>(
-    (columnName, sql) => sql`${sql.ident(columnName)} IN (${query})`,
+    (columnName, sql) => sql`${sql.ident(columnName)} IN (${query(sql)})`,
   );
+}
+
+export function inQueryResults(query: SQLQuery) {
+  return internalInQueryResults(() => query);
 }
 
 export function lessThan<T>(value: T) {
@@ -129,18 +178,29 @@ export function greaterThan<T>(value: T) {
   );
 }
 
+interface SelectQueryOptions {
+  selectColumnNames: readonly string[] | undefined;
+  orderBy: readonly {
+    readonly columnName: string;
+    readonly direction: 'ASC' | 'DESC';
+  }[];
+  limit: number | undefined;
+}
 class SelectQueryImplementation<TRecord>
   implements OrderedSelectQuery<TRecord>
 {
-  public readonly orderByQueries: SQLQuery[] = [];
-  public limitCount: number | undefined;
-  private _selectFields: SQLQuery | undefined;
+  private readonly _orderByQueries: {
+    columnName: string;
+    direction: 'ASC' | 'DESC';
+  }[] = [];
+  private _limitCount: number | undefined;
+  private _selectFields: readonly string[] | undefined;
 
   constructor(
-    private readonly _sql: typeof sql,
-    private readonly _tableID: SQLQuery,
-    private readonly _where: SQLQuery,
-    public readonly _executeQuery: (query: SQLQuery) => Promise<TRecord[]>,
+    private readonly _tableName: string,
+    public readonly _executeQuery: (
+      options: SelectQueryOptions,
+    ) => Promise<TRecord[]>,
   ) {}
 
   private _methodCalled: string | undefined;
@@ -152,31 +212,25 @@ class SelectQueryImplementation<TRecord>
     }
     this._methodCalled = mode;
 
-    const sql = this._sql;
-    const parts = [
-      this._selectFields
-        ? sql`SELECT ${this._selectFields} FROM ${this._tableID} ${this._where}`
-        : sql`SELECT * FROM ${this._tableID} ${this._where}`,
-    ];
-    if (this.orderByQueries.length) {
-      parts.push(sql`ORDER BY ${sql.join(this.orderByQueries, sql`, `)}`);
-    }
-    if (this.limitCount) {
-      parts.push(sql`LIMIT ${this.limitCount}`);
-    }
-    return this._executeQuery(
-      parts.length === 1 ? parts[0] : sql.join(parts, sql` `),
-    );
+    return this._executeQuery({
+      selectColumnNames: this._selectFields,
+      orderBy: this._orderByQueries,
+      limit: this._limitCount,
+    });
   }
 
-  public orderByAsc(key: keyof TRecord): OrderedSelectQuery<TRecord> {
-    const sql = this._sql;
-    this.orderByQueries.push(sql`${sql.ident(key)} ASC`);
+  public orderByAsc(columnName: keyof TRecord): OrderedSelectQuery<TRecord> {
+    this._orderByQueries.push({
+      columnName: columnName as string,
+      direction: `ASC`,
+    });
     return this;
   }
-  public orderByDesc(key: keyof TRecord): OrderedSelectQuery<TRecord> {
-    const sql = this._sql;
-    this.orderByQueries.push(sql`${sql.ident(key)} DESC`);
+  public orderByDesc(columnName: keyof TRecord): OrderedSelectQuery<TRecord> {
+    this._orderByQueries.push({
+      columnName: columnName as string,
+      direction: `DESC`,
+    });
     return this;
   }
 
@@ -186,10 +240,7 @@ class SelectQueryImplementation<TRecord>
     if (this._selectFields) {
       throw new Error('Cannot call select fields multiple times on one query');
     }
-    this._selectFields = this._sql.join(
-      fields.map((f) => this._sql.ident(f)),
-      ',',
-    );
+    this._selectFields = fields as readonly string[];
     return this;
   }
 
@@ -197,49 +248,253 @@ class SelectQueryImplementation<TRecord>
     return await this._getResults('all');
   }
   public async limit(count: number) {
-    if (!this.orderByQueries.length) {
+    if (!this._orderByQueries.length) {
       throw new Error(
         'You cannot call "limit" until after you call "orderByAsc" or "orderByDesc".',
       );
     }
-    this.limitCount = count;
+    this._limitCount = count;
     return await this._getResults('limit');
   }
   public async first() {
-    if (!this.orderByQueries.length) {
+    if (!this._orderByQueries.length) {
       throw new Error(
         'You cannot call "first" until after you call "orderByAsc" or "orderByDesc".',
       );
     }
-    this.limitCount = 1;
+    this._limitCount = 1;
     const results = await this._getResults('first');
     return results.length ? results[0] : null;
   }
+  public async one() {
+    const results = await this._getResults('only');
+    if (results.length > 1) {
+      throw Object.assign(
+        new Error(
+          `More than one row matched this query on ${this._tableName} but we only expected one.`,
+        ),
+        {code: MULTIPLE_RESULTS_FOUND},
+      );
+    }
+    if (results.length === 0) {
+      return null;
+    }
+    return results[0];
+  }
+  public async oneRequired() {
+    const result = await this.one();
+    if (result === null) {
+      throw Object.assign(
+        new Error(`No results matched this query on ${this._tableName}.`),
+        {code: NO_RESULT_FOUND},
+      );
+    }
+    return result;
+  }
 }
 
+type BulkRecord<TParameters, TKey extends keyof TParameters> = {
+  [key in TKey]-?: Exclude<TParameters[key], undefined>;
+} &
+  {
+    [key in Exclude<keyof TParameters, TKey>]?: undefined;
+  };
+
+type BulkInsertFields<
+  TInsertParameters,
+  TKey extends keyof TInsertParameters,
+> =
+  | TKey
+  | {
+      [K in keyof TInsertParameters]: undefined extends TInsertParameters[K]
+        ? never
+        : K;
+    }[keyof TInsertParameters];
+
+type BulkInsertRecord<
+  TInsertParameters,
+  TKey extends keyof TInsertParameters,
+> = BulkRecord<TInsertParameters, BulkInsertFields<TInsertParameters, TKey>>;
+
+function rowToOptionalWhere<TRecord>(
+  row: WhereCondition<TRecord>,
+  sql: Queryable['sql'],
+  toValue: (columnName: string, value: unknown) => unknown,
+): SQLQuery | null {
+  const entries = Object.entries(row).filter((row) => row[1] !== undefined);
+  if (entries.length === 0) {
+    return null;
+  }
+  return sql`WHERE ${sql.join(
+    entries.map(([columnName, value]) =>
+      FieldQuery.query(columnName, value, sql, toValue),
+    ),
+    sql` AND `,
+  )}`;
+}
+function rowToWhere<TRecord>(
+  row: WhereCondition<TRecord>,
+  sql: Queryable['sql'],
+  toValue: (columnName: string, value: unknown) => unknown,
+): SQLQuery {
+  return rowToOptionalWhere(row, sql, toValue) ?? sql``;
+}
+
+type BulkOperationOptionsBase<
+  TColumnName extends string | number | symbol,
+  TInsertColumnName extends string | number | symbol,
+> = Omit<BulkOperationOptions<TColumnName>, 'database'> & {
+  requiredInsertColumnNames: readonly TInsertColumnName[];
+};
+function getBulkOperationOptionsBase<
+  TColumnName extends string | number | symbol,
+  TInsertColumnName extends string | number | symbol,
+>(
+  table: DatabaseSchemaTable,
+  {
+    sql,
+    schemaName,
+    serializeValue,
+  }: {
+    sql: Queryable['sql'];
+    schemaName?: string;
+    serializeValue: (column: string, value: unknown) => unknown;
+  },
+): BulkOperationOptionsBase<TColumnName, TInsertColumnName> {
+  return {
+    tableName: table.name,
+    columnTypes: Object.fromEntries(
+      table.columns.map((c) => [
+        c.name,
+        sql.__dangerous__rawValue(`${c.typeName}`),
+      ]),
+    ) as any,
+    schemaName,
+    serializeValue,
+    requiredInsertColumnNames: table.columns
+      .filter((c) => !c.isNullable && !c.hasDefault)
+      .map((c) => c.name as TInsertColumnName),
+  };
+}
 class Table<TRecord, TInsertParameters> {
   private readonly _value: (columnName: string, value: any) => unknown;
+  private readonly _bulkOperationOptions:
+    | (BulkOperationOptions<keyof TRecord | keyof TInsertParameters> & {
+        requiredInsertColumnNames: readonly (keyof TInsertParameters)[];
+      })
+    | undefined;
   constructor(
     private readonly _underlyingDb: Queryable,
     public readonly tableId: SQLQuery,
     public readonly tableName: string,
     serializeValue: (columnName: string, value: unknown) => unknown,
+    bulkOperationOptions:
+      | (BulkOperationOptions<keyof TRecord | keyof TInsertParameters> & {
+          requiredInsertColumnNames: readonly (keyof TInsertParameters)[];
+        })
+      | undefined,
   ) {
     this._value = (c, v) => serializeValue(c, v);
+    this._bulkOperationOptions = bulkOperationOptions;
   }
 
-  private _rowToWhere(row: WhereCondition<TRecord>) {
-    const {sql} = this._underlyingDb;
-    const entries = Object.entries(row).filter((row) => row[1] !== undefined);
-    if (entries.length === 0) {
-      return sql``;
+  private _getBulkOperationOptions() {
+    if (!this._bulkOperationOptions) {
+      throw new Error(
+        `You must provide a "databaseSchema" when constructing pg-typed to use bulk operations.`,
+      );
     }
-    return sql`WHERE ${sql.join(
-      entries.map(([columnName, value]) =>
-        FieldQuery.query(columnName, value, sql, this._value),
-      ),
-      sql` AND `,
-    )}`;
+    return this._bulkOperationOptions;
+  }
+
+  async bulkInsert<
+    TColumnsToInsert extends [...(readonly (keyof TInsertParameters)[])],
+  >({
+    columnsToInsert,
+    records,
+  }: {
+    readonly columnsToInsert: TColumnsToInsert;
+    readonly records: readonly BulkInsertRecord<
+      TInsertParameters,
+      TColumnsToInsert[number]
+    >[];
+  }) {
+    await bulkInsert<keyof TInsertParameters>({
+      ...this._getBulkOperationOptions(),
+      columnsToInsert: [
+        ...new Set([
+          ...columnsToInsert,
+          ...this._getBulkOperationOptions().requiredInsertColumnNames,
+        ]),
+      ].sort(),
+      records,
+    });
+  }
+
+  bulkFind<TWhereColumns extends [...(readonly (keyof TRecord)[])]>({
+    whereColumnNames,
+    whereConditions,
+  }: {
+    readonly whereColumnNames: TWhereColumns;
+    readonly whereConditions: readonly BulkRecord<
+      TRecord,
+      TWhereColumns[number]
+    >[];
+  }): SelectQuery<TRecord> {
+    const bulkOperationOptions = this._getBulkOperationOptions();
+    return new SelectQueryImplementation<TRecord>(
+      this.tableName,
+      async ({selectColumnNames, orderBy, limit}) => {
+        return bulkSelect<TWhereColumns[number]>({
+          ...bulkOperationOptions,
+          whereColumnNames,
+          whereConditions,
+          selectColumnNames,
+          orderBy,
+          limit,
+        });
+      },
+    );
+  }
+
+  async bulkUpdate<
+    TWhereColumns extends [...(readonly (keyof TRecord)[])],
+    TSetColumns extends [...(readonly (keyof TRecord)[])],
+  >({
+    whereColumnNames,
+    setColumnNames,
+    updates,
+  }: {
+    readonly whereColumnNames: TWhereColumns;
+    readonly setColumnNames: TSetColumns;
+    readonly updates: readonly {
+      readonly where: BulkRecord<TRecord, TWhereColumns[number]>;
+      readonly set: BulkRecord<TRecord, TSetColumns[number]>;
+    }[];
+  }) {
+    await bulkUpdate<TWhereColumns[number], TSetColumns[number]>({
+      ...this._getBulkOperationOptions(),
+      whereColumnNames,
+      setColumnNames,
+      updates,
+    });
+  }
+
+  async bulkDelete<TWhereColumns extends [...(readonly (keyof TRecord)[])]>({
+    whereColumnNames,
+    whereConditions,
+  }: {
+    readonly whereColumnNames: TWhereColumns;
+    readonly whereConditions: readonly BulkRecord<
+      TRecord,
+      TWhereColumns[number]
+    >[];
+  }) {
+    await bulkDelete<TWhereColumns[number]>({
+      ...this._getBulkOperationOptions(),
+      whereColumnNames,
+      whereConditions,
+    });
   }
 
   private async _insert<TRecordsToInsert extends readonly TInsertParameters[]>(
@@ -354,7 +609,7 @@ class Table<TRecord, TInsertParameters> {
     updateValues: Partial<TRecord>,
   ): Promise<TRecord[]> {
     const {sql} = this._underlyingDb;
-    const where = this._rowToWhere(whereValues);
+    const where = rowToWhere(whereValues, sql, this._value);
     const setClause = sql.join(
       Object.entries(updateValues).map(([columnName, value]) => {
         return sql`${sql.ident(columnName)} = ${this._value(
@@ -371,7 +626,7 @@ class Table<TRecord, TInsertParameters> {
 
   async delete(whereValues: WhereCondition<TRecord>): Promise<void> {
     const {sql} = this._underlyingDb;
-    const where = this._rowToWhere(whereValues);
+    const where = rowToWhere(whereValues, sql, this._value);
     await this.untypedQuery(sql`DELETE FROM ${this.tableId} ${where}`);
   }
 
@@ -383,12 +638,41 @@ class Table<TRecord, TInsertParameters> {
   }
   find(whereValues: WhereCondition<TRecord> = {}): SelectQuery<TRecord> {
     const {sql} = this._underlyingDb;
-    const where = this._rowToWhere(whereValues);
     return new SelectQueryImplementation(
-      sql,
-      this.tableId,
-      where,
-      async (query) => await this._underlyingDb.query(query),
+      this.tableName,
+      async ({
+        selectColumnNames: selectFields,
+        orderBy: orderByQueries,
+        limit: limitCount,
+      }) => {
+        return await this._underlyingDb.query(
+          sql.join(
+            [
+              sql`SELECT ${
+                selectFields
+                  ? sql.join(
+                      selectFields.map((f) => sql.ident(f)),
+                      ',',
+                    )
+                  : sql`*`
+              } FROM ${this.tableId}`,
+              rowToOptionalWhere(whereValues, sql, this._value),
+              orderByQueries.length
+                ? sql`ORDER BY ${sql.join(
+                    orderByQueries.map((q) =>
+                      q.direction === 'ASC'
+                        ? sql`${sql.ident(q.columnName)} ASC`
+                        : sql`${sql.ident(q.columnName)} DESC`,
+                    ),
+                    sql`, `,
+                  )}`
+                : null,
+              limitCount ? sql`LIMIT ${limitCount}` : null,
+            ].filter(<T>(v: T): v is Exclude<T, null> => v !== null),
+            sql` `,
+          ),
+        );
+      },
     );
   }
 
@@ -402,21 +686,17 @@ class Table<TRecord, TInsertParameters> {
   }
   // throws if > 1 row matches
   async findOne(whereValues: WhereCondition<TRecord>): Promise<TRecord | null> {
-    const rows = await this.find(whereValues).all();
-    if (rows.length >= 2) {
-      throw new Error(
-        'More than one row matched this query but you used `.findOne`.',
-      );
-    }
-    if (rows.length !== 1) {
-      return null;
-    }
-    return rows[0];
+    return await this.find(whereValues).one();
+  }
+  async findOneRequired(
+    whereValues: WhereCondition<TRecord>,
+  ): Promise<TRecord> {
+    return await this.find(whereValues).oneRequired();
   }
 
   async count(whereValues: WhereCondition<TRecord> = {}): Promise<number> {
     const {sql} = this._underlyingDb;
-    const where = this._rowToWhere(whereValues);
+    const where = rowToWhere(whereValues, sql, this._value);
     const [result] = await this._underlyingDb.query(
       sql`SELECT count(*) AS count FROM ${this.tableId} ${where}`,
     );
@@ -427,32 +707,107 @@ class Table<TRecord, TInsertParameters> {
     return await this._underlyingDb.query(query);
   }
 }
+export type {Table};
 
 function getTable<TRecord, TInsertParameters>(
   tableName: string,
   defaultConnection: Queryable | undefined,
   schemaName: string | undefined,
   serializeValue: (columnName: string, value: unknown) => unknown,
-) {
-  return (
-    queryable: Queryable | undefined = defaultConnection,
-  ): Table<TRecord, TInsertParameters> => {
-    if (!queryable) {
-      throw new Error(
-        'You must either provide a "defaultConnection" to pg-typed, or specify a connection when accessing the table.',
+  tableSchema?: DatabaseSchemaTable,
+): TableHelper<TRecord, TInsertParameters> {
+  const cache = new WeakMap<Queryable, Table<TRecord, TInsertParameters>>();
+  const bulkOperationOptionsCache = new Map<
+    Queryable['sql'],
+    BulkOperationOptionsBase<
+      keyof TRecord | keyof TInsertParameters,
+      keyof TInsertParameters
+    >
+  >();
+  return Object.assign(
+    (
+      queryable: Queryable | undefined = defaultConnection,
+    ): Table<TRecord, TInsertParameters> => {
+      if (!queryable) {
+        throw new Error(
+          'You must either provide a "defaultConnection" to pg-typed, or specify a connection when accessing the table.',
+        );
+      }
+      const cached = cache.get(queryable);
+      if (cached) return cached;
+
+      let bulkOperationsBase = bulkOperationOptionsCache.get(queryable.sql);
+      if (tableSchema && !bulkOperationsBase) {
+        bulkOperationsBase =
+          tableSchema &&
+          getBulkOperationOptionsBase<
+            keyof TRecord | keyof TInsertParameters,
+            keyof TInsertParameters
+          >(tableSchema, {
+            sql: queryable.sql,
+            schemaName,
+            serializeValue,
+          });
+        bulkOperationOptionsCache.set(queryable.sql, bulkOperationsBase);
+      }
+      const fresh = new Table<TRecord, TInsertParameters>(
+        queryable,
+        schemaName
+          ? queryable.sql.ident(schemaName, tableName)
+          : queryable.sql.ident(tableName),
+        tableName,
+        serializeValue,
+        bulkOperationsBase
+          ? {...bulkOperationsBase, database: queryable}
+          : undefined,
       );
-    }
-    return new Table<TRecord, TInsertParameters>(
-      queryable,
-      schemaName
-        ? queryable.sql.ident(schemaName, tableName)
-        : queryable.sql.ident(tableName),
-      tableName,
-      serializeValue,
-    );
-  };
+      cache.set(queryable, fresh);
+
+      return fresh;
+    },
+    {
+      key: <TKey extends keyof TRecord>(
+        fieldName: TKey,
+        condition: WhereCondition<TRecord> = {},
+      ): FieldQuery<TRecord[TKey]> =>
+        internalInQueryResults(
+          (sql) =>
+            sql`SELECT ${sql.ident(fieldName)} FROM ${
+              schemaName
+                ? sql.ident(schemaName, tableName)
+                : sql.ident(tableName)
+            } ${rowToWhere(condition, sql, serializeValue)}`,
+        ),
+    },
+  );
 }
-export type {Table};
+
+type TableHelperFunction<
+  TMissingOptions extends keyof PgTypedOptions,
+  TResult,
+> = 'defaultConnection' extends TMissingOptions
+  ? (connectionOrTransaction: Queryable) => TResult
+  : (connectionOrTransaction?: Queryable) => TResult;
+
+type AssertKeyOfTable<TKey extends keyof Table<any, any>> = TKey;
+type PropertiesThatRequireDbSchema = AssertKeyOfTable<
+  'bulkDelete' | 'bulkFind' | 'bulkInsert' | 'bulkUpdate'
+>;
+export type TableHelper<
+  TRecord,
+  TInsertParameters,
+  TMissingOptions extends keyof PgTypedOptions = never,
+> = {
+  key: <TKey extends keyof TRecord>(
+    fieldName: TKey,
+    condition?: WhereCondition<TRecord>,
+  ) => FieldQuery<TRecord[TKey]>;
+} & TableHelperFunction<
+  TMissingOptions,
+  'databaseSchema' extends TMissingOptions
+    ? Omit<Table<TRecord, TInsertParameters>, PropertiesThatRequireDbSchema>
+    : Table<TRecord, TInsertParameters>
+>;
 
 export interface PgTypedOptions {
   schemaName?: string;
@@ -461,41 +816,70 @@ export interface PgTypedOptions {
     columnName: string,
     value: unknown,
   ) => unknown;
-
   // TODO: easy aliasing of fields and easy parsing of fields using a similar API to the serializeValue?
-}
-export interface PgTypedOptionsWithDefaultConnection extends PgTypedOptions {
   defaultConnection: Queryable;
+  databaseSchema: DatabaseSchemaTable[];
 }
 
-export default function tables<TTables>(
-  options: PgTypedOptionsWithDefaultConnection,
-): {
-  [TTableName in keyof TTables]: (
-    connectionOrTransaction?: Queryable,
-  ) => Table<
+export default function defineTables<TTables>(options: PgTypedOptions): {
+  [TTableName in keyof TTables]: TableHelper<
     PropertyOf<TTables[TTableName], 'record'>,
     PropertyOf<TTables[TTableName], 'insert'>
   >;
 };
-export default function tables<TTables>(options?: PgTypedOptions): {
-  [TTableName in keyof TTables]: (
-    connectionOrTransaction: Queryable,
-  ) => Table<
+export default function defineTables<TTables>(
+  options: Omit<PgTypedOptions, 'defaultConnection'>,
+): {
+  [TTableName in keyof TTables]: TableHelper<
     PropertyOf<TTables[TTableName], 'record'>,
-    PropertyOf<TTables[TTableName], 'insert'>
+    PropertyOf<TTables[TTableName], 'insert'>,
+    'defaultConnection'
   >;
 };
-export default function tables<TTables>(
-  options: Partial<PgTypedOptionsWithDefaultConnection> = {},
+export default function defineTables<TTables>(
+  options: Omit<PgTypedOptions, 'databaseSchema'>,
 ): {
-  [TTableName in keyof TTables]: (
-    connectionOrTransaction?: Queryable,
-  ) => Table<
+  [TTableName in keyof TTables]: TableHelper<
+    PropertyOf<TTables[TTableName], 'record'>,
+    PropertyOf<TTables[TTableName], 'insert'>,
+    'databaseSchema'
+  >;
+};
+export default function defineTables<TTables>(
+  options?: Omit<PgTypedOptions, 'databaseSchema' | 'defaultConnection'>,
+): {
+  [TTableName in keyof TTables]: TableHelper<
+    PropertyOf<TTables[TTableName], 'record'>,
+    PropertyOf<TTables[TTableName], 'insert'>,
+    'databaseSchema' | 'defaultConnection'
+  >;
+};
+export default function defineTables<TTables>(
+  options: Partial<PgTypedOptions> &
+    Omit<PgTypedOptions, 'databaseSchema' | 'defaultConnection'> = {},
+): {
+  [TTableName in keyof TTables]: TableHelper<
     PropertyOf<TTables[TTableName], 'record'>,
     PropertyOf<TTables[TTableName], 'insert'>
   >;
 } {
+  if (options.databaseSchema) {
+    return Object.fromEntries(
+      options.databaseSchema.map((tableSchema) => [
+        tableSchema.name,
+        getTable(
+          tableSchema.name,
+          options.defaultConnection,
+          options.schemaName,
+          options.serializeValue
+            ? (column: string, value: unknown) =>
+                options.serializeValue!(tableSchema.name, column, value)
+            : getTableSerializeValue(tableSchema),
+          tableSchema,
+        ),
+      ]),
+    ) as any;
+  }
   return new Proxy(
     {},
     {
@@ -508,7 +892,10 @@ export default function tables<TTables>(
           tableName,
           options.defaultConnection,
           options.schemaName,
-          getTableSerializeValue(tableName, options.serializeValue),
+          options.serializeValue
+            ? (column: string, value: unknown) =>
+                options.serializeValue!(tableName, column, value)
+            : (_column: string, value: unknown) => value,
         );
       },
     },
@@ -522,23 +909,38 @@ type PropertyOf<T, TProp extends string> = T extends {
   : never;
 
 function getTableSerializeValue(
-  tableName: string,
-  serializeValue?: (
-    tableName: string,
-    columnName: string,
-    value: unknown,
-  ) => unknown,
+  tableSchema: Pick<DatabaseSchemaTable, 'columns'>,
 ): (columnName: string, value: unknown) => unknown {
-  return serializeValue
-    ? (columnName, value) => serializeValue(tableName, columnName, value)
+  const jsonColumns = new Set(
+    tableSchema.columns
+      .filter((c) => c.typeId === 114 || c.typeId === 3802)
+      .map((c) => c.name),
+  );
+  const jsonArrayColumns = new Set(
+    tableSchema.columns
+      .filter((c) => c.typeId === 199 || c.typeId === 3807)
+      .map((c) => c.name),
+  );
+  return tableSchema
+    ? (columnName, value) => {
+        if (jsonColumns.has(columnName)) {
+          return JSON.stringify(value);
+        }
+        if (jsonArrayColumns.has(columnName) && Array.isArray(value)) {
+          return value.map((v) => JSON.stringify(v));
+        }
+        return value;
+      }
     : (_, value) => value;
 }
 
-module.exports = Object.assign(tables, {
-  default: tables,
+module.exports = Object.assign(defineTables, {
+  default: defineTables,
   anyOf,
   not,
   inQueryResults,
   lessThan,
   greaterThan,
+  isNoResultFoundError,
+  isMultipleResultsFoundError,
 });

@@ -1,10 +1,16 @@
 import connect, {sql} from '@databases/pg';
-import Schema, {serializeValue} from './__generated__';
-import tables, {not, anyOf, greaterThan, lessThan, inQueryResults} from '..';
+import Schema, {databaseSchema} from './__generated__';
+import defineTables, {
+  not,
+  anyOf,
+  greaterThan,
+  lessThan,
+  inQueryResults,
+} from '..';
 
-const {users, photos} = tables<Schema>({
+const {users, photos} = defineTables<Schema>({
   schemaName: 'typed_queries_advanced_tests',
-  serializeValue,
+  databaseSchema,
 });
 
 const db = connect({bigIntMode: 'number'});

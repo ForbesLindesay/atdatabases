@@ -17,11 +17,11 @@ The `tables` function returns an object for each database table, allowing you to
 
 import createConnectionPool, {sql} from '@databases/pg';
 import tables from '@databases/pg-typed';
-import DatabaseSchema, {serializeValue} from './__generated__';
+import DatabaseSchema, {databaseSchema} from './__generated__';
 
 export {sql};
 
-const db = createConnectionPool({serializeValue});
+const db = createConnectionPool();
 export default db;
 
 const {users, posts} = tables<DatabaseSchema>();
@@ -34,7 +34,7 @@ export {users, posts};
 const tables = require('@databases/pg-typed');
 const db = require('./database');
 
-const {users, posts} = tables();
+const {users, posts} = tables({databaseSchema});
 module.exports = {users, posts};
 ```
 
@@ -141,6 +141,21 @@ export async function getFavoriteColor(email: string) {
   return user?.favorite_color ?? `Unknown`;
 }
 ```
+
+### findOneRequired(whereValues)
+
+If you know a record exists, you can use `findOneRequired` instead of `findOne`. This will throw an error if the record does not exist.
+
+```typescript
+import db, {users} from './database';
+
+export async function getFavoriteColor(email: string) {
+  const user = await users(db).findOneRequired({email});
+  return user.favorite_color;
+}
+```
+
+You can use `isNoResultFoundError` to test a caught exception to see if it is the result of a `findOneRequired` call failing to return any results.
 
 ### find(whereValues)
 
@@ -252,6 +267,84 @@ import db, {users} from './database';
 users(db).tableName; // 'users'
 ```
 
+### bulkFind(options)
+
+This is like the regular `.find(condition)` API, but it lets you specify multiple distinct conditions that are efficiently or'ed together. Once you've started a query using `bulkFind` you can call `.orderByAsc`/`.orderByDesc`/`.select`/etc. just like you could if you started a query with a call to `find`. You can find more details on how this API works in [@databases/pg-bulk](pg-bulk.md).
+
+```typescript
+async function getPosts() {
+  await tables
+    .posts(db)
+    .bulkFind({
+      whereColumnNames: [`org_id`, `user_id`],
+      whereConditions: [
+        {org_id: 1, user_id: 10},
+        {org_id: 2, user_id: 20},
+      ],
+    })
+    .all();
+}
+```
+
+### bulkInsert(options)
+
+To insert thousands of records at a time, you can use the bulk insert API. This requires you to specify any optional fields that you want to pass in. Any required (i.e. `NOT NULL` and no default value) fields are automatically expected. You can find more details on how this API works in [@databases/pg-bulk](pg-bulk.md).
+
+```typescript
+async function insertUsers() {
+  // This example assumes that `email` is a non-nullable field
+  await tables.users(db).bulkInsert({
+    columnsToInsert: [`favorite_color`],
+    records: [
+      {email: `joe@example.com`, favorite_color: `red`},
+      {email: `ben@example.com`, favorite_color: `green`},
+      {email: `tom@example.com`, favorite_color: `blue`},
+      {email: `clare@example.com`, favorite_color: `indigo`},
+    ],
+  });
+}
+```
+
+### bulkUpdate(options)
+
+Updating multiple records in one go, where each record needs to be updated to a different value can be tricky to do efficiently. If there is a unique constraint, it may be possible to use `insertOrUpdate`, but failing that you'll want to use this bulk API. You can find more details on how this API works in [@databases/pg-bulk](pg-bulk.md).
+
+```typescript
+async function updateUsers() {
+  // This example assumes that `email` is a non-nullable field
+  await tables.users(db).bulkUpdate({
+    whereColumnNames: [`email`],
+    setColumnNames: [`favorite_color`],
+    updates: [
+      {where: {email: `joe@example.com`}, set: {favorite_color: `green`}},
+      {where: {email: `ben@example.com`}, set: {favorite_color: `blue`}},
+      {where: {email: `tom@example.com`}, set: {favorite_color: `indigo`}},
+      {where: {email: `clare@example.com`}, set: {favorite_color: `green`}},
+    ],
+  });
+}
+```
+
+This will efficiently update all records in a single statement.
+
+### bulkDelete(options)
+
+The bulk delete API lets you delete multiple records using different conditions in one go. You can find more details on how this API works in [@databases/pg-bulk](pg-bulk.md).
+
+```typescript
+async function deletePosts() {
+  await tables.posts(db).bulkDelete({
+    whereColumnNames: [`org_id`, `user_id`],
+    whereConditions: [
+      {org_id: 1, user_id: 10},
+      {org_id: 2, user_id: 20},
+    ],
+  });
+}
+```
+
+This will delete results that match: `(org_id=1 AND user_id=10) OR (org_id=2 AND user_id=20)`. Unlike combining conditions in that way, it remains efficient even once you are deleting with thousands of possible conditions.
+
 ## SelectQuery
 
 A `SelectQuery` is a query for records within a table. The actual query is sent when you call one of the methods that returns a `Promise`, i.e. `all()`, `first()` or `limit(count)`.
@@ -341,6 +434,37 @@ export async function getEmails() {
   return records.map((record) => record.email);
 }
 ```
+
+### one()
+
+Return a single record (or null). If multiple records in the table match `whereValues`, an error is thrown. If no records match `whereValues`, `null` is returned. This is useful if you want to do `.findOne` but only need a sub-set of the fields.
+
+```typescript
+import db, {users} from './database';
+
+export async function getFavoriteColor(email: string) {
+  const user = await users(db).find({email}).select(`favorite_color`).one();
+  return user?.favorite_color ?? `Unknown`;
+}
+```
+
+### oneRequired()
+
+If you know a record exists, you can use `onlyRequired` instead of `only`. This will throw an error if the record does not exist.
+
+```typescript
+import db, {users} from './database';
+
+export async function getFavoriteColor(email: string) {
+  const user = await users(db)
+    .find({email})
+    .select(`favorite_color`)
+    .oneRequired();
+  return user.favorite_color;
+}
+```
+
+You can use `isNoResultFoundError` to test a caught exception to see if it is the result of a `.oneRequired()` call failing to return any results.
 
 ## FieldQuery
 
@@ -432,6 +556,30 @@ export async function getUsersWithValidPreference() {
   return await users(db)
     .find({
       favorite_color: inQueryResults(sql`SELECT color FROM valid_colors;`),
+    })
+    .all();
+}
+```
+
+### key(fieldName, whereClause)
+
+There is also a helper on the table itself to allow you to do `inQueryResults`, but in a type safe way:
+
+```typescript
+import {inQueryResults} from '@databases/pg-typed';
+import db, {users, valid_colors, posts} from './database';
+
+export async function getUsersWithValidPreference() {
+  return await users(db)
+    .find({
+      favorite_color: valid_colors.key(`color`),
+    })
+    .all();
+}
+export async function getPostsByUserEmail(email: string) {
+  return await posts(db)
+    .find({
+      created_by_id: users.key(`id`, {email}),
     })
     .all();
 }

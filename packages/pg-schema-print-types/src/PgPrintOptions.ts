@@ -1,3 +1,4 @@
+import assertNever from 'assert-never';
 import {PrintOptions} from '@databases/shared-print-types';
 import PgConfig, {DEFAULT_CONFIG} from '@databases/pg-config';
 import TypeID from './TypeID';
@@ -35,20 +36,25 @@ export default class PgPrintOptions implements PrintOptions<TypeID> {
       case 'schema':
         return 0;
       case 'class':
-        return 1;
+        return 2;
       case 'insert_parameters':
       case 'primary_key':
       case 'enum':
       case 'domain':
-        return 2;
-      case 'serializeValue':
         return 3;
+      case 'schema_json':
+      case 'serializeValue':
+        return 4;
+      case 're_export':
+        return 5;
     }
   }
   getExportNameTemplate(id: TypeID): string {
     switch (id.type) {
       case 'schema':
         return this._v('schemaTypeName');
+      case 'schema_json':
+        return this._v('schemaObjectName');
       case 'class':
         return this._v('tableTypeName');
       case 'insert_parameters':
@@ -61,12 +67,16 @@ export default class PgPrintOptions implements PrintOptions<TypeID> {
         return this._v('domainTypeName');
       case 'serializeValue':
         return this._v('serializeValueTypeName');
+      case 're_export':
+        return this.getExportNameTemplate(id.of);
     }
   }
   getFilenameTemplate(id: TypeID): string {
     switch (id.type) {
       case 'schema':
         return this._v('schemaFileName');
+      case 'schema_json':
+        return this._v('schemaObjectFileName');
       case 'class':
         return this._v('tableFileName');
       case 'insert_parameters':
@@ -79,11 +89,34 @@ export default class PgPrintOptions implements PrintOptions<TypeID> {
         return this._v('domainFileName');
       case 'serializeValue':
         return this._v('serializeValueFileName');
+      case 're_export':
+        switch (id.of.type) {
+          case 'class': {
+            if (this._config.tableReExportFileName === null) {
+              return this.getFilenameTemplate(id.of);
+            }
+            return (
+              this._v('tableReExportFileName') ??
+              this.getFilenameTemplate(id.of)
+            );
+          }
+          case 'insert_parameters':
+            if (this._config.tableInsertParametersReExportFileName === null) {
+              return this.getFilenameTemplate(id.of);
+            }
+            return (
+              this._v('tableInsertParametersReExportFileName') ??
+              this.getFilenameTemplate(id.of)
+            );
+          default:
+            return assertNever(id.of);
+        }
     }
   }
-  getTemplateValues(id: TypeID) {
+  getTemplateValues(id: TypeID): any {
     switch (id.type) {
       case 'schema':
+      case 'schema_json':
       case 'serializeValue':
         return {};
       case 'class':
@@ -97,6 +130,8 @@ export default class PgPrintOptions implements PrintOptions<TypeID> {
       case 'enum':
       case 'domain':
         return {TYPE_NAME: id.name};
+      case 're_export':
+        return this.getTemplateValues(id.of);
     }
   }
 }

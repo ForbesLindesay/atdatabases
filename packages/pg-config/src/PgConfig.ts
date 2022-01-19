@@ -211,6 +211,14 @@ export interface TypesConfig {
    * @default "{{ TABLE_NAME }}.ts"
    */
   tableFileName: string;
+  /**
+   * Also re-export the table record type from this file.
+   * Set this to `null` or to the same value as `tableFileName`
+   * to disable this feature.
+   *
+   * @default "index.ts"
+   */
+  tableReExportFileName: string | null;
 
   /**
    * What should TypeScript types for table insert parameters be called
@@ -224,6 +232,14 @@ export interface TypesConfig {
    * @default "{{ TABLE_NAME }}.ts"
    */
   tableInsertParametersFileName: string;
+  /**
+   * Also re-export the table insert parameters type from this file.
+   * Set this to `null` or to the same value as `tableFileName`
+   * to disable this feature.
+   *
+   * @default "index.ts"
+   */
+  tableInsertParametersReExportFileName: string | null;
 
   /**
    * What should the main generated "schema" type be called
@@ -237,6 +253,19 @@ export interface TypesConfig {
    * @default "index.ts"
    */
   schemaFileName: string;
+
+  /**
+   * What should the generated "schema" object type be called
+   *
+   * @default "databaseSchema"
+   */
+  schemaObjectName: string;
+  /**
+   * What filename do you want to use for the generated "schema" object
+   *
+   * @default "index.ts"
+   */
+  schemaObjectFileName: string;
 
   /**
    * What should the generated "serializeValue" function be called
@@ -300,6 +329,10 @@ export const TypesConfigSchema: ft.Runtype<TypesConfig> = ft
     primaryKeyFileName: withDefault(ft.String, `{{ TABLE_NAME }}.ts`),
     tableTypeName: withDefault(ft.String, `{{ TABLE_NAME | pascal-case }}`),
     tableFileName: withDefault(ft.String, `{{ TABLE_NAME }}.ts`),
+    tableReExportFileName: withDefault(
+      ft.Union(ft.String, ft.Null),
+      'index.ts',
+    ),
     tableInsertParametersTypeName: withDefault(
       ft.String,
       `{{ TABLE_NAME | pascal-case }}_InsertParameters`,
@@ -308,8 +341,14 @@ export const TypesConfigSchema: ft.Runtype<TypesConfig> = ft
       ft.String,
       `{{ TABLE_NAME }}.ts`,
     ),
+    tableInsertParametersReExportFileName: withDefault(
+      ft.Union(ft.String, ft.Null),
+      'index.ts',
+    ),
     schemaTypeName: withDefault(ft.String, `DatabaseSchema`),
     schemaFileName: withDefault(ft.String, `index.ts`),
+    schemaObjectName: withDefault(ft.String, `databaseSchema`),
+    schemaObjectFileName: withDefault(ft.String, `index.ts`),
     serializeValueTypeName: withDefault(ft.String, `serializeValue`),
     serializeValueFileName: withDefault(ft.String, `index.ts`),
 

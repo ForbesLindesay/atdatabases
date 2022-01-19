@@ -7,7 +7,8 @@
   "dependencies": {
     "@databases/pg-config": "^0.0.0",
     "@databases/pg-data-type-id": "^0.0.0",
-    "@databases/shared-print-types": "^0.0.0"
+    "@databases/shared-print-types": "^0.0.0",
+    "assert-never": "^1.2.1"
   },
   "devDependencies": {
     "@databases/pg-schema-introspect": "^0.0.0"

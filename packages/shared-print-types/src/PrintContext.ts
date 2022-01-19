@@ -14,6 +14,7 @@ export interface FileContext {
   getImport: (fileExport: FileExport) => string;
 }
 export interface FileExport {
+  mode: 'type' | 'value';
   file: FileName;
   isDefaultExport: () => boolean;
   exportName: string;
@@ -53,6 +54,10 @@ class FileContent<TypeID> {
   private readonly _imports = new Map<FileName, ImportState>();
   private readonly _declarationNames = new Set<string>();
   private readonly _declarations: (() => string[])[] = [];
+  private readonly _reExports: {
+    type: {source: string; dest: string}[];
+    value: {source: string; dest: string}[];
+  } = {type: [], value: []};
   constructor(file: FileName, options: PrintOptions<TypeID>) {
     this.file = file;
     this._options = options;
@@ -125,10 +130,23 @@ class FileContent<TypeID> {
       ]);
     }
     return {
+      mode,
       file: this.file,
       isDefaultExport: () => this.getDefaultName() === identifierName,
       exportName: identifierName,
     };
+  }
+  public pushReExport(dest: TypeID, source: FileExport) {
+    const identifierName = resolveExportName(dest, this._options);
+    if (this._declarationNames.has(identifierName)) {
+      return;
+    }
+    const importedName = this._getImportState(source.file).getImport(source);
+    this._declarationNames.add(identifierName);
+    this._reExports[source.mode].push({
+      source: importedName,
+      dest: identifierName,
+    });
   }
 
   public getContent() {
@@ -150,6 +168,28 @@ class FileContent<TypeID> {
             ]
           : []),
         ...this._declarations.map((v) => v().join('\n')),
+        ...(this._reExports.type.length
+          ? [
+              `export type {\n${this._reExports.type
+                .map((t) =>
+                  t.source === t.dest
+                    ? `  ${t.source},`
+                    : `  ${t.source} as ${t.dest},`,
+                )
+                .join(`\n`)}\n}`,
+            ]
+          : []),
+        ...(this._reExports.value.length
+          ? [
+              `export {\n${this._reExports.value
+                .map((t) =>
+                  t.source === t.dest
+                    ? `  ${t.source},`
+                    : `  ${t.source} as ${t.dest},`,
+                )
+                .join(`\n`)}\n}`,
+            ]
+          : []),
       ].join('\n\n') + '\n'
     );
   }
@@ -182,6 +222,15 @@ export default class PrintContext<TypeID> {
     declaration: (identifier: IdentifierName, imp: FileContext) => string[],
   ): FileExport {
     return this._pushDeclaration(id, 'type', declaration);
+  }
+  public pushReExport(id: TypeID, from: FileExport): void {
+    const file = resolveFilename(id, this.options);
+    const fileContent = mapGetOrSet(
+      this._files,
+      file,
+      () => new FileContent(file, this.options),
+    );
+    fileContent.pushReExport(id, from);
   }
 
   public pushValueDeclaration(

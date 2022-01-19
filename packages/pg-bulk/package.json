@@ -1,21 +1,18 @@
 {
-  "name": "@databases/pg-typed",
+  "name": "@databases/pg-bulk",
   "version": "0.0.0",
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
-  "dependencies": {
-    "@databases/pg-bulk": "^0.0.0"
-  },
+  "dependencies": {},
   "devDependencies": {
-    "@databases/pg": "^0.0.0",
-    "@databases/pg-schema-print-types": "^0.0.0"
+    "@databases/pg": "^0.0.0"
   },
   "peerDependencies": {
     "@databases/pg": "*"
   },
   "scripts": {},
-  "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/pg-typed",
+  "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/pg-bulk",
   "bugs": "https://github.com/ForbesLindesay/atdatabases/issues",
   "license": "MIT",
   "publishConfig": {
@@ -24,5 +21,5 @@
   "files": [
     "lib/"
   ],
-  "homepage": "https://www.atdatabases.org/docs/pg-typed"
+  "homepage": "https://www.atdatabases.org/docs/pg-bulk"
 }
