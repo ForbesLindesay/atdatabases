@@ -1,8 +1,8 @@
 import connect, {sql} from '@databases/pg';
 import Schema from './__generated__';
-import tables from '..';
+import defineTables from '..';
 
-const {users} = tables<Schema>({schemaName: 'typed_queries_count'});
+const {users} = defineTables<Schema>({schemaName: 'typed_queries_count'});
 
 const dbNumber = connect({bigIntMode: 'number'});
 const dbString = connect({bigIntMode: 'string'});

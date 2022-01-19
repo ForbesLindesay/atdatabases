@@ -45,6 +45,23 @@ test('replace filter', async () => {
       return value;
     }
     export {serializeValue}
+
+    /**
+     * The table names and column names (along with their types) can help to
+     * make pg-typed more reliable.
+     *
+     * You also must pass either \\"databaseSchema\\" or \\"serializeValue\\" to pg-typed
+     * if you want to store anything other than plain objects in JSON or JSONB
+     * columns
+     */
+    const databaseSchema = [
+      {
+        name: \\"my_table_my_name\\",
+        columns: [
+        ],
+      },
+    ];
+    export {databaseSchema}
     ",
         "filename": "index.ts",
       },

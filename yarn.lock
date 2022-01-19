@@ -3923,6 +3923,11 @@ gcp-metadata@^4.2.0:
     gaxios "^4.0.0"
     json-bigint "^1.0.0"
 
+generate-alphabetic-name@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/generate-alphabetic-name/-/generate-alphabetic-name-1.0.0.tgz#20390ac8dc8325caf9edb4b5643beb5385210e5a"
+  integrity sha512-/0o6Y1wZ2NgvF9Ev8mYEqi2TGQjyQM0Z9BuyQ8ulZ8ObkDV9inRDrLFTH9nFmMIRswDTavyWz60L4tRndgFyFA==
+
 generate-function@^2.3.1:
   version "2.3.1"
   resolved "https://registry.yarnpkg.com/generate-function/-/generate-function-2.3.1.tgz#f069617690c10c868e73b8465746764f97c3479f"

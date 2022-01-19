@@ -10,7 +10,7 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "jsx": "preserve",
-    "lib": ["es2016", "dom"],
+    "lib": ["es2020", "dom"],
     "pretty": true
   }
 }

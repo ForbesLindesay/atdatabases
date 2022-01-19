@@ -22,6 +22,7 @@ export default function printSchema(type: Schema, context: PgPrintContext) {
       `}`,
     ],
   );
+
   context.printer.pushValueDeclaration(
     {type: 'serializeValue'},
     (identifier) => {
@@ -84,4 +85,75 @@ export default function printSchema(type: Schema, context: PgPrintContext) {
       ];
     },
   );
+
+  const typeAliases = new Map([
+    [`INT2`, `SMALLINT`],
+    [`INT4`, `INTEGER`],
+    [`INT8`, `BIGINT`],
+  ]);
+  const types = new Map(
+    [
+      ...Object.entries(PgDataTypeID)
+        .map(([typeName, typeId]) =>
+          typeof typeId === 'number' ? ([typeId, typeName] as const) : null,
+        )
+        .filter(<T>(v: T): v is Exclude<T, null> => v !== null),
+      ...type.types.map((t) => [t.typeID, t.typeName] as const),
+    ]
+      .map(
+        ([typeId, typeName]) =>
+          [typeId, typeName.toUpperCase().replace(/^_(.*)$/, `$1[]`)] as const,
+      )
+      .map(([typeId, typeName]) => [
+        typeId,
+        typeName.endsWith(`[]`)
+          ? `${
+              typeAliases.get(
+                typeName.substring(0, typeName.length - `[]`.length),
+              ) ?? typeName.substring(0, typeName.length - `[]`.length)
+            }[]`
+          : typeAliases.get(typeName) ?? typeName,
+      ]),
+  );
+
+  context.printer.pushValueDeclaration({type: 'schema_json'}, (identifier) => {
+    const tables = type.classes.filter(
+      (cls) => cls.kind === ClassKind.OrdinaryTable,
+    );
+    return [
+      `/**`,
+      ` * The table names and column names (along with their types) can help to`,
+      ` * make pg-typed more reliable.`,
+      ` *`,
+      ` * You also must pass either "databaseSchema" or "serializeValue" to pg-typed`,
+      ` * if you want to store anything other than plain objects in JSON or JSONB`,
+      ` * columns`,
+      ` */`,
+      `const ${identifier} = [`,
+      ...tables
+        .map((table) => [
+          `  {`,
+          `    name: ${JSON.stringify(table.className)},`,
+          `    columns: [`,
+          ...table.attributes
+            .map((column) => {
+              const typeName = types.get(column.typeID) ?? null;
+              return [
+                `      {`,
+                `        name: ${JSON.stringify(column.attributeName)},`,
+                `        isNullable: ${JSON.stringify(!column.notNull)},`,
+                `        hasDefault: ${JSON.stringify(column.hasDefault)},`,
+                `        typeId: ${JSON.stringify(column.typeID)},`,
+                `        typeName: ${JSON.stringify(typeName)},`,
+                `      },`,
+              ];
+            })
+            .reduce((a, b) => [...a, ...b], []),
+          `    ],`,
+          `  },`,
+        ])
+        .reduce((a, b) => [...a, ...b], []),
+      `];`,
+    ];
+  });
 }

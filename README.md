@@ -60,6 +60,7 @@ Package Name | Version | Docs
 @databases/mysql-schema-cli | [![NPM version](https://img.shields.io/npm/v/@databases/mysql-schema-cli?style=for-the-badge)](https://www.npmjs.com/package/@databases/mysql-schema-cli) | Not documented yet
 @databases/mysql-schema-introspect | [![NPM version](https://img.shields.io/npm/v/@databases/mysql-schema-introspect?style=for-the-badge)](https://www.npmjs.com/package/@databases/mysql-schema-introspect) | Not documented yet
 @databases/mysql-schema-print-types | [![NPM version](https://img.shields.io/npm/v/@databases/mysql-schema-print-types?style=for-the-badge)](https://www.npmjs.com/package/@databases/mysql-schema-print-types) | Not documented yet
+@databases/pg-bulk | [![NPM version](https://img.shields.io/npm/v/@databases/pg-bulk?style=for-the-badge)](https://www.npmjs.com/package/@databases/pg-bulk) | Not documented yet
 @databases/pg-config | [![NPM version](https://img.shields.io/npm/v/@databases/pg-config?style=for-the-badge)](https://www.npmjs.com/package/@databases/pg-config) | Not documented yet
 @databases/pg-connection-string | [![NPM version](https://img.shields.io/npm/v/@databases/pg-connection-string?style=for-the-badge)](https://www.npmjs.com/package/@databases/pg-connection-string) | Not documented yet
 @databases/pg-create | [![NPM version](https://img.shields.io/npm/v/@databases/pg-create?style=for-the-badge)](https://www.npmjs.com/package/@databases/pg-create) | Not documented yet

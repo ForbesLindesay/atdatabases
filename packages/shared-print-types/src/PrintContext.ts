@@ -3,6 +3,7 @@ import PrintOptions, {
   isDefaultExportCandidate,
   resolveExportName,
   resolveFilename,
+  resolveFilenameTemplate,
 } from './PrintOptions';
 import FileName from './FileName';
 import IdentifierName from './IdentifierName';
@@ -14,6 +15,7 @@ export interface FileContext {
   getImport: (fileExport: FileExport) => string;
 }
 export interface FileExport {
+  mode: 'type' | 'value';
   file: FileName;
   isDefaultExport: () => boolean;
   exportName: string;
@@ -125,6 +127,7 @@ class FileContent<TypeID> {
       ]);
     }
     return {
+      mode,
       file: this.file,
       isDefaultExport: () => this.getDefaultName() === identifierName,
       exportName: identifierName,
@@ -182,6 +185,23 @@ export default class PrintContext<TypeID> {
     declaration: (identifier: IdentifierName, imp: FileContext) => string[],
   ): FileExport {
     return this._pushDeclaration(id, 'type', declaration);
+  }
+  public pushReExport(id: TypeID, from: FileExport): void {
+    const destName = resolveExportName(id, this.options);
+    const destFile = resolveFilename(id, this.options);
+    if (destFile === from.file && destName === from.exportName) {
+      return;
+    }
+    this._pushDeclaration(id, from.mode, (identifier, file) => {
+      const sourceName = file.getImport(from);
+      return sourceName === destName
+        ? []
+        : [
+            `${
+              from.mode === 'type' ? `type` : `const`
+            } ${identifier} = ${sourceName}`,
+          ];
+    });
   }
 
   public pushValueDeclaration(
