@@ -15,6 +15,7 @@
           "pg-guide-query",
           "pg-guide-transactions",
           "pg-guide-typescript",
+          "pg-bulk",
           "pg-guide-logging",
           "pg-migrations",
           "pg-test"
