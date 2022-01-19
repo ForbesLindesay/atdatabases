@@ -71,8 +71,9 @@ function getPostWithAuthorName(id: DbPost['id']) {
   const post = await posts(database).findOne({id});
   if (!post) return null;
   const author = await users(database)
+    .find({id: post.author_id})
     .select(`name`)
-    .findOneRequired({id: post.author_id});
+    .oneRequired();
   return {post, author: author.name};
 }
 ```
