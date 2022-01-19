@@ -272,16 +272,18 @@ users(db).tableName; // 'users'
 This is like the regular `.find(condition)` API, but it lets you specify multiple distinct conditions that are efficiently or'ed together. Once you've started a query using `bulkFind` you can call `.orderByAsc`/`.orderByDesc`/`.select`/etc. just like you could if you started a query with a call to `find`. You can find more details on how this API works in [@databases/pg-bulk](pg-bulk.md).
 
 ```typescript
-await tables
-  .posts(db)
-  .bulkFind({
-    whereColumnNames: [`org_id`, `user_id`],
-    whereConditions: [
-      {org_id: 1, user_id: 10},
-      {org_id: 2, user_id: 20},
-    ],
-  })
-  .all();
+async function getPosts() {
+  await tables
+    .posts(db)
+    .bulkFind({
+      whereColumnNames: [`org_id`, `user_id`],
+      whereConditions: [
+        {org_id: 1, user_id: 10},
+        {org_id: 2, user_id: 20},
+      ],
+    })
+    .all();
+}
 ```
 
 ### bulkInsert(options)
@@ -289,16 +291,18 @@ await tables
 To insert thousands of records at a time, you can use the bulk insert API. This requires you to specify any optional fields that you want to pass in. Any required (i.e. `NOT NULL` and no default value) fields are automatically expected. You can find more details on how this API works in [@databases/pg-bulk](pg-bulk.md).
 
 ```typescript
-// This example assumes that `email` is a non-nullable field
-await tables.users(db).bulkInsert({
-  columnsToInsert: [`favorite_color`],
-  records: [
-    {email: `joe@example.com`, favorite_color: `red`},
-    {email: `ben@example.com`, favorite_color: `green`},
-    {email: `tom@example.com`, favorite_color: `blue`},
-    {email: `clare@example.com`, favorite_color: `indigo`},
-  ],
-});
+async function insertUsers() {
+  // This example assumes that `email` is a non-nullable field
+  await tables.users(db).bulkInsert({
+    columnsToInsert: [`favorite_color`],
+    records: [
+      {email: `joe@example.com`, favorite_color: `red`},
+      {email: `ben@example.com`, favorite_color: `green`},
+      {email: `tom@example.com`, favorite_color: `blue`},
+      {email: `clare@example.com`, favorite_color: `indigo`},
+    ],
+  });
+}
 ```
 
 ### bulkUpdate(options)
@@ -306,17 +310,19 @@ await tables.users(db).bulkInsert({
 Updating multiple records in one go, where each record needs to be updated to a different value can be tricky to do efficiently. If there is a unique constraint, it may be possible to use `insertOrUpdate`, but failing that you'll want to use this bulk API. You can find more details on how this API works in [@databases/pg-bulk](pg-bulk.md).
 
 ```typescript
-// This example assumes that `email` is a non-nullable field
-await tables.users(db).bulkUpdate({
-  whereColumnNames: [`email`],
-  setColumnNames: [`favorite_color`],
-  updates: [
-    {where: {email: `joe@example.com`}, set: {favorite_color: `green`}},
-    {where: {email: `ben@example.com`}, set: {favorite_color: `blue`}},
-    {where: {email: `tom@example.com`}, set: {favorite_color: `indigo`}},
-    {where: {email: `clare@example.com`}, set: {favorite_color: `green`}},
-  ],
-});
+async function updateUsers() {
+  // This example assumes that `email` is a non-nullable field
+  await tables.users(db).bulkUpdate({
+    whereColumnNames: [`email`],
+    setColumnNames: [`favorite_color`],
+    updates: [
+      {where: {email: `joe@example.com`}, set: {favorite_color: `green`}},
+      {where: {email: `ben@example.com`}, set: {favorite_color: `blue`}},
+      {where: {email: `tom@example.com`}, set: {favorite_color: `indigo`}},
+      {where: {email: `clare@example.com`}, set: {favorite_color: `green`}},
+    ],
+  });
+}
 ```
 
 This will efficiently update all records in a single statement.
@@ -326,13 +332,15 @@ This will efficiently update all records in a single statement.
 The bulk delete API lets you delete multiple records using different conditions in one go. You can find more details on how this API works in [@databases/pg-bulk](pg-bulk.md).
 
 ```typescript
-await tables.posts(db).bulkDelete({
-  whereColumnNames: [`org_id`, `user_id`],
-  whereConditions: [
-    {org_id: 1, user_id: 10},
-    {org_id: 2, user_id: 20},
-  ],
-});
+async function deletePosts() {
+  await tables.posts(db).bulkDelete({
+    whereColumnNames: [`org_id`, `user_id`],
+    whereConditions: [
+      {org_id: 1, user_id: 10},
+      {org_id: 2, user_id: 20},
+    ],
+  });
+}
 ```
 
 This will delete results that match: `(org_id=1 AND user_id=10) OR (org_id=2 AND user_id=20)`. Unlike combining conditions in that way, it remains efficient even once you are deleting with thousands of possible conditions.

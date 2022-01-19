@@ -234,18 +234,6 @@ This will efficiently update all records in a single statement.
 The bulk delete API lets you delete multiple records using different conditions in one go:
 
 ```typescript
-await tables
-  .posts(db)
-  .bulk(`org_id`, `user_id`)
-  .delete([
-    {org_id: 1, user_id: 10},
-    {org_id: 2, user_id: 20},
-  ]);
-```
-
-This will delete results that match: `(org_id=1 AND user_id=10) OR (org_id=2 AND user_id=20)`. Unlike combining conditions in that way, it remains efficient even once you are deleting with thousands of possible conditions.
-
-```typescript
 import {bulkDelete} from '@databases/pg-bulk';
 import {usersOptions} from './database';
 
