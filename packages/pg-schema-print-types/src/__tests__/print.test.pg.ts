@@ -51,6 +51,8 @@ test('getClasses', async () => {
       typeOverrides: {
         [PgDataTypeID.jsonb]: 'unknown',
       },
+      tableReExportFileName: null,
+      tableInsertParametersReExportFileName: null,
     }),
   );
   printSchema(schema, printContext);
@@ -170,13 +172,6 @@ test('getClasses', async () => {
       },
     ];
     export {databaseSchema}
-
-    export type {
-    User,
-    Users_InsertParameters,
-    Photo,
-    Photos_InsertParameters,
-    }
     ",
         "filename": "index.ts",
       },
