@@ -497,24 +497,6 @@ class Table<TRecord, TInsertParameters> {
     });
   }
 
-  // bulk<TKeys extends readonly [...(readonly (keyof TRecord)[])]>(
-  //   ...fields: TKeys
-  // ): BulkTable<TRecord, TInsertParameters, TKeys[number]> {
-  //   if (!this._columnTypes) {
-  //     throw new Error(
-  //       `Missing databaseSchema information. You must provide the databaseSchema to use the .bulk API`,
-  //     );
-  //   }
-  //   return new BulkTable(
-  //     this._underlyingDb,
-  //     this.tableId,
-  //     this.tableName,
-  //     this._value,
-  //     this._columnTypes,
-  //     fields as any,
-  //   );
-  // }
-
   private async _insert<TRecordsToInsert extends readonly TInsertParameters[]>(
     onConflict:
       | null
@@ -807,6 +789,10 @@ type TableHelperFunction<
   ? (connectionOrTransaction: Queryable) => TResult
   : (connectionOrTransaction?: Queryable) => TResult;
 
+type AssertKeyOfTable<TKey extends keyof Table<any, any>> = TKey;
+type PropertiesThatRequireDbSchema = AssertKeyOfTable<
+  'bulkDelete' | 'bulkFind' | 'bulkInsert' | 'bulkUpdate'
+>;
 export type TableHelper<
   TRecord,
   TInsertParameters,
@@ -819,7 +805,7 @@ export type TableHelper<
 } & TableHelperFunction<
   TMissingOptions,
   'databaseSchema' extends TMissingOptions
-    ? Omit<Table<TRecord, TInsertParameters>, 'bulk'>
+    ? Omit<Table<TRecord, TInsertParameters>, PropertiesThatRequireDbSchema>
     : Table<TRecord, TInsertParameters>
 >;
 
