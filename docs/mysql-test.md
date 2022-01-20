@@ -29,8 +29,8 @@ to take care of the rest.
 To setup jest, add the following keys to your jest config:
 
 ```json
-"globalSetup": "<rootDir>/node_modules/@databases/mysql-test/jest/globalSetup.js",
-"globalTeardown": "<rootDir>/node_modules/@databases/mysql-test/jest/globalTeardown.js",
+"globalSetup": "<rootDir>/node_modules/@databases/mysql-test/lib/jest/globalSetup.js",
+"globalTeardown": "<rootDir>/node_modules/@databases/mysql-test/lib/jest/globalTeardown.js",
 ```
 
 This will set up a MySQL server on a free port, before your tests run. It will tear down the MySQL server after all your tests run. N.B. Your tests will all share a single database, and execute in parallel, so you should not assume your generated IDs will have consistent values.
