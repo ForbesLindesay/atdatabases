@@ -22,13 +22,14 @@ export default async function writeFiles<TypeID>({
     (
       await promises.readdir(directory)
     )
-      .filter((e) => !filenames.has(e))
-      .map((e) => join(directory, e))
-      .map(async (e) => {
-        if ((await promises.stat(e)).isFile()) {
-          const src = await promises.readFile(e, 'utf8');
+      .filter((fileName) => !filenames.has(fileName))
+      .map(async (fileName) => {
+        const filePath = join(directory, fileName);
+        if ((await promises.stat(filePath)).isFile()) {
+          const src = await promises.readFile(filePath, 'utf8');
           if (src.includes(generatedStatement)) {
-            await promises.unlink(e);
+            console.info(`Deleting: ${fileName}`);
+            await promises.unlink(filePath);
           }
         }
       }),
@@ -47,12 +48,13 @@ export default async function writeFiles<TypeID>({
           if (existingSource.includes(checksum)) {
             return;
           }
+          console.info(`Updating: ${f.filename}`);
         } catch (ex: any) {
           if (ex.code !== 'ENOENT') {
             throw ex;
           }
+          console.info(`Writing: ${f.filename}`);
         }
-        console.info(`Updating: ${f.filename}`);
         await promises.writeFile(
           filename,
           [
@@ -76,10 +78,12 @@ export default async function writeFiles<TypeID>({
           if (existingSource === f.content) {
             return;
           }
+          console.info(`Updating: ${f.filename}`);
         } catch (ex: any) {
           if (ex.code !== 'ENOENT') {
             throw ex;
           }
+          console.info(`Writing: ${f.filename}`);
         }
         await promises.writeFile(filename, f.content);
       }
