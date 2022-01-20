@@ -116,44 +116,27 @@ export default function printSchema(type: Schema, context: PgPrintContext) {
       ]),
   );
 
-  context.printer.pushValueDeclaration({type: 'schema_json'}, (identifier) => {
-    const tables = type.classes.filter(
-      (cls) => cls.kind === ClassKind.OrdinaryTable,
+  const schemaJsonFileName = context.options.getSchemaJsonFileName();
+
+  if (schemaJsonFileName) {
+    const schemaJson = type.classes
+      .filter((cls) => cls.kind === ClassKind.OrdinaryTable)
+      .map((table) => ({
+        name: table.className,
+        columns: table.attributes.map((column) => {
+          const typeName = types.get(column.typeID) ?? null;
+          return {
+            name: column.attributeName,
+            isNullable: !column.notNull,
+            hasDefault: column.hasDefault,
+            typeId: column.typeID,
+            typeName: typeName,
+          };
+        }),
+      }));
+    context.printer.writeFile(
+      schemaJsonFileName,
+      JSON.stringify(schemaJson, null, `  `) + `\n`,
     );
-    return [
-      `/**`,
-      ` * The table names and column names (along with their types) can help to`,
-      ` * make pg-typed more reliable.`,
-      ` *`,
-      ` * You also must pass either "databaseSchema" or "serializeValue" to pg-typed`,
-      ` * if you want to store anything other than plain objects in JSON or JSONB`,
-      ` * columns`,
-      ` */`,
-      `const ${identifier} = [`,
-      ...tables
-        .map((table) => [
-          `  {`,
-          `    name: ${JSON.stringify(table.className)},`,
-          `    columns: [`,
-          ...table.attributes
-            .map((column) => {
-              const typeName = types.get(column.typeID) ?? null;
-              return [
-                `      {`,
-                `        name: ${JSON.stringify(column.attributeName)},`,
-                `        isNullable: ${JSON.stringify(!column.notNull)},`,
-                `        hasDefault: ${JSON.stringify(column.hasDefault)},`,
-                `        typeId: ${JSON.stringify(column.typeID)},`,
-                `        typeName: ${JSON.stringify(typeName)},`,
-                `      },`,
-              ];
-            })
-            .reduce((a, b) => [...a, ...b], []),
-          `    ],`,
-          `  },`,
-        ])
-        .reduce((a, b) => [...a, ...b], []),
-      `];`,
-    ];
-  });
+  }
 }

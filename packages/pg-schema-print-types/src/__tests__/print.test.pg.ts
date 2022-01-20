@@ -87,91 +87,6 @@ test('getClasses', async () => {
       return v;
     }
     export {serializeValue}
-
-    /**
-     * The table names and column names (along with their types) can help to
-     * make pg-typed more reliable.
-     *
-     * You also must pass either \\"databaseSchema\\" or \\"serializeValue\\" to pg-typed
-     * if you want to store anything other than plain objects in JSON or JSONB
-     * columns
-     */
-    const databaseSchema = [
-      {
-        name: \\"photos\\",
-        columns: [
-          {
-            name: \\"caption\\",
-            isNullable: true,
-            hasDefault: false,
-            typeId: 25,
-            typeName: \\"TEXT\\",
-          },
-          {
-            name: \\"cdn_url\\",
-            isNullable: false,
-            hasDefault: false,
-            typeId: 25,
-            typeName: \\"TEXT\\",
-          },
-          {
-            name: \\"id\\",
-            isNullable: false,
-            hasDefault: true,
-            typeId: 20,
-            typeName: \\"BIGINT\\",
-          },
-          {
-            name: \\"metadata\\",
-            isNullable: false,
-            hasDefault: false,
-            typeId: 3802,
-            typeName: \\"JSONB\\",
-          },
-          {
-            name: \\"owner_user_id\\",
-            isNullable: false,
-            hasDefault: false,
-            typeId: 20,
-            typeName: \\"BIGINT\\",
-          },
-        ],
-      },
-      {
-        name: \\"users\\",
-        columns: [
-          {
-            name: \\"age\\",
-            isNullable: true,
-            hasDefault: false,
-            typeId: 23,
-            typeName: \\"INTEGER\\",
-          },
-          {
-            name: \\"bio\\",
-            isNullable: true,
-            hasDefault: false,
-            typeId: 25,
-            typeName: \\"TEXT\\",
-          },
-          {
-            name: \\"id\\",
-            isNullable: false,
-            hasDefault: true,
-            typeId: 20,
-            typeName: \\"BIGINT\\",
-          },
-          {
-            name: \\"screen_name\\",
-            isNullable: false,
-            hasDefault: false,
-            typeId: 25,
-            typeName: \\"TEXT\\",
-          },
-        ],
-      },
-    ];
-    export {databaseSchema}
     ",
         "filename": "index.ts",
       },
@@ -234,6 +149,85 @@ test('getClasses', async () => {
     export type {Users_InsertParameters}
     ",
         "filename": "users.ts",
+      },
+      Object {
+        "content": "[
+      {
+        \\"name\\": \\"photos\\",
+        \\"columns\\": [
+          {
+            \\"name\\": \\"caption\\",
+            \\"isNullable\\": true,
+            \\"hasDefault\\": false,
+            \\"typeId\\": 25,
+            \\"typeName\\": \\"TEXT\\"
+          },
+          {
+            \\"name\\": \\"cdn_url\\",
+            \\"isNullable\\": false,
+            \\"hasDefault\\": false,
+            \\"typeId\\": 25,
+            \\"typeName\\": \\"TEXT\\"
+          },
+          {
+            \\"name\\": \\"id\\",
+            \\"isNullable\\": false,
+            \\"hasDefault\\": true,
+            \\"typeId\\": 20,
+            \\"typeName\\": \\"BIGINT\\"
+          },
+          {
+            \\"name\\": \\"metadata\\",
+            \\"isNullable\\": false,
+            \\"hasDefault\\": false,
+            \\"typeId\\": 3802,
+            \\"typeName\\": \\"JSONB\\"
+          },
+          {
+            \\"name\\": \\"owner_user_id\\",
+            \\"isNullable\\": false,
+            \\"hasDefault\\": false,
+            \\"typeId\\": 20,
+            \\"typeName\\": \\"BIGINT\\"
+          }
+        ]
+      },
+      {
+        \\"name\\": \\"users\\",
+        \\"columns\\": [
+          {
+            \\"name\\": \\"age\\",
+            \\"isNullable\\": true,
+            \\"hasDefault\\": false,
+            \\"typeId\\": 23,
+            \\"typeName\\": \\"INTEGER\\"
+          },
+          {
+            \\"name\\": \\"bio\\",
+            \\"isNullable\\": true,
+            \\"hasDefault\\": false,
+            \\"typeId\\": 25,
+            \\"typeName\\": \\"TEXT\\"
+          },
+          {
+            \\"name\\": \\"id\\",
+            \\"isNullable\\": false,
+            \\"hasDefault\\": true,
+            \\"typeId\\": 20,
+            \\"typeName\\": \\"BIGINT\\"
+          },
+          {
+            \\"name\\": \\"screen_name\\",
+            \\"isNullable\\": false,
+            \\"hasDefault\\": false,
+            \\"typeId\\": 25,
+            \\"typeName\\": \\"TEXT\\"
+          }
+        ]
+      }
+    ]
+    ",
+        "filename": "schema.json",
       },
     ]
   `);

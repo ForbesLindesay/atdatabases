@@ -1,5 +1,5 @@
 import connect, {sql} from '@databases/pg';
-import Schema, {databaseSchema} from './__generated__';
+import Schema from './__generated__';
 import defineTables, {
   not,
   anyOf,
@@ -10,7 +10,7 @@ import defineTables, {
 
 const {users, photos} = defineTables<Schema>({
   schemaName: 'typed_queries_advanced_tests',
-  databaseSchema,
+  databaseSchema: require('./__generated__/schema.json'),
 });
 
 const db = connect({bigIntMode: 'number'});

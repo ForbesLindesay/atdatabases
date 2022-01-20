@@ -5,7 +5,6 @@ type TypeID =
   | {type: 'domain'; name: string}
   | {type: 'enum'; name: string}
   | {type: 'schema'}
-  | {type: 'schema_json'}
   | {type: 'serializeValue'}
   | {
       type: 're_export';
