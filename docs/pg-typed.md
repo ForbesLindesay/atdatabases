@@ -379,6 +379,29 @@ export async function getEmailsAlphabetical() {
 }
 ```
 
+### orderByAscDistinct(key) / orderByDescDistinct(key)
+
+Sort the records by the provided key and only return the first occurrence of each key. You can chain multiple calls to `orderByAscDistinct` or `orderByDescDistinct` with different keys to require more columns to have distinct value.
+
+```typescript
+import db, {users} from './database';
+
+export async function getLatestPostVersions() {
+  return await post_versions(db)
+    .find()
+    .orderByAscDistinct(`id`)
+    .orderByDesc(`version`)
+    .all();
+}
+export async function getOldestPostVersions() {
+  return await post_versions(db)
+    .find()
+    .orderByAscDistinct(`id`)
+    .orderByAsc(`version`)
+    .all();
+}
+```
+
 ### limit(count)
 
 Return the first `count` rows. N.B. you can only use this method if you have first called `orderByAsc` or `orderByDesc` at least once.

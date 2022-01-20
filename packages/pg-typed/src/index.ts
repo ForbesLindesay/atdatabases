@@ -1,10 +1,10 @@
 import {SQLQuery, Queryable} from '@databases/pg';
 import {
   bulkInsert,
-  bulkSelect,
   bulkUpdate,
   bulkDelete,
   BulkOperationOptions,
+  bulkCondition,
 } from '@databases/pg-bulk';
 
 const NO_RESULT_FOUND = `NO_RESULT_FOUND`;
@@ -56,6 +56,19 @@ export interface SelectQuery<TRecord> {
   ): SelectQuery<Pick<TRecord, TKeys[number]>>;
 }
 
+export interface UnorderedSelectQuery<TRecord> extends SelectQuery<TRecord> {
+  orderByAscDistinct(key: keyof TRecord): DistinctOrderedSelectQuery<TRecord>;
+  orderByDescDistinct(key: keyof TRecord): DistinctOrderedSelectQuery<TRecord>;
+}
+
+export interface DistinctOrderedSelectQuery<TRecord>
+  extends SelectQuery<TRecord> {
+  orderByAscDistinct(key: keyof TRecord): DistinctOrderedSelectQuery<TRecord>;
+  orderByDescDistinct(key: keyof TRecord): DistinctOrderedSelectQuery<TRecord>;
+  first(): Promise<TRecord | null>;
+  limit(count: number): Promise<TRecord[]>;
+}
+
 export interface OrderedSelectQuery<TRecord> extends SelectQuery<TRecord> {
   first(): Promise<TRecord | null>;
   limit(count: number): Promise<TRecord[]>;
@@ -101,7 +114,7 @@ class FieldQuery<T> {
 export type {FieldQuery};
 
 export type WhereCondition<TRecord> = Partial<
-  {[key in keyof TRecord]: TRecord[key] | FieldQuery<TRecord[key]>}
+  {readonly [key in keyof TRecord]: TRecord[key] | FieldQuery<TRecord[key]>}
 >;
 
 export function anyOf<T>(values: {
@@ -180,6 +193,7 @@ export function greaterThan<T>(value: T) {
 
 interface SelectQueryOptions {
   selectColumnNames: readonly string[] | undefined;
+  distinctColumnNames: readonly string[];
   orderBy: readonly {
     readonly columnName: string;
     readonly direction: 'ASC' | 'DESC';
@@ -187,8 +201,9 @@ interface SelectQueryOptions {
   limit: number | undefined;
 }
 class SelectQueryImplementation<TRecord>
-  implements OrderedSelectQuery<TRecord>
+  implements DistinctOrderedSelectQuery<TRecord>
 {
+  private readonly _distinctColumnNames: string[] = [];
   private readonly _orderByQueries: {
     columnName: string;
     direction: 'ASC' | 'DESC';
@@ -216,9 +231,36 @@ class SelectQueryImplementation<TRecord>
       selectColumnNames: this._selectFields,
       orderBy: this._orderByQueries,
       limit: this._limitCount,
+      distinctColumnNames: this._distinctColumnNames,
     });
   }
 
+  public orderByAscDistinct(
+    columnName: keyof TRecord,
+  ): DistinctOrderedSelectQuery<TRecord> {
+    if (this._distinctColumnNames.length !== this._orderByQueries.length) {
+      throw new Error(`Cannot add distinct field after adding order by field`);
+    }
+    this._distinctColumnNames.push(columnName as string);
+    this._orderByQueries.push({
+      columnName: columnName as string,
+      direction: `ASC`,
+    });
+    return this;
+  }
+  public orderByDescDistinct(
+    columnName: keyof TRecord,
+  ): DistinctOrderedSelectQuery<TRecord> {
+    if (this._distinctColumnNames.length !== this._orderByQueries.length) {
+      throw new Error(`Cannot add distinct field after adding order by field`);
+    }
+    this._distinctColumnNames.push(columnName as string);
+    this._orderByQueries.push({
+      columnName: columnName as string,
+      direction: `DESC`,
+    });
+    return this;
+  }
   public orderByAsc(columnName: keyof TRecord): OrderedSelectQuery<TRecord> {
     this._orderByQueries.push({
       columnName: columnName as string,
@@ -294,10 +336,10 @@ class SelectQueryImplementation<TRecord>
 }
 
 type BulkRecord<TParameters, TKey extends keyof TParameters> = {
-  [key in TKey]-?: Exclude<TParameters[key], undefined>;
+  readonly [key in TKey]-?: Exclude<TParameters[key], undefined>;
 } &
   {
-    [key in Exclude<keyof TParameters, TKey>]?: undefined;
+    readonly [key in Exclude<keyof TParameters, TKey>]?: undefined;
   };
 
 type BulkInsertFields<
@@ -306,7 +348,7 @@ type BulkInsertFields<
 > =
   | TKey
   | {
-      [K in keyof TInsertParameters]: undefined extends TInsertParameters[K]
+      readonly [K in keyof TInsertParameters]: undefined extends TInsertParameters[K]
         ? never
         : K;
     }[keyof TInsertParameters];
@@ -316,7 +358,7 @@ type BulkInsertRecord<
   TKey extends keyof TInsertParameters,
 > = BulkRecord<TInsertParameters, BulkInsertFields<TInsertParameters, TKey>>;
 
-function rowToOptionalWhere<TRecord>(
+function rowToCondition<TRecord>(
   row: WhereCondition<TRecord>,
   sql: Queryable['sql'],
   toValue: (columnName: string, value: unknown) => unknown,
@@ -325,19 +367,20 @@ function rowToOptionalWhere<TRecord>(
   if (entries.length === 0) {
     return null;
   }
-  return sql`WHERE ${sql.join(
+  return sql.join(
     entries.map(([columnName, value]) =>
       FieldQuery.query(columnName, value, sql, toValue),
     ),
     sql` AND `,
-  )}`;
+  );
 }
 function rowToWhere<TRecord>(
   row: WhereCondition<TRecord>,
   sql: Queryable['sql'],
   toValue: (columnName: string, value: unknown) => unknown,
 ): SQLQuery {
-  return rowToOptionalWhere(row, sql, toValue) ?? sql``;
+  const condition = rowToCondition(row, sql, toValue);
+  return condition ? sql`WHERE ${condition}` : sql``;
 }
 
 type BulkOperationOptionsBase<
@@ -408,7 +451,9 @@ class Table<TRecord, TInsertParameters> {
   }
 
   async bulkInsert<
-    TColumnsToInsert extends [...(readonly (keyof TInsertParameters)[])],
+    TColumnsToInsert extends readonly [
+      ...(readonly (keyof TInsertParameters)[])
+    ],
   >({
     columnsToInsert,
     records,
@@ -431,7 +476,7 @@ class Table<TRecord, TInsertParameters> {
     });
   }
 
-  bulkFind<TWhereColumns extends [...(readonly (keyof TRecord)[])]>({
+  bulkFind<TWhereColumns extends readonly [...(readonly (keyof TRecord)[])]>({
     whereColumnNames,
     whereConditions,
   }: {
@@ -440,26 +485,20 @@ class Table<TRecord, TInsertParameters> {
       TRecord,
       TWhereColumns[number]
     >[];
-  }): SelectQuery<TRecord> {
+  }): UnorderedSelectQuery<TRecord> {
     const bulkOperationOptions = this._getBulkOperationOptions();
-    return new SelectQueryImplementation<TRecord>(
-      this.tableName,
-      async ({selectColumnNames, orderBy, limit}) => {
-        return bulkSelect<TWhereColumns[number]>({
-          ...bulkOperationOptions,
-          whereColumnNames,
-          whereConditions,
-          selectColumnNames,
-          orderBy,
-          limit,
-        });
-      },
+    return this.findUntyped(
+      bulkCondition({
+        ...bulkOperationOptions,
+        whereColumnNames,
+        whereConditions,
+      }),
     );
   }
 
   async bulkUpdate<
-    TWhereColumns extends [...(readonly (keyof TRecord)[])],
-    TSetColumns extends [...(readonly (keyof TRecord)[])],
+    TWhereColumns extends readonly [...(readonly (keyof TRecord)[])],
+    TSetColumns extends readonly [...(readonly (keyof TRecord)[])],
   >({
     whereColumnNames,
     setColumnNames,
@@ -480,7 +519,9 @@ class Table<TRecord, TInsertParameters> {
     });
   }
 
-  async bulkDelete<TWhereColumns extends [...(readonly (keyof TRecord)[])]>({
+  async bulkDelete<
+    TWhereColumns extends readonly [...(readonly (keyof TRecord)[])],
+  >({
     whereColumnNames,
     whereConditions,
   }: {
@@ -546,9 +587,11 @@ class Table<TRecord, TInsertParameters> {
   async insert<TRecordsToInsert extends readonly TInsertParameters[]>(
     ...rows: keyof TRecordsToInsert[number] extends keyof TInsertParameters
       ? TRecordsToInsert
-      : readonly ({[key in keyof TInsertParameters]: TInsertParameters[key]} &
+      : readonly ({
+          readonly [key in keyof TInsertParameters]: TInsertParameters[key];
+        } &
           {
-            [key in Exclude<
+            readonly [key in Exclude<
               keyof TRecordsToInsert[number],
               keyof TInsertParameters
             >]: never;
@@ -562,7 +605,7 @@ class Table<TRecord, TInsertParameters> {
   }
 
   async insertOrUpdate<TRecordsToInsert extends readonly TInsertParameters[]>(
-    conflictKeys: [keyof TRecord, ...(keyof TRecord)[]],
+    conflictKeys: readonly [keyof TRecord, ...(keyof TRecord)[]],
     ...rows: keyof TRecordsToInsert[number] extends keyof TInsertParameters
       ? TRecordsToInsert
       : readonly ({[key in keyof TInsertParameters]: TInsertParameters[key]} &
@@ -592,9 +635,11 @@ class Table<TRecord, TInsertParameters> {
   async insertOrIgnore<TRecordsToInsert extends readonly TInsertParameters[]>(
     ...rows: keyof TRecordsToInsert[number] extends keyof TInsertParameters
       ? TRecordsToInsert
-      : readonly ({[key in keyof TInsertParameters]: TInsertParameters[key]} &
+      : readonly ({
+          readonly [key in keyof TInsertParameters]: TInsertParameters[key];
+        } &
           {
-            [key in Exclude<
+            readonly [key in Exclude<
               keyof TRecordsToInsert[number],
               keyof TInsertParameters
             >]: never;
@@ -633,10 +678,13 @@ class Table<TRecord, TInsertParameters> {
   /**
    * @deprecated use .find instead of .select
    */
-  select(whereValues: WhereCondition<TRecord> = {}): SelectQuery<TRecord> {
+  select(
+    whereValues: WhereCondition<TRecord> = {},
+  ): UnorderedSelectQuery<TRecord> {
     return this.find(whereValues);
   }
-  find(whereValues: WhereCondition<TRecord> = {}): SelectQuery<TRecord> {
+
+  findUntyped(whereCondition: SQLQuery | null): UnorderedSelectQuery<TRecord> {
     const {sql} = this._underlyingDb;
     return new SelectQueryImplementation(
       this.tableName,
@@ -644,19 +692,26 @@ class Table<TRecord, TInsertParameters> {
         selectColumnNames: selectFields,
         orderBy: orderByQueries,
         limit: limitCount,
+        distinctColumnNames,
       }) => {
         return await this._underlyingDb.query(
           sql.join(
             [
-              sql`SELECT ${
-                selectFields
-                  ? sql.join(
-                      selectFields.map((f) => sql.ident(f)),
-                      ',',
-                    )
-                  : sql`*`
-              } FROM ${this.tableId}`,
-              rowToOptionalWhere(whereValues, sql, this._value),
+              sql`SELECT`,
+              distinctColumnNames.length
+                ? sql`DISTINCT ON (${sql.join(
+                    distinctColumnNames.map((f) => sql.ident(f)),
+                    `,`,
+                  )})`
+                : null,
+              selectFields
+                ? sql.join(
+                    selectFields.map((f) => sql.ident(f)),
+                    ',',
+                  )
+                : sql`*`,
+              sql`FROM ${this.tableId}`,
+              whereCondition ? sql`WHERE ${whereCondition}` : null,
               orderByQueries.length
                 ? sql`ORDER BY ${sql.join(
                     orderByQueries.map((q) =>
@@ -674,6 +729,13 @@ class Table<TRecord, TInsertParameters> {
         );
       },
     );
+  }
+
+  find(
+    whereValues: WhereCondition<TRecord> = {},
+  ): UnorderedSelectQuery<TRecord> {
+    const {sql} = this._underlyingDb;
+    return this.findUntyped(rowToCondition(whereValues, sql, this._value));
   }
 
   /**
