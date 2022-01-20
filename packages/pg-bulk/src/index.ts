@@ -19,6 +19,7 @@ export interface BulkSelectOptions<TWhereColumn extends ColumnName>
   extends BulkOperationOptions<TWhereColumn> {
   readonly whereColumnNames: readonly TWhereColumn[];
   readonly whereConditions: readonly any[];
+  readonly distinctColumnNames?: readonly string[];
   readonly selectColumnNames?: readonly string[];
   readonly orderBy?: readonly {
     readonly columnName: string;
@@ -134,6 +135,7 @@ export async function bulkSelect<TWhereColumn extends ColumnName>(
     tableName,
     whereColumnNames,
     whereConditions,
+    distinctColumnNames,
     selectColumnNames,
     orderBy,
     limit,
@@ -142,16 +144,24 @@ export async function bulkSelect<TWhereColumn extends ColumnName>(
   return await database.query(
     sql.join(
       [
-        sql`SELECT ${
-          selectColumnNames
-            ? sql.join(
-                selectColumnNames.map((columnName) =>
-                  sql.ident(tableName, columnName),
-                ),
-                ',',
-              )
-            : sql`${sql.ident(tableName)}.*`
-        } FROM ${tableId(options)} INNER JOIN ${selection(
+        sql`SELECT`,
+        distinctColumnNames?.length
+          ? sql`DISTINCT ON (${sql.join(
+              distinctColumnNames.map((columnName) =>
+                sql.ident(tableName, columnName),
+              ),
+              `,`,
+            )})`
+          : null,
+        selectColumnNames
+          ? sql.join(
+              selectColumnNames.map((columnName) =>
+                sql.ident(tableName, columnName),
+              ),
+              ',',
+            )
+          : sql`${sql.ident(tableName)}.*`,
+        sql`FROM ${tableId(options)} INNER JOIN ${selection(
           whereColumnNames.map((columnName) => ({
             name: columnName,
             alias: columnName,
