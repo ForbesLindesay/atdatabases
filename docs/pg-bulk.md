@@ -149,15 +149,11 @@ This is equivalent to:
 ```javascript
 async function getUsers() {
   await database.query(sql`
-    SELECT users.email, users.date_of_birth FROM users
-    INNER JOIN (
+    SELECT email, date_of_birth FROM users
+    WHERE (email, favorite_color) IN (
       SELECT
-        UNNEST(${[`joe@example.com`, `ben@example.com`]}::TEXT[]) AS email,
-        UNNEST(${[`red`, `blue`]}::TEXT[]) AS favorite_color
-    ) AS bulk_query 
-    ON (
-      users.email=bulk_query.email
-      AND users.color=bulk_query.color
+        UNNEST(${['joe@example.com', 'ben@example.com']}::TEXT[]),
+        UNNEST(${['red', 'blue']}::TEXT[])
     )
     ORDER BY email ASC
     LIMIT 100
@@ -216,9 +212,9 @@ async function updateFavoriteColors() {
     FROM
       (
         SELECT
-          UNNEST(${[`joe@example.com`, `ben@example.com`]}::TEXT[])
+          UNNEST(${['joe@example.com', 'ben@example.com']}::TEXT[])
             AS email,
-          UNNEST(${[`indigo`, `orange`]}::TEXT[])
+          UNNEST(${['indigo', 'orange']}::TEXT[])
             AS updated_value_of_favorite_color
       ) AS bulk_query
     WHERE
@@ -271,16 +267,10 @@ This is equivalent to:
 async function getUsers() {
   await database.query(sql`
     DELETE FROM users
-    WHERE EXISTS(
-      SELECT *
-      FROM
-        (
-          UNNEST(${[`joe@example.com`, `ben@example.com`]}::TEXT[]) AS email,
-          UNNEST(${[`red`, `blue`]}::TEXT[]) AS favorite_color
-        ) AS bulk_query
-      WHERE
-        users.email=bulk_query.email
-        AND users.color=bulk_query.color
+    WHERE (email, favorite_color) IN (
+      SELECT
+        UNNEST(${['joe@example.com', 'ben@example.com']}::TEXT[]),
+        UNNEST(${['red', 'blue']}::TEXT[])
     )
   `);
 }

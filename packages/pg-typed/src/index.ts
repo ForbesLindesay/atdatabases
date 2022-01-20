@@ -1,10 +1,10 @@
 import {SQLQuery, Queryable} from '@databases/pg';
 import {
   bulkInsert,
-  bulkSelect,
   bulkUpdate,
   bulkDelete,
   BulkOperationOptions,
+  bulkCondition,
 } from '@databases/pg-bulk';
 
 const NO_RESULT_FOUND = `NO_RESULT_FOUND`;
@@ -62,7 +62,9 @@ export interface UnorderedSelectQuery<TRecord> extends SelectQuery<TRecord> {
 }
 
 export interface DistinctOrderedSelectQuery<TRecord>
-  extends UnorderedSelectQuery<TRecord> {
+  extends SelectQuery<TRecord> {
+  orderByAscDistinct(key: keyof TRecord): DistinctOrderedSelectQuery<TRecord>;
+  orderByDescDistinct(key: keyof TRecord): DistinctOrderedSelectQuery<TRecord>;
   first(): Promise<TRecord | null>;
   limit(count: number): Promise<TRecord[]>;
 }
@@ -356,7 +358,7 @@ type BulkInsertRecord<
   TKey extends keyof TInsertParameters,
 > = BulkRecord<TInsertParameters, BulkInsertFields<TInsertParameters, TKey>>;
 
-function rowToOptionalWhere<TRecord>(
+function rowToCondition<TRecord>(
   row: WhereCondition<TRecord>,
   sql: Queryable['sql'],
   toValue: (columnName: string, value: unknown) => unknown,
@@ -365,19 +367,20 @@ function rowToOptionalWhere<TRecord>(
   if (entries.length === 0) {
     return null;
   }
-  return sql`WHERE ${sql.join(
+  return sql.join(
     entries.map(([columnName, value]) =>
       FieldQuery.query(columnName, value, sql, toValue),
     ),
     sql` AND `,
-  )}`;
+  );
 }
 function rowToWhere<TRecord>(
   row: WhereCondition<TRecord>,
   sql: Queryable['sql'],
   toValue: (columnName: string, value: unknown) => unknown,
 ): SQLQuery {
-  return rowToOptionalWhere(row, sql, toValue) ?? sql``;
+  const condition = rowToCondition(row, sql, toValue);
+  return condition ? sql`WHERE ${condition}` : sql``;
 }
 
 type BulkOperationOptionsBase<
@@ -484,19 +487,12 @@ class Table<TRecord, TInsertParameters> {
     >[];
   }): UnorderedSelectQuery<TRecord> {
     const bulkOperationOptions = this._getBulkOperationOptions();
-    return new SelectQueryImplementation<TRecord>(
-      this.tableName,
-      async ({selectColumnNames, orderBy, limit, distinctColumnNames}) => {
-        return bulkSelect<TWhereColumns[number]>({
-          ...bulkOperationOptions,
-          whereColumnNames,
-          whereConditions,
-          distinctColumnNames,
-          selectColumnNames,
-          orderBy,
-          limit,
-        });
-      },
+    return this.findUntyped(
+      bulkCondition({
+        ...bulkOperationOptions,
+        whereColumnNames,
+        whereConditions,
+      }),
     );
   }
 
@@ -687,9 +683,8 @@ class Table<TRecord, TInsertParameters> {
   ): UnorderedSelectQuery<TRecord> {
     return this.find(whereValues);
   }
-  find(
-    whereValues: WhereCondition<TRecord> = {},
-  ): UnorderedSelectQuery<TRecord> {
+
+  findUntyped(whereCondition: SQLQuery | null): UnorderedSelectQuery<TRecord> {
     const {sql} = this._underlyingDb;
     return new SelectQueryImplementation(
       this.tableName,
@@ -716,7 +711,7 @@ class Table<TRecord, TInsertParameters> {
                   )
                 : sql`*`,
               sql`FROM ${this.tableId}`,
-              rowToOptionalWhere(whereValues, sql, this._value),
+              whereCondition ? sql`WHERE ${whereCondition}` : null,
               orderByQueries.length
                 ? sql`ORDER BY ${sql.join(
                     orderByQueries.map((q) =>
@@ -734,6 +729,13 @@ class Table<TRecord, TInsertParameters> {
         );
       },
     );
+  }
+
+  find(
+    whereValues: WhereCondition<TRecord> = {},
+  ): UnorderedSelectQuery<TRecord> {
+    const {sql} = this._underlyingDb;
+    return this.findUntyped(rowToCondition(whereValues, sql, this._value));
   }
 
   /**

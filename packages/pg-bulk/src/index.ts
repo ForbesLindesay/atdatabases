@@ -15,10 +15,13 @@ export interface BulkInsertOptions<TColumnToInsert extends ColumnName>
   readonly records: readonly any[];
 }
 
-export interface BulkSelectOptions<TWhereColumn extends ColumnName>
+export interface BulkConditionOptions<TWhereColumn extends ColumnName>
   extends BulkOperationOptions<TWhereColumn> {
   readonly whereColumnNames: readonly TWhereColumn[];
   readonly whereConditions: readonly any[];
+}
+export interface BulkSelectOptions<TWhereColumn extends ColumnName>
+  extends BulkConditionOptions<TWhereColumn> {
   readonly distinctColumnNames?: readonly string[];
   readonly selectColumnNames?: readonly string[];
   readonly orderBy?: readonly {
@@ -38,10 +41,7 @@ export interface BulkUpdateOptions<
 }
 
 export interface BulkDeleteOptions<TWhereColumn extends ColumnName>
-  extends BulkOperationOptions<TWhereColumn> {
-  readonly whereColumnNames: readonly TWhereColumn[];
-  readonly whereConditions: readonly any[];
-}
+  extends BulkConditionOptions<TWhereColumn> {}
 
 function tableId<TColumnName extends ColumnName>(
   options: BulkOperationOptions<TColumnName>,
@@ -52,7 +52,7 @@ function tableId<TColumnName extends ColumnName>(
     : sql.ident(options.tableName);
 }
 
-function selectionSet<TColumnName extends ColumnName>(
+function select<TColumnName extends ColumnName>(
   columns: readonly {
     readonly name: TColumnName;
     readonly alias?: ColumnName;
@@ -63,7 +63,7 @@ function selectionSet<TColumnName extends ColumnName>(
 ) {
   const {database, columnTypes, serializeValue} = options;
   const {sql} = database;
-  return sql.join(
+  return sql`SELECT ${sql.join(
     columns.map(({name, alias, getValue}) => {
       const typeName = columnTypes[name];
       if (!typeName) {
@@ -75,39 +75,7 @@ function selectionSet<TColumnName extends ColumnName>(
       })}::${typeName}[])${alias ? sql` AS ${sql.ident(alias)}` : sql``}`;
     }),
     `,`,
-  );
-}
-
-function selection<TColumnName extends ColumnName>(
-  columns: readonly {
-    readonly name: TColumnName;
-    readonly alias?: ColumnName;
-    readonly getValue?: (record: any) => unknown;
-  }[],
-  records: readonly any[],
-  options: BulkOperationOptions<TColumnName>,
-) {
-  const {database} = options;
-  const {sql} = database;
-  return sql`(SELECT ${selectionSet(columns, records, options)}) AS bulk_query`;
-}
-
-function condition<TColumnName extends ColumnName>(
-  columnNames: readonly TColumnName[],
-  options: BulkOperationOptions<TColumnName>,
-) {
-  const {database, tableName} = options;
-  const {sql} = database;
-  return sql.join(
-    columnNames.map(
-      (columnName) =>
-        sql`${sql.ident(tableName, columnName)} = ${sql.ident(
-          `bulk_query`,
-          columnName,
-        )}`,
-    ),
-    ` AND `,
-  );
+  )}`;
 }
 
 export async function bulkInsert<TColumnToInsert extends ColumnName>(
@@ -119,7 +87,7 @@ export async function bulkInsert<TColumnToInsert extends ColumnName>(
     sql`INSERT INTO ${tableId(options)} (${sql.join(
       columnsToInsert.map((columnName) => sql.ident(columnName)),
       `,`,
-    )}) SELECT ${selectionSet(
+    )}) ${select(
       columnsToInsert.map((name) => ({name})),
       records,
       options,
@@ -127,19 +95,26 @@ export async function bulkInsert<TColumnToInsert extends ColumnName>(
   );
 }
 
+export function bulkCondition<TWhereColumn extends ColumnName>(
+  options: BulkConditionOptions<TWhereColumn>,
+): SQLQuery {
+  const {database, whereColumnNames, whereConditions} = options;
+  const {sql} = database;
+  return sql`(${sql.join(
+    whereColumnNames.map((columnName) => sql.ident(columnName)),
+    `,`,
+  )}) IN (${select(
+    whereColumnNames.map((columnName) => ({name: columnName})),
+    whereConditions,
+    options,
+  )})`;
+}
+
 export async function bulkSelect<TWhereColumn extends ColumnName>(
   options: BulkSelectOptions<TWhereColumn>,
 ): Promise<any[]> {
-  const {
-    database,
-    tableName,
-    whereColumnNames,
-    whereConditions,
-    distinctColumnNames,
-    selectColumnNames,
-    orderBy,
-    limit,
-  } = options;
+  const {database, distinctColumnNames, selectColumnNames, orderBy, limit} =
+    options;
   const {sql} = database;
   return await database.query(
     sql.join(
@@ -147,34 +122,24 @@ export async function bulkSelect<TWhereColumn extends ColumnName>(
         sql`SELECT`,
         distinctColumnNames?.length
           ? sql`DISTINCT ON (${sql.join(
-              distinctColumnNames.map((columnName) =>
-                sql.ident(tableName, columnName),
-              ),
+              distinctColumnNames.map((columnName) => sql.ident(columnName)),
               `,`,
             )})`
           : null,
         selectColumnNames
           ? sql.join(
-              selectColumnNames.map((columnName) =>
-                sql.ident(tableName, columnName),
-              ),
+              selectColumnNames.map((columnName) => sql.ident(columnName)),
               ',',
             )
-          : sql`${sql.ident(tableName)}.*`,
-        sql`FROM ${tableId(options)} INNER JOIN ${selection(
-          whereColumnNames.map((columnName) => ({
-            name: columnName,
-            alias: columnName,
-          })),
-          whereConditions,
-          options,
-        )} ON (${condition(whereColumnNames, options)})`,
+          : sql`*`,
+        sql`FROM ${tableId(options)} WHERE`,
+        bulkCondition(options),
         orderBy?.length
           ? sql`ORDER BY ${sql.join(
               orderBy.map((q) =>
                 q.direction === 'ASC'
-                  ? sql`${sql.ident(tableName, q.columnName)} ASC`
-                  : sql`${sql.ident(tableName, q.columnName)} DESC`,
+                  ? sql`${sql.ident(q.columnName)} ASC`
+                  : sql`${sql.ident(q.columnName)} DESC`,
               ),
               sql`, `,
             )}`
@@ -190,7 +155,8 @@ export async function bulkUpdate<
   TWhereColumn extends ColumnName,
   TSetColumn extends ColumnName,
 >(options: BulkUpdateOptions<TWhereColumn, TSetColumn>): Promise<void> {
-  const {database, whereColumnNames, setColumnNames, updates} = options;
+  const {database, tableName, whereColumnNames, setColumnNames, updates} =
+    options;
   const {sql} = database;
   await database.query(
     sql`UPDATE ${tableId(options)} SET ${sql.join(
@@ -202,7 +168,7 @@ export async function bulkUpdate<
           )}`,
       ),
       `,`,
-    )} FROM ${selection(
+    )} FROM (${select(
       [
         ...whereColumnNames.map((columnName) => ({
           name: columnName,
@@ -217,23 +183,25 @@ export async function bulkUpdate<
       ],
       updates,
       options,
-    )} WHERE ${condition(whereColumnNames, options)}`,
+    )}) AS bulk_query WHERE ${sql.join(
+      whereColumnNames.map(
+        (columnName) =>
+          sql`${sql.ident(tableName, columnName)} = ${sql.ident(
+            `bulk_query`,
+            columnName,
+          )}`,
+      ),
+      ` AND `,
+    )}`,
   );
 }
 
 export async function bulkDelete<TWhereColumn extends ColumnName>(
   options: BulkDeleteOptions<TWhereColumn>,
 ): Promise<void> {
-  const {database, whereColumnNames, whereConditions} = options;
+  const {database} = options;
   const {sql} = database;
   await database.query(
-    sql`DELETE FROM ${tableId(options)} WHERE EXISTS (SELECT * FROM ${selection(
-      whereColumnNames.map((columnName) => ({
-        name: columnName,
-        alias: columnName,
-      })),
-      whereConditions,
-      options,
-    )} WHERE ${condition(whereColumnNames, options)})`,
+    sql`DELETE FROM ${tableId(options)} WHERE ${bulkCondition(options)}`,
   );
 }
