@@ -17,14 +17,16 @@ The `tables` function returns an object for each database table, allowing you to
 
 import createConnectionPool, {sql} from '@databases/pg';
 import tables from '@databases/pg-typed';
-import DatabaseSchema, {databaseSchema} from './__generated__';
+import DatabaseSchema from './__generated__';
 
 export {sql};
 
 const db = createConnectionPool();
 export default db;
 
-const {users, posts} = tables<DatabaseSchema>();
+const {users, posts} = tables<DatabaseSchema>({
+  databaseSchema: require('./__generated__/schema.json'),
+});
 export {users, posts};
 ```
 
@@ -34,7 +36,9 @@ export {users, posts};
 const tables = require('@databases/pg-typed');
 const db = require('./database');
 
-const {users, posts} = tables({databaseSchema});
+const {users, posts} = tables({
+  databaseSchema: require('./__generated__/schema.json'),
+});
 module.exports = {users, posts};
 ```
 

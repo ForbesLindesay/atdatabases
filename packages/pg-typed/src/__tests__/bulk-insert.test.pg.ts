@@ -1,10 +1,10 @@
 import connect, {sql} from '@databases/pg';
-import Schema, {databaseSchema} from './__generated__';
+import Schema from './__generated__';
 import defineTables, {anyOf} from '..';
 
 const {users} = defineTables<Schema>({
   schemaName: 'typed_queries_bulk_insert',
-  databaseSchema,
+  databaseSchema: require('./__generated__/schema.json'),
 });
 
 const db = connect({bigIntMode: 'number'});

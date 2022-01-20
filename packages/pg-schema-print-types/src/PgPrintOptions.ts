@@ -14,6 +14,13 @@ export default class PgPrintOptions implements PrintOptions<TypeID> {
   ): PgConfig['types'][Literal<TKey>] {
     return (this._config as any)[key] ?? DEFAULT_CONFIG.types[key];
   }
+  public getSchemaJsonFileName() {
+    if (this._config.schemaJsonFileName !== undefined) {
+      return this._config.schemaJsonFileName;
+    } else {
+      return DEFAULT_CONFIG.types.schemaJsonFileName;
+    }
+  }
   public get domainTypeMode() {
     return this._v('domainTypeMode');
   }
@@ -42,7 +49,6 @@ export default class PgPrintOptions implements PrintOptions<TypeID> {
       case 'enum':
       case 'domain':
         return 3;
-      case 'schema_json':
       case 'serializeValue':
         return 4;
       case 're_export':
@@ -53,8 +59,6 @@ export default class PgPrintOptions implements PrintOptions<TypeID> {
     switch (id.type) {
       case 'schema':
         return this._v('schemaTypeName');
-      case 'schema_json':
-        return this._v('schemaObjectName');
       case 'class':
         return this._v('tableTypeName');
       case 'insert_parameters':
@@ -75,8 +79,6 @@ export default class PgPrintOptions implements PrintOptions<TypeID> {
     switch (id.type) {
       case 'schema':
         return this._v('schemaFileName');
-      case 'schema_json':
-        return this._v('schemaObjectFileName');
       case 'class':
         return this._v('tableFileName');
       case 'insert_parameters':
@@ -116,7 +118,6 @@ export default class PgPrintOptions implements PrintOptions<TypeID> {
   getTemplateValues(id: TypeID): any {
     switch (id.type) {
       case 'schema':
-      case 'schema_json':
       case 'serializeValue':
         return {};
       case 'class':

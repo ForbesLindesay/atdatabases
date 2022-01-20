@@ -255,17 +255,13 @@ export interface TypesConfig {
   schemaFileName: string;
 
   /**
-   * What should the generated "schema" object type be called
+   * What filename do you want to use for the generated "schema" object.
    *
-   * @default "databaseSchema"
-   */
-  schemaObjectName: string;
-  /**
-   * What filename do you want to use for the generated "schema" object
+   * Set this explicitly to `null` to prevent this file being written.
    *
-   * @default "index.ts"
+   * @default "schema.json"
    */
-  schemaObjectFileName: string;
+  schemaJsonFileName: string | null;
 
   /**
    * What should the generated "serializeValue" function be called
@@ -347,8 +343,10 @@ export const TypesConfigSchema: ft.Runtype<TypesConfig> = ft
     ),
     schemaTypeName: withDefault(ft.String, `DatabaseSchema`),
     schemaFileName: withDefault(ft.String, `index.ts`),
-    schemaObjectName: withDefault(ft.String, `databaseSchema`),
-    schemaObjectFileName: withDefault(ft.String, `index.ts`),
+    schemaJsonFileName: withDefault(
+      ft.Union(ft.String, ft.Null),
+      `schema.json`,
+    ),
     serializeValueTypeName: withDefault(ft.String, `serializeValue`),
     serializeValueFileName: withDefault(ft.String, `index.ts`),
 

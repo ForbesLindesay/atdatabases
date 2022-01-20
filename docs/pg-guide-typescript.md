@@ -46,7 +46,7 @@ You should now have a folder called `__generated__` containing all the generated
 
 import createConnectionPool, {sql} from '@databases/pg';
 import tables from '@databases/pg-typed';
-import DatabaseSchema, {serializeValue} from './__generated__';
+import DatabaseSchema from './__generated__';
 
 export {sql};
 
@@ -55,7 +55,7 @@ export default db;
 
 // You can list whatever tables you actually have here:
 const {users, posts} = tables<DatabaseSchema>({
-  serializeValue,
+  databaseSchema: require('./__generated__/schema.json'),
 });
 export {users, posts};
 ```

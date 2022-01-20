@@ -197,6 +197,7 @@ class FileContent<TypeID> {
 
 export default class PrintContext<TypeID> {
   private readonly _files = new Map<FileName, FileContent<TypeID>>();
+  private readonly _rawFiles = new Map<FileName, string>();
 
   public readonly options: PrintOptions<TypeID>;
   constructor(options: PrintOptions<TypeID>) {
@@ -240,11 +241,23 @@ export default class PrintContext<TypeID> {
     return this._pushDeclaration(id, 'value', declaration);
   }
 
+  public writeFile(filename: FileName, content: string) {
+    if (this._rawFiles.has(filename)) {
+      throw new Error(`Cannot write the same file multiple times: ${filename}`);
+    }
+    this._rawFiles.set(filename, content);
+  }
   public getFiles() {
-    return [...this._files.values()].map((file) => ({
-      filename: file.file,
-      content: file.getContent(),
-    }));
+    return [
+      ...[...this._files.values()].map((file) => ({
+        filename: file.file,
+        content: file.getContent(),
+      })),
+      ...[...this._rawFiles].map(([filename, content]) => ({
+        filename,
+        content,
+      })),
+    ];
   }
 }
 
