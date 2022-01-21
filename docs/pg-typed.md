@@ -292,7 +292,7 @@ async function getPosts() {
 
 ### bulkInsert(options)
 
-To insert thousands of records at a time, you can use the bulk insert API. This requires you to specify any optional fields that you want to pass in. Any required (i.e. `NOT NULL` and no default value) fields are automatically expected. You can find more details on how this API works in [@databases/pg-bulk](pg-bulk.md).
+To insert thousands of records at a time, you can use the bulk insert API. This requires you to specify any optional fields that you want to pass in. Any required (i.e. `NOT NULL` and no default value) fields are automatically expected. You can find more details on how this API works in [@databases/pg-bulk](pg-bulk.md). `bulkInsert` also returns the inserted records.
 
 ```typescript
 async function insertUsers() {
@@ -311,7 +311,7 @@ async function insertUsers() {
 
 ### bulkUpdate(options)
 
-Updating multiple records in one go, where each record needs to be updated to a different value can be tricky to do efficiently. If there is a unique constraint, it may be possible to use `insertOrUpdate`, but failing that you'll want to use this bulk API. You can find more details on how this API works in [@databases/pg-bulk](pg-bulk.md).
+Updating multiple records in one go, where each record needs to be updated to a different value can be tricky to do efficiently. If there is a unique constraint, it may be possible to use `insertOrUpdate`, but failing that you'll want to use this bulk API. You can find more details on how this API works in [@databases/pg-bulk](pg-bulk.md). `bulkUpdate` also returns the updated records.
 
 ```typescript
 async function updateUsers() {
@@ -497,6 +497,28 @@ You can use `isNoResultFoundError` to test a caught exception to see if it is th
 
 ### anyOf(valuesOrFieldQueries)
 
+Match all of the supplied values. For example, to get posts within a time range:
+
+```typescript
+import {anyOf} from '@databases/pg-typed';
+import db, {posts} from './database';
+
+/**
+ * Get posts where:
+ *
+ *   timestamp >= start AND timestamp < end
+ */
+async function getPostsBetween(start: Date, end: Date) {
+  return await posts(db)
+    .find({
+      timestamp: allOf([anyOf([greaterThan(start), start]), lessThan(end)]),
+    })
+    .all();
+}
+```
+
+### anyOf(valuesOrFieldQueries)
+
 Match any of the supplied values. For example, to get users who like blue or green:
 
 ```typescript
@@ -510,6 +532,51 @@ export async function getUsersWhoLikeBlueOrGreen() {
     })
     .all();
   return users;
+}
+```
+
+### caseInsensitive(valueOrFieldQuery)
+
+Match the supplied string while ignoring case.
+
+```typescript
+import {caseInsensitive} from '@databases/pg-typed';
+import db, {users} from './database';
+
+/**
+ * Return true if there is a user with this username, ignoring
+ * the case of the user, so ForbesLindesay would be equivalent
+ * to forbeslindesay
+ */
+async function userExists(username: string) {
+  return (
+    0 !==
+    (await users(db).count({
+      username: caseInsensitive(username),
+    }))
+  );
+}
+```
+
+### jsonPath(path, value)
+
+Match the supplied value against the given path in a `JSON`/`JSONB` column.
+
+```typescript
+import {jsonPath} from '@databases/pg-typed';
+import db, {events} from './database';
+
+/**
+ * return events where:
+ *
+ *   event_data.type = 'FEEDBACK'
+ */
+async function getFeedbackEvents() {
+  return await events(db)
+    .find({
+      event_data: jsonPath(['type'], 'feedback'),
+    })
+    .all();
 }
 ```
 
@@ -608,6 +675,76 @@ export async function getPostsByUserEmail(email: string) {
     .find({
       created_by_id: users.key(`id`, {email}),
     })
+    .all();
+}
+```
+
+## or(conditions) / and(conditions)
+
+To `or`/`and` values/conditions for a single field, you can use `anyOf`/`allOf`, but the `or` utility helps if you want to have multiple distinct queries. If you anticipate many conditions in an or, you may be get better performance by using `.bulkFind`/`.bulkDelete` instead of `or`.
+
+```typescript
+import {or, and, greaterThan} from '@databases/pg-typed';
+import db, {posts, User} from './database';
+
+/**
+ * return posts where:
+ *
+ *   user_id=${authorId}
+ *   AND (
+ *     (is_public IS TRUE AND view_count > 1000)
+ *     OR (is_public IS FALSE AND view_count > 100)
+ *   )
+ */
+async function getPopularPostsByAuthor(authorId: User['id']) {
+  return await posts(db)
+    .find(
+      and(
+        {user_id: authorId},
+        or(
+          {
+            is_public: true,
+            view_count: greaterThan(1_000),
+          },
+          {
+            is_public: false,
+            view_count: greaterThan(100),
+          },
+        ),
+      ),
+    )
+    .all();
+}
+```
+
+You can often avoid using the `and` helper by simply duplicating some fields in the query:
+
+```typescript
+import {or, greaterThan} from '@databases/pg-typed';
+import db, {posts, User} from './database';
+
+/**
+ * return posts where:
+ *
+ *   (user_id=${authorId} AND is_public IS TRUE AND view_count > 1000)
+ *   OR (user_id=${authorId} AND is_public IS FALSE AND view_count > 100)
+ */
+async function getPopularPostsByAuthor(authorId: User['id']) {
+  return await posts(db)
+    .find(
+      or(
+        {
+          user_id: authorId,
+          is_public: true,
+          view_count: greaterThan(1_000),
+        },
+        {
+          user_id: authorId,
+          is_public: false,
+          view_count: greaterThan(100),
+        },
+      ),
+    )
     .all();
 }
 ```
