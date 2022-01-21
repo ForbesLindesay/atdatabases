@@ -55,7 +55,6 @@ function tableId<TColumnName extends ColumnName>(
 function select<TColumnName extends ColumnName>(
   columns: readonly {
     readonly name: TColumnName;
-    readonly alias?: ColumnName;
     readonly getValue?: (record: any) => unknown;
   }[],
   records: readonly any[],
@@ -63,19 +62,19 @@ function select<TColumnName extends ColumnName>(
 ) {
   const {database, columnTypes, serializeValue} = options;
   const {sql} = database;
-  return sql`SELECT ${sql.join(
-    columns.map(({name, alias, getValue}) => {
+  return sql`SELECT * FROM UNNEST(${sql.join(
+    columns.map(({name, getValue}) => {
       const typeName = columnTypes[name];
       if (!typeName) {
         throw new Error(`Missing type name for ${name}`);
       }
-      return sql`UNNEST(${records.map((r) => {
+      return sql`${records.map((r) => {
         const value = getValue ? getValue(r) : r[name];
         return serializeValue ? serializeValue(`${name}`, value) : value;
-      })}::${typeName}[])${alias ? sql` AS ${sql.ident(alias)}` : sql``}`;
+      })}::${typeName}[]`;
     }),
     `,`,
-  )}`;
+  )})`;
 }
 
 export async function bulkInsert<TColumnToInsert extends ColumnName>(
@@ -196,18 +195,24 @@ export async function bulkUpdate<
       [
         ...whereColumnNames.map((columnName) => ({
           name: columnName,
-          alias: columnName,
           getValue: (u: any) => u.where[columnName],
         })),
         ...setColumnNames.map((columnName) => ({
           name: columnName,
-          alias: `updated_value_of_${columnName}`,
           getValue: (u: any) => u.set[columnName],
         })),
       ],
       updates,
       options,
-    )}) AS bulk_query WHERE ${sql.join(
+    )} AS bulk_query(${sql.join(
+      [
+        ...whereColumnNames.map((columnName) => sql.ident(columnName)),
+        ...setColumnNames.map((columnName) =>
+          sql.ident(`updated_value_of_${columnName}`),
+        ),
+      ],
+      `,`,
+    )})) AS bulk_query WHERE ${sql.join(
       whereColumnNames.map(
         (columnName) =>
           sql`${sql.ident(tableName, columnName)} = ${sql.ident(

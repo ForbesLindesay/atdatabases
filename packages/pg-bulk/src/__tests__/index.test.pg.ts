@@ -11,7 +11,32 @@ const SCHEMA_NAME = `bulk_utils_test`;
 const TABLE_NAME = `users`;
 const table = sql.ident(SCHEMA_NAME, TABLE_NAME);
 
-const db = connect({bigIntMode: 'number'});
+let queries: {readonly text: string; readonly values: readonly any[]}[] = [];
+const db = connect({
+  bigIntMode: 'number',
+  onQueryStart(_q, q) {
+    queries.push({
+      text: q.text.split(`"bulk_utils_test".`).join(``),
+      values: q.values.map((v) =>
+        Array.isArray(v) ? `Array<${typeof v[0]}>` : v,
+      ),
+    });
+  },
+});
+function expectQueries(fn: () => Promise<void>) {
+  return expect(
+    (async () => {
+      try {
+        queries = [];
+        await fn();
+        return queries;
+      } catch (ex) {
+        console.error(queries);
+        throw ex;
+      }
+    })(),
+  ).resolves;
+}
 
 const options: BulkOperationOptions<'id' | 'screen_name' | 'bio' | 'age'> = {
   database: db,
@@ -68,15 +93,22 @@ test('create users in bulk', async () => {
   for (let i = 0; i < 50_000; i++) {
     names.push(`bulk_insert_name_${i}`);
   }
-  await bulkInsert({
-    ...options,
-    columnsToInsert: [`screen_name`, `age`, `bio`],
-    records: names.map((n) => ({
-      screen_name: n,
-      age: 42,
-      bio: `My name is ${n}`,
-    })),
-  });
+  await expectQueries(async () => {
+    await bulkInsert({
+      ...options,
+      columnsToInsert: [`screen_name`, `age`, `bio`],
+      records: names.map((n) => ({
+        screen_name: n,
+        age: 42,
+        bio: `My name is ${n}`,
+      })),
+    });
+  }).toEqual([
+    {
+      text: `INSERT INTO "users" ("screen_name","age","bio") SELECT * FROM UNNEST($1::TEXT[],$2::INT[],$3::TEXT[])`,
+      values: ['Array<string>', 'Array<number>', 'Array<string>'],
+    },
+  ]);
   const records = await db.query(
     sql`SELECT screen_name, age FROM ${table} ORDER BY screen_name ASC`,
   );
@@ -85,43 +117,57 @@ test('create users in bulk', async () => {
 });
 
 test('query users in bulk', async () => {
-  expect(
-    await bulkSelect({
-      ...options,
-      whereColumnNames: [`screen_name`, `age`],
-      whereConditions: [
-        {screen_name: `bulk_insert_name_5`, age: 42},
-        {screen_name: `bulk_insert_name_6`, age: 42},
-        {screen_name: `bulk_insert_name_7`, age: 32},
-      ],
-      selectColumnNames: [`screen_name`, `age`, `bio`],
-      orderBy: [{columnName: `screen_name`, direction: `ASC`}],
-    }),
-  ).toEqual([
+  await expectQueries(async () => {
+    expect(
+      await bulkSelect({
+        ...options,
+        whereColumnNames: [`screen_name`, `age`],
+        whereConditions: [
+          {screen_name: `bulk_insert_name_5`, age: 42},
+          {screen_name: `bulk_insert_name_6`, age: 42},
+          {screen_name: `bulk_insert_name_7`, age: 32},
+        ],
+        selectColumnNames: [`screen_name`, `age`, `bio`],
+        orderBy: [{columnName: `screen_name`, direction: `ASC`}],
+      }),
+    ).toEqual([
+      {
+        screen_name: `bulk_insert_name_5`,
+        age: 42,
+        bio: `My name is bulk_insert_name_5`,
+      },
+      {
+        screen_name: `bulk_insert_name_6`,
+        age: 42,
+        bio: `My name is bulk_insert_name_6`,
+      },
+    ]);
+  }).toEqual([
     {
-      screen_name: `bulk_insert_name_5`,
-      age: 42,
-      bio: `My name is bulk_insert_name_5`,
-    },
-    {
-      screen_name: `bulk_insert_name_6`,
-      age: 42,
-      bio: `My name is bulk_insert_name_6`,
+      text: `SELECT "screen_name","age","bio" FROM "users" WHERE ("screen_name","age") IN (SELECT * FROM UNNEST($1::TEXT[],$2::INT[])) ORDER BY "screen_name" ASC`,
+      values: ['Array<string>', 'Array<number>'],
     },
   ]);
 });
 
 test('update users in bulk', async () => {
-  await bulkUpdate({
-    ...options,
-    whereColumnNames: [`screen_name`, `age`],
-    setColumnNames: [`age`],
-    updates: [
-      {where: {screen_name: `bulk_insert_name_10`, age: 42}, set: {age: 1}},
-      {where: {screen_name: `bulk_insert_name_11`, age: 42}, set: {age: 2}},
-      {where: {screen_name: `bulk_insert_name_12`, age: 32}, set: {age: 3}},
-    ],
-  });
+  await expectQueries(async () => {
+    await bulkUpdate({
+      ...options,
+      whereColumnNames: [`screen_name`, `age`],
+      setColumnNames: [`age`],
+      updates: [
+        {where: {screen_name: `bulk_insert_name_10`, age: 42}, set: {age: 1}},
+        {where: {screen_name: `bulk_insert_name_11`, age: 42}, set: {age: 2}},
+        {where: {screen_name: `bulk_insert_name_12`, age: 32}, set: {age: 3}},
+      ],
+    });
+  }).toEqual([
+    {
+      text: `UPDATE "users" SET "age" = "bulk_query"."updated_value_of_age" FROM (SELECT * FROM UNNEST($1::TEXT[],$2::INT[],$3::INT[]) AS bulk_query("screen_name","age","updated_value_of_age")) AS bulk_query WHERE "users"."screen_name" = "bulk_query"."screen_name" AND "users"."age" = "bulk_query"."age"`,
+      values: ['Array<string>', 'Array<number>', 'Array<number>'],
+    },
+  ]);
   expect(
     await db.query(
       sql`SELECT screen_name, age FROM ${table} WHERE screen_name=ANY(${[
@@ -138,15 +184,22 @@ test('update users in bulk', async () => {
 });
 
 test('delete users in bulk', async () => {
-  await bulkDelete({
-    ...options,
-    whereColumnNames: [`screen_name`, `age`],
-    whereConditions: [
-      {screen_name: `bulk_insert_name_15`, age: 42},
-      {screen_name: `bulk_insert_name_16`, age: 42},
-      {screen_name: `bulk_insert_name_17`, age: 32},
-    ],
-  });
+  await expectQueries(async () => {
+    await bulkDelete({
+      ...options,
+      whereColumnNames: [`screen_name`, `age`],
+      whereConditions: [
+        {screen_name: `bulk_insert_name_15`, age: 42},
+        {screen_name: `bulk_insert_name_16`, age: 42},
+        {screen_name: `bulk_insert_name_17`, age: 32},
+      ],
+    });
+  }).toEqual([
+    {
+      text: `DELETE FROM "users" WHERE ("screen_name","age") IN (SELECT * FROM UNNEST($1::TEXT[],$2::INT[]))`,
+      values: ['Array<string>', 'Array<number>'],
+    },
+  ]);
   expect(
     await db.query(
       sql`SELECT screen_name, age FROM ${table} WHERE screen_name=ANY(${[

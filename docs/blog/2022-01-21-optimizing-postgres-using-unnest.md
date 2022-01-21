@@ -28,9 +28,7 @@ You can run the following query:
 
 ```sql
 INSERT INTO users (email, favorite_color)
-SELECT
-  UNNEST(?::TEXT[]),
-  UNNEST(?::TEXT[])
+SELECT * FROM UNNEST(?::TEXT[], ?::TEXT[])
 ```
 
 With parameters like:
@@ -64,11 +62,10 @@ SET
   favorite_color=bulk_query.updated_favorite_color
 FROM
   (
-    SELECT
-      UNNEST(?::TEXT[])
-        AS email,
-      UNNEST(?::TEXT[])
-        AS updated_favorite_color
+    SELECT *
+    FROM
+      UNNEST(?::TEXT[], ?::TEXT[])
+      AS t(email, updated_favorite_color)
   ) AS bulk_query
 WHERE
   users.email=bulk_query.email
@@ -102,9 +99,8 @@ You can run the following query:
 ```sql
 SELECT * FROM users
 WHERE (email, favorite_color) IN (
-  SELECT
-    UNNEST(?::TEXT[]),
-    UNNEST(?::TEXT[])
+  SELECT *
+  FROM UNNEST(?::TEXT[], ?::TEXT[])
 )
 ```
 
@@ -134,11 +130,15 @@ An alternative if you need more control can be to use an INNER JOIN instead of t
 ```sql
 SELECT users.* FROM users
 INNER JOIN (
-  SELECT
-    UNNEST(?::TEXT[]) AS email,
-    UNNEST(?::TEXT[]) AS favorite_color
+  SELECT *
+  FROM
+    UNNEST(?::TEXT[], ?::TEXT[])
+    AS t(email, favorite_color)
 ) AS unnest_query
-ON (LOWER(users.email) = LOWER(unnest_query.email) AND LOWER(user.favorite_color) = LOWER(unnest_query.favorite_color))
+ON (
+  LOWER(users.email) = LOWER(unnest_query.email)
+  AND LOWER(users.favorite_color) = LOWER(unnest_query.favorite_color)
+)
 ```
 
 ## DELETE with thousands of different conditions in one go
@@ -150,9 +150,8 @@ You can run the following query:
 ```sql
 DELETE FROM users
 WHERE (email, favorite_color) IN (
-  SELECT
-    UNNEST(?::TEXT[]),
-    UNNEST(?::TEXT[])
+  SELECT *
+  FROM UNNEST(?::TEXT[], ?::TEXT[])
 )
 ```
 
