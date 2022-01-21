@@ -167,3 +167,5 @@ WHERE
 ```
 
 Just like with `SELECT`, using `UNNEST` here lets us keep the query constant, and use only 2 parameters, regardless of how many conditions we want to add.
+
+> If you're using node.js, you can do all these operations without having to memorize the syntax by using [`@database/pg-typed`](https://www.atdatabases.org/docs/pg-guide-typescript) or [`@database/pg-bulk`](https://www.atdatabases.org/docs/pg-bulk).
