@@ -303,7 +303,7 @@ async function insertUsers() {
       {email: `joe@example.com`, favorite_color: `red`},
       {email: `ben@example.com`, favorite_color: `green`},
       {email: `tom@example.com`, favorite_color: `blue`},
-      {email: `clare@example.com`, favorite_color: `indigo`},
+      {email: `mary@example.com`, favorite_color: `indigo`},
     ],
   });
 }
@@ -323,7 +323,7 @@ async function updateUsers() {
       {where: {email: `joe@example.com`}, set: {favorite_color: `green`}},
       {where: {email: `ben@example.com`}, set: {favorite_color: `blue`}},
       {where: {email: `tom@example.com`}, set: {favorite_color: `indigo`}},
-      {where: {email: `clare@example.com`}, set: {favorite_color: `green`}},
+      {where: {email: `mary@example.com`}, set: {favorite_color: `green`}},
     ],
   });
 }
