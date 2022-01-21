@@ -7,9 +7,18 @@ googleSummary: UNNEST is the only way to make Postgres queries fast and reliable
 ogSummary: UNNEST is the only way to make Postgres queries fast and reliable, if you want to interact thousands of rows at a time.
 ---
 
-Postgres is normally very fast, but it can become slow (or even fail completely), if you hae too many parameters in your queries. When it comes to operating on data in bulk, `UNNEST` is the only way to achieve fast, reliable queries. This post has examples for using `UNNEST` to do all types of bulk transactions.
+Postgres is normally very fast, but it can become slow (or even fail completely), if you have too many parameters in your queries. When it comes to operating on data in bulk, `UNNEST` is the only way to achieve fast, reliable queries. This post has examples for using `UNNEST` to do all types of bulk transactions.
 
 <!--truncate-->
+
+All the examples in this article assume a database schema that looks like:
+
+```sql
+CREATE TABLE users (
+  email TEXT NOT NULL PRIMARY KEY,
+  favorite_color TEXT NOT NULL
+)
+```
 
 ## INSERT thousands of records in one go
 
