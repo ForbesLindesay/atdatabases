@@ -17,6 +17,13 @@
         "typeName": "TEXT"
       },
       {
+        "name": "created_at",
+        "isNullable": true,
+        "hasDefault": false,
+        "typeId": 1184,
+        "typeName": "TIMESTAMPTZ"
+      },
+      {
         "name": "id",
         "isNullable": false,
         "hasDefault": true,
@@ -36,6 +43,13 @@
         "hasDefault": false,
         "typeId": 20,
         "typeName": "BIGINT"
+      },
+      {
+        "name": "updated_at",
+        "isNullable": true,
+        "hasDefault": false,
+        "typeId": 1184,
+        "typeName": "TIMESTAMPTZ"
       }
     ]
   },
@@ -57,6 +71,13 @@
         "typeName": "TEXT"
       },
       {
+        "name": "created_at",
+        "isNullable": true,
+        "hasDefault": false,
+        "typeId": 1184,
+        "typeName": "TIMESTAMPTZ"
+      },
+      {
         "name": "id",
         "isNullable": false,
         "hasDefault": true,
@@ -69,6 +90,13 @@
         "hasDefault": false,
         "typeId": 25,
         "typeName": "TEXT"
+      },
+      {
+        "name": "updated_at",
+        "isNullable": true,
+        "hasDefault": false,
+        "typeId": 1184,
+        "typeName": "TIMESTAMPTZ"
       }
     ]
   }

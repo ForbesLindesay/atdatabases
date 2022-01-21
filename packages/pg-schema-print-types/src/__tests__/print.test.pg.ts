@@ -19,14 +19,18 @@ test('getClasses', async () => {
         id BIGSERIAL NOT NULL PRIMARY KEY,
         screen_name TEXT UNIQUE NOT NULL,
         bio TEXT,
-        age INT
+        age INT,
+        created_at TIMESTAMPTZ,
+        updated_at TIMESTAMPTZ
       );
       CREATE TABLE print_types.photos (
         id BIGSERIAL NOT NULL PRIMARY KEY,
         owner_user_id BIGINT NOT NULL REFERENCES print_types.users(id),
         cdn_url TEXT NOT NULL,
         caption TEXT NULL,
-        metadata JSONB NOT NULL
+        metadata JSONB NOT NULL,
+        created_at TIMESTAMPTZ,
+        updated_at TIMESTAMPTZ
       );
       CREATE MATERIALIZED VIEW print_types.view_a AS SELECT * FROM print_types.users;
       CREATE VIEW print_types.view_b AS SELECT * FROM print_types.photos;
@@ -99,12 +103,14 @@ test('getClasses', async () => {
     interface Photo {
       caption: (string) | null
       cdn_url: string & {__brand?: \\"url\\"}
+      created_at: (Date) | null
       /**
        * @default nextval('print_types.photos_id_seq'::regclass)
        */
       id: number & {readonly __brand?: 'photos_id'}
       metadata: unknown
       owner_user_id: User['id']
+      updated_at: (Date) | null
     }
     export default Photo;
 
@@ -114,12 +120,14 @@ test('getClasses', async () => {
     interface Photos_InsertParameters {
       caption?: (string) | null
       cdn_url: string & {__brand?: \\"url\\"}
+      created_at?: (Date) | null
       /**
        * @default nextval('print_types.photos_id_seq'::regclass)
        */
       id?: number & {readonly __brand?: 'photos_id'}
       metadata: unknown
       owner_user_id: User['id']
+      updated_at?: (Date) | null
     }
     export type {Photos_InsertParameters}
     ",
@@ -129,22 +137,26 @@ test('getClasses', async () => {
         "content": "interface User {
       age: (number) | null
       bio: (string) | null
+      created_at: (Date) | null
       /**
        * @default nextval('print_types.users_id_seq'::regclass)
        */
       id: number & {readonly __brand?: 'users_id'}
       screen_name: string
+      updated_at: (Date) | null
     }
     export default User;
 
     interface Users_InsertParameters {
       age?: (number) | null
       bio?: (string) | null
+      created_at?: (Date) | null
       /**
        * @default nextval('print_types.users_id_seq'::regclass)
        */
       id?: number & {readonly __brand?: 'users_id'}
       screen_name: string
+      updated_at?: (Date) | null
     }
     export type {Users_InsertParameters}
     ",
@@ -170,6 +182,13 @@ test('getClasses', async () => {
             \\"typeName\\": \\"TEXT\\"
           },
           {
+            \\"name\\": \\"created_at\\",
+            \\"isNullable\\": true,
+            \\"hasDefault\\": false,
+            \\"typeId\\": 1184,
+            \\"typeName\\": \\"TIMESTAMPTZ\\"
+          },
+          {
             \\"name\\": \\"id\\",
             \\"isNullable\\": false,
             \\"hasDefault\\": true,
@@ -189,6 +208,13 @@ test('getClasses', async () => {
             \\"hasDefault\\": false,
             \\"typeId\\": 20,
             \\"typeName\\": \\"BIGINT\\"
+          },
+          {
+            \\"name\\": \\"updated_at\\",
+            \\"isNullable\\": true,
+            \\"hasDefault\\": false,
+            \\"typeId\\": 1184,
+            \\"typeName\\": \\"TIMESTAMPTZ\\"
           }
         ]
       },
@@ -210,6 +236,13 @@ test('getClasses', async () => {
             \\"typeName\\": \\"TEXT\\"
           },
           {
+            \\"name\\": \\"created_at\\",
+            \\"isNullable\\": true,
+            \\"hasDefault\\": false,
+            \\"typeId\\": 1184,
+            \\"typeName\\": \\"TIMESTAMPTZ\\"
+          },
+          {
             \\"name\\": \\"id\\",
             \\"isNullable\\": false,
             \\"hasDefault\\": true,
@@ -222,6 +255,13 @@ test('getClasses', async () => {
             \\"hasDefault\\": false,
             \\"typeId\\": 25,
             \\"typeName\\": \\"TEXT\\"
+          },
+          {
+            \\"name\\": \\"updated_at\\",
+            \\"isNullable\\": true,
+            \\"hasDefault\\": false,
+            \\"typeId\\": 1184,
+            \\"typeName\\": \\"TIMESTAMPTZ\\"
           }
         ]
       }

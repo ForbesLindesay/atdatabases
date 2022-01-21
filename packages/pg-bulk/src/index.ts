@@ -79,11 +79,17 @@ function select<TColumnName extends ColumnName>(
 }
 
 export async function bulkInsert<TColumnToInsert extends ColumnName>(
+  options: BulkInsertOptions<TColumnToInsert> & {returning: SQLQuery},
+): Promise<any[]>;
+export async function bulkInsert<TColumnToInsert extends ColumnName>(
   options: BulkInsertOptions<TColumnToInsert>,
-): Promise<void> {
-  const {database, columnsToInsert, records} = options;
+): Promise<void>;
+export async function bulkInsert<TColumnToInsert extends ColumnName>(
+  options: BulkInsertOptions<TColumnToInsert> & {returning?: SQLQuery},
+): Promise<any[] | void> {
+  const {database, columnsToInsert, records, returning} = options;
   const {sql} = database;
-  await database.query(
+  return await database.query(
     sql`INSERT INTO ${tableId(options)} (${sql.join(
       columnsToInsert.map((columnName) => sql.ident(columnName)),
       `,`,
@@ -91,7 +97,7 @@ export async function bulkInsert<TColumnToInsert extends ColumnName>(
       columnsToInsert.map((name) => ({name})),
       records,
       options,
-    )}`,
+    )}${returning ? sql` RETURNING ${returning}` : sql``}`,
   );
 }
 
@@ -154,11 +160,29 @@ export async function bulkSelect<TWhereColumn extends ColumnName>(
 export async function bulkUpdate<
   TWhereColumn extends ColumnName,
   TSetColumn extends ColumnName,
->(options: BulkUpdateOptions<TWhereColumn, TSetColumn>): Promise<void> {
-  const {database, tableName, whereColumnNames, setColumnNames, updates} =
-    options;
+>(
+  options: BulkUpdateOptions<TWhereColumn, TSetColumn> & {returning: SQLQuery},
+): Promise<any[]>;
+export async function bulkUpdate<
+  TWhereColumn extends ColumnName,
+  TSetColumn extends ColumnName,
+>(options: BulkUpdateOptions<TWhereColumn, TSetColumn>): Promise<void>;
+export async function bulkUpdate<
+  TWhereColumn extends ColumnName,
+  TSetColumn extends ColumnName,
+>(
+  options: BulkUpdateOptions<TWhereColumn, TSetColumn> & {returning?: SQLQuery},
+): Promise<any[] | void> {
+  const {
+    database,
+    tableName,
+    whereColumnNames,
+    setColumnNames,
+    updates,
+    returning,
+  } = options;
   const {sql} = database;
-  await database.query(
+  return await database.query(
     sql`UPDATE ${tableId(options)} SET ${sql.join(
       setColumnNames.map(
         (columnName) =>
@@ -192,7 +216,7 @@ export async function bulkUpdate<
           )}`,
       ),
       ` AND `,
-    )}`,
+    )}${returning ? sql` RETURNING ${returning}` : sql``}`,
   );
 }
 

@@ -1,3 +1,4 @@
+import assertNever from 'assert-never';
 import {SQLQuery, Queryable} from '@databases/pg';
 import {
   bulkInsert,
@@ -74,20 +75,31 @@ export interface OrderedSelectQuery<TRecord> extends SelectQuery<TRecord> {
   limit(count: number): Promise<TRecord[]>;
 }
 
+type SpecialFieldQuery<T> =
+  | {
+      type: 'json_path';
+      path: readonly string[];
+      query: T | FieldQuery<T>;
+    }
+  | {type: 'case_insensitive'; query: T | FieldQuery<T>}
+  | {type: 'not'; query: T | FieldQuery<T>};
 class FieldQuery<T> {
   protected readonly __query: (
-    columnName: string,
+    columnName: SQLQuery,
     sql: Queryable['sql'],
-    toValue: (columnName: string, value: unknown) => unknown,
+    toValue: (value: unknown) => unknown,
   ) => SQLQuery;
+  protected readonly __special: SpecialFieldQuery<T> | undefined;
   constructor(
     query: (
-      columnName: string,
+      columnName: SQLQuery,
       sql: Queryable['sql'],
-      toValue: (columnName: string, value: unknown) => unknown,
+      toValue: (value: unknown) => unknown,
     ) => SQLQuery,
+    special?: SpecialFieldQuery<T>,
   ) {
     this.__query = query;
+    this.__special = special;
   }
   protected __checkFieldType(): T {
     throw new Error(
@@ -95,34 +107,48 @@ class FieldQuery<T> {
     );
   }
   static query<T>(
-    columnName: string,
+    columnName: SQLQuery,
     q: FieldQuery<T> | unknown,
     sql: Queryable['sql'],
-    toValue: (columnName: string, value: unknown) => unknown,
+    toValue: (value: unknown) => unknown,
   ): SQLQuery {
     if (q === null) {
-      return sql`${sql.ident(columnName)} IS NULL`;
+      return sql`${columnName} IS NULL`;
     }
     if (q && q instanceof FieldQuery) {
       return q.__query(columnName, sql, toValue);
     }
 
-    return sql`${sql.ident(columnName)} = ${toValue(columnName, q)}`;
+    return sql`${columnName} = ${toValue(q)}`;
+  }
+  static getSpecial<T>(q: T | FieldQuery<T>) {
+    if (q && q instanceof FieldQuery) {
+      return q.__special;
+    } else {
+      return undefined;
+    }
   }
 }
 
-export type {FieldQuery};
+const FALSE_FIELD_QUERY = new FieldQuery<any>((_columnName, sql) => sql`FALSE`);
+const TRUE_FIELD_QUERY = new FieldQuery<any>((_columnName, sql) => sql`TRUE`);
 
-export type WhereCondition<TRecord> = Partial<
-  {readonly [key in keyof TRecord]: TRecord[key] | FieldQuery<TRecord[key]>}
->;
+export type {FieldQuery};
 
 export function anyOf<T>(values: {
   [Symbol.iterator](): IterableIterator<T | FieldQuery<T>>;
-}) {
-  const valuesArray: any[] = [];
+}): T | FieldQuery<T> {
+  const valuesSet = new Set<T>();
   const parts: FieldQuery<T>[] = [];
+  const caseInsensitiveParts: (T | FieldQuery<T>)[] = [];
+  const negatedParts: (T | FieldQuery<T>)[] = [];
   for (const value of values) {
+    if (value === TRUE_FIELD_QUERY) {
+      return TRUE_FIELD_QUERY;
+    }
+    if (value === FALSE_FIELD_QUERY) {
+      continue;
+    }
     if (value === null) {
       parts.push(
         new FieldQuery((columnName, sql, toValue) =>
@@ -130,23 +156,50 @@ export function anyOf<T>(values: {
         ),
       );
     } else if (value instanceof FieldQuery) {
-      parts.push(value);
+      const special = FieldQuery.getSpecial(value);
+      if (special?.type === 'case_insensitive') {
+        caseInsensitiveParts.push(special.query);
+      } else if (special?.type === 'not') {
+        negatedParts.push(special.query);
+      } else {
+        parts.push(value);
+      }
     } else {
-      valuesArray.push(value);
+      valuesSet.add(value);
     }
   }
-  if (valuesArray.length) {
-    parts.push(
-      new FieldQuery<T>(
-        (columnName, sql, toValue) =>
-          sql`${sql.ident(columnName)} = ANY(${valuesArray.map((v) =>
-            toValue(columnName, v),
-          )})`,
-      ),
-    );
+  if (caseInsensitiveParts.length) {
+    parts.push(caseInsensitive(anyOf(caseInsensitiveParts) as any) as any);
+  }
+  if (negatedParts.length) {
+    const negated = not(allOf(negatedParts));
+    if (negated && negated instanceof FieldQuery) {
+      parts.push(negated);
+    } else {
+      valuesSet.add(negated);
+    }
+  }
+  if (valuesSet.size) {
+    if (valuesSet.size === 1 && parts.length === 0) {
+      return [...valuesSet][0];
+    }
+    if (valuesSet.size === 1) {
+      parts.push(
+        new FieldQuery<T>((columnName, sql, toValue) =>
+          FieldQuery.query(columnName, [...valuesSet][0], sql, toValue),
+        ),
+      );
+    } else {
+      parts.push(
+        new FieldQuery<T>(
+          (columnName, sql, toValue) =>
+            sql`${columnName} = ANY(${[...valuesSet].map((v) => toValue(v))})`,
+        ),
+      );
+    }
   }
   if (parts.length === 0) {
-    return new FieldQuery<T>((_columnName, sql) => sql`FALSE`);
+    return FALSE_FIELD_QUERY;
   }
   if (parts.length === 1) {
     return parts[0];
@@ -160,35 +213,234 @@ export function anyOf<T>(values: {
   );
 }
 
-export function not<T>(value: T | FieldQuery<T>) {
+export function allOf<T>(values: {
+  [Symbol.iterator](): IterableIterator<T | FieldQuery<T>>;
+}): T | FieldQuery<T> {
+  const valuesSet = new Set<T>();
+  const ordinaryParts: FieldQuery<T>[] = [];
+  const negated: (T | FieldQuery<T>)[] = [];
+  for (const q of values) {
+    if (q === FALSE_FIELD_QUERY) {
+      return FALSE_FIELD_QUERY;
+    }
+    if (q === TRUE_FIELD_QUERY) {
+      continue;
+    }
+    if (q && q instanceof FieldQuery) {
+      const special = FieldQuery.getSpecial(q);
+      if (special?.type === 'not') {
+        negated.push(special.query);
+      } else {
+        ordinaryParts.push(q);
+      }
+    } else {
+      valuesSet.add(q);
+    }
+  }
+  if (negated.length) {
+    const n = not(anyOf(negated));
+    if (n && n instanceof FieldQuery) {
+      ordinaryParts.push(n);
+    } else {
+      valuesSet.add(n);
+    }
+  }
+  if (valuesSet.size > 1) {
+    return FALSE_FIELD_QUERY;
+  } else if (valuesSet.size) {
+    ordinaryParts.push(
+      new FieldQuery((columnName, sql, toValue) =>
+        FieldQuery.query(columnName, [...valuesSet][0], sql, toValue),
+      ),
+    );
+  }
+  if (ordinaryParts.length === 0) {
+    return TRUE_FIELD_QUERY;
+  }
+  if (ordinaryParts.length === 1) {
+    return ordinaryParts[0];
+  }
+  return new FieldQuery<T>(
+    (columnName, sql, toValue) =>
+      sql`(${sql.join(
+        ordinaryParts.map((p) => FieldQuery.query(columnName, p, sql, toValue)),
+        ' AND ',
+      )})`,
+  );
+}
+
+export function not<T>(value: T | FieldQuery<T>): T | FieldQuery<T> {
+  if (value === TRUE_FIELD_QUERY) {
+    return FALSE_FIELD_QUERY;
+  } else if (value === FALSE_FIELD_QUERY) {
+    return TRUE_FIELD_QUERY;
+  }
+  const special = FieldQuery.getSpecial(value);
+  if (special?.type === 'not') {
+    return special.query;
+  }
   return new FieldQuery<T>(
     (columnName, sql, toValue) =>
       sql`NOT (${FieldQuery.query(columnName, value, sql, toValue)})`,
+    {type: 'not', query: value},
   );
 }
 
-function internalInQueryResults(query: (sql: Queryable['sql']) => SQLQuery) {
+function internalInQueryResults(
+  query: (sql: Queryable['sql']) => SQLQuery | FieldQuery<any>,
+): FieldQuery<any> {
   return new FieldQuery<any>(
-    (columnName, sql) => sql`${sql.ident(columnName)} IN (${query(sql)})`,
+    (columnName, sql) => sql`${columnName} IN (${query(sql)})`,
   );
 }
 
-export function inQueryResults(query: SQLQuery) {
+export function inQueryResults(query: SQLQuery): FieldQuery<any> {
   return internalInQueryResults(() => query);
 }
 
-export function lessThan<T>(value: T) {
+export function lessThan<T>(value: T): FieldQuery<T> {
   return new FieldQuery<T>(
-    (columnName, sql, toValue) =>
-      sql`${sql.ident(columnName)} < ${toValue(columnName, value)}`,
+    (columnName, sql, toValue) => sql`${columnName} < ${toValue(value)}`,
   );
 }
 
-export function greaterThan<T>(value: T) {
+export function greaterThan<T>(value: T): FieldQuery<T> {
   return new FieldQuery<T>(
-    (columnName, sql, toValue) =>
-      sql`${sql.ident(columnName)} > ${toValue(columnName, value)}`,
+    (columnName, sql, toValue) => sql`${columnName} > ${toValue(value)}`,
   );
+}
+
+export function jsonPath(
+  path: readonly string[],
+  query: any | FieldQuery<any>,
+): FieldQuery<any> {
+  return new FieldQuery<any>(
+    (columnName, sql, toValue) =>
+      FieldQuery.query(sql`${columnName}#>${path}`, query, sql, toValue),
+    {type: 'json_path', path, query},
+  );
+}
+
+export function caseInsensitive(
+  query: string | FieldQuery<string>,
+): FieldQuery<string> {
+  const special = FieldQuery.getSpecial(query);
+  if (special?.type === 'json_path') {
+    return jsonPath(special.path, caseInsensitive(special.query));
+  }
+  return new FieldQuery<string>(
+    (columnName, sql, toValue) =>
+      FieldQuery.query(
+        sql`LOWER(CAST(${columnName} AS TEXT))`,
+        query,
+        sql,
+        (v) => `${toValue(v)}`.toLowerCase(),
+      ),
+    {type: 'case_insensitive', query},
+  );
+}
+
+class WhereCombinedCondition<TRecord> {
+  protected readonly __conditions: readonly WhereCondition<TRecord>[];
+  protected readonly __combiner: 'AND' | 'OR';
+  constructor(
+    conditions: readonly WhereCondition<TRecord>[],
+    combiner: 'AND' | 'OR',
+  ) {
+    this.__conditions = conditions;
+    this.__combiner = combiner;
+  }
+  static query<T>(
+    q: WhereCombinedCondition<T> | WhereCondition<T>,
+    sql: Queryable['sql'],
+    toValue: (columnName: string, value: unknown) => unknown,
+    parentType?: 'AND' | 'OR',
+  ): SQLQuery | 'TRUE' | 'FALSE' {
+    if (q instanceof WhereCombinedCondition) {
+      const conditions = q.__conditions.map((c) =>
+        WhereCombinedCondition.query(c, sql, toValue, q.__combiner),
+      );
+      const significantConditions: SQLQuery[] = [];
+      switch (q.__combiner) {
+        case 'AND': {
+          for (const c of conditions) {
+            if (c === 'FALSE') {
+              return 'FALSE';
+            } else if (c !== 'TRUE') {
+              significantConditions.push(c);
+            }
+          }
+          if (!significantConditions.length) {
+            return 'TRUE';
+          }
+          if (significantConditions.length === 1) {
+            return significantConditions[0];
+          }
+          const query = sql.join(significantConditions, sql` AND `);
+          return parentType === 'OR' ? sql`(${query})` : query;
+        }
+        case 'OR': {
+          for (const c of conditions) {
+            if (c === 'TRUE') {
+              return 'TRUE';
+            } else if (c !== 'FALSE') {
+              significantConditions.push(c);
+            }
+          }
+          if (!significantConditions.length) {
+            return 'FALSE';
+          }
+          if (significantConditions.length === 1) {
+            return significantConditions[0];
+          }
+          const query = sql.join(significantConditions, sql` OR `);
+          return parentType === 'AND' ? sql`(${query})` : query;
+        }
+        default:
+          return assertNever(q.__combiner);
+      }
+    }
+
+    const entries = Object.entries(q);
+    const fieldTests: SQLQuery[] = [];
+    for (const [columnName, value] of entries) {
+      if (value === FALSE_FIELD_QUERY) {
+        return 'FALSE';
+      } else if (value !== TRUE_FIELD_QUERY) {
+        fieldTests.push(
+          FieldQuery.query(sql.ident(columnName), value, sql, (v) =>
+            toValue(columnName, v),
+          ),
+        );
+      }
+    }
+    if (fieldTests.length === 0) {
+      return 'TRUE';
+    }
+    if (fieldTests.length === 1) {
+      return fieldTests[0];
+    }
+    const query = sql.join(fieldTests, sql` AND `);
+    return parentType === 'OR' ? sql`(${query})` : query;
+  }
+}
+export type {WhereCombinedCondition};
+
+export type WhereCondition<TRecord> =
+  | Partial<
+      {readonly [key in keyof TRecord]: TRecord[key] | FieldQuery<TRecord[key]>}
+    >
+  | WhereCombinedCondition<TRecord>;
+
+export function and<TRecord>(
+  ...conditions: readonly WhereCondition<TRecord>[]
+): WhereCondition<TRecord> {
+  return new WhereCombinedCondition(conditions, 'AND');
+}
+export function or<TRecord>(
+  ...conditions: readonly WhereCondition<TRecord>[]
+): WhereCondition<TRecord> {
+  return new WhereCombinedCondition(conditions, 'OR');
 }
 
 interface SelectQueryOptions {
@@ -358,31 +610,6 @@ type BulkInsertRecord<
   TKey extends keyof TInsertParameters,
 > = BulkRecord<TInsertParameters, BulkInsertFields<TInsertParameters, TKey>>;
 
-function rowToCondition<TRecord>(
-  row: WhereCondition<TRecord>,
-  sql: Queryable['sql'],
-  toValue: (columnName: string, value: unknown) => unknown,
-): SQLQuery | null {
-  const entries = Object.entries(row).filter((row) => row[1] !== undefined);
-  if (entries.length === 0) {
-    return null;
-  }
-  return sql.join(
-    entries.map(([columnName, value]) =>
-      FieldQuery.query(columnName, value, sql, toValue),
-    ),
-    sql` AND `,
-  );
-}
-function rowToWhere<TRecord>(
-  row: WhereCondition<TRecord>,
-  sql: Queryable['sql'],
-  toValue: (columnName: string, value: unknown) => unknown,
-): SQLQuery {
-  const condition = rowToCondition(row, sql, toValue);
-  return condition ? sql`WHERE ${condition}` : sql``;
-}
-
 type BulkOperationOptionsBase<
   TColumnName extends string | number | symbol,
   TInsertColumnName extends string | number | symbol,
@@ -463,8 +690,12 @@ class Table<TRecord, TInsertParameters> {
       TInsertParameters,
       TColumnsToInsert[number]
     >[];
-  }) {
-    await bulkInsert<keyof TInsertParameters>({
+  }): Promise<TRecord[]> {
+    if (records.length === 0) {
+      return [];
+    }
+    const {sql} = this._underlyingDb;
+    return await bulkInsert<keyof TInsertParameters>({
       ...this._getBulkOperationOptions(),
       columnsToInsert: [
         ...new Set([
@@ -473,6 +704,7 @@ class Table<TRecord, TInsertParameters> {
         ]),
       ].sort(),
       records,
+      returning: sql`${this.tableId}.*`,
     });
   }
 
@@ -487,12 +719,14 @@ class Table<TRecord, TInsertParameters> {
     >[];
   }): UnorderedSelectQuery<TRecord> {
     const bulkOperationOptions = this._getBulkOperationOptions();
-    return this.findUntyped(
-      bulkCondition({
-        ...bulkOperationOptions,
-        whereColumnNames,
-        whereConditions,
-      }),
+    return this._findUntyped(
+      whereConditions.length
+        ? bulkCondition({
+            ...bulkOperationOptions,
+            whereColumnNames,
+            whereConditions,
+          })
+        : 'FALSE',
     );
   }
 
@@ -510,12 +744,17 @@ class Table<TRecord, TInsertParameters> {
       readonly where: BulkRecord<TRecord, TWhereColumns[number]>;
       readonly set: BulkRecord<TRecord, TSetColumns[number]>;
     }[];
-  }) {
-    await bulkUpdate<TWhereColumns[number], TSetColumns[number]>({
+  }): Promise<TRecord[]> {
+    if (updates.length === 0) {
+      return [];
+    }
+    const {sql} = this._underlyingDb;
+    return await bulkUpdate<TWhereColumns[number], TSetColumns[number]>({
       ...this._getBulkOperationOptions(),
       whereColumnNames,
       setColumnNames,
       updates,
+      returning: sql`${this.tableId}.*`,
     });
   }
 
@@ -531,6 +770,9 @@ class Table<TRecord, TInsertParameters> {
       TWhereColumns[number]
     >[];
   }) {
+    if (whereConditions.length === 0) {
+      return;
+    }
     await bulkDelete<TWhereColumns[number]>({
       ...this._getBulkOperationOptions(),
       whereColumnNames,
@@ -605,7 +847,18 @@ class Table<TRecord, TInsertParameters> {
   }
 
   async insertOrUpdate<TRecordsToInsert extends readonly TInsertParameters[]>(
-    conflictKeys: readonly [keyof TRecord, ...(keyof TRecord)[]],
+    options:
+      | readonly [keyof TRecord, ...(keyof TRecord)[]]
+      | {
+          onConflict: readonly [keyof TRecord, ...(keyof TRecord)[]];
+          set?: readonly [keyof TRecord, ...(keyof TRecord)[]];
+          doNotSet?: undefined;
+        }
+      | {
+          onConflict: readonly [keyof TRecord, ...(keyof TRecord)[]];
+          set?: undefined;
+          doNotSet?: readonly [keyof TRecord, ...(keyof TRecord)[]];
+        },
     ...rows: keyof TRecordsToInsert[number] extends keyof TInsertParameters
       ? TRecordsToInsert
       : readonly ({[key in keyof TInsertParameters]: TInsertParameters[key]} &
@@ -616,20 +869,36 @@ class Table<TRecord, TInsertParameters> {
             >]: never;
           })[]
   ): Promise<{-readonly [key in keyof TRecordsToInsert]: TRecord}> {
+    const getOption = (
+      k: 'onConflict' | 'set' | 'doNotSet',
+    ): readonly (keyof TRecord)[] | undefined => {
+      return Array.isArray(options) ? undefined : (options as any)[k];
+    };
+    const conflictKeys =
+      getOption('onConflict') ?? (options as readonly (keyof TRecord)[]);
+    const set = getOption('set');
+    const doNotSet = getOption('doNotSet');
+
     const {sql} = this._underlyingDb;
-    return this._insert(
-      (columnNames) =>
-        sql`ON CONFLICT (${sql.join(
-          conflictKeys.map((k) => sql.ident(k)),
-          sql`, `,
-        )}) DO UPDATE SET ${sql.join(
-          columnNames.map(
-            (key) => sql`${sql.ident(key)}=EXCLUDED.${sql.ident(key)}`,
-          ),
-          sql`, `,
-        )}`,
-      ...rows,
-    ) as any;
+    return this._insert((columnNames) => {
+      let updateKeys: readonly (string | number | symbol)[] = columnNames;
+      if (set) {
+        updateKeys = set;
+      }
+      if (doNotSet) {
+        const keysNotToSet = new Set<string | number | symbol>(doNotSet);
+        updateKeys = updateKeys.filter((key) => !keysNotToSet.has(key));
+      }
+      return sql`ON CONFLICT (${sql.join(
+        conflictKeys.map((k) => sql.ident(k)),
+        sql`, `,
+      )}) DO UPDATE SET ${sql.join(
+        updateKeys.map(
+          (key) => sql`${sql.ident(key)}=EXCLUDED.${sql.ident(key)}`,
+        ),
+        sql`, `,
+      )}`;
+    }, ...rows) as any;
   }
 
   async insertOrIgnore<TRecordsToInsert extends readonly TInsertParameters[]>(
@@ -654,7 +923,14 @@ class Table<TRecord, TInsertParameters> {
     updateValues: Partial<TRecord>,
   ): Promise<TRecord[]> {
     const {sql} = this._underlyingDb;
-    const where = rowToWhere(whereValues, sql, this._value);
+    const whereConditions = WhereCombinedCondition.query(
+      whereValues,
+      sql,
+      this._value,
+    );
+    if (whereConditions === `FALSE`) {
+      return [];
+    }
     const setClause = sql.join(
       Object.entries(updateValues).map(([columnName, value]) => {
         return sql`${sql.ident(columnName)} = ${this._value(
@@ -664,15 +940,31 @@ class Table<TRecord, TInsertParameters> {
       }),
       sql`, `,
     );
-    return await this.untypedQuery(
-      sql`UPDATE ${this.tableId} SET ${setClause} ${where} RETURNING *`,
-    );
+    if (whereConditions === 'TRUE') {
+      return await this.untypedQuery(
+        sql`UPDATE ${this.tableId} SET ${setClause} RETURNING *`,
+      );
+    } else {
+      return await this.untypedQuery(
+        sql`UPDATE ${this.tableId} SET ${setClause} WHERE ${whereConditions} RETURNING *`,
+      );
+    }
   }
 
   async delete(whereValues: WhereCondition<TRecord>): Promise<void> {
     const {sql} = this._underlyingDb;
-    const where = rowToWhere(whereValues, sql, this._value);
-    await this.untypedQuery(sql`DELETE FROM ${this.tableId} ${where}`);
+    const whereConditions = WhereCombinedCondition.query(
+      whereValues,
+      sql,
+      this._value,
+    );
+    if (whereConditions === 'TRUE') {
+      await this.untypedQuery(sql`DELETE FROM ${this.tableId}`);
+    } else if (whereConditions !== 'FALSE') {
+      await this.untypedQuery(
+        sql`DELETE FROM ${this.tableId} WHERE ${whereConditions}`,
+      );
+    }
   }
 
   /**
@@ -684,7 +976,9 @@ class Table<TRecord, TInsertParameters> {
     return this.find(whereValues);
   }
 
-  findUntyped(whereCondition: SQLQuery | null): UnorderedSelectQuery<TRecord> {
+  private _findUntyped(
+    whereCondition: SQLQuery | 'TRUE' | 'FALSE',
+  ): UnorderedSelectQuery<TRecord> {
     const {sql} = this._underlyingDb;
     return new SelectQueryImplementation(
       this.tableName,
@@ -694,6 +988,7 @@ class Table<TRecord, TInsertParameters> {
         limit: limitCount,
         distinctColumnNames,
       }) => {
+        if (whereCondition === 'FALSE') return [];
         return await this._underlyingDb.query(
           sql.join(
             [
@@ -711,7 +1006,7 @@ class Table<TRecord, TInsertParameters> {
                   )
                 : sql`*`,
               sql`FROM ${this.tableId}`,
-              whereCondition ? sql`WHERE ${whereCondition}` : null,
+              whereCondition !== 'TRUE' ? sql`WHERE ${whereCondition}` : null,
               orderByQueries.length
                 ? sql`ORDER BY ${sql.join(
                     orderByQueries.map((q) =>
@@ -735,7 +1030,9 @@ class Table<TRecord, TInsertParameters> {
     whereValues: WhereCondition<TRecord> = {},
   ): UnorderedSelectQuery<TRecord> {
     const {sql} = this._underlyingDb;
-    return this.findUntyped(rowToCondition(whereValues, sql, this._value));
+    return this._findUntyped(
+      WhereCombinedCondition.query(whereValues, sql, this._value),
+    );
   }
 
   /**
@@ -758,11 +1055,24 @@ class Table<TRecord, TInsertParameters> {
 
   async count(whereValues: WhereCondition<TRecord> = {}): Promise<number> {
     const {sql} = this._underlyingDb;
-    const where = rowToWhere(whereValues, sql, this._value);
-    const [result] = await this._underlyingDb.query(
-      sql`SELECT count(*) AS count FROM ${this.tableId} ${where}`,
+    const whereCondition = WhereCombinedCondition.query(
+      whereValues,
+      sql,
+      this._value,
     );
-    return parseInt(result.count, 10);
+    if (whereCondition === `FALSE`) {
+      return 0;
+    } else if (whereCondition === `TRUE`) {
+      const [result] = await this._underlyingDb.query(
+        sql`SELECT count(*) AS count FROM ${this.tableId}`,
+      );
+      return parseInt(result.count, 10);
+    } else {
+      const [result] = await this._underlyingDb.query(
+        sql`SELECT count(*) AS count FROM ${this.tableId} WHERE ${whereCondition}`,
+      );
+      return parseInt(result.count, 10);
+    }
   }
 
   async untypedQuery(query: SQLQuery): Promise<TRecord[]> {
@@ -832,14 +1142,25 @@ function getTable<TRecord, TInsertParameters>(
         fieldName: TKey,
         condition: WhereCondition<TRecord> = {},
       ): FieldQuery<TRecord[TKey]> =>
-        internalInQueryResults(
-          (sql) =>
-            sql`SELECT ${sql.ident(fieldName)} FROM ${
-              schemaName
-                ? sql.ident(schemaName, tableName)
-                : sql.ident(tableName)
-            } ${rowToWhere(condition, sql, serializeValue)}`,
-        ),
+        internalInQueryResults((sql) => {
+          const whereCondition = WhereCombinedCondition.query(
+            condition,
+            sql,
+            serializeValue,
+          );
+          if (whereCondition === 'FALSE') {
+            return FALSE_FIELD_QUERY;
+          }
+          const tableId = schemaName
+            ? sql.ident(schemaName, tableName)
+            : sql.ident(tableName);
+          const fieldId = sql.ident(fieldName);
+          if (whereCondition === 'TRUE') {
+            return sql`SELECT ${fieldId} FROM ${tableId}`;
+          } else {
+            return sql`SELECT ${fieldId} FROM ${tableId} WHERE ${whereCondition}`;
+          }
+        }),
     },
   );
 }
@@ -999,10 +1320,15 @@ function getTableSerializeValue(
 module.exports = Object.assign(defineTables, {
   default: defineTables,
   anyOf,
+  allOf,
   not,
   inQueryResults,
   lessThan,
+  jsonPath,
+  caseInsensitive,
   greaterThan,
+  and,
+  or,
   isNoResultFoundError,
   isMultipleResultsFoundError,
 });

@@ -6,14 +6,43 @@ import defineTables, {
   greaterThan,
   lessThan,
   inQueryResults,
+  jsonPath,
+  allOf,
+  or,
+  caseInsensitive,
+  and,
 } from '..';
+import User from './__generated__/users';
 
 const {users, photos} = defineTables<Schema>({
   schemaName: 'typed_queries_advanced_tests',
   databaseSchema: require('./__generated__/schema.json'),
 });
 
-const db = connect({bigIntMode: 'number'});
+let queries: {readonly text: string; readonly values: readonly any[]}[] = [];
+const db = connect({
+  bigIntMode: 'number',
+  onQueryStart(_q, q) {
+    queries.push({
+      text: q.text.split(`"typed_queries_advanced_tests".`).join(``),
+      values: q.values,
+    });
+  },
+});
+function expectQueries(fn: () => Promise<void>) {
+  return expect(
+    (async () => {
+      try {
+        queries = [];
+        await fn();
+        return queries;
+      } catch (ex) {
+        console.error(queries);
+        throw ex;
+      }
+    })(),
+  ).resolves;
+}
 
 afterAll(async () => {
   await db.dispose();
@@ -27,14 +56,18 @@ test('create schema', async () => {
         id BIGSERIAL NOT NULL PRIMARY KEY,
         screen_name TEXT UNIQUE NOT NULL,
         bio TEXT,
-        age INT
+        age INT,
+        created_at TIMESTAMPTZ,
+        updated_at TIMESTAMPTZ
       );
       CREATE TABLE typed_queries_advanced_tests.photos (
         id BIGSERIAL NOT NULL PRIMARY KEY,
         owner_user_id BIGINT NOT NULL REFERENCES typed_queries_advanced_tests.users(id),
         cdn_url TEXT NOT NULL,
         caption TEXT NULL,
-        metadata JSONB NOT NULL
+        metadata JSONB NOT NULL,
+        created_at TIMESTAMPTZ,
+        updated_at TIMESTAMPTZ
       );
     `,
   );
@@ -189,7 +222,12 @@ test('JSON values can be of any type', async () => {
     },
     {
       cdn_url: 'http://example.com/f',
-      metadata: {whatever: 'this is great'},
+      metadata: {whatever: 'this is GREAT'},
+      owner_user_id: user.id,
+    },
+    {
+      cdn_url: 'http://example.com/g',
+      metadata: {whatever: 'this is GREAT', also: {this: 'is super GREAT'}},
       owner_user_id: user.id,
     },
   );
@@ -199,6 +237,162 @@ test('JSON values can be of any type', async () => {
     ['http://example.com/c', true],
     ['http://example.com/d', [1, 2, 3]],
     ['http://example.com/e', ['foo', 'bar', 'baz']],
-    ['http://example.com/f', {whatever: 'this is great'}],
+    ['http://example.com/f', {whatever: 'this is GREAT'}],
+    [
+      'http://example.com/g',
+      {whatever: 'this is GREAT', also: {this: 'is super GREAT'}},
+    ],
+  ]);
+
+  expect(
+    await photos(db)
+      .find({
+        metadata: anyOf([
+          jsonPath(['1'], 2),
+          allOf([
+            jsonPath(['whatever'], caseInsensitive('this is great')),
+            jsonPath(['also', 'this'], caseInsensitive('is super great')),
+          ]),
+        ]),
+      })
+      .orderByAsc(`cdn_url`)
+      .select(`cdn_url`, `metadata`)
+      .all(),
+  ).toEqual([
+    {
+      cdn_url: 'http://example.com/d',
+      metadata: [1, 2, 3],
+    },
+    {
+      cdn_url: 'http://example.com/g',
+      metadata: {
+        also: {this: 'is super GREAT'},
+        whatever: 'this is GREAT',
+      },
+    },
+  ]);
+
+  expect(
+    await photos(db)
+      .find(
+        or(
+          {
+            cdn_url: anyOf(['http://example.com/d', 'http://example.com/g']),
+            metadata: jsonPath(['1'], 2),
+          },
+          {
+            cdn_url: 'http://example.com/f',
+            metadata: jsonPath(['whatever'], caseInsensitive('this is great')),
+          },
+        ),
+      )
+      .orderByAsc(`cdn_url`)
+      .select(`cdn_url`, `metadata`)
+      .all(),
+  ).toEqual([
+    {
+      cdn_url: 'http://example.com/d',
+      metadata: [1, 2, 3],
+    },
+    {
+      cdn_url: 'http://example.com/f',
+      metadata: {whatever: 'this is GREAT'},
+    },
+  ]);
+});
+
+test('case insensitive', async () => {
+  const USER_NAME_A = `USERwithMIXEDcaseNAME_A`;
+  const USER_NAME_B = `USERwithMIXEDcaseNAME_B`;
+  const [USER_A, USER_B] = await users(db).insert(
+    {screen_name: 'userWITHmixedCASEname_A', age: 1},
+    {screen_name: 'userWITHmixedCASEname_B', age: 2},
+  );
+
+  expect(
+    await users(db)
+      .find({screen_name: anyOf([USER_NAME_A, USER_NAME_B])})
+      .all(),
+  ).toEqual([]);
+
+  await expectQueries(async () => {
+    expect(
+      await users(db)
+        .find({
+          screen_name: anyOf([
+            caseInsensitive(USER_NAME_A),
+            caseInsensitive(USER_NAME_B),
+          ]),
+        })
+        .all(),
+    ).toEqual([USER_A, USER_B]);
+  }).toEqual([
+    {
+      text: `SELECT * FROM "users" WHERE LOWER(CAST("screen_name" AS TEXT)) = ANY($1)`,
+      values: [['userwithmixedcasename_a', 'userwithmixedcasename_b']],
+    },
+  ]);
+
+  await expectQueries(async () => {
+    expect(
+      await users(db)
+        .find({
+          screen_name: caseInsensitive(anyOf([USER_NAME_A, USER_NAME_B])),
+        })
+        .all(),
+    ).toEqual([USER_A, USER_B]);
+  }).toEqual([
+    {
+      text: `SELECT * FROM "users" WHERE LOWER(CAST("screen_name" AS TEXT)) = ANY($1)`,
+      values: [['userwithmixedcasename_a', 'userwithmixedcasename_b']],
+    },
+  ]);
+
+  await expectQueries(async () => {
+    expect(
+      await users(db)
+        .find({
+          screen_name: anyOf([
+            caseInsensitive(USER_NAME_A),
+            caseInsensitive(USER_NAME_B),
+          ]),
+          age: allOf([not(1), not(3)]),
+        })
+        .all(),
+    ).toEqual([USER_B]);
+  }).toEqual([
+    {
+      text: `SELECT * FROM "users" WHERE LOWER(CAST("screen_name" AS TEXT)) = ANY($1) AND NOT ("age" = ANY($2))`,
+      values: [
+        ['userwithmixedcasename_a', 'userwithmixedcasename_b'],
+        [1, 3],
+      ],
+    },
+  ]);
+
+  await expectQueries(async () => {
+    expect(
+      await users(db)
+        .find(
+          and<User>(
+            {
+              screen_name: anyOf([
+                caseInsensitive(USER_NAME_A),
+                caseInsensitive(USER_NAME_B),
+              ]),
+              age: anyOf([not(1), not(2)]),
+            },
+            {
+              age: anyOf([not(greaterThan(5)), not(lessThan(10))]),
+            },
+          ),
+        )
+        .all(),
+    ).toEqual([USER_A, USER_B]);
+  }).toEqual([
+    {
+      text: `SELECT * FROM "users" WHERE LOWER(CAST("screen_name" AS TEXT)) = ANY($1) AND NOT (("age" > $2 AND "age" < $3))`,
+      values: [['userwithmixedcasename_a', 'userwithmixedcasename_b'], 5, 10],
+    },
   ]);
 });
