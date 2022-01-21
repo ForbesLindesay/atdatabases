@@ -93,9 +93,11 @@ This is equivalent to:
 async function insertUsers(users) {
   await database.query(sql`
     INSERT INTO users (email, favorite_color)
-    SELECT
-      UNNEST(${users.map((u) => u.email)}::TEXT[]),
-      UNNEST(${users.map((u) => u.favorite_color)}::TEXT[])
+    SELECT * FROM
+      UNNEST(
+        ${users.map((u) => u.email)}::TEXT[],
+        ${users.map((u) => u.favorite_color)}::TEXT[]
+      )
   `);
 }
 ```
@@ -151,9 +153,11 @@ async function getUsers() {
   await database.query(sql`
     SELECT email, date_of_birth FROM users
     WHERE (email, favorite_color) IN (
-      SELECT
-        UNNEST(${['joe@example.com', 'ben@example.com']}::TEXT[]),
-        UNNEST(${['red', 'blue']}::TEXT[])
+      SELECT * FROM
+        UNNEST(
+          ${['joe@example.com', 'ben@example.com']}::TEXT[],
+          ${['red', 'blue']}::TEXT[]
+        )
     )
     ORDER BY email ASC
     LIMIT 100
@@ -211,11 +215,12 @@ async function updateFavoriteColors() {
       favorite_color=bulk_query.updated_value_of_favorite_color
     FROM
       (
-        SELECT
-          UNNEST(${['joe@example.com', 'ben@example.com']}::TEXT[])
-            AS email,
-          UNNEST(${['indigo', 'orange']}::TEXT[])
-            AS updated_value_of_favorite_color
+        SELECT * FROM
+          UNNEST(
+            ${['joe@example.com', 'ben@example.com']}::TEXT[],
+            ${['indigo', 'orange']}::TEXT[]
+          )
+          AS t(email, updated_value_of_favorite_color)
       ) AS bulk_query
     WHERE
       users.email=bulk_query.email
@@ -268,9 +273,11 @@ async function getUsers() {
   await database.query(sql`
     DELETE FROM users
     WHERE (email, favorite_color) IN (
-      SELECT
-        UNNEST(${['joe@example.com', 'ben@example.com']}::TEXT[]),
-        UNNEST(${['red', 'blue']}::TEXT[])
+      SELECT * FROM
+        UNNEST(
+          ${['joe@example.com', 'ben@example.com']}::TEXT[],
+          ${['red', 'blue']}::TEXT[]
+        )
     )
   `);
 }
