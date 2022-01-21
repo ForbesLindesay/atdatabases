@@ -29,15 +29,16 @@ test('insert', async () => {
     INSERT INTO ${table} (email, favorite_color)
     SELECT * FROM UNNEST(${p[0]}::TEXT[], ${p[1]}::TEXT[])
   `);
-  expect(await db.query(sql`SELECT * FROM ${table}`)).toMatchInlineSnapshot(`
+  expect(await db.query(sql`SELECT * FROM ${table} ORDER BY email ASC`))
+    .toMatchInlineSnapshot(`
     Array [
-      Object {
-        "email": "joe@example.com",
-        "favorite_color": "red",
-      },
       Object {
         "email": "ben@example.com",
         "favorite_color": "green",
+      },
+      Object {
+        "email": "joe@example.com",
+        "favorite_color": "red",
       },
       Object {
         "email": "mary@example.com",
@@ -66,15 +67,16 @@ test('update', async () => {
     WHERE
       users.email=bulk_query.email
   `);
-  expect(await db.query(sql`SELECT * FROM ${table}`)).toMatchInlineSnapshot(`
+  expect(await db.query(sql`SELECT * FROM ${table} ORDER BY email ASC`))
+    .toMatchInlineSnapshot(`
     Array [
-      Object {
-        "email": "joe@example.com",
-        "favorite_color": "purple",
-      },
       Object {
         "email": "ben@example.com",
         "favorite_color": "violet",
+      },
+      Object {
+        "email": "joe@example.com",
+        "favorite_color": "purple",
       },
       Object {
         "email": "mary@example.com",
@@ -95,17 +97,17 @@ test('select', async () => {
       WHERE (email, favorite_color) IN (
         SELECT *
         FROM UNNEST(${p[0]}::TEXT[], ${p[1]}::TEXT[])
-      )
+      ) ORDER BY email ASC
     `),
   ).toMatchInlineSnapshot(`
     Array [
       Object {
-        "email": "joe@example.com",
-        "favorite_color": "purple",
-      },
-      Object {
         "email": "ben@example.com",
         "favorite_color": "violet",
+      },
+      Object {
+        "email": "joe@example.com",
+        "favorite_color": "purple",
       },
       Object {
         "email": "mary@example.com",
@@ -125,17 +127,17 @@ test('select', async () => {
       ON (
         LOWER(users.email) = LOWER(unnest_query.email)
         AND LOWER(users.favorite_color) = LOWER(unnest_query.favorite_color)
-      )
+      ) ORDER BY users.email ASC
     `),
   ).toMatchInlineSnapshot(`
     Array [
       Object {
-        "email": "joe@example.com",
-        "favorite_color": "purple",
-      },
-      Object {
         "email": "ben@example.com",
         "favorite_color": "violet",
+      },
+      Object {
+        "email": "joe@example.com",
+        "favorite_color": "purple",
       },
       Object {
         "email": "mary@example.com",
@@ -157,7 +159,7 @@ test('update', async () => {
       FROM UNNEST(${p[0]}::TEXT[], ${p[1]}::TEXT[])
     )
   `);
-  expect(await db.query(sql`SELECT * FROM ${table}`)).toMatchInlineSnapshot(
-    `Array []`,
-  );
+  expect(
+    await db.query(sql`SELECT * FROM ${table} ORDER BY email ASC`),
+  ).toMatchInlineSnapshot(`Array []`);
 });
