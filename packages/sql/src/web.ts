@@ -177,13 +177,6 @@ class SQLQuery {
    * names will be concatenated with a period (`.`).
    */
   public static ident(...names: Array<any>): SQLQuery {
-    if (names.some((n) => typeof n !== 'string')) {
-      console.log(
-        JSON.stringify(names),
-        names,
-        new Error(`local identifier being created`).stack,
-      );
-    }
     return new SQLQuery([{type: SQLItemType.IDENTIFIER, names}]);
   }
 
