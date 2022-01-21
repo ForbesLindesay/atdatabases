@@ -88,14 +88,14 @@ class FieldQuery<T> {
     columnName: SQLQuery,
     sql: Queryable['sql'],
     toValue: (value: unknown) => unknown,
-  ) => SQLQuery | FieldQuery<T>;
+  ) => SQLQuery;
   protected readonly __special: SpecialFieldQuery<T> | undefined;
   constructor(
     query: (
       columnName: SQLQuery,
       sql: Queryable['sql'],
       toValue: (value: unknown) => unknown,
-    ) => SQLQuery | FieldQuery<T>,
+    ) => SQLQuery,
     special?: SpecialFieldQuery<T>,
   ) {
     this.__query = query;
@@ -116,11 +116,7 @@ class FieldQuery<T> {
       return sql`${columnName} IS NULL`;
     }
     if (q && q instanceof FieldQuery) {
-      const result = q.__query(columnName, sql, toValue);
-      if (result instanceof FieldQuery) {
-        return FieldQuery.query(columnName, result, sql, toValue);
-      }
-      return result;
+      return q.__query(columnName, sql, toValue);
     }
 
     return sql`${columnName} = ${toValue(q)}`;
@@ -176,7 +172,12 @@ export function anyOf<T>(values: {
     parts.push(caseInsensitive(anyOf(caseInsensitiveParts) as any) as any);
   }
   if (negatedParts.length) {
-    parts.push(not(allOf(negatedParts)));
+    const negated = not(allOf(negatedParts));
+    if (negated && negated instanceof FieldQuery) {
+      parts.push(negated);
+    } else {
+      valuesSet.add(negated);
+    }
   }
   if (valuesSet.size) {
     if (valuesSet.size === 1 && parts.length === 0) {
@@ -236,6 +237,14 @@ export function allOf<T>(values: {
       valuesSet.add(q);
     }
   }
+  if (negated.length) {
+    const n = not(anyOf(negated));
+    if (n && n instanceof FieldQuery) {
+      ordinaryParts.push(n);
+    } else {
+      valuesSet.add(n);
+    }
+  }
   if (valuesSet.size > 1) {
     return FALSE_FIELD_QUERY;
   } else if (valuesSet.size) {
@@ -244,9 +253,6 @@ export function allOf<T>(values: {
         FieldQuery.query(columnName, [...valuesSet][0], sql, toValue),
       ),
     );
-  }
-  if (negated.length) {
-    ordinaryParts.push(not(anyOf(negated)));
   }
   if (ordinaryParts.length === 0) {
     return TRUE_FIELD_QUERY;
@@ -263,11 +269,15 @@ export function allOf<T>(values: {
   );
 }
 
-export function not<T>(value: T | FieldQuery<T>): FieldQuery<T> {
+export function not<T>(value: T | FieldQuery<T>): T | FieldQuery<T> {
   if (value === TRUE_FIELD_QUERY) {
     return FALSE_FIELD_QUERY;
   } else if (value === FALSE_FIELD_QUERY) {
     return TRUE_FIELD_QUERY;
+  }
+  const special = FieldQuery.getSpecial(value);
+  if (special?.type === 'not') {
+    return special.query;
   }
   return new FieldQuery<T>(
     (columnName, sql, toValue) =>
