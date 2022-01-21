@@ -166,18 +166,4 @@ WHERE
   OR (email='mary@example.com' AND favorite_color='orange')
 ```
 
-Just like with using `UNNEST` here lets us keep the query constant, and use only 2 parameters, regardless of how many conditions we want to add.
-
-An alternative if you need more control can be to use an INNER JOIN instead of the `IN` part of the query. For example, if you needed the tests to be case insensitive you could do:
-
-```sql
-SELECT users.* FROM users
-INNER JOIN (
-  SELECT
-    UNNEST(?::TEXT[]) AS email,
-    UNNEST(?::TEXT[]) AS favorite_color
-) AS unnest_query
-ON (LOWER(users.email) = LOWER(unnest_query.email) AND LOWER(user.favorite_color) = LOWER(unnest_query.favorite_color))
-```
-
-> If you're using node.js, you can do all these operations without having to memorize the syntax by using [`@database/pg-typed`](https://www.atdatabases.org/docs/pg-guide-typescript) or [`@database/pg-bulk`](https://www.atdatabases.org/docs/pg-bulk).
+Just like with `SELECT`, using `UNNEST` here lets us keep the query constant, and use only 2 parameters, regardless of how many conditions we want to add.
