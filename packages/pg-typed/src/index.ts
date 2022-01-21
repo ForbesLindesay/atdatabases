@@ -75,20 +75,31 @@ export interface OrderedSelectQuery<TRecord> extends SelectQuery<TRecord> {
   limit(count: number): Promise<TRecord[]>;
 }
 
+type SpecialFieldQuery<T> =
+  | {
+      type: 'json_path';
+      path: readonly string[];
+      query: T | FieldQuery<T>;
+    }
+  | {type: 'case_insensitive'; query: T | FieldQuery<T>}
+  | {type: 'not'; query: T | FieldQuery<T>};
 class FieldQuery<T> {
   protected readonly __query: (
     columnName: SQLQuery,
     sql: Queryable['sql'],
     toValue: (value: unknown) => unknown,
   ) => SQLQuery | FieldQuery<T>;
+  protected readonly __special: SpecialFieldQuery<T> | undefined;
   constructor(
     query: (
       columnName: SQLQuery,
       sql: Queryable['sql'],
       toValue: (value: unknown) => unknown,
     ) => SQLQuery | FieldQuery<T>,
+    special?: SpecialFieldQuery<T>,
   ) {
     this.__query = query;
+    this.__special = special;
   }
   protected __checkFieldType(): T {
     throw new Error(
@@ -114,6 +125,13 @@ class FieldQuery<T> {
 
     return sql`${columnName} = ${toValue(q)}`;
   }
+  static getSpecial<T>(q: T | FieldQuery<T>) {
+    if (q && q instanceof FieldQuery) {
+      return q.__special;
+    } else {
+      return undefined;
+    }
+  }
 }
 
 const FALSE_FIELD_QUERY = new FieldQuery<any>((_columnName, sql) => sql`FALSE`);
@@ -123,10 +141,18 @@ export type {FieldQuery};
 
 export function anyOf<T>(values: {
   [Symbol.iterator](): IterableIterator<T | FieldQuery<T>>;
-}) {
-  const valuesArray: any[] = [];
+}): T | FieldQuery<T> {
+  const valuesSet = new Set<T>();
   const parts: FieldQuery<T>[] = [];
+  const caseInsensitiveParts: (T | FieldQuery<T>)[] = [];
+  const negatedParts: (T | FieldQuery<T>)[] = [];
   for (const value of values) {
+    if (value === TRUE_FIELD_QUERY) {
+      return TRUE_FIELD_QUERY;
+    }
+    if (value === FALSE_FIELD_QUERY) {
+      continue;
+    }
     if (value === null) {
       parts.push(
         new FieldQuery((columnName, sql, toValue) =>
@@ -134,18 +160,42 @@ export function anyOf<T>(values: {
         ),
       );
     } else if (value instanceof FieldQuery) {
-      parts.push(value);
+      const special = FieldQuery.getSpecial(value);
+      if (special?.type === 'case_insensitive') {
+        caseInsensitiveParts.push(special.query);
+      } else if (special?.type === 'not') {
+        negatedParts.push(special.query);
+      } else {
+        parts.push(value);
+      }
     } else {
-      valuesArray.push(value);
+      valuesSet.add(value);
     }
   }
-  if (valuesArray.length) {
-    parts.push(
-      new FieldQuery<T>(
-        (columnName, sql, toValue) =>
-          sql`${columnName} = ANY(${valuesArray.map((v) => toValue(v))})`,
-      ),
-    );
+  if (caseInsensitiveParts.length) {
+    parts.push(caseInsensitive(anyOf(caseInsensitiveParts) as any) as any);
+  }
+  if (negatedParts.length) {
+    parts.push(not(allOf(negatedParts)));
+  }
+  if (valuesSet.size) {
+    if (valuesSet.size === 1 && parts.length === 0) {
+      return [...valuesSet][0];
+    }
+    if (valuesSet.size === 1) {
+      parts.push(
+        new FieldQuery<T>((columnName, sql, toValue) =>
+          FieldQuery.query(columnName, [...valuesSet][0], sql, toValue),
+        ),
+      );
+    } else {
+      parts.push(
+        new FieldQuery<T>(
+          (columnName, sql, toValue) =>
+            sql`${columnName} = ANY(${[...valuesSet].map((v) => toValue(v))})`,
+        ),
+      );
+    }
   }
   if (parts.length === 0) {
     return FALSE_FIELD_QUERY;
@@ -163,23 +213,57 @@ export function anyOf<T>(values: {
 }
 
 export function allOf<T>(values: {
-  [Symbol.iterator](): IterableIterator<FieldQuery<T>>;
-}) {
+  [Symbol.iterator](): IterableIterator<T | FieldQuery<T>>;
+}): T | FieldQuery<T> {
+  const valuesSet = new Set<T>();
+  const ordinaryParts: FieldQuery<T>[] = [];
+  const negated: (T | FieldQuery<T>)[] = [];
   for (const q of values) {
     if (q === FALSE_FIELD_QUERY) {
       return FALSE_FIELD_QUERY;
     }
+    if (q === TRUE_FIELD_QUERY) {
+      continue;
+    }
+    if (q && q instanceof FieldQuery) {
+      const special = FieldQuery.getSpecial(q);
+      if (special?.type === 'not') {
+        negated.push(special.query);
+      } else {
+        ordinaryParts.push(q);
+      }
+    } else {
+      valuesSet.add(q);
+    }
+  }
+  if (valuesSet.size > 1) {
+    return FALSE_FIELD_QUERY;
+  } else if (valuesSet.size) {
+    ordinaryParts.push(
+      new FieldQuery((columnName, sql, toValue) =>
+        FieldQuery.query(columnName, [...valuesSet][0], sql, toValue),
+      ),
+    );
+  }
+  if (negated.length) {
+    ordinaryParts.push(not(anyOf(negated)));
+  }
+  if (ordinaryParts.length === 0) {
+    return TRUE_FIELD_QUERY;
+  }
+  if (ordinaryParts.length === 1) {
+    return ordinaryParts[0];
   }
   return new FieldQuery<T>(
     (columnName, sql, toValue) =>
       sql`(${sql.join(
-        [...values].map((p) => FieldQuery.query(columnName, p, sql, toValue)),
+        ordinaryParts.map((p) => FieldQuery.query(columnName, p, sql, toValue)),
         ' AND ',
       )})`,
   );
 }
 
-export function not<T>(value: T | FieldQuery<T>) {
+export function not<T>(value: T | FieldQuery<T>): FieldQuery<T> {
   if (value === TRUE_FIELD_QUERY) {
     return FALSE_FIELD_QUERY;
   } else if (value === FALSE_FIELD_QUERY) {
@@ -188,28 +272,29 @@ export function not<T>(value: T | FieldQuery<T>) {
   return new FieldQuery<T>(
     (columnName, sql, toValue) =>
       sql`NOT (${FieldQuery.query(columnName, value, sql, toValue)})`,
+    {type: 'not', query: value},
   );
 }
 
 function internalInQueryResults(
   query: (sql: Queryable['sql']) => SQLQuery | FieldQuery<any>,
-) {
+): FieldQuery<any> {
   return new FieldQuery<any>(
     (columnName, sql) => sql`${columnName} IN (${query(sql)})`,
   );
 }
 
-export function inQueryResults(query: SQLQuery) {
+export function inQueryResults(query: SQLQuery): FieldQuery<any> {
   return internalInQueryResults(() => query);
 }
 
-export function lessThan<T>(value: T) {
+export function lessThan<T>(value: T): FieldQuery<T> {
   return new FieldQuery<T>(
     (columnName, sql, toValue) => sql`${columnName} < ${toValue(value)}`,
   );
 }
 
-export function greaterThan<T>(value: T) {
+export function greaterThan<T>(value: T): FieldQuery<T> {
   return new FieldQuery<T>(
     (columnName, sql, toValue) => sql`${columnName} > ${toValue(value)}`,
   );
@@ -218,17 +303,30 @@ export function greaterThan<T>(value: T) {
 export function jsonPath(
   path: readonly string[],
   query: any | FieldQuery<any>,
-) {
-  return new FieldQuery<any>((columnName, sql, toValue) =>
-    FieldQuery.query(sql`${columnName}#>${path}`, query, sql, toValue),
+): FieldQuery<any> {
+  return new FieldQuery<any>(
+    (columnName, sql, toValue) =>
+      FieldQuery.query(sql`${columnName}#>${path}`, query, sql, toValue),
+    {type: 'json_path', path, query},
   );
 }
 
-export function caseInsensitive(query: string | FieldQuery<string>) {
-  return new FieldQuery<string>((columnName, sql, toValue) =>
-    FieldQuery.query(sql`LOWER(${columnName})`, query, sql, (v) =>
-      `${toValue(v)}`.toLowerCase(),
-    ),
+export function caseInsensitive(
+  query: string | FieldQuery<string>,
+): FieldQuery<string> {
+  const special = FieldQuery.getSpecial(query);
+  if (special?.type === 'json_path') {
+    return jsonPath(special.path, caseInsensitive(special.query));
+  }
+  return new FieldQuery<string>(
+    (columnName, sql, toValue) =>
+      FieldQuery.query(
+        sql`LOWER(CAST(${columnName} AS TEXT))`,
+        query,
+        sql,
+        (v) => `${toValue(v)}`.toLowerCase(),
+      ),
+    {type: 'case_insensitive', query},
   );
 }
 
@@ -246,48 +344,74 @@ class WhereCombinedCondition<TRecord> {
     q: WhereCombinedCondition<T> | WhereCondition<T>,
     sql: Queryable['sql'],
     toValue: (columnName: string, value: unknown) => unknown,
+    parentType?: 'AND' | 'OR',
   ): SQLQuery | 'TRUE' | 'FALSE' {
     if (q instanceof WhereCombinedCondition) {
       const conditions = q.__conditions.map((c) =>
-        WhereCombinedCondition.query(c, sql, toValue),
+        WhereCombinedCondition.query(c, sql, toValue, q.__combiner),
       );
-      const significantConditions = conditions.filter(
-        (v: SQLQuery | 'TRUE' | 'FALSE'): v is SQLQuery =>
-          v !== 'TRUE' && v !== 'FALSE',
-      );
+      const significantConditions: SQLQuery[] = [];
       switch (q.__combiner) {
-        case 'AND':
-          if (conditions.some((c) => c === 'FALSE')) {
-            return 'FALSE';
+        case 'AND': {
+          for (const c of conditions) {
+            if (c === 'FALSE') {
+              return 'FALSE';
+            } else if (c !== 'TRUE') {
+              significantConditions.push(c);
+            }
           }
-          return sql`(${sql.join(significantConditions, sql` AND `)})`;
-        case 'OR':
-          if (conditions.some((c) => c === 'TRUE')) {
+          if (!significantConditions.length) {
             return 'TRUE';
           }
-          return sql`(${sql.join(significantConditions, sql` OR `)})`;
+          if (significantConditions.length === 1) {
+            return significantConditions[0];
+          }
+          const query = sql.join(significantConditions, sql` AND `);
+          return parentType === 'OR' ? sql`(${query})` : query;
+        }
+        case 'OR': {
+          for (const c of conditions) {
+            if (c === 'TRUE') {
+              return 'TRUE';
+            } else if (c !== 'FALSE') {
+              significantConditions.push(c);
+            }
+          }
+          if (!significantConditions.length) {
+            return 'FALSE';
+          }
+          if (significantConditions.length === 1) {
+            return significantConditions[0];
+          }
+          const query = sql.join(significantConditions, sql` OR `);
+          return parentType === 'AND' ? sql`(${query})` : query;
+        }
         default:
           return assertNever(q.__combiner);
       }
     }
 
-    const entries = Object.entries(q).filter(
-      (row) => row[1] !== undefined && row[1] !== TRUE_FIELD_QUERY,
-    );
-    if (entries.length === 0) {
+    const entries = Object.entries(q);
+    const fieldTests: SQLQuery[] = [];
+    for (const [columnName, value] of entries) {
+      if (value === FALSE_FIELD_QUERY) {
+        return 'FALSE';
+      } else if (value !== TRUE_FIELD_QUERY) {
+        fieldTests.push(
+          FieldQuery.query(sql.ident(columnName), value, sql, (v) =>
+            toValue(columnName, v),
+          ),
+        );
+      }
+    }
+    if (fieldTests.length === 0) {
       return 'TRUE';
     }
-    if (entries.some(([_column, value]) => value === FALSE_FIELD_QUERY)) {
-      return 'FALSE';
+    if (fieldTests.length === 1) {
+      return fieldTests[0];
     }
-    return sql.join(
-      entries.map(([columnName, value]) =>
-        FieldQuery.query(sql.ident(columnName), value, sql, (v) =>
-          toValue(columnName, v),
-        ),
-      ),
-      sql` AND `,
-    );
+    const query = sql.join(fieldTests, sql` AND `);
+    return parentType === 'OR' ? sql`(${query})` : query;
   }
 }
 export type {WhereCombinedCondition};
@@ -1186,13 +1310,13 @@ function getTableSerializeValue(
 module.exports = Object.assign(defineTables, {
   default: defineTables,
   anyOf,
+  allOf,
   not,
   inQueryResults,
   lessThan,
   jsonPath,
   caseInsensitive,
   greaterThan,
-  allOf,
   and,
   or,
   isNoResultFoundError,

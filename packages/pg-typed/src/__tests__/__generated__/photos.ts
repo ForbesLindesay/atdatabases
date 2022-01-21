@@ -8,22 +8,22 @@
 /* eslint-disable */
 // tslint:disable
 
-import User from './users'
+import User from './users';
 
 /**
  * This is a great table
  */
 interface Photo {
-  caption: (string) | null
-  cdn_url: string & {__brand?: "url"}
-  created_at: (Date) | null
+  caption: string | null;
+  cdn_url: string & {__brand?: 'url'};
+  created_at: Date | null;
   /**
    * @default nextval('print_types.photos_id_seq'::regclass)
    */
-  id: number & {readonly __brand?: 'photos_id'}
-  metadata: unknown
-  owner_user_id: User['id']
-  updated_at: (Date) | null
+  id: number & {readonly __brand?: 'photos_id'};
+  metadata: unknown;
+  owner_user_id: User['id'];
+  updated_at: Date | null;
 }
 export default Photo;
 
@@ -31,15 +31,15 @@ export default Photo;
  * This is a great table
  */
 interface Photos_InsertParameters {
-  caption?: (string) | null
-  cdn_url: string & {__brand?: "url"}
-  created_at?: (Date) | null
+  caption?: string | null;
+  cdn_url: string & {__brand?: 'url'};
+  created_at?: Date | null;
   /**
    * @default nextval('print_types.photos_id_seq'::regclass)
    */
-  id?: number & {readonly __brand?: 'photos_id'}
-  metadata: unknown
-  owner_user_id: User['id']
-  updated_at?: (Date) | null
+  id?: number & {readonly __brand?: 'photos_id'};
+  metadata: unknown;
+  owner_user_id: User['id'];
+  updated_at?: Date | null;
 }
-export type {Photos_InsertParameters}
+export type {Photos_InsertParameters};
