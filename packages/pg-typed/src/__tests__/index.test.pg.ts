@@ -20,14 +20,18 @@ test('create schema', async () => {
         id BIGSERIAL NOT NULL PRIMARY KEY,
         screen_name TEXT UNIQUE NOT NULL,
         bio TEXT,
-        age INT
+        age INT,
+        created_at TIMESTAMPTZ,
+        updated_at TIMESTAMPTZ
       );
       CREATE TABLE typed_queries_tests.photos (
         id BIGSERIAL NOT NULL PRIMARY KEY,
         owner_user_id BIGINT NOT NULL REFERENCES typed_queries_tests.users(id),
         cdn_url TEXT NOT NULL,
         caption TEXT NULL,
-        metadata JSONB NOT NULL
+        metadata JSONB NOT NULL,
+        created_at TIMESTAMPTZ,
+        updated_at TIMESTAMPTZ
       );
     `,
   );
@@ -263,4 +267,61 @@ test('use a default connection', async () => {
   ).toThrowErrorMatchingInlineSnapshot(
     `"You must either provide a \\"defaultConnection\\" to pg-typed, or specify a connection when accessing the table."`,
   );
+});
+
+test('insert or update', async () => {
+  const time1 = new Date('2021-01-10T11:00:00.000Z');
+  const time2 = new Date('2021-01-10T20:00:00.000Z');
+  const time3 = new Date('2021-01-10T23:00:00.000Z');
+
+  const USER_A = 'insert_or_update_a';
+  const USER_B = 'insert_or_update_b';
+
+  function exp(user: any, {created, updated}: {created: Date; updated: Date}) {
+    expect({
+      created: user.created_at.toISOString(),
+      updated: user.updated_at.toISOString(),
+    }).toEqual({
+      created: created.toISOString(),
+      updated: updated.toISOString(),
+    });
+  }
+
+  const [userA1] = await users(db).insert({
+    screen_name: USER_A,
+    created_at: time1,
+    updated_at: time1,
+  });
+  exp(userA1, {created: time1, updated: time1});
+  const [userA2, userB2] = await users(db).insertOrUpdate(
+    {onConflict: [`screen_name`], set: ['screen_name', 'updated_at']},
+    {
+      screen_name: USER_A,
+      created_at: time2,
+      updated_at: time2,
+    },
+    {
+      screen_name: USER_B,
+      created_at: time2,
+      updated_at: time2,
+    },
+  );
+  exp(userA2, {created: time1, updated: time2});
+  exp(userB2, {created: time2, updated: time2});
+
+  const [userA3, userB3] = await users(db).insertOrUpdate(
+    {onConflict: [`screen_name`], doNotSet: ['created_at']},
+    {
+      screen_name: USER_A,
+      created_at: time3,
+      updated_at: time3,
+    },
+    {
+      screen_name: USER_B,
+      created_at: time3,
+      updated_at: time3,
+    },
+  );
+  exp(userA3, {created: time1, updated: time3});
+  exp(userB3, {created: time2, updated: time3});
 });

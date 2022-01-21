@@ -24,7 +24,9 @@ test('create schema', async () => {
         id BIGSERIAL NOT NULL PRIMARY KEY,
         screen_name TEXT UNIQUE NOT NULL,
         bio TEXT,
-        age INT
+        age INT,
+        created_at TIMESTAMPTZ,
+        updated_at TIMESTAMPTZ
       );
     `,
   );

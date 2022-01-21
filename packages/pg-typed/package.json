@@ -9,7 +9,8 @@
   },
   "devDependencies": {
     "@databases/pg": "^0.0.0",
-    "@databases/pg-schema-print-types": "^0.0.0"
+    "@databases/pg-schema-print-types": "^0.0.0",
+    "assert-never": "^1.2.1"
   },
   "peerDependencies": {
     "@databases/pg": "*"

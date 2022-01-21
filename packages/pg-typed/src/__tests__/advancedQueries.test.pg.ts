@@ -6,6 +6,9 @@ import defineTables, {
   greaterThan,
   lessThan,
   inQueryResults,
+  jsonPath,
+  allOf,
+  or,
 } from '..';
 
 const {users, photos} = defineTables<Schema>({
@@ -13,7 +16,12 @@ const {users, photos} = defineTables<Schema>({
   databaseSchema: require('./__generated__/schema.json'),
 });
 
-const db = connect({bigIntMode: 'number'});
+const db = connect({
+  bigIntMode: 'number',
+  onQueryStart(_q, q) {
+    console.log(q);
+  },
+});
 
 afterAll(async () => {
   await db.dispose();
@@ -27,14 +35,18 @@ test('create schema', async () => {
         id BIGSERIAL NOT NULL PRIMARY KEY,
         screen_name TEXT UNIQUE NOT NULL,
         bio TEXT,
-        age INT
+        age INT,
+        created_at TIMESTAMPTZ,
+        updated_at TIMESTAMPTZ
       );
       CREATE TABLE typed_queries_advanced_tests.photos (
         id BIGSERIAL NOT NULL PRIMARY KEY,
         owner_user_id BIGINT NOT NULL REFERENCES typed_queries_advanced_tests.users(id),
         cdn_url TEXT NOT NULL,
         caption TEXT NULL,
-        metadata JSONB NOT NULL
+        metadata JSONB NOT NULL,
+        created_at TIMESTAMPTZ,
+        updated_at TIMESTAMPTZ
       );
     `,
   );
@@ -192,6 +204,11 @@ test('JSON values can be of any type', async () => {
       metadata: {whatever: 'this is great'},
       owner_user_id: user.id,
     },
+    {
+      cdn_url: 'http://example.com/g',
+      metadata: {whatever: 'this is great', also: {this: 'is super great'}},
+      owner_user_id: user.id,
+    },
   );
   expect(inserted.map((img) => [img.cdn_url, img.metadata])).toEqual([
     ['http://example.com/a', 'A " string'],
@@ -200,5 +217,65 @@ test('JSON values can be of any type', async () => {
     ['http://example.com/d', [1, 2, 3]],
     ['http://example.com/e', ['foo', 'bar', 'baz']],
     ['http://example.com/f', {whatever: 'this is great'}],
+    [
+      'http://example.com/g',
+      {whatever: 'this is great', also: {this: 'is super great'}},
+    ],
+  ]);
+
+  expect(
+    await photos(db)
+      .find({
+        metadata: anyOf([
+          jsonPath(['1'], 2),
+          allOf([
+            jsonPath(['whatever'], 'this is great'),
+            jsonPath(['also', 'this'], 'is super great'),
+          ]),
+        ]),
+      })
+      .orderByAsc(`cdn_url`)
+      .select(`cdn_url`, `metadata`)
+      .all(),
+  ).toEqual([
+    {
+      cdn_url: 'http://example.com/d',
+      metadata: [1, 2, 3],
+    },
+    {
+      cdn_url: 'http://example.com/g',
+      metadata: {
+        also: {this: 'is super great'},
+        whatever: 'this is great',
+      },
+    },
+  ]);
+
+  expect(
+    await photos(db)
+      .find(
+        or(
+          {
+            cdn_url: anyOf(['http://example.com/d', 'http://example.com/g']),
+            metadata: jsonPath(['1'], 2),
+          },
+          {
+            cdn_url: 'http://example.com/f',
+            metadata: jsonPath(['whatever'], 'this is great'),
+          },
+        ),
+      )
+      .orderByAsc(`cdn_url`)
+      .select(`cdn_url`, `metadata`)
+      .all(),
+  ).toEqual([
+    {
+      cdn_url: 'http://example.com/d',
+      metadata: [1, 2, 3],
+    },
+    {
+      cdn_url: 'http://example.com/f',
+      metadata: {whatever: 'this is great'},
+    },
   ]);
 });

@@ -21,7 +21,9 @@ test('create schema', async () => {
         id BIGSERIAL NOT NULL PRIMARY KEY,
         screen_name TEXT UNIQUE NOT NULL,
         bio TEXT,
-        age INT DEFAULT 42
+        age INT DEFAULT 42,
+        created_at TIMESTAMPTZ,
+        updated_at TIMESTAMPTZ
       );
     `,
   );
@@ -38,20 +40,26 @@ test('create multiple users per statement using non-bulk API', async () => {
       Object {
         "age": 42,
         "bio": null,
+        "created_at": null,
         "id": 1,
         "screen_name": "Forbes",
+        "updated_at": null,
       },
       Object {
         "age": 10,
         "bio": null,
+        "created_at": null,
         "id": 2,
         "screen_name": "Ellie",
+        "updated_at": null,
       },
       Object {
         "age": 42,
         "bio": "Hello world",
+        "created_at": null,
         "id": 3,
         "screen_name": "John",
+        "updated_at": null,
       },
     ]
   `);
@@ -66,8 +74,10 @@ test('create multiple users per statement using non-bulk API', async () => {
       Object {
         "age": 42,
         "bio": null,
+        "created_at": null,
         "id": 5,
         "screen_name": "Martin",
+        "updated_at": null,
       },
       undefined,
       undefined,
@@ -86,26 +96,34 @@ test('create multiple users per statement using non-bulk API', async () => {
       Object {
         "age": 20,
         "bio": null,
+        "created_at": null,
         "id": 1,
         "screen_name": "Forbes",
+        "updated_at": null,
       },
       Object {
         "age": 42,
         "bio": null,
+        "created_at": null,
         "id": 5,
         "screen_name": "Martin",
+        "updated_at": null,
       },
       Object {
         "age": 5,
         "bio": null,
+        "created_at": null,
         "id": 2,
         "screen_name": "Ellie",
+        "updated_at": null,
       },
       Object {
         "age": 42,
         "bio": "Whatever world",
+        "created_at": null,
         "id": 3,
         "screen_name": "John",
+        "updated_at": null,
       },
     ]
   `);
@@ -116,13 +134,14 @@ test('create users in bulk', async () => {
   for (let i = 0; i < 50_000; i++) {
     names.push(`bulk_insert_name_${i}`);
   }
-  await users(db).bulkInsert({
+  const inserted = await users(db).bulkInsert({
     columnsToInsert: [`age`],
     records: names.map((n) => ({screen_name: n, age: 42})),
   });
-  // await users(db).insert(
-  //   ...names.map((n) => ({screen_name: n, age: 42})),
-  // );
+
+  expect(inserted.map((i) => i.screen_name)).toEqual(names);
+  expect(inserted.map((i) => i.age)).toEqual(names.map(() => 42));
+
   const records = await users(db)
     .find({screen_name: anyOf(names)})
     .orderByAsc(`screen_name`)
@@ -152,7 +171,7 @@ test('query users in bulk', async () => {
 });
 
 test('update users in bulk', async () => {
-  await users(db).bulkUpdate({
+  const updated = await users(db).bulkUpdate({
     whereColumnNames: [`screen_name`, `age`],
     setColumnNames: [`age`],
     updates: [
@@ -161,6 +180,10 @@ test('update users in bulk', async () => {
       {where: {screen_name: `bulk_insert_name_12`, age: 32}, set: {age: 3}},
     ],
   });
+  expect(updated.map(({screen_name, age}) => ({screen_name, age}))).toEqual([
+    {screen_name: `bulk_insert_name_10`, age: 1},
+    {screen_name: `bulk_insert_name_11`, age: 2},
+  ]);
   expect(
     await users(db)
       .find({
