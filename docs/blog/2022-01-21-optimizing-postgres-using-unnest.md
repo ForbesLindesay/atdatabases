@@ -65,6 +65,8 @@ WHERE
   users.email=bulk_query.email
 ```
 
+With parameters like:
+
 ```json
 [
   ["joe@example.com", "ben@example.com", "mary@example.com"],
