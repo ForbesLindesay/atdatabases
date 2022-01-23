@@ -26,7 +26,7 @@ yarn mysql-test start
 ```
 
 ```npm
-npx mysql-test start
+npx @databases/mysql-test start
 ```
 
 This will print a connection string as the last line of it's output, it will look something like:
@@ -44,7 +44,7 @@ yarn mysql-test stop
 ```
 
 ```npm
-npx mysql-test stop
+npx @databases/mysql-test stop
 ```
 
 ## Running your first query
