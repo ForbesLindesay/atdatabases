@@ -26,7 +26,7 @@ yarn pg-test start
 ```
 
 ```npm
-npx pg-test start
+npx @databases/pg-test start
 ```
 
 This will print a connection string as the last line of it's output, it will look something like:
@@ -44,7 +44,7 @@ yarn pg-test stop
 ```
 
 ```npm
-npx pg-test stop
+npx @databases/pg-test stop
 ```
 
 ## Running your first query
