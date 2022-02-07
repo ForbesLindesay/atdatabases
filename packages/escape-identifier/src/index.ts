@@ -81,22 +81,17 @@ export function escapeSQLiteIdentifier(str: string) {
 }
 
 function quoteString(str: string, quoteChar: string) {
-  let escaped = quoteChar;
-
-  for (const c of str) {
-    if (c === quoteChar) escaped += c + c;
-    else escaped += c;
-  }
-
-  escaped += quoteChar;
-
-  return escaped;
+  if (!str.includes(quoteChar)) return quoteChar + str + quoteChar;
+  return (
+    quoteChar + str.split(quoteChar).join(quoteChar + quoteChar) + quoteChar
+  );
 }
 
+const NON_ASCII = /[^\u0001-\u007f]/;
 function assertAscii(str: string, db: string, unicodeAvailable: boolean) {
-  if (!/^[\u0001-\u007f]+$/.test(str)) {
+  if (NON_ASCII.test(str)) {
     throw new Error(
-      `${db} identifiers may only contain ASCII characters${
+      `${db} identifiers must only contain ASCII characters${
         unicodeAvailable
           ? ` (to use unicode, pass {extended: true} when escaping the identifier)`
           : ``
@@ -105,12 +100,13 @@ function assertAscii(str: string, db: string, unicodeAvailable: boolean) {
   }
 }
 
+const NON_UNICODE = /[^\u0001-\uffff]/;
 function assertUnicode(str: string, db: string) {
   // U+0001 .. U+007F
   // U+0080 .. U+FFFF
-  if (!/^[\u0001-\uffff]+$/.test(str)) {
+  if (NON_UNICODE.test(str)) {
     throw new Error(
-      `${db} identifiers should only contain charcters in the range: U+0001 .. U+FFFF`,
+      `${db} identifiers must only contain characters in the range: U+0001 .. U+FFFF`,
     );
   }
 }
@@ -123,7 +119,7 @@ function minLength(str: string, db: string) {
 function maxLength(str: string, length: number, db: string, ref: string) {
   if (str.length > length) {
     throw new Error(
-      `${db} identifiers should not be longer than ${length} characters. ${str}`,
+      `${db} identifiers must not be longer than ${length} characters. ${str}`,
     );
   }
 }
