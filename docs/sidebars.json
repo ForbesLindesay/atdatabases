@@ -32,6 +32,14 @@
           "pg-transaction",
           "pg-typed"
         ]
+      },
+      {
+        "type": "subcategory",
+        "label": "Cloud Providers",
+        "ids": [
+          "pg-provider-google-cloud",
+          "pg-provider-heroku"
+        ]
       }
     ],
     "MySQL": [

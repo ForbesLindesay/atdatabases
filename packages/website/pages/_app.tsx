@@ -3,6 +3,7 @@ import {GlobalStyles} from 'twin.macro';
 import {useRouter} from 'next/router';
 import {useEffect} from 'react';
 import {pageView} from '../utils/gtag';
+import {EnvironmentProvider} from '../components/CodeBlock';
 
 function MyApp({Component, pageProps}: any) {
   const router = useRouter();
@@ -19,7 +20,10 @@ function MyApp({Component, pageProps}: any) {
   return (
     <>
       <GlobalStyles />
-      <Component {...pageProps} />
+
+      <EnvironmentProvider>
+        <Component {...pageProps} />
+      </EnvironmentProvider>
     </>
   );
 }

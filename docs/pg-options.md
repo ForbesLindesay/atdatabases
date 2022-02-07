@@ -4,7 +4,7 @@ title: Postgres Connection Options
 sidebar_label: Connection Options
 ---
 
-- `connectionString` (`string | false`, default: `process.env.DATABASE_URL`) - Set this to `false` to disable all connection string & environment variable handling
+- `connectionString` (`string | false`, default: `process.env.DATABASE_URL`) - Set this to `false` to disable ignore the connection string even if there is one in the environment
 - `user` (`string`, default: from connection string or `process.env.PGUSER`)
 - `password` (`string`, default: from connection string or `process.env.PGPASSWORD`)
 - `host` (`string | string[]`, default: from connection string or `process.env.PGHOST`) - if multiple hosts are specified, we will attempt to connect to each one in turn until a successful connection is made.
