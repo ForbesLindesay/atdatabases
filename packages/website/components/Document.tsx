@@ -2,7 +2,7 @@ import 'twin.macro';
 import type * as m from 'mdast';
 import tw from 'twin.macro';
 import {createContext, memo, useContext} from 'react';
-import {CodeBlock, CodeTokenType} from './CodeBlock';
+import {CodeBlock, CodeTokenType, EnvironmentEditor} from './CodeBlock';
 
 const HeadingContext = createContext(false);
 function useIsInHeading() {
@@ -226,6 +226,21 @@ function DocumentInlineCode({node}: {node: m.InlineCode}) {
       <span tw="p-1 -my-1 rounded-sm bg-yellow-200">
         {node.value.substring(`@[[[`.length, node.value.length - `]]]@`.length)}
       </span>
+    );
+  }
+  if (/^\$[A-Z_]+$/.test(node.value)) {
+    return (
+      <code
+        tw="font-mono p-1 -my-1 rounded-sm"
+        css={[
+          !isInBlockquote && tw`bg-gray-100`,
+          isInBlockquote && tw`bg-yellow-100`,
+        ]}
+      >
+        <span tw="text-red-500">
+          <EnvironmentEditor name={node.value} />
+        </span>
+      </code>
     );
   }
   return (

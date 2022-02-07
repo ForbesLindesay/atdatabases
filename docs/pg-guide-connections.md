@@ -80,3 +80,10 @@ process.once('SIGTERM', () => {
   });
 });
 ```
+
+## Connecting to/from cloud providers
+
+You can normally follow the instructions from the cloud providers, but we have prepared the following guides to make things easier for these common platforms:
+
+- [Google Cloud](pg-provider-google-cloud.md)
+- [Heroku](pg-provider-heroku.md)

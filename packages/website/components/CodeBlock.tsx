@@ -15,6 +15,7 @@ export enum CodeTokenType {
   Property,
   Null,
   Comment,
+  EnvironmentVariable,
 }
 const DISPLAY_NAMES: {[key in string]?: string} = {
   typescript: 'TypeScript',
@@ -97,6 +98,13 @@ function Code({
       <code>
         {code.map((c, i) => {
           const style = getStyle(c.type);
+          if (c.type === CodeTokenType.EnvironmentVariable) {
+            return (
+              <span key={i} css={[style, c.highlight && tw`bg-yellow-200`]}>
+                <EnvironmentEditor name={c.value} />
+              </span>
+            );
+          }
           return (
             <span key={i} css={[style, c.highlight && tw`bg-yellow-200`]}>
               {c.value}
@@ -105,6 +113,93 @@ function Code({
         })}
       </code>
     </pre>
+  );
+}
+
+const EnvironmentContext = React.createContext<
+  | undefined
+  | {
+      values: ReadonlyMap<string, string>;
+      setValue(name: string, value: string): void;
+    }
+>(undefined);
+
+export function EnvironmentProvider({children}: {children: React.ReactNode}) {
+  const [values, setValues] = React.useState<ReadonlyMap<string, string>>(
+    new Map(),
+  );
+  const setValue = React.useCallback(
+    (name: string, value: string) => {
+      setValues((values) => new Map([...Array.from(values), [name, value]]));
+    },
+    [setValues],
+  );
+  return (
+    <EnvironmentContext.Provider value={{values, setValue}}>
+      {children}
+    </EnvironmentContext.Provider>
+  );
+}
+function useEnvironment(name: string): [string, (value: string) => void] {
+  const {values, setValue} = React.useContext(EnvironmentContext)!;
+  return [
+    values.get(name) ?? ``,
+    React.useCallback(
+      (value: string) => setValue(name, value),
+      [setValue, name],
+    ),
+  ];
+}
+export function EnvironmentEditor({name}: {name: string}) {
+  const [width, setWidth] = React.useState<number>();
+  const [editing, setEditing] = React.useState(false);
+  const [value, setValue] = useEnvironment(name);
+  if (editing) {
+    return (
+      <form
+        tw="inline-flex"
+        onSubmit={(e) => {
+          e.preventDefault();
+          setEditing(false);
+        }}
+      >
+        <input
+          style={{width}}
+          ref={(e) => e?.focus()}
+          placeholder={name}
+          value={value || ``}
+          onChange={(e) => setValue(e.target.value)}
+          onBlur={() => setEditing(false)}
+        />
+      </form>
+    );
+  }
+  return (
+    <button
+      tw="inline-flex items-center"
+      type="button"
+      onClick={() => setEditing(true)}
+      ref={(e) => {
+        if (e) setWidth(e.clientWidth);
+      }}
+    >
+      {value || name}
+
+      <svg
+        tw="h-4 w-4 mb-1"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+        />
+      </svg>
+    </button>
   );
 }
 
@@ -130,5 +225,7 @@ function getStyle(type: CodeTokenType): TwStyle {
       return tw`text-gray-500`;
     case CodeTokenType.Text:
       return tw``;
+    case CodeTokenType.EnvironmentVariable:
+      return tw`text-red-500`;
   }
 }

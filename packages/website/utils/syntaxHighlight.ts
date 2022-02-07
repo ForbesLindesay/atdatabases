@@ -127,7 +127,9 @@ function simplifyResult(
   for (const {...token} of tokens) {
     if (
       lastToken?.type === token.type ||
-      (lastToken && /^\s*$/.test(token.value))
+      (lastToken &&
+        lastToken.type !== CodeTokenType.EnvironmentVariable &&
+        /^\s*$/.test(token.value))
     ) {
       lastToken.value += token.value;
     } else {
@@ -192,9 +194,7 @@ function highlightResult(
   return results;
 }
 
-function highlightSQL(
-  str: string,
-): {
+function highlightSQL(str: string): {
   type: CodeTokenType;
   value: string;
 }[] {
@@ -267,9 +267,7 @@ function highlightSQL(
     });
 }
 
-function highlightYamlLine(
-  str: string,
-): {
+function highlightYamlLine(str: string): {
   type: CodeTokenType;
   value: string;
 }[] {
@@ -320,9 +318,7 @@ function highlightYamlLine(
   return [{type: CodeTokenType.String, value: str}];
 }
 
-function highlightYaml(
-  str: string,
-): {
+function highlightYaml(str: string): {
   type: CodeTokenType;
   value: string;
 }[] {
@@ -334,9 +330,7 @@ function highlightYaml(
   });
 }
 
-function highlightJSON(
-  str: string,
-): {
+function highlightJSON(str: string): {
   type: CodeTokenType;
   value: string;
 }[] {
@@ -362,6 +356,107 @@ function highlightJSON(
   }
   return result;
 }
+
+function highlightSh(code: string) {
+  const result: {
+    type: CodeTokenType;
+    value: string;
+  }[] = [];
+  let state = 'initial';
+  for (const c of code) {
+    switch (state) {
+      case 'initial':
+        if (c === ` `) {
+          // state = `param_start`;
+          result.push({type: CodeTokenType.Text, value: c});
+        } else {
+          state = `command`;
+          result.push({type: CodeTokenType.Keyword, value: c});
+        }
+        break;
+      case 'command':
+        if (c === ` `) {
+          state = `param_start`;
+          result.push({type: CodeTokenType.Text, value: c});
+        } else {
+          result.push({type: CodeTokenType.Keyword, value: c});
+        }
+        break;
+      case 'continue_next_line':
+        if (c === `\n`) {
+          state = `param_start`;
+        }
+        result.push({type: CodeTokenType.Text, value: c});
+        break;
+      case 'param_start':
+        if (c === ` `) {
+          result.push({type: CodeTokenType.Text, value: c});
+        } else if (c === `\\`) {
+          state = 'continue_next_line';
+          result.push({type: CodeTokenType.Punctuation, value: c});
+        } else if (c === `-`) {
+          state = 'param_name';
+          result.push({type: CodeTokenType.Identifier, value: c});
+        } else if (c === `\n`) {
+          state = 'initial';
+          result.push({type: CodeTokenType.Text, value: c});
+        } else if (c === `$`) {
+          state = 'env_value';
+          result.push({type: CodeTokenType.EnvironmentVariable, value: c});
+        } else {
+          state = 'param_value';
+          result.push({type: CodeTokenType.Text, value: c});
+        }
+        break;
+      case 'param_name':
+        if (c === ` `) {
+          result.push({type: CodeTokenType.Punctuation, value: c});
+          state = 'param_start';
+        } else if (c === `=`) {
+          result.push({type: CodeTokenType.Punctuation, value: c});
+          state = 'param_value';
+        } else if (c === `\n`) {
+          state = 'initial';
+          result.push({type: CodeTokenType.Text, value: c});
+        } else {
+          result.push({type: CodeTokenType.Identifier, value: c});
+        }
+        break;
+      case 'param_value':
+        if (c === ` `) {
+          result.push({type: CodeTokenType.Punctuation, value: c});
+          state = 'param_start';
+        } else if (c === `\n`) {
+          state = 'initial';
+          result.push({type: CodeTokenType.Text, value: c});
+        } else if (c === `$`) {
+          state = 'env_value';
+          result.push({type: CodeTokenType.EnvironmentVariable, value: c});
+        } else {
+          result.push({type: CodeTokenType.Text, value: c});
+        }
+        break;
+      case 'env_value':
+        if (/[A-Z_]/.test(c)) {
+          result.push({type: CodeTokenType.EnvironmentVariable, value: c});
+        } else if (c === ` `) {
+          result.push({type: CodeTokenType.Punctuation, value: c});
+          state = 'param_start';
+        } else if (c === `\n`) {
+          state = 'initial';
+          result.push({type: CodeTokenType.Text, value: c});
+        } else if (c === `$`) {
+          state = 'env_value';
+          result.push({type: CodeTokenType.Property, value: c});
+        } else {
+          result.push({type: CodeTokenType.Text, value: c});
+        }
+        break;
+    }
+  }
+  return result;
+}
+
 /**
  * The code plugin adds a language switcher for consecutive blocks of code
  */
@@ -502,6 +597,12 @@ const syntaxHighlight = ({
     return {
       lang: language,
       code: highlightResult(simplifyResult(highlightJSON(code)), highlights),
+    };
+  }
+  if (language === 'sh') {
+    return {
+      lang: language,
+      code: highlightResult(simplifyResult(highlightSh(code)), highlights),
     };
   }
   return {

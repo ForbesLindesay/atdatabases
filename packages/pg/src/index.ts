@@ -204,13 +204,6 @@ export default function createConnectionPool(
     connectionStringEnvironmentVariable
   ],
 ): ConnectionPool {
-  if (!connectionConfig) {
-    throw new Error(
-      'You must provide a connection string for @databases/pg. You can ' +
-        'either pass one directly to the createConnection call or set ' +
-        `the ${connectionStringEnvironmentVariable} environment variable.`,
-    );
-  }
   const {connectionString = process.env[connectionStringEnvironmentVariable]} =
     typeof connectionConfig === 'object'
       ? connectionConfig
@@ -271,6 +264,19 @@ export default function createConnectionPool(
     onConnectionOpened,
     onConnectionClosed,
   } = connectionConfigObject;
+
+  if (
+    !connectionConfig &&
+    ![user, password, host, database].some(
+      (v) => v !== undefined && !(Array.isArray(v) && v.length === 0),
+    )
+  ) {
+    throw new Error(
+      'You must provide a connection string for @databases/pg. You can ' +
+        'either pass one directly to the createConnection call or set ' +
+        `the ${connectionStringEnvironmentVariable} environment variable.`,
+    );
+  }
 
   if (bigIntAsString) {
     console.warn(
