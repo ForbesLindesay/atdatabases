@@ -15,6 +15,19 @@ const Cursor = require('pg-cursor');
 
 type QueryResult = {rows: any[]};
 
+const RECOVERABLE_ERRORS: ReadonlySet<SQLErrorCode> = new Set<SQLErrorCode>([
+  SQLErrorCode.INTEGRITY_CONSTRAINT_VIOLATION,
+  SQLErrorCode.RESTRICT_VIOLATION,
+  SQLErrorCode.NOT_NULL_VIOLATION,
+  SQLErrorCode.FOREIGN_KEY_VIOLATION,
+  SQLErrorCode.UNIQUE_VIOLATION,
+  SQLErrorCode.CHECK_VIOLATION,
+  SQLErrorCode.EXCLUSION_VIOLATION,
+]);
+function isRecoverableError(err: unknown) {
+  return isSQLError(err) && RECOVERABLE_ERRORS.has(err.code);
+}
+
 export default class PgDriver
   implements Driver<TransactionOptions, QueryStreamOptions>
 {
@@ -23,6 +36,7 @@ export default class PgDriver
   private readonly _handlers: EventHandlers;
   private _endCalled = false;
   private readonly _disposed: Promise<void>;
+  private _canRecycleConnection: boolean = true;
   constructor(
     client: PgClient,
     handlers: EventHandlers,
@@ -80,54 +94,60 @@ export default class PgDriver
   }
 
   async canRecycleConnectionAfterError(_err: Error) {
-    try {
-      let timeout: any | undefined;
-      const result: undefined | {1?: {rows?: {0?: {result?: number}}}} =
-        await Promise.race([
-          this.client.query(
-            'BEGIN TRANSACTION READ ONLY;SELECT 1 AS result;COMMIT;',
-          ) as any,
-          new Promise((r) => {
-            timeout = setTimeout(r, 100);
-          }),
-        ]);
-      if (timeout !== undefined) {
-        clearTimeout(timeout);
-      }
-      return result?.[1]?.rows?.[0]?.result === 1;
-    } catch (ex) {
-      return false;
-    }
+    return this._canRecycleConnection;
   }
 
   async beginTransaction(options?: TransactionOptions) {
-    const parameters = [];
-    if (options) {
-      if (options.isolationLevel) {
-        parameters.push(isolationLevelToString(options.isolationLevel));
+    try {
+      const parameters = [];
+      if (options) {
+        if (options.isolationLevel) {
+          parameters.push(isolationLevelToString(options.isolationLevel));
+        }
+        if (options.readOnly) {
+          parameters.push('READ ONLY');
+        } else if (options.readOnly === false) {
+          parameters.push('READ WRITE');
+        }
+        if (options.deferrable) {
+          parameters.push('DEFERRABLE');
+        } else if (options.deferrable === false) {
+          parameters.push('NOT DEFERRABLE');
+        }
       }
-      if (options.readOnly) {
-        parameters.push('READ ONLY');
-      } else if (options.readOnly === false) {
-        parameters.push('READ WRITE');
+      if (parameters.length) {
+        await execute(this.client, `BEGIN ${parameters.join(', ')}`);
+      } else {
+        await execute(this.client, `BEGIN`);
       }
-      if (options.deferrable) {
-        parameters.push('DEFERRABLE');
-      } else if (options.deferrable === false) {
-        parameters.push('NOT DEFERRABLE');
-      }
-    }
-    if (parameters.length) {
-      await execute(this.client, `BEGIN ${parameters.join(', ')}`);
-    } else {
-      await execute(this.client, `BEGIN`);
+    } catch (ex) {
+      this._canRecycleConnection = false;
+      throw ex;
     }
   }
   async commitTransaction() {
-    await execute(this.client, `COMMIT`);
+    try {
+      await execute(this.client, `COMMIT`);
+    } catch (ex) {
+      if (!isRecoverableError(ex)) {
+        this._canRecycleConnection = false;
+      }
+
+      // Make sure we report a decent stack trace
+      const err = Object.assign(
+        new Error(isError(ex) ? ex.message : `${ex}`),
+        ex,
+      );
+      throw err;
+    }
   }
   async rollbackTransaction() {
-    await execute(this.client, `ROLLBACK`);
+    try {
+      await execute(this.client, `ROLLBACK`);
+    } catch (ex) {
+      this._canRecycleConnection = false;
+      throw ex;
+    }
   }
   async shouldRetryTransactionFailure(
     transactionOptions: TransactionOptions | undefined,
@@ -156,13 +176,28 @@ export default class PgDriver
   }
 
   async createSavepoint(savepointName: string) {
-    await execute(this.client, `SAVEPOINT ${savepointName}`);
+    try {
+      await execute(this.client, `SAVEPOINT ${savepointName}`);
+    } catch (ex) {
+      this._canRecycleConnection = false;
+      throw ex;
+    }
   }
   async releaseSavepoint(savepointName: string) {
-    await execute(this.client, `RELEASE SAVEPOINT ${savepointName}`);
+    try {
+      await execute(this.client, `RELEASE SAVEPOINT ${savepointName}`);
+    } catch (ex) {
+      this._canRecycleConnection = false;
+      throw ex;
+    }
   }
   async rollbackToSavepoint(savepointName: string) {
-    await execute(this.client, `ROLLBACK TO SAVEPOINT ${savepointName}`);
+    try {
+      await execute(this.client, `ROLLBACK TO SAVEPOINT ${savepointName}`);
+    } catch (ex) {
+      this._canRecycleConnection = false;
+      throw ex;
+    }
   }
 
   private async _executeQuery(query: SQLQuery): Promise<any[]> {
@@ -171,17 +206,24 @@ export default class PgDriver
       enforceUndefined(this._handlers.onQueryStart(query, q));
     }
 
-    const results = await executeQueryInternal(
-      this.client,
-      query,
-      q,
-      this._handlers,
-    );
+    try {
+      const results = await executeQueryInternal(
+        this.client,
+        query,
+        q,
+        this._handlers,
+      );
 
-    if (this._handlers.onQueryResults) {
-      enforceUndefined(this._handlers.onQueryResults(query, q, results.rows));
+      if (this._handlers.onQueryResults) {
+        enforceUndefined(this._handlers.onQueryResults(query, q, results.rows));
+      }
+      return results.rows;
+    } catch (ex) {
+      if (!isRecoverableError(ex)) {
+        this._canRecycleConnection = false;
+      }
+      throw ex;
     }
-    return results.rows;
   }
   async executeAndReturnAll(queries: SQLQuery[]): Promise<any[][]> {
     const results = new Array(queries.length);
@@ -204,6 +246,7 @@ export default class PgDriver
     query: SQLQuery,
     options: {highWaterMark?: number},
   ): Readable {
+    this._canRecycleConnection = false;
     if (!isSqlQuery(query)) {
       throw new Error(
         'Invalid query, you must use @databases/sql to create your queries.',
@@ -264,6 +307,7 @@ export default class PgDriver
     query: SQLQuery,
     {batchSize = 16, signal}: QueryStreamOptions = {},
   ): AsyncGenerator<any, void, unknown> {
+    this._canRecycleConnection = false;
     if (!isSqlQuery(query)) {
       throw new Error(
         'Invalid query, you must use @databases/sql to create your queries.',
