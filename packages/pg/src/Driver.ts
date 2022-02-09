@@ -43,26 +43,43 @@ export default class PgDriver
     acquireLockTimeoutMilliseconds: number,
   ) {
     this.acquireLockTimeoutMilliseconds = acquireLockTimeoutMilliseconds;
+    client.on('error', this._onIdleError);
     this._disposed = new Promise<void>((resolve) => {
       client.on('end', resolve);
     });
     this.client = client;
     this._handlers = handlers;
   }
+
+  private _isIdle: boolean = false;
+  private _idleError: null | Error = null;
   private _removeFromPool: undefined | (() => void);
   private _idleErrorEventHandler: undefined | ((err: Error) => void);
+
   private readonly _onIdleError = (err: Error) => {
-    if (this._endCalled) {
-      return;
+    if (this._endCalled) return;
+    this._canRecycleConnection = false;
+
+    if (this._isIdle) {
+      if (this._idleErrorEventHandler) {
+        this._idleErrorEventHandler(err);
+      }
+    } else {
+      this._idleError = err;
     }
-    this.client.removeListener('error', this._onIdleError);
+
     if (this._removeFromPool) {
       this._removeFromPool();
     }
-    if (this._idleErrorEventHandler) {
-      this._idleErrorEventHandler(err);
-    }
   };
+  private _throwPendingIdleError() {
+    if (this._idleError) {
+      const err = this._idleError;
+      this._idleError = null;
+      throw err;
+    }
+  }
+
   onAddingToPool(
     removeFromPool: undefined | (() => void),
     idleErrorEventHandler: undefined | ((err: Error) => void),
@@ -70,18 +87,18 @@ export default class PgDriver
     this._removeFromPool = removeFromPool;
     this._idleErrorEventHandler = idleErrorEventHandler;
   }
+
   onActive() {
-    this.client.removeListener('error', this._onIdleError);
+    this._isIdle = false;
   }
   onIdle() {
-    this.client.on('error', this._onIdleError);
+    this._isIdle = true;
   }
 
   async connect(): Promise<void> {
     return await this.client.connect();
   }
   async dispose(): Promise<void> {
-    this.client.on('error', this._onIdleError);
     if (!this._endCalled) {
       this._endCalled = true;
       if (this.client.connection?.stream?.destroy) {
@@ -99,6 +116,7 @@ export default class PgDriver
 
   async beginTransaction(options?: TransactionOptions) {
     try {
+      this._throwPendingIdleError();
       const parameters = [];
       if (options) {
         if (options.isolationLevel) {
@@ -127,6 +145,7 @@ export default class PgDriver
   }
   async commitTransaction() {
     try {
+      this._throwPendingIdleError();
       await execute(this.client, `COMMIT`);
     } catch (ex) {
       if (!isRecoverableError(ex)) {
@@ -143,6 +162,7 @@ export default class PgDriver
   }
   async rollbackTransaction() {
     try {
+      this._throwPendingIdleError();
       await execute(this.client, `ROLLBACK`);
     } catch (ex) {
       this._canRecycleConnection = false;
@@ -177,6 +197,7 @@ export default class PgDriver
 
   async createSavepoint(savepointName: string) {
     try {
+      this._throwPendingIdleError();
       await execute(this.client, `SAVEPOINT ${savepointName}`);
     } catch (ex) {
       this._canRecycleConnection = false;
@@ -185,6 +206,7 @@ export default class PgDriver
   }
   async releaseSavepoint(savepointName: string) {
     try {
+      this._throwPendingIdleError();
       await execute(this.client, `RELEASE SAVEPOINT ${savepointName}`);
     } catch (ex) {
       this._canRecycleConnection = false;
@@ -193,6 +215,7 @@ export default class PgDriver
   }
   async rollbackToSavepoint(savepointName: string) {
     try {
+      this._throwPendingIdleError();
       await execute(this.client, `ROLLBACK TO SAVEPOINT ${savepointName}`);
     } catch (ex) {
       this._canRecycleConnection = false;
@@ -201,12 +224,13 @@ export default class PgDriver
   }
 
   private async _executeQuery(query: SQLQuery): Promise<any[]> {
-    const q = query.format(pgFormat);
-    if (this._handlers.onQueryStart) {
-      enforceUndefined(this._handlers.onQueryStart(query, q));
-    }
-
     try {
+      this._throwPendingIdleError();
+      const q = query.format(pgFormat);
+      if (this._handlers.onQueryStart) {
+        enforceUndefined(this._handlers.onQueryStart(query, q));
+      }
+
       const results = await executeQueryInternal(
         this.client,
         query,
@@ -246,6 +270,7 @@ export default class PgDriver
     query: SQLQuery,
     options: {highWaterMark?: number},
   ): Readable {
+    this._throwPendingIdleError();
     this._canRecycleConnection = false;
     if (!isSqlQuery(query)) {
       throw new Error(
@@ -307,6 +332,7 @@ export default class PgDriver
     query: SQLQuery,
     {batchSize = 16, signal}: QueryStreamOptions = {},
   ): AsyncGenerator<any, void, unknown> {
+    this._throwPendingIdleError();
     this._canRecycleConnection = false;
     if (!isSqlQuery(query)) {
       throw new Error(
