@@ -464,7 +464,7 @@ class SelectQueryImplementation<TRecord>
   }[] = [];
   private _limitCount: number | undefined;
   private _selectFields: readonly string[] | undefined;
-  private _whereAnd: WhereCondition<TRecord>[] = [];
+  private readonly _whereAnd: WhereCondition<TRecord>[] = [];
 
   constructor(
     private readonly _tableName: string,
