@@ -353,6 +353,29 @@ This will delete results that match: `(org_id=1 AND user_id=10) OR (org_id=2 AND
 
 A `SelectQuery` is a query for records within a table. The actual query is sent when you call one of the methods that returns a `Promise`, i.e. `all()`, `first()` or `limit(count)`.
 
+### andWhere(condition)
+
+This lets you add extra conditions to a `.bulkFind` query. e.g.
+
+```typescript
+import {gt} from '@databases/pg-typed';
+import db, {users} from './database';
+
+export async function getPostsSince(since: Date) {
+  await tables
+    .posts(db)
+    .bulkFind({
+      whereColumnNames: [`org_id`, `user_id`],
+      whereConditions: [
+        {org_id: 1, user_id: 10},
+        {org_id: 2, user_id: 20},
+      ],
+    })
+    .andWhere({created_at: gt(since)})
+    .all();
+}
+```
+
 ### select(...fields)
 
 Only return the provided fields. This can be useful if you have database records with many fields or where some fields are very large, and you typically only care about a small subset of the fields. The default is to return all fields, i.e. `*`.

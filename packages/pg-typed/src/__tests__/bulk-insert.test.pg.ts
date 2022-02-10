@@ -168,6 +168,29 @@ test('query users in bulk', async () => {
     {screen_name: `bulk_insert_name_5`, age: 42, bio: null},
     {screen_name: `bulk_insert_name_6`, age: 42, bio: null},
   ]);
+
+  expect(
+    await users(db)
+      .bulkFind({
+        whereColumnNames: [`screen_name`, `age`],
+        whereConditions: [
+          {screen_name: `bulk_insert_name_3`, age: 42},
+          {screen_name: `bulk_insert_name_4`, age: 42},
+          {screen_name: `bulk_insert_name_5`, age: 42},
+          {screen_name: `bulk_insert_name_6`, age: 42},
+          {screen_name: `bulk_insert_name_7`, age: 32},
+        ],
+      })
+      .andWhere({
+        screen_name: anyOf([`bulk_insert_name_3`, `bulk_insert_name_5`]),
+      })
+      .select(`screen_name`, `age`, `bio`)
+      .orderByAsc(`screen_name`)
+      .all(),
+  ).toEqual([
+    {screen_name: `bulk_insert_name_3`, age: 42, bio: null},
+    {screen_name: `bulk_insert_name_5`, age: 42, bio: null},
+  ]);
 });
 
 test('update users in bulk', async () => {
