@@ -55,6 +55,7 @@ export interface SelectQuery<TRecord> {
   >(
     ...fields: TKeys
   ): SelectQuery<Pick<TRecord, TKeys[number]>>;
+  andWhere(condition: WhereCondition<TRecord>): this;
 }
 
 export interface UnorderedSelectQuery<TRecord> extends SelectQuery<TRecord> {
@@ -443,14 +444,15 @@ export function or<TRecord>(
   return new WhereCombinedCondition(conditions, 'OR');
 }
 
-interface SelectQueryOptions {
-  selectColumnNames: readonly string[] | undefined;
-  distinctColumnNames: readonly string[];
-  orderBy: readonly {
+interface SelectQueryOptions<TRecord> {
+  readonly whereAnd: readonly WhereCondition<TRecord>[];
+  readonly selectColumnNames: readonly string[] | undefined;
+  readonly distinctColumnNames: readonly string[];
+  readonly orderBy: readonly {
     readonly columnName: string;
     readonly direction: 'ASC' | 'DESC';
   }[];
-  limit: number | undefined;
+  readonly limit: number | undefined;
 }
 class SelectQueryImplementation<TRecord>
   implements DistinctOrderedSelectQuery<TRecord>
@@ -462,11 +464,12 @@ class SelectQueryImplementation<TRecord>
   }[] = [];
   private _limitCount: number | undefined;
   private _selectFields: readonly string[] | undefined;
+  private readonly _whereAnd: WhereCondition<TRecord>[] = [];
 
   constructor(
     private readonly _tableName: string,
     public readonly _executeQuery: (
-      options: SelectQueryOptions,
+      options: SelectQueryOptions<TRecord>,
     ) => Promise<TRecord[]>,
   ) {}
 
@@ -484,6 +487,7 @@ class SelectQueryImplementation<TRecord>
       orderBy: this._orderByQueries,
       limit: this._limitCount,
       distinctColumnNames: this._distinctColumnNames,
+      whereAnd: this._whereAnd,
     });
   }
 
@@ -525,6 +529,11 @@ class SelectQueryImplementation<TRecord>
       columnName: columnName as string,
       direction: `DESC`,
     });
+    return this;
+  }
+
+  public andWhere(condition: WhereCondition<TRecord>) {
+    this._whereAnd.push(condition);
     return this;
   }
 
@@ -987,8 +996,21 @@ class Table<TRecord, TInsertParameters> {
         orderBy: orderByQueries,
         limit: limitCount,
         distinctColumnNames,
+        whereAnd,
       }) => {
-        if (whereCondition === 'FALSE') return [];
+        const whereConditions = [
+          whereCondition,
+          ...whereAnd.map((c) =>
+            WhereCombinedCondition.query(c, sql, this._value),
+          ),
+        ];
+
+        const significantConditions: SQLQuery[] = [];
+        for (const condition of whereConditions) {
+          if (condition === 'FALSE') return [];
+          else if (condition !== 'TRUE') significantConditions.push(condition);
+        }
+
         return await this._underlyingDb.query(
           sql.join(
             [
@@ -1006,7 +1028,12 @@ class Table<TRecord, TInsertParameters> {
                   )
                 : sql`*`,
               sql`FROM ${this.tableId}`,
-              whereCondition !== 'TRUE' ? sql`WHERE ${whereCondition}` : null,
+              significantConditions.length === 1
+                ? sql`WHERE ${significantConditions[0]}`
+                : significantConditions.length
+                ? sql`WHERE (${sql.join(significantConditions, `) AND (`)})`
+                : null,
+
               orderByQueries.length
                 ? sql`ORDER BY ${sql.join(
                     orderByQueries.map((q) =>
