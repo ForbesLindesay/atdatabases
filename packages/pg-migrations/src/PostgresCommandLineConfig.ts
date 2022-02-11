@@ -79,7 +79,7 @@ const PostgresCommandLineConfig: CommandLineInterfaceConfig<
       console.error(
         ` - The ${chalk.cyan(
           '--directory',
-        )} paramter when calling @databases/pg-migrations`,
+        )} parameter when calling @databases/pg-migrations`,
       );
       console.error('');
       if (isInteractive()) {
@@ -109,7 +109,7 @@ const PostgresCommandLineConfig: CommandLineInterfaceConfig<
       console.error(
         ` - The ${chalk.cyan(
           '--database',
-        )} paramter when calling pg-migrations`,
+        )} parameter when calling pg-migrations`,
       );
       console.error('');
       if (isInteractive()) {
