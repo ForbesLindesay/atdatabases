@@ -117,13 +117,17 @@ export async function run(args: string[]) {
 
   await runMigrationsAndAddToEnv(databaseURL, parseResult.parsed.debug);
 
-  await spawnBuffered(parseResult.rest[0], parseResult.rest.slice(1), {
-    debug: true,
-  });
+  const result = await spawnBuffered(
+    parseResult.rest[0],
+    parseResult.rest.slice(1),
+    {
+      debug: true,
+    },
+  );
 
   await kill();
 
-  return 0;
+  return result.status ?? 0;
 }
 
 const stopParams = startChain()
