@@ -5,10 +5,6 @@ const command = process.argv[2];
 const args = process.argv.slice(3);
 
 const hasHelpFlag = args.includes('--help') || args.includes('-h');
-if (hasHelpFlag) {
-  commands.help();
-  process.exit(0);
-}
 
 switch (command) {
   case 'start':

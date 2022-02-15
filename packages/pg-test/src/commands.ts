@@ -127,7 +127,7 @@ export async function run(args: string[]) {
 
   await kill();
 
-  return result.status;
+  return result.status ?? 0;
 }
 
 const stopParams = startChain()
