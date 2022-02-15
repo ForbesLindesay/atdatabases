@@ -35,7 +35,7 @@ export default async function run(
       )}`,
     );
     console.error(
-      ` - The ${chalk.cyan('--database')} paramter when calling pg-migrations`,
+      ` - The ${chalk.cyan('--database')} parameter when calling pg-migrations`,
     );
     console.error('');
     if (isInteractive()) {

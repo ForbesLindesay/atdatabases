@@ -15,7 +15,7 @@ stderr:
   You must supply a directory path for your migrations. You can supply it as either:
   
    - The migrationsDirectory config value using @databases/pg-config
-   - The --directory paramter when calling @databases/pg-migrations
+   - The --directory parameter when calling @databases/pg-migrations
   
   "
 `;
