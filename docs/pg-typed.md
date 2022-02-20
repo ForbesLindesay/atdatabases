@@ -318,10 +318,12 @@ Like `bulkInsert` except it will ignore conflicting inserts.
 Like `bulkInsert` except it will update records where insert would conflict.
 
 ```typescript
-async function setUserFavoriteColors(users: {
-  email: string;
-  favorite_color: string;
-}) {
+async function setUserFavoriteColors(
+  users: {
+    email: string;
+    favorite_color: string;
+  }[],
+) {
   await tables.users(db).bulkInsert({
     columnsToInsert: [`email`, `favorite_color`],
     columnsThatConflict: [`email`],

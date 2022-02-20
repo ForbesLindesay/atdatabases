@@ -105,8 +105,8 @@ export async function bulkInsert<TColumnToInsert extends ColumnName>(
   const {sql} = database;
   return await database.query(
     returning
-      ? bulkInsertStatement(options)
-      : sql`${bulkInsertStatement(options)} RETURNING ${returning}`,
+      ? sql`${bulkInsertStatement(options)} RETURNING ${returning}`
+      : bulkInsertStatement(options),
   );
 }
 
