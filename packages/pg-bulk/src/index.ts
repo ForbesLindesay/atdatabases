@@ -77,6 +77,21 @@ function select<TColumnName extends ColumnName>(
   )})`;
 }
 
+export function bulkInsertStatement<TColumnToInsert extends ColumnName>(
+  options: BulkInsertOptions<TColumnToInsert>,
+): SQLQuery {
+  const {database, columnsToInsert, records} = options;
+  const {sql} = database;
+  return sql`INSERT INTO ${tableId(options)} (${sql.join(
+    columnsToInsert.map((columnName) => sql.ident(columnName)),
+    `,`,
+  )}) ${select(
+    columnsToInsert.map((name) => ({name})),
+    records,
+    options,
+  )}`;
+}
+
 export async function bulkInsert<TColumnToInsert extends ColumnName>(
   options: BulkInsertOptions<TColumnToInsert> & {returning: SQLQuery},
 ): Promise<any[]>;
@@ -86,17 +101,12 @@ export async function bulkInsert<TColumnToInsert extends ColumnName>(
 export async function bulkInsert<TColumnToInsert extends ColumnName>(
   options: BulkInsertOptions<TColumnToInsert> & {returning?: SQLQuery},
 ): Promise<any[] | void> {
-  const {database, columnsToInsert, records, returning} = options;
+  const {database, returning} = options;
   const {sql} = database;
   return await database.query(
-    sql`INSERT INTO ${tableId(options)} (${sql.join(
-      columnsToInsert.map((columnName) => sql.ident(columnName)),
-      `,`,
-    )}) ${select(
-      columnsToInsert.map((name) => ({name})),
-      records,
-      options,
-    )}${returning ? sql` RETURNING ${returning}` : sql``}`,
+    returning
+      ? bulkInsertStatement(options)
+      : sql`${bulkInsertStatement(options)} RETURNING ${returning}`,
   );
 }
 

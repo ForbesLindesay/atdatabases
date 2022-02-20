@@ -309,6 +309,28 @@ async function insertUsers() {
 }
 ```
 
+### bulkInsertOrIgnore(options)
+
+Like `bulkInsert` except it will ignore conflicting inserts.
+
+### bulkInsertOrUpdate(options)
+
+Like `bulkInsert` except it will update records where insert would conflict.
+
+```typescript
+async function setUserFavoriteColors(users: {
+  email: string;
+  favorite_color: string;
+}) {
+  await tables.users(db).bulkInsert({
+    columnsToInsert: [`email`, `favorite_color`],
+    columnsThatConflict: [`email`],
+    columnsToUpdate: [`favorite_color`],
+    records: users,
+  });
+}
+```
+
 ### bulkUpdate(options)
 
 Updating multiple records in one go, where each record needs to be updated to a different value can be tricky to do efficiently. If there is a unique constraint, it may be possible to use `insertOrUpdate`, but failing that you'll want to use this bulk API. You can find more details on how this API works in [@databases/pg-bulk](pg-bulk.md). `bulkUpdate` also returns the updated records.

@@ -1,11 +1,11 @@
 import assertNever from 'assert-never';
 import {SQLQuery, Queryable} from '@databases/pg';
 import {
-  bulkInsert,
   bulkUpdate,
   bulkDelete,
   BulkOperationOptions,
   bulkCondition,
+  bulkInsertStatement,
 } from '@databases/pg-bulk';
 
 const NO_RESULT_FOUND = `NO_RESULT_FOUND`;
@@ -704,17 +704,100 @@ class Table<TRecord, TInsertParameters> {
       return [];
     }
     const {sql} = this._underlyingDb;
-    return await bulkInsert<keyof TInsertParameters>({
-      ...this._getBulkOperationOptions(),
-      columnsToInsert: [
-        ...new Set([
-          ...columnsToInsert,
-          ...this._getBulkOperationOptions().requiredInsertColumnNames,
-        ]),
-      ].sort(),
-      records,
-      returning: sql`${this.tableId}.*`,
-    });
+    return await this._underlyingDb.query(
+      sql`${bulkInsertStatement<keyof TInsertParameters>({
+        ...this._getBulkOperationOptions(),
+        columnsToInsert: [
+          ...new Set([
+            ...columnsToInsert,
+            ...this._getBulkOperationOptions().requiredInsertColumnNames,
+          ]),
+        ].sort(),
+        records,
+      })} RETURNING ${this.tableId}.*`,
+    );
+  }
+
+  async bulkInsertOrIgnore<
+    TColumnsToInsert extends readonly [
+      ...(readonly (keyof TInsertParameters)[])
+    ],
+  >({
+    columnsToInsert,
+    records,
+  }: {
+    readonly columnsToInsert: TColumnsToInsert;
+    readonly records: readonly BulkInsertRecord<
+      TInsertParameters,
+      TColumnsToInsert[number]
+    >[];
+  }): Promise<TRecord[]> {
+    if (records.length === 0) {
+      return [];
+    }
+    const {sql} = this._underlyingDb;
+    return await this._underlyingDb.query(
+      sql`${bulkInsertStatement<keyof TInsertParameters>({
+        ...this._getBulkOperationOptions(),
+        columnsToInsert: [
+          ...new Set([
+            ...columnsToInsert,
+            ...this._getBulkOperationOptions().requiredInsertColumnNames,
+          ]),
+        ].sort(),
+        records,
+      })} ON CONFLICT DO NOTHING RETURNING ${this.tableId}.*`,
+    );
+  }
+
+  async bulkInsertOrUpdate<
+    TColumnsToInsert extends readonly [
+      ...(readonly (keyof TInsertParameters)[])
+    ],
+  >({
+    columnsToInsert,
+    columnsThatConflict,
+    columnsToUpdate,
+    records,
+  }: {
+    readonly columnsToInsert: TColumnsToInsert;
+    readonly columnsThatConflict: readonly [
+      TColumnsToInsert[number],
+      ...TColumnsToInsert[number][]
+    ];
+    readonly columnsToUpdate: readonly [
+      TColumnsToInsert[number],
+      ...TColumnsToInsert[number][]
+    ];
+    readonly records: readonly BulkInsertRecord<
+      TInsertParameters,
+      TColumnsToInsert[number]
+    >[];
+  }): Promise<TRecord[]> {
+    if (records.length === 0) {
+      return [];
+    }
+    const {sql} = this._underlyingDb;
+    return await this._underlyingDb.query(
+      sql`${bulkInsertStatement<keyof TInsertParameters>({
+        ...this._getBulkOperationOptions(),
+        columnsToInsert: [
+          ...new Set([
+            ...columnsToInsert,
+            ...this._getBulkOperationOptions().requiredInsertColumnNames,
+          ]),
+        ].sort(),
+        records,
+      })} ON CONFLICT (${sql.join(
+        columnsThatConflict.map((k) => sql.ident(k)),
+        sql`, `,
+      )}) DO UPDATE SET ${sql.join(
+        columnsToUpdate.map(
+          (key) => sql`${sql.ident(key)}=EXCLUDED.${sql.ident(key)}`,
+        ),
+        sql`, `,
+      )} RETURNING ${this.tableId}.*`,
+    );
   }
 
   bulkFind<TWhereColumns extends readonly [...(readonly (keyof TRecord)[])]>({

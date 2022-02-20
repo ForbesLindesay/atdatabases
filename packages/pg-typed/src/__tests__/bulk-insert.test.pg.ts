@@ -249,3 +249,75 @@ test('delete users in bulk', async () => {
       .all(),
   ).toEqual([{screen_name: `bulk_insert_name_17`, age: 42}]);
 });
+
+test('insertOrIgnore users in bulk', async () => {
+  await users(db).bulkInsertOrIgnore({
+    columnsToInsert: [`age`],
+    records: [
+      {screen_name: `bulk_insert_name_18`, age: 56},
+      {screen_name: `bulk_insert_name_19`, age: 56},
+      {screen_name: `bulk_insert_name_20`, age: 56},
+      {screen_name: `bulk_insert_or_ignore_name_1`, age: 56},
+    ],
+  });
+  expect(
+    await users(db)
+      .find({
+        screen_name: anyOf([
+          `bulk_insert_name_18`,
+          `bulk_insert_name_19`,
+          `bulk_insert_name_20`,
+          `bulk_insert_or_ignore_name_1`,
+        ]),
+      })
+      .select(`screen_name`, `age`)
+      .orderByAsc(`screen_name`)
+      .all(),
+  ).toEqual([
+    {screen_name: `bulk_insert_name_18`, age: 42},
+    {screen_name: `bulk_insert_name_19`, age: 42},
+    {screen_name: `bulk_insert_name_20`, age: 42},
+    {screen_name: `bulk_insert_or_ignore_name_1`, age: 56},
+  ]);
+});
+
+test('insertOrUpdate users in bulk', async () => {
+  await users(db).bulkInsertOrUpdate({
+    columnsToInsert: [`screen_name`, `age`, `bio`],
+    columnsThatConflict: [`screen_name`],
+    columnsToUpdate: [`bio`],
+    records: [
+      {screen_name: `bulk_insert_name_21`, age: 56, bio: `Updated in bulk`},
+      {screen_name: `bulk_insert_name_22`, age: 56, bio: `Updated in bulk`},
+      {screen_name: `bulk_insert_name_23`, age: 56, bio: `Updated in bulk`},
+      {
+        screen_name: `bulk_insert_or_update_name_1`,
+        age: 56,
+        bio: `Updated in bulk`,
+      },
+    ],
+  });
+  expect(
+    await users(db)
+      .find({
+        screen_name: anyOf([
+          `bulk_insert_name_21`,
+          `bulk_insert_name_22`,
+          `bulk_insert_name_23`,
+          `bulk_insert_or_update_name_1`,
+        ]),
+      })
+      .select(`screen_name`, `age`, `bio`)
+      .orderByAsc(`screen_name`)
+      .all(),
+  ).toEqual([
+    {screen_name: `bulk_insert_name_21`, age: 42, bio: `Updated in bulk`},
+    {screen_name: `bulk_insert_name_22`, age: 42, bio: `Updated in bulk`},
+    {screen_name: `bulk_insert_name_23`, age: 42, bio: `Updated in bulk`},
+    {
+      screen_name: `bulk_insert_or_update_name_1`,
+      age: 56,
+      bio: `Updated in bulk`,
+    },
+  ]);
+});
