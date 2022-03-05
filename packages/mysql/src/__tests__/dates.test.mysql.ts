@@ -439,3 +439,50 @@ test('DATE as utc', async () => {
   ]);
   await db.dispose();
 });
+
+test('timestamp NULL', async () => {
+  await db.task(async (db) => {
+    await db.query(sql`SET time_zone = "+00:00";`);
+    await db.query(sql`
+      DROP TABLE IF EXISTS dates_test_timestamp_null;
+      CREATE TABLE dates_test_timestamp_null (
+        id INT NOT NULL PRIMARY KEY,
+        a TIMESTAMP NULL DEFAULT NULL
+      );
+    `);
+
+    const sampleDate = new Date('2000-06-03T05:40:10.123Z');
+    await db.query(sql`
+      INSERT INTO dates_test_timestamp_null (id, a)
+      VALUES (1, ${sampleDate}),
+             (2, NULL);
+    `);
+
+    expect(
+      (await (await rawConnection).query(`SELECT * from dates_test_timestamp_null`))[0],
+    ).toEqual([
+      {
+        a: '2000-06-03 15:10:10',
+        id: 1,
+      },
+      {
+        a: null,
+        id: 2,
+      },
+    ]);
+
+    const result = await db.query(sql`
+      SELECT * from dates_test_timestamp_null;
+    `);
+    expect(result).toEqual([
+      {
+        a: new Date('2000-06-03T05:40:10.000Z'),
+        id: 1
+      },
+      {
+        a: null,
+        id: 2
+      },
+    ]);
+  })
+});

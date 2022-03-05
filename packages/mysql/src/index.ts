@@ -300,6 +300,7 @@ function getDateParser(
       };
   }
 }
+
 function getDateTimeParser(
   mode: 'string' | 'date-object',
   timeZone: 'local' | 'utc',
@@ -309,9 +310,13 @@ function getDateTimeParser(
       return (f) => f.string();
     case 'date-object':
       return (f) => {
+        const fBuffer = (f as any).buffer()
+        if (fBuffer === null || fBuffer.length === 0) {
+          return null;
+        }
         const match =
           /^(\d{4})\-(\d{2})\-(\d{2}) (\d{2})\:(\d{2})\:(\d{2})(?:\.(\d+))?$/.exec(
-            f.string(),
+            fBuffer.toString(),
           );
         if (!match) {
           throw new Error('Expected yyyy-mm-dd HH:MM:SS');
