@@ -304,13 +304,13 @@ function getDateParser(
 function getDateTimeParser(
   mode: 'string' | 'date-object',
   timeZone: 'local' | 'utc',
-): (f: {string(): string}) => any {
+): (f: {string(): string; buffer(): Buffer}) => any {
   switch (mode) {
     case 'string':
       return (f) => f.string();
     case 'date-object':
       return (f) => {
-        const fBuffer = (f as any).buffer()
+        const fBuffer = f.buffer();
         if (fBuffer === null || fBuffer.length === 0) {
           return null;
         }

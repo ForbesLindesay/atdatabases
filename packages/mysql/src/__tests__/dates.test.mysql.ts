@@ -459,7 +459,11 @@ test('timestamp NULL', async () => {
     `);
 
     expect(
-      (await (await rawConnection).query(`SELECT * from dates_test_timestamp_null`))[0],
+      (
+        await (
+          await rawConnection
+        ).query(`SELECT * from dates_test_timestamp_null`)
+      )[0],
     ).toEqual([
       {
         a: '2000-06-03 15:10:10',
@@ -477,12 +481,12 @@ test('timestamp NULL', async () => {
     expect(result).toEqual([
       {
         a: new Date('2000-06-03T05:40:10.000Z'),
-        id: 1
+        id: 1,
       },
       {
         a: null,
-        id: 2
+        id: 2,
       },
     ]);
-  })
+  });
 });
