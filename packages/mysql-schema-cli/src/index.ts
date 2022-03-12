@@ -10,7 +10,8 @@ import {writeSchema} from '@databases/mysql-schema-print-types';
 const parameterParser = startChain()
   .addParam(param.string(['-c', '--database'], 'database'))
   .addParam(param.string(['-d', '--directory'], 'directory'))
-  .addParam(param.string(['--config'], 'configFilename'));
+  .addParam(param.string(['--config'], 'configFilename'))
+  .addParam(param.string(['-s', '--schemaName'], 'schemaName'));
 export default async function run(
   cwd: string,
   args: string[],
@@ -48,7 +49,7 @@ export default async function run(
   const connection = connect({connectionString: database, poolSize: 1});
   let schema;
   try {
-    schema = await getSchema(connection);
+    schema = await getSchema(connection, {schemaName: params.schemaName});
   } finally {
     await connection.dispose().catch(() => {
       // ignore the error if it's just disposing the database connection
