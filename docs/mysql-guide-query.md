@@ -85,7 +85,7 @@ async function deleteUser(email) {
 
 async function getUser(email) {
   const users = await db.query(sql`
-    SELET * FROM users
+    SELECT * FROM users
     WHERE email=${email}
   `);
   if (users.length === 0) {
@@ -139,7 +139,7 @@ async function deleteUser(email) {
 
 async function getUser(email) {
   const users = await db.query(sql`
-    SELET * FROM users
+    SELECT * FROM users
     WHERE email=${email}
   `);
   if (users.length === 0) {
