@@ -324,7 +324,7 @@ async function setUserFavoriteColors(
     favorite_color: string;
   }[],
 ) {
-  await tables.users(db).bulkInsert({
+  await tables.users(db).bulkInsertOrUpdate({
     columnsToInsert: [`email`, `favorite_color`],
     columnsThatConflict: [`email`],
     columnsToUpdate: [`favorite_color`],
