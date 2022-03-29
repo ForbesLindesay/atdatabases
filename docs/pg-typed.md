@@ -44,6 +44,39 @@ module.exports = {users, posts};
 
 ## Table
 
+### initializer
+
+The objects returned by the `tables` function are initialized with an optional argument represeting the connection(s) for the queries.
+
+The initializer argument can be a single `ConnectionPool`, `Connection`, `Transaction` or `Cluster`.
+
+```typescript
+import createConnectionPool from '@databases/pg';
+import {Cluster} from '@databases/pg-cluster';
+import db, {users} from './database';
+
+export async function initialize() {
+  // both queries are run on the same connection
+  await users(db).find().all();
+  await users(db).insert({
+    email: `alice@example.com`,
+    favorite_color: `blue`,
+  });
+
+  const primary = createConnectionPool();
+  const replica = createConnectionPool();
+  const cluster = new Cluster(primary, [replica]);
+
+  // read queries are run on the replica connection(s)
+  await users(cluster).find().all();
+  // write queries are run on the primary connection
+  await users(cluster).insert({
+    email: `alice@example.com`,
+    favorite_color: `blue`,
+  });
+}
+```
+
 ### insert(...records)
 
 Inserts records into the database table. If you pass multiple records to `insert`, they will all be added "atomically", i.e. either all of the records will be added, or none of them will be added.

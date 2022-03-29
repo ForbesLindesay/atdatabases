@@ -81,6 +81,25 @@ process.once('SIGTERM', () => {
 });
 ```
 
+## Cluster connections
+
+In a highly available Postgres cluster with a primary node & multiple replicas nodes (e.g. AWS RDS Aurora), write queries should be sent to the primary node, while read queries should be distributed equally to the read replicas nodes.
+
+To connect to such a cluster you can use the `@databases/pg-cluster` package like this:
+
+```typescript
+// database.ts
+
+import createConnectionPool from '@databases/pg';
+import createCluster from '@databases/pg-cluster';
+
+const primary = createConnectionPool(process.env.MY_CUSTOM_PRIMARY_ENV_VAR);
+const replica = createConnectionPool(process.env.MY_CUSTOM_REPLICA_ENV_VAR);
+
+const db = createCluster(primary, replica);
+export default db;
+```
+
 ## Connecting to/from cloud providers
 
 You can normally follow the instructions from the cloud providers, but we have prepared the following guides to make things easier for these common platforms:
