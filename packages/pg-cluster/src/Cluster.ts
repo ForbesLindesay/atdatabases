@@ -76,13 +76,13 @@ export default class Cluster implements Queryable {
     }
   }
 
-  task<T>(
+  async task<T>(
     fn: (connection: Connection | Transaction) => Promise<T>,
   ): Promise<T> {
     return this._primary.task(fn);
   }
 
-  tx<T>(
+  async tx<T>(
     fn: (connection: Transaction) => Promise<T>,
     options?: TransactionOptions,
   ): Promise<T> {
