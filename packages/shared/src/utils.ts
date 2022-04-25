@@ -87,8 +87,8 @@ export async function txInternal<
   options: TTransactionOptions | undefined,
 ): Promise<TResult> {
   let failureCount = 0;
-  await driver.beginTransaction(options);
   while (true) {
+    await driver.beginTransaction(options);
     const postCommitSteps: (() => Promise<void>)[] = [];
     const tx = factories.createTransaction(driver, {
       addPostCommitStep: (fn) => {
