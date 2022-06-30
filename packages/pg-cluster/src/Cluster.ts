@@ -19,7 +19,9 @@ export default class Cluster implements Queryable {
 
   constructor(primary: Queryable, replicas: Queryable[]) {
     if (!replicas.length) {
-      throw new Error("You must provide at least one replica when using pg-cluster")
+      throw new Error(
+        'You must provide at least one replica when using pg-cluster',
+      );
     }
     this._primary = primary;
     this._replicas = replicas;

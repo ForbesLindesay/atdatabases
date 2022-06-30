@@ -5,7 +5,7 @@ export type {Cluster};
 
 export default function createCluster(
   primary: Queryable,
-  replicas: Queryable[]
+  replicas: Queryable[],
 ) {
   return new Cluster(primary, replicas);
 }

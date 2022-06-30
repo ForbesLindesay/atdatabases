@@ -36,7 +36,7 @@ const replica = connect({
     });
   },
 });
-const cluster = createCluster(primary, replica);
+const cluster = createCluster(primary, [replica]);
 
 beforeEach(() => {
   primaryQueries = [];
