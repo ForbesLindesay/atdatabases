@@ -83,7 +83,7 @@ process.once('SIGTERM', () => {
 
 ## Cluster connections
 
-In a highly available Postgres cluster with a primary node & multiple replicas nodes (e.g. AWS RDS Aurora), write queries should be sent to the primary node, while read queries should be distributed equally to the read replicas nodes.
+In a highly available Postgres cluster with a primary node & multiple replicas nodes (e.g. AWS RDS Aurora), write queries should be sent to the primary node, while read queries that do not require strong consistency can be distributed equally to the read replicas nodes.
 
 To connect to such a cluster you can use the `@databases/pg-cluster` package like this:
 

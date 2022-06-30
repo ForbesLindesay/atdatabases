@@ -18,6 +18,9 @@ export default class Cluster implements Queryable {
   private readonly _replicas: Queryable[];
 
   constructor(primary: Queryable, replicas: Queryable[]) {
+    if (!replicas.length) {
+      throw new Error("You must provide at least one replica when using pg-cluster")
+    }
     this._primary = primary;
     this._replicas = replicas;
   }
@@ -33,10 +36,7 @@ export default class Cluster implements Queryable {
       if (query.length === 0) {
         return [];
       }
-      const hasWriteableQueries = query.reduce(
-        (accumulated, item) => accumulated || isQueryWriteable(item),
-        false,
-      );
+      const hasWriteableQueries = query.some(isQueryWriteable);
       if (hasWriteableQueries) {
         return this._primary.query(query);
       } else {
@@ -103,5 +103,5 @@ const WRITEABLE_REGEX =
 
 function isQueryWriteable(query: SQLQuery): boolean {
   const formatted = query.format(pgFormat);
-  return WRITEABLE_REGEX.exec(formatted.text) !== null;
+  return WRITEABLE_REGEX.test(formatted.text);
 }

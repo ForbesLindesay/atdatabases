@@ -78,9 +78,17 @@ A transaction wraps a regular task with 3 additional queries:
 3. it executes `COMMIT`, if the callback does throw any error and does not return a rejected promise
 
 ```ts
-const result = await cluster.task(async (task) => {
-  const resultA = await task.query(sql`SELECT 1 + 1 AS a`);
-  const resultB = await task.query(sql`SELECT 1 + 1 AS b`);
+// transaction executed on the replica connection
+const result = await cluster.tx(async (tx) => {
+  const resultA = await tx.query(sql`SELECT 1 + 1 AS a`);
+  const resultB = await tx.query(sql`SELECT 1 + 1 AS b`);
+  return resultA[0].a + resultB[0].b;
+}, {readOnly: true});
+
+// transaction executed on the primary connection
+const resultPrimary = await cluster.tx(async (tx) => {
+  const resultA = await tx.query(sql`SELECT 1 + 1 AS a`);
+  const resultB = await tx.query(sql`SELECT 1 + 1 AS b`);
   return resultA[0].a + resultB[0].b;
 });
 // => 4
