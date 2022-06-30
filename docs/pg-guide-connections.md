@@ -94,9 +94,9 @@ import createConnectionPool from '@databases/pg';
 import createCluster from '@databases/pg-cluster';
 
 const primary = createConnectionPool(process.env.MY_CUSTOM_PRIMARY_ENV_VAR);
-const replica = createConnectionPool(process.env.MY_CUSTOM_REPLICA_ENV_VAR);
+const replicas = [createConnectionPool(process.env.MY_CUSTOM_REPLICA_ENV_VAR)];
 
-const db = createCluster(primary, replica);
+const db = createCluster(primary, replicas);
 export default db;
 ```
 
