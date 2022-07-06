@@ -5,10 +5,11 @@ import {
   Queryable,
   QueryableType,
   Transaction,
+  sql,
+  SQLQuery,
 } from '@databases/pg';
 import AbortSignal from '@databases/pg/lib/types/AbortSignal';
 import TransactionOptions from '@databases/pg/lib/types/TransactionOptions';
-import sql, {SQLQuery} from '@databases/sql';
 
 export default class Cluster implements Queryable {
   public readonly type: QueryableType = QueryableType.Cluster;

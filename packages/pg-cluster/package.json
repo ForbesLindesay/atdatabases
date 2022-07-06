@@ -6,12 +6,10 @@
   "types": "./lib/index.d.ts",
   "dependencies": {},
   "devDependencies": {
-    "@databases/pg": "^0.0.0",
-    "@databases/sql": "^0.0.0"
+    "@databases/pg": "^0.0.0"
   },
   "peerDependencies": {
-    "@databases/pg": "*",
-    "@databases/sql": "*"
+    "@databases/pg": "*"
   },
   "scripts": {},
   "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/pg-cluster",

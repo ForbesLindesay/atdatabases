@@ -13,12 +13,12 @@ Run an SQL Query and get a promise for an array of results. If your query contai
 Write queries are executed in the primary connection, and read-only queries are executed in the replica connections.
 
 ```ts
-// query executed on the primary connection
+// query executed on a secondary connection
 const result = await cluster.query(sql`SELECT 1 + 1 AS a`);
 result[0].a;
 // => 2
 
-// query executed on the replica connection
+// query executed on the primary connection
 await cluster.query(sql`UPDATE users SET active = true`);
 ```
 
