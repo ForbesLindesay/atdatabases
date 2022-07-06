@@ -29,7 +29,7 @@ If you pass an array of SQLQueries, you will get an array in response where each
 If there is at least one write query in the argument list, then the queries are executed in the primary connection, otherwise in the replica connections.
 
 ```ts
-// query executed on the replica connection
+// query executed on a secondary connection
 const [resultA, resultB] = await cluster.query([
   sql`SELECT 1 + 1 AS a`,
   sql`SELECT 1 + 1 AS b`,
@@ -78,12 +78,15 @@ A transaction wraps a regular task with 3 additional queries:
 3. it executes `COMMIT`, if the callback does throw any error and does not return a rejected promise
 
 ```ts
-// transaction executed on the replica connection
-const result = await cluster.tx(async (tx) => {
-  const resultA = await tx.query(sql`SELECT 1 + 1 AS a`);
-  const resultB = await tx.query(sql`SELECT 1 + 1 AS b`);
-  return resultA[0].a + resultB[0].b;
-}, {readOnly: true});
+// transaction executed on a replica connection
+const result = await cluster.tx(
+  async (tx) => {
+    const resultA = await tx.query(sql`SELECT 1 + 1 AS a`);
+    const resultB = await tx.query(sql`SELECT 1 + 1 AS b`);
+    return resultA[0].a + resultB[0].b;
+  },
+  {readOnly: true},
+);
 
 // transaction executed on the primary connection
 const resultPrimary = await cluster.tx(async (tx) => {
