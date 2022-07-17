@@ -10,7 +10,7 @@ A ConnectionPool represents a set of automatically managed physical connections 
 
 Acquires a connection from the pool. If the pool is 'full' and all connections are currently checked out, this will wait in a FIFO queue until a connection becomes available by it being released back to the pool.
 
-Once a connetion has been acquired, `fn` is called with that connection.
+Once a connection has been acquired, `fn` is called with that connection.
 
 When `fn` returns, the connection is returned to the pool.
 

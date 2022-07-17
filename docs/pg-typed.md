@@ -44,6 +44,34 @@ module.exports = {users, posts};
 
 ## Table
 
+### initializer
+
+The objects returned by the `tables` function are initialized with an optional argument represeting the connection(s) for the queries.
+
+The initializer argument is a single `Queryable` (i.e. `ConnectionPool`, `Connection`, `Transaction` or `Cluster`).
+
+```typescript
+import db, {users} from './database';
+
+export async function initialize() {
+  // These 2 queries are not run in a transaction
+  await users(db).find().all();
+  await users(db).insert({
+    email: `alice@example.com`,
+    favorite_color: `blue`,
+  });
+
+  await db.tx(async db => {
+    // These 2 queries are run in the same transaction
+    await users(db).find().all();
+    await users(db).insert({
+      email: `alice@example.com`,
+      favorite_color: `blue`,
+    });
+  });
+}
+```
+
 ### insert(...records)
 
 Inserts records into the database table. If you pass multiple records to `insert`, they will all be added "atomically", i.e. either all of the records will be added, or none of them will be added.

@@ -27,6 +27,7 @@
         "ids": [
           "pg-options",
           "pg-queryable",
+          "pg-cluster",
           "pg-connection-pool",
           "pg-connection",
           "pg-transaction",

@@ -4,13 +4,14 @@ title: Postgres Queryable
 sidebar_label: Queryable
 ---
 
-There are three types of `Queryable` in postgres:
+There are four types of `Queryable` in postgres:
 
+- `Cluster` - represents a group of primary and replica connections to a database cluster
 - `ConnectionPool` - represents a set of automatically managed connections to the database
 - `Connection` - represents a single physical connection to the database
 - `Transaction` - represents a transaction (or nested transaction) on a single physical connection to the database
 
-All three share a common API, allowing you to write methods that can be used both inside and outside a transaction. e.g.
+All four share a common API, allowing you to write methods that can be used both inside and outside a transaction. e.g.
 
 ```ts
 import {Queryable} from '@databases/pg';

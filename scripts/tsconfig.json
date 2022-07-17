@@ -18,6 +18,7 @@
     {"path": "../packages/mysql-typed"},
     {"path": "../packages/pg"},
     {"path": "../packages/pg-bulk"},
+    {"path": "../packages/pg-cluster"},
     {"path": "../packages/pg-config"},
     {"path": "../packages/pg-connection-string"},
     {"path": "../packages/pg-create"},
