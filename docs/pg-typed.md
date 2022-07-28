@@ -552,7 +552,7 @@ export async function getFavoriteColor(email: string) {
 
 ### oneRequired()
 
-If you know a record exists, you can use `onlyRequired` instead of `only`. This will throw an error if the record does not exist.
+If you know a record exists, you can use `oneRequired` instead of `one`. This will throw an error if the record does not exist.
 
 ```typescript
 import db, {users} from './database';
