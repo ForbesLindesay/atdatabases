@@ -1,12 +1,13 @@
-import assertNever from 'assert-never';
-import {SQLQuery, Queryable} from '@databases/pg';
 import {
-  bulkUpdate,
-  bulkDelete,
   BulkOperationOptions,
   bulkCondition,
+  bulkDelete,
   bulkInsertStatement,
+  bulkUpdate,
 } from '@databases/pg-bulk';
+import {Queryable, SQLQuery} from '@databases/pg';
+
+import assertNever from 'assert-never';
 
 const NO_RESULT_FOUND = `NO_RESULT_FOUND`;
 const MULTIPLE_RESULTS_FOUND = `MULTIPLE_RESULTS_FOUND`;
@@ -69,11 +70,13 @@ export interface DistinctOrderedSelectQuery<TRecord>
   orderByDescDistinct(key: keyof TRecord): DistinctOrderedSelectQuery<TRecord>;
   first(): Promise<TRecord | null>;
   limit(count: number): Promise<TRecord[]>;
+  limitOffset(count: number, offset: number): Promise<TRecord[]>;
 }
 
 export interface OrderedSelectQuery<TRecord> extends SelectQuery<TRecord> {
   first(): Promise<TRecord | null>;
   limit(count: number): Promise<TRecord[]>;
+  limitOffset(count: number, offset: number): Promise<TRecord[]>;
 }
 
 type SpecialFieldQuery<T> =
@@ -453,6 +456,7 @@ interface SelectQueryOptions<TRecord> {
     readonly direction: 'ASC' | 'DESC';
   }[];
   readonly limit: number | undefined;
+  readonly offset: number | undefined;
 }
 class SelectQueryImplementation<TRecord>
   implements DistinctOrderedSelectQuery<TRecord>
@@ -463,6 +467,7 @@ class SelectQueryImplementation<TRecord>
     direction: 'ASC' | 'DESC';
   }[] = [];
   private _limitCount: number | undefined;
+  private _offsetCount: number | undefined;
   private _selectFields: readonly string[] | undefined;
   private readonly _whereAnd: WhereCondition<TRecord>[] = [];
 
@@ -486,6 +491,7 @@ class SelectQueryImplementation<TRecord>
       selectColumnNames: this._selectFields,
       orderBy: this._orderByQueries,
       limit: this._limitCount,
+      offset: this._offsetCount,
       distinctColumnNames: this._distinctColumnNames,
       whereAnd: this._whereAnd,
     });
@@ -558,6 +564,16 @@ class SelectQueryImplementation<TRecord>
     }
     this._limitCount = count;
     return await this._getResults('limit');
+  }
+  public async limitOffset(count: number, offset: number) {
+    if (!this._orderByQueries.length) {
+      throw new Error(
+        'You cannot call "limitOffset" until after you call "orderByAsc" or "orderByDesc".',
+      );
+    }
+    this._limitCount = limit;
+    this._offsetCount = offset;
+    return await this._getResults('limitOffset');
   }
   public async first() {
     if (!this._orderByQueries.length) {
@@ -1078,6 +1094,7 @@ class Table<TRecord, TInsertParameters> {
         selectColumnNames: selectFields,
         orderBy: orderByQueries,
         limit: limitCount,
+        offset: offsetCount,
         distinctColumnNames,
         whereAnd,
       }) => {
@@ -1128,6 +1145,7 @@ class Table<TRecord, TInsertParameters> {
                   )}`
                 : null,
               limitCount ? sql`LIMIT ${limitCount}` : null,
+              offsetCount ? sql`OFFSET ${offsetCount}` : null,
             ].filter(<T>(v: T): v is Exclude<T, null> => v !== null),
             sql` `,
           ),

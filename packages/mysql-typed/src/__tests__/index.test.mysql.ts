@@ -1,4 +1,5 @@
 import connect, {sql} from '@databases/mysql';
+
 import declareTables from '..';
 
 // JSON added in 5.7
@@ -114,6 +115,18 @@ t('create users', async () => {
       "http://example.com/2",
     ]
   `);
+
+  const photoRecordsOffset = await photos(db)
+    .find({owner_user_id: 1})
+    .orderByAsc('cdn_url')
+    .limitOffset(2, 1);
+  expect(photoRecordsOffset.map((p) => p.cdn_url)).toMatchInlineSnapshot(`
+    Array [
+      "http://example.com/2",
+      "http://example.com/3",
+    ]
+  `);
+
 
   const photoRecordsDesc = await photos(db)
     .find({owner_user_id: 1})

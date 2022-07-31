@@ -1,4 +1,5 @@
 import connect, {pgFormat, sql} from '@databases/pg';
+
 import Schema from './__generated__';
 import defineTables from '..';
 
@@ -85,6 +86,16 @@ test('create users', async () => {
     Array [
       "http://example.com/1",
       "http://example.com/2",
+    ]
+  `);
+  const photoRecordsOffset = await photos(db)
+    .find({owner_user_id: forbes.id})
+    .orderByAsc('cdn_url')
+    .limitOffset(2, 1);
+  expect(photoRecordsOffset.map((p) => p.cdn_url)).toMatchInlineSnapshot(`
+    Array [
+      "http://example.com/2",
+      "http://example.com/3",
     ]
   `);
 
