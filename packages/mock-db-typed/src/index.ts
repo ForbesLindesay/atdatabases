@@ -216,7 +216,7 @@ class SelectQueryImplementation<TRecord>
         'You cannot call "limitOffset" until after you call "orderByAsc" or "orderByDesc".',
       );
     }
-    this.limitCount = limit;
+    this.limitCount = count;
     this.offsetCount = offset;
     return await this._getResults('limitOffset');
   }

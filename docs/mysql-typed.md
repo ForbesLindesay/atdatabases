@@ -226,6 +226,7 @@ Return the first `count` rows. N.B. you can only use this method if you have fir
 ```typescript
 import db, {users} from './database';
 
+// Example for an endless pagination. Expects an email to be passed in, from where it returns 10 more rows.
 export async function paginatedEmails(nextPageToken?: string) {
   const records = await users(db)
     .find({
