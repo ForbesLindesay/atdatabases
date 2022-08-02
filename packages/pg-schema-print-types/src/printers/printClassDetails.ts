@@ -119,36 +119,39 @@ function getAttributeType(
     return columnTypeOverride;
   }
 
-  for (const constraint of type.constraints) {
-    if (constraint.tableAttributeNumbers.includes(attribute.attributeNumber)) {
-      if (
-        constraint.constraintType === ConstraintType.ForeignKey &&
-        constraint.referencedClassID !== type.classID
-      ) {
-        const referencedClass = context.getClass(constraint.referencedClassID);
-        if (referencedClass) {
-          const referencedAttributeNumber =
-            constraint.referencedAttributeNumbers[
-              constraint.tableAttributeNumbers.indexOf(
-                attribute.attributeNumber,
-              )
-            ];
-          const referencedAttribute = referencedClass.attributes.find(
-            (a) => a.attributeNumber === referencedAttributeNumber,
-          );
-          if (referencedAttribute) {
-            const {DatabaseRecord} = printClassDetails(
-              referencedClass,
-              context,
-            );
-            return `${file.getImport(DatabaseRecord)}['${
-              referencedAttribute.attributeName
-            }']`;
-          }
+  const constraints = type.constraints.filter((c) =>
+    c.tableAttributeNumbers.includes(attribute.attributeNumber),
+  );
+  // First check if this attribute is a foreign key. If it is, write the type
+  // as a reference to that other table's attribute
+  for (const constraint of constraints) {
+    if (
+      constraint.constraintType === ConstraintType.ForeignKey &&
+      constraint.referencedClassID !== type.classID
+    ) {
+      const referencedClass = context.getClass(constraint.referencedClassID);
+      if (referencedClass) {
+        const referencedAttributeNumber =
+          constraint.referencedAttributeNumbers[
+            constraint.tableAttributeNumbers.indexOf(attribute.attributeNumber)
+          ];
+        const referencedAttribute = referencedClass.attributes.find(
+          (a) => a.attributeNumber === referencedAttributeNumber,
+        );
+        if (referencedAttribute) {
+          const {DatabaseRecord} = printClassDetails(referencedClass, context);
+          return `${file.getImport(DatabaseRecord)}['${
+            referencedAttribute.attributeName
+          }']`;
         }
-      } else if (constraint.constraintType === ConstraintType.PrimaryKey) {
-        return handleBrand(type.className, attribute, context, file);
       }
+    }
+  }
+  // If it's not a foreign key, check if it's a primary key.
+  // If it is a primary key, we may want to use a branded type.
+  for (const constraint of constraints) {
+    if (constraint.constraintType === ConstraintType.PrimaryKey) {
+      return handleBrand(type.className, attribute, context, file);
     }
   }
   return context.getTypeScriptType(attribute.typeID, file);
