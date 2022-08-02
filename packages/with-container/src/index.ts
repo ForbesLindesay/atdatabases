@@ -91,6 +91,8 @@ export function startDockerContainer(options: NormalizedOptions) {
     'docker',
     [
       'run',
+      '--platform',
+      'linux/amd64',
       '--name',
       options.containerName,
       '-t', // terminate when sent SIGTERM
