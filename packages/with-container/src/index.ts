@@ -75,7 +75,7 @@ export async function pullDockerImage(options: NormalizedOptions | Options) {
     return;
   }
   console.warn('Pulling Docker Image ' + options.image);
-  await spawnBuffered('docker', ['pull', options.image], {
+  await spawnBuffered('docker', ['pull', '--platform', 'linux/amd64', options.image], {
     debug: options.debug,
   }).getResult();
 }
