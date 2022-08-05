@@ -91,3 +91,8 @@ export class AsyncQueue<T> {
     return this._items.getLength() - this._waiting.getLength();
   }
 }
+
+module.exports = Object.assign(Queue, {
+  default: Queue,
+  AsyncQueue: AsyncQueue,
+});
