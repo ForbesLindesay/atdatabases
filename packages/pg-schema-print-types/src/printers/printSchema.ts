@@ -3,12 +3,35 @@ import PgDataTypeID from '@databases/pg-data-type-id';
 import PgPrintContext from '../PgPrintContext';
 import printClassDetails from './printClassDetails';
 
-export default function printSchema(type: Schema, context: PgPrintContext) {
+export default function printSchema(
+  unfilteredSchema: Schema,
+  context: PgPrintContext,
+) {
+  const ignoredClassIds = new Set(
+    unfilteredSchema.classes
+      .filter((c) => context.options.isTableIgnored(c.className))
+      .map((c) => c.classID),
+  );
+  const schema: Schema = {
+    ...unfilteredSchema,
+    classes: unfilteredSchema.classes
+      .filter((c) => !ignoredClassIds.has(c.classID))
+      .map((c) => ({
+        ...c,
+        constraints: c.constraints.filter(
+          (c) =>
+            !ignoredClassIds.has(c.classID) &&
+            (c.referencedClassID === 0 ||
+              !ignoredClassIds.has(c.referencedClassID)),
+        ),
+      })),
+  };
+
   context.printer.pushTypeDeclaration(
     {type: 'schema'},
     (identifier, {getImport}) => [
       `interface ${identifier} {`,
-      ...type.classes
+      ...schema.classes
         .filter((cls) => cls.kind === ClassKind.OrdinaryTable)
         .map((cls) => {
           const {DatabaseRecord, InsertParameters} = printClassDetails(
@@ -26,7 +49,7 @@ export default function printSchema(type: Schema, context: PgPrintContext) {
   context.printer.pushValueDeclaration(
     {type: 'serializeValue'},
     (identifier) => {
-      const tables = type.classes
+      const tables = schema.classes
         .filter((cls) => cls.kind === ClassKind.OrdinaryTable)
         .map((cls) => {
           const jsonAttributes = cls.attributes
@@ -98,7 +121,7 @@ export default function printSchema(type: Schema, context: PgPrintContext) {
           typeof typeId === 'number' ? ([typeId, typeName] as const) : null,
         )
         .filter(<T>(v: T): v is Exclude<T, null> => v !== null),
-      ...type.types.map((t) => [t.typeID, t.typeName] as const),
+      ...schema.types.map((t) => [t.typeID, t.typeName] as const),
     ]
       .map(
         ([typeId, typeName]) =>
@@ -119,7 +142,7 @@ export default function printSchema(type: Schema, context: PgPrintContext) {
   const schemaJsonFileName = context.options.getSchemaJsonFileName();
 
   if (schemaJsonFileName) {
-    const schemaJson = type.classes
+    const schemaJson = schema.classes
       .filter((cls) => cls.kind === ClassKind.OrdinaryTable)
       .map((table) => ({
         name: table.className,

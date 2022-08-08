@@ -220,6 +220,22 @@ export interface TypesConfig {
    * @default {}
    */
   typeOverrides: {[x: string]: string | undefined};
+
+  /**
+   * Tables you want to generate types for. Use
+   * null to generate types for all tables
+   *
+   * @default null
+   */
+  includeTables: string[] | null;
+
+  /**
+   * Tables you do not want to generate types for.
+   * Overrides includeTables
+   *
+   * @default []
+   */
+  ignoreTables: string[];
 }
 
 export const TypesConfigSchema: ft.Runtype<TypesConfig> = ft
@@ -257,6 +273,13 @@ export const TypesConfigSchema: ft.Runtype<TypesConfig> = ft
       ft.Record(ft.String, ft.String),
       {},
     ),
+
+    includeTables: withDefault<string[] | null>(
+      ft.Union(ft.Array(ft.String), ft.Null),
+      null,
+    ),
+
+    ignoreTables: withDefault<string[]>(ft.Array(ft.String), []),
   })
   .withConstraint((value) => true, {name: `TypesConfig`});
 
