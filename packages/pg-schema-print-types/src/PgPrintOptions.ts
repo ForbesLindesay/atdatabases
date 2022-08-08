@@ -5,10 +5,23 @@ import TypeID from './TypeID';
 
 export default class PgPrintOptions implements PrintOptions<TypeID> {
   private readonly _config: Partial<PgConfig['types']>;
-
+  private readonly _includeTables: ReadonlySet<string> | null;
+  private readonly _ignoreTables: ReadonlySet<string>;
   constructor(config: Partial<PgConfig['types']>) {
     this._config = config;
+    this._includeTables = config.includeTables
+      ? new Set(config.includeTables)
+      : null;
+    this._ignoreTables = new Set(config.ignoreTables ?? []);
   }
+
+  isTableIgnored(tableName: string): boolean {
+    return (
+      (this._includeTables !== null && !this._includeTables.has(tableName)) ||
+      this._ignoreTables.has(tableName)
+    );
+  }
+
   private _v<TKey extends keyof PgConfig['types']>(
     key: Literal<TKey>,
   ): PgConfig['types'][Literal<TKey>] {
