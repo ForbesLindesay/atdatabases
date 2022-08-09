@@ -53,7 +53,7 @@ class FileContent<TypeID> {
   private readonly _options: PrintOptions<TypeID>;
   private readonly _imports = new Map<FileName, ImportState>();
   private readonly _declarationNames = new Set<string>();
-  private readonly _declarations: (() => string[])[] = [];
+  private readonly _declarations: {name: string; src: () => string[]}[] = [];
   private readonly _reExports: {
     type: {source: string; dest: string}[];
     value: {source: string; dest: string}[];
@@ -122,12 +122,15 @@ class FileContent<TypeID> {
         getImport: (id: FileExport) =>
           this._getImportState(id.file).getImport(id),
       });
-      this._declarations.push(() => [
-        ...declarationLines,
-        this.getDefaultName() === identifierName
-          ? `export default ${identifierName};`
-          : `export ${mode === 'type' ? 'type ' : ''}{${identifierName}}`,
-      ]);
+      this._declarations.push({
+        name: identifierName,
+        src: () => [
+          ...declarationLines,
+          this.getDefaultName() === identifierName
+            ? `export default ${identifierName};`
+            : `export ${mode === 'type' ? 'type ' : ''}{${identifierName}}`,
+        ],
+      });
     }
     return {
       mode,
@@ -167,10 +170,13 @@ class FileContent<TypeID> {
                 .join('\n'),
             ]
           : []),
-        ...this._declarations.map((v) => v().join('\n')),
+        ...this._declarations
+          .sort((a, b) => (a.name < b.name ? -1 : 1))
+          .map((v) => v.src().join('\n')),
         ...(this._reExports.type.length
           ? [
               `export type {\n${this._reExports.type
+                .sort((a, b) => (a.dest < b.dest ? -1 : 1))
                 .map((t) =>
                   t.source === t.dest
                     ? `  ${t.source},`
@@ -182,6 +188,7 @@ class FileContent<TypeID> {
         ...(this._reExports.value.length
           ? [
               `export {\n${this._reExports.value
+                .sort((a, b) => (a.dest < b.dest ? -1 : 1))
                 .map((t) =>
                   t.source === t.dest
                     ? `  ${t.source},`
