@@ -5,26 +5,10 @@ import TypeID from '../TypeID';
 import printTableDetails from './printTableDetails';
 
 export default function printSchema(
-  unfilteredSchema: Schema,
+  schema: Schema,
   context: PrintContext<TypeID>,
   options: MySqlPrintOptions,
 ) {
-  const schema = {
-    tables: unfilteredSchema.tables
-      .filter((t) => !options.isTableIgnored(t.tableName))
-      .map((t) => ({
-        ...t,
-        constraints: t.constraints.filter(
-          (c) =>
-            !options.isTableIgnored(c.tableName) &&
-            !c.columns.some(
-              (c) =>
-                c.referenced?.tableName &&
-                options.isTableIgnored(c.referenced.tableName),
-            ),
-        ),
-      })),
-  };
   context.pushTypeDeclaration({type: 'schema'}, (identifier, {getImport}) => [
     `interface ${identifier} {`,
     ...schema.tables
