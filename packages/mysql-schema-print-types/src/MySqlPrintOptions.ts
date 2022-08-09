@@ -6,29 +6,16 @@ import {Schema, TableDetails} from '@databases/mysql-schema-introspect';
 export default class MySqlPrintOptions implements PrintOptions<TypeID> {
   private readonly _config: Partial<MySqlConfig['types']>;
   private readonly _tables: Map<string, TableDetails>;
-  private readonly _includeTables: ReadonlySet<string> | null;
-  private readonly _ignoreTables: ReadonlySet<string>;
   constructor(config: Partial<MySqlConfig['types']>, schema: Schema) {
     this._config = config;
     this._tables = new Map(
       schema.tables.map((t) => [`${t.schemaName}.${t.tableName}`, t]),
     );
-    this._includeTables = config.includeTables
-      ? new Set(config.includeTables)
-      : null;
-    this._ignoreTables = new Set(config.ignoreTables ?? []);
   }
   private _v<TKey extends keyof MySqlConfig['types']>(
     key: Literal<TKey>,
   ): MySqlConfig['types'][Literal<TKey>] {
     return (this._config as any)[key] ?? DEFAULT_CONFIG.types[key];
-  }
-
-  isTableIgnored(tableName: string): boolean {
-    return (
-      (this._includeTables !== null && !this._includeTables.has(tableName)) ||
-      this._ignoreTables.has(tableName)
-    );
   }
 
   getTable(key: {schemaName: string; tableName: string}): TableDetails | null {

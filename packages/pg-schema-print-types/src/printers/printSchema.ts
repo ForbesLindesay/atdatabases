@@ -3,30 +3,7 @@ import PgDataTypeID from '@databases/pg-data-type-id';
 import PgPrintContext from '../PgPrintContext';
 import printClassDetails from './printClassDetails';
 
-export default function printSchema(
-  unfilteredSchema: Schema,
-  context: PgPrintContext,
-) {
-  const ignoredClassIds = new Set(
-    unfilteredSchema.classes
-      .filter((c) => context.options.isTableIgnored(c.className))
-      .map((c) => c.classID),
-  );
-  const schema: Schema = {
-    ...unfilteredSchema,
-    classes: unfilteredSchema.classes
-      .filter((c) => !ignoredClassIds.has(c.classID))
-      .map((c) => ({
-        ...c,
-        constraints: c.constraints.filter(
-          (c) =>
-            !ignoredClassIds.has(c.classID) &&
-            (c.referencedClassID === 0 ||
-              !ignoredClassIds.has(c.referencedClassID)),
-        ),
-      })),
-  };
-
+export default function printSchema(schema: Schema, context: PgPrintContext) {
   context.printer.pushTypeDeclaration(
     {type: 'schema'},
     (identifier, {getImport}) => [
