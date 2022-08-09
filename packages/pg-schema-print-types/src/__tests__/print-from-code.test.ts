@@ -47,20 +47,20 @@ test('replace filter', async () => {
     export {serializeValue}
 
     export type {
-      TableName,
       TableMyNameInsert,
+      TableName,
     }
     ",
         "filename": "index.ts",
       },
       Object {
-        "content": "interface TableName {
-    }
-    export default TableName;
-
-    interface TableMyNameInsert {
+        "content": "interface TableMyNameInsert {
     }
     export type {TableMyNameInsert}
+
+    interface TableName {
+    }
+    export default TableName;
     ",
         "filename": "my_table_my_name.ts",
       },
