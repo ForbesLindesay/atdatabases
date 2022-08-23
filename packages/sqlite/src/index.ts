@@ -137,7 +137,7 @@ class DatabaseConnectionImplementation implements DatabaseConnection {
         return result;
       } catch (ex) {
         await new Promise<void>((resolve, reject) => {
-          this._database.run('REVERT', (err) => {
+          this._database.run('ROLLBACK', (err) => {
             if (err) reject(err);
             else resolve();
           });
