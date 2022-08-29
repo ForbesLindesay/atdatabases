@@ -570,12 +570,12 @@ You can use `isNoResultFoundError` to test a caught exception to see if it is th
 
 ## FieldQuery
 
-### anyOf(valuesOrFieldQueries)
+### allOf(valuesOrFieldQueries)
 
 Match all of the supplied values. For example, to get posts within a time range:
 
 ```typescript
-import {anyOf} from '@databases/pg-typed';
+import {allOf, anyOf} from '@databases/pg-typed';
 import db, {posts} from './database';
 
 /**
