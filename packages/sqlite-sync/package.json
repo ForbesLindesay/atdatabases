@@ -1,5 +1,5 @@
 {
-  "name": "@databases/sqlite",
+  "name": "@databases/sqlite-sync",
   "version": "0.0.0",
   "description": "",
   "main": "./lib/index.js",
@@ -7,12 +7,11 @@
   "dependencies": {
     "@databases/escape-identifier": "^0.0.0",
     "@databases/sql": "^0.0.0",
-    "@types/sqlite3": "^3.1.5",
-    "sqlite3": "^5.0.0",
-    "then-queue": "^1.3.0"
+    "@types/better-sqlite3": "^7.6.0",
+    "better-sqlite3": "^7.6.2"
   },
   "scripts": {},
-  "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/sqlite",
+  "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/sqlite-sync",
   "bugs": "https://github.com/ForbesLindesay/atdatabases/issues",
   "license": "MIT",
   "publishConfig": {

@@ -1,41 +1,35 @@
 ---
 id: sqlite
-title: SQLite
+title: SQLite Sync
 sidebar_label: API
 ---
 
-The `@databases/sqlite` library provides an asynchronous, safe and convenient
-API for querying SQLite databases in node.js. Built on top of
-[sqlite3](https://www.npmjs.com/package/sqlite3).
+The `@databases/sqlite-sync` library provides a _synchronous_, safe and convenient API
+for querying SQLite databases in node.js. Built on top of
+[better-sqlite3](https://www.npmjs.com/package/better-sqlite3).
 
 N.B. you should only have one process connected to a given SQLite database at a time.
 
 ## Usage
 
 ```typescript
-import connect, {sql} from '@databases/sqlite';
+import connect, {sql} from '@databases/sqlite-sync';
 // or in CommonJS:
-// const connect = require('@databases/sqlite');
-// const {sql} = require('@databases/sqlite');
+// const connect = require('@databases/sqlite-sync');
+// const {sql} = require('@databases/sqlite-sync');
 
 const db = connect();
 
-db.query(sql`SELECT * FROM users;`).then(
-  (results) => console.log(results),
-  (err) => console.error(err),
-);
+console.log(db.query(sql`SELECT * FROM users;`));
 ```
 
 ```javascript
-const connect = require('@databases/sqlite');
-const {sql} = require('@databases/sqlite');
+const connect = require('@databases/sqlite-sync');
+const {sql} = require('@databases/sqlite-sync');
 
 const db = connect();
 
-db.query(sql`SELECT * FROM users;`).then(
-  (results) => console.log(results),
-  (err) => console.error(err),
-);
+console.log(db.query(sql`SELECT * FROM users;`))
 ```
 
 > For details on how to build queries, see [Building SQL Queries](sql.md)
@@ -62,16 +56,16 @@ const db = connect(FILE_NAME);
 
 The `Database` inherits from `DatabaseTransaction`, so you call `Database.query` directly instead of having to create a transaction for every query. Since SQLite has very limited support for actual transactions, we only support running one transaction at a time, but multiple queries can be run in parallel. You should therefore only use transactions when you actually need them.
 
-### `Connection.query(SQLQuery): Promise<any[]>`
+### `Connection.query(SQLQuery): any[]`
 
 Run an SQL Query and get a promise for an array of results.
 
-### `Connection.queryStream(SQLQuery): AsyncIterable<any>`
+### `Connection.queryStream(SQLQuery): Iterable<any>`
 
 Run an SQL Query and get an async iterable of the results. e.g.
 
 ```js
-for await (const record of db.queryStream(sql`SELECT * FROM massive_table`)) {
+for (const record of db.queryStream(sql`SELECT * FROM massive_table`)) {
   console.log(result);
 }
 ```
@@ -90,8 +84,10 @@ A transaction wraps a regular task with additional queries:
 
 ```ts
 const result = await db.tx(async (transaction) => {
-  const resultA = await transaction.query(sql`SELECT 1 + 1 AS a`);
-  const resultB = await transaction.query(sql`SELECT 1 + 1 AS b`);
+  const resultA = transaction.query(sql`SELECT 1 + 1 AS a`);
+  // Simulate calling an external endpoint
+  await new Promise((res) => res());
+  const resultB = transaction.query(sql`SELECT 1 + 1 AS b`);
   return resultA[0].a + resultB[0].b;
 });
 // => 4

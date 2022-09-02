@@ -14,7 +14,9 @@ test('error messages', async () => {
     db.query(s`
     SELECT * FRM 'baz;
   `),
-  ).rejects.toMatchInlineSnapshot(`[SqliteError: near "FRM": syntax error]`);
+  ).rejects.toMatchInlineSnapshot(
+    `[Error: SQLITE_ERROR: near "FRM": syntax error]`,
+  );
 });
 
 test('query', async () => {
@@ -48,17 +50,17 @@ test('transaction', async () => {
     return {a, b};
   });
   expect(result).toMatchInlineSnapshot(`
+Object {
+  "a": Array [
     Object {
-      "a": Array [
-        Object {
-          "foo": 42,
-        },
-      ],
-      "b": Array [
-        Object {
-          "bar": 3,
-        },
-      ],
-    }
-  `);
+      "foo": 42,
+    },
+  ],
+  "b": Array [
+    Object {
+      "bar": 3,
+    },
+  ],
+}
+`);
 });
