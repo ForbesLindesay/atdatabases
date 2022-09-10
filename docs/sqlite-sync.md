@@ -74,13 +74,11 @@ for (const record of db.queryStream(sql`SELECT * FROM massive_table`)) {
 
 Executes a callback function as a transaction, with automatically managed connection.
 
-When invoked on the ConnectionPool object, the method allocates the Connection from the pool, executes the callback, and once finished - releases the connection back to the pool. However, when invoked inside another task or transaction, the method reuses the parent Connection.
-
-A transaction wraps a regular task with additional queries:
+A transaction wraps the queries executed by the callback with additional queries:
 
 1. it executes `BEGIN` just before invoking the callback function
-2. it executes `COMMIT`, if the callback didn't throw any error or return a rejected promise
-3. it executes `ROLLBACK`, if the callback did throw an error or return a rejected promise
+2. it executes `COMMIT`, if the callback didn't throw any error
+3. it executes `ROLLBACK`, if the callback did throw an error
 
 ```ts
 const result = await db.tx(async (transaction) => {
