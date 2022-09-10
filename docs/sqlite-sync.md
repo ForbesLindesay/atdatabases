@@ -81,10 +81,8 @@ A transaction wraps the queries executed by the callback with additional queries
 3. it executes `ROLLBACK`, if the callback did throw an error
 
 ```ts
-const result = await db.tx(async (transaction) => {
+const result = db.tx((transaction) => {
   const resultA = transaction.query(sql`SELECT 1 + 1 AS a`);
-  // Simulate calling an external endpoint
-  await new Promise((res) => res());
   const resultB = transaction.query(sql`SELECT 1 + 1 AS b`);
   return resultA[0].a + resultB[0].b;
 });
