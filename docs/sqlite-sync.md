@@ -70,7 +70,7 @@ for (const record of db.queryStream(sql`SELECT * FROM massive_table`)) {
 }
 ```
 
-### `Connection.tx(fn): Promise<T>`
+### `Connection.tx(fn): T`
 
 Executes a callback function as a transaction, with automatically managed connection.
 
