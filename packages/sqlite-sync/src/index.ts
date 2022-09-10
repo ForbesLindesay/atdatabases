@@ -15,7 +15,7 @@ export interface DatabaseTransaction {
   queryStream(query: SQLQuery): IterableIterator<any>;
 }
 export interface DatabaseConnection extends DatabaseTransaction {
-  tx<T>(fn: (db: DatabaseTransaction) => Promise<T>): Promise<T>;
+  tx<T>(fn: (db: DatabaseTransaction) => T): T;
   dispose(): void;
 }
 
@@ -49,13 +49,11 @@ class DatabaseConnectionImplementation implements DatabaseConnection {
   private readonly _begin : Statement;
   private readonly _commit : Statement;
   private readonly _rollback : Statement;
-  private lockedPromise : Promise<any> | null;
   constructor(filename: string, options: DatabaseOptions = {}) {
     this._database = new DatabaseConstructor(filename, options);
     this._begin = this._database.prepare('BEGIN');
     this._commit = this._database.prepare('COMMIT');
     this._rollback = this._database.prepare('ROLLBACK');
-    this.lockedPromise = null;
   }
   query(query: SQLQuery) {
     if (!isSqlQuery(query)) {
@@ -71,18 +69,10 @@ class DatabaseConnectionImplementation implements DatabaseConnection {
     return runQueryStream(query, this._database);
   }
 
-  async tx<T>(fn: (db: DatabaseTransaction) => Promise<T>): Promise<T> {
-    if (this.lockedPromise) {
-      await this.lockedPromise;
-      return this.tx(fn);
-    }
-    let resolve!: () => void;
-    this.lockedPromise = new Promise<void>((res) => {
-      resolve = res
-    })
+  tx<T>(fn: (db: DatabaseTransaction) => T): T {
     this._begin.run();
     try {
-      const result = await fn(
+      const result = fn(
         new DatabaseTransactionImplementation(this._database),
       );
       this._commit.run();
@@ -90,8 +80,6 @@ class DatabaseConnectionImplementation implements DatabaseConnection {
     } catch (ex) {
       this._rollback.run();
       throw ex;
-    } finally {
-      resolve();
     }
   }
 

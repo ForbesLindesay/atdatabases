@@ -1,11 +1,9 @@
 import connect, {sql} from '../';
 
-jest.setTimeout(30000);
-
 const db = connect();
 
-afterAll(async () => {
-  await db.dispose();
+afterAll(() => {
+  db.dispose();
 });
 
 test('error messages', async () => {
@@ -41,10 +39,9 @@ test('bigint', () => {
   expect(result).toEqual([{id: 1}, {id: 2}, {id: 42}]);
 });
 
-test('transaction', async () => {
-  const result = await db.tx(async (tx) => {
+test('transaction', () => {
+  const result = db.tx((tx) => {
     const a = tx.query(sql`SELECT 1 + ${41} as ${sql.ident('foo')}`);
-    await new Promise((res) => setTimeout(res, 1));
     const b = tx.query(sql`SELECT 1 + 2 as bar;`);
     return {a, b};
   });
