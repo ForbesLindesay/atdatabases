@@ -62,7 +62,7 @@ Run an SQL Query and get a promise for an array of results.
 
 ### `Connection.queryStream(SQLQuery): Iterable<any>`
 
-Run an SQL Query and get an async iterable of the results. e.g.
+Run an SQL Query and get an iterable of the results. e.g.
 
 ```js
 for (const record of db.queryStream(sql`SELECT * FROM massive_table`)) {
