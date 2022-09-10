@@ -54,7 +54,7 @@ import connect from '@databases/sqlite';
 const db = connect(FILE_NAME);
 ```
 
-The `Database` inherits from `DatabaseTransaction`, so you call `Database.query` directly instead of having to create a transaction for every query. Since SQLite has very limited support for actual transactions, we only support running one transaction at a time, but multiple queries can be run in parallel. You should therefore only use transactions when you actually need them.
+The `Database` inherits from `DatabaseTransaction`, so you call `Database.query` directly instead of having to create a transaction for every query.
 
 ### `Connection.query(SQLQuery): any[]`
 
