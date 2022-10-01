@@ -64,3 +64,24 @@ Object {
 }
 `);
 });
+
+test('transaction with rollback', async () => {
+  await db.query(
+    sql`CREATE TABLE test_rollback (id INTEGER NOT NULL PRIMARY KEY);`,
+  );
+  try {
+    await db.tx(async (tx) => {
+      await tx.query(sql`
+        INSERT INTO test_rollback (id)
+          VALUES (1), (2), (42);
+      `);
+      const result = await tx.query(sql`SELECT id from test_rollback;`);
+      expect(result).toEqual([{id: 1}, {id: 2}, {id: 42}]);
+      throw new Error('rollback');
+    });
+  } catch (e) {
+    // rollback
+  }
+  const result = await db.query(sql`SELECT id from test_rollback;`);
+  expect(result).toEqual([]);
+});
