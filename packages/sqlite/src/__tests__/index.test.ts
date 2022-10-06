@@ -79,8 +79,8 @@ test('transaction with rollback', async () => {
       expect(result).toEqual([{id: 1}, {id: 2}, {id: 42}]);
       throw new Error('rollback');
     });
-  } catch (e) {
-    // rollback
+  } catch (e: any) {
+    expect(e.message).toBe('rollback');
   }
   const result = await db.query(sql`SELECT id from test_rollback;`);
   expect(result).toEqual([]);
