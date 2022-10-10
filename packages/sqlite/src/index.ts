@@ -125,7 +125,7 @@ class DatabaseConnectionImplementation implements DatabaseConnection {
         });
       });
       try {
-        const result = fn(
+        const result = await fn(
           new DatabaseTransactionImplementation(this._database),
         );
         await new Promise<void>((resolve, reject) => {
