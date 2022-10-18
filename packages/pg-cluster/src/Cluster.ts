@@ -102,7 +102,7 @@ export default class Cluster implements Queryable {
 }
 
 const WRITEABLE_REGEX =
-  /\b(alter|create|delete|drop|insert|truncate|update|vacuum)\b/i;
+  /\b(alter|create|delete|drop|insert|reindex|truncate|update|vacuum)\b/i;
 
 function isQueryWriteable(query: SQLQuery): boolean {
   const formatted = query.format(pgFormat);
