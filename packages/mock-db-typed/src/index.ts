@@ -1,4 +1,4 @@
-import type {sql, SQLQuery, Queryable} from '@databases/mock-db';
+import type {Queryable, SQLQuery, sql} from '@databases/mock-db';
 
 export interface SelectQuery<TRecord> {
   all(): Promise<TRecord[]>;
@@ -14,6 +14,7 @@ export interface SelectQuery<TRecord> {
 export interface OrderedSelectQuery<TRecord> extends SelectQuery<TRecord> {
   first(): Promise<TRecord | null>;
   limit(count: number): Promise<TRecord[]>;
+  limitOffset(count: number, offset: number): Promise<TRecord[]>;
 }
 
 class FieldQuery<T> {
@@ -134,6 +135,7 @@ class SelectQueryImplementation<TRecord>
 {
   public readonly orderByQueries: SQLQuery[] = [];
   public limitCount: number | undefined;
+  public offsetCount: number | undefined;
   private _selectFields: SQLQuery | undefined;
 
   constructor(
@@ -163,6 +165,9 @@ class SelectQueryImplementation<TRecord>
     }
     if (this.limitCount) {
       parts.push(sql`LIMIT ${this.limitCount}`);
+    }
+    if(this.offsetCount) {
+      parts.push(sql`OFFSET ${this.offsetCount}`);
     }
     return this._executeQuery(
       parts.length === 1 ? parts[0] : sql.join(parts, sql` `),
@@ -204,6 +209,16 @@ class SelectQueryImplementation<TRecord>
     }
     this.limitCount = count;
     return await this._getResults('limit');
+  }
+  public async limitOffset(count: number, offset: number) {
+    if (!this.orderByQueries.length) {
+      throw new Error(
+        'You cannot call "limitOffset" until after you call "orderByAsc" or "orderByDesc".',
+      );
+    }
+    this.limitCount = count;
+    this.offsetCount = offset;
+    return await this._getResults('limitOffset');
   }
   public async first() {
     if (!this.orderByQueries.length) {

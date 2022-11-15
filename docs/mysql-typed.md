@@ -226,6 +226,7 @@ Return the first `count` rows. N.B. you can only use this method if you have fir
 ```typescript
 import db, {users} from './database';
 
+// Example for an endless pagination. Expects an email to be passed in, from where it returns 10 more rows.
 export async function paginatedEmails(nextPageToken?: string) {
   const records = await users(db)
     .find({
@@ -250,6 +251,27 @@ export async function printAllEmails() {
     }
     page = await paginatedEmails(page.nextPageToken);
   }
+}
+```
+
+### limitOffset(count, offset)
+
+Return the first `count` rows offset by `offset` number of rows.  N.B. you can only use this method if you have first called `orderByAsc` or `orderByDesc` at least once.
+
+If you have a large number of rows (more than some thousands), using an offset is inefficient as it will scan through the results. For larger sets, see the endless pagination example above.
+
+```typescript
+import db, {users} from './database';
+
+// Example for simple offset-based pagination
+export async function offsetPaginatedEmails(offset?: number = 0) {
+  const records = await users(db)
+    .find()
+    .orderByAsc(`email`)
+    .limitOffset(10, offset);
+  return {
+    records: records.map((record) => record.email),
+  };
 }
 ```
 
