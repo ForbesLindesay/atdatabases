@@ -141,6 +141,10 @@ db.query(sql`SELECT * FROM users WHERE dob = ${new DayDate(2018, 1, 20)};`);
 // => {text: 'SELECT * FROM users WHERE dob = $1;', values: ['2018-01-20']}
 ```
 
+### `sql.isSqlQuery(query)`
+
+Use this to test if an unknown value is an SQLQuery. Returns `true` if `query` is an instance of `SQLQuery`, otherwise it returns `false`.
+
 ### `SQLQuery.format(config: FormatConfig)`
 
 This returns an object with `{text: string, values: any[]}` where the `text` field contains the SQL formatted query, and values contains the parameters.

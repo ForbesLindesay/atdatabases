@@ -281,6 +281,7 @@ export type SQL = typeof SQLQuery.query & {
   readonly value: typeof SQLQuery.value;
   readonly ident: typeof SQLQuery.ident;
   readonly registerFormatter: typeof SQLQuery.registerFormatter;
+  readonly isSqlQuery: (query: unknown) => query is SQLQuery;
 };
 
 // tslint:disable:no-unbound-method
@@ -292,6 +293,7 @@ const sql: SQL = Object.assign(SQLQuery.query, {
   value: SQLQuery.value,
   ident: SQLQuery.ident,
   registerFormatter: SQLQuery.registerFormatter,
+  isSqlQuery,
 });
 // tslint:enable:no-unbound-method
 
