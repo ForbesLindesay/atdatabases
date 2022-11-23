@@ -61,7 +61,7 @@ export async function initialize() {
     favorite_color: `blue`,
   });
 
-  await db.tx(async db => {
+  await db.tx(async (db) => {
     // These 2 queries are run in the same transaction
     await users(db).find().all();
     await users(db).insert({
@@ -135,6 +135,28 @@ export async function setFavoriteColor(
   const insertedOrUpdatedUsers = await users(db).insertOrUpdate(
     [`email`],
     ...emails.map((email) => ({
+      email,
+      favorite_color: favoriteColor,
+    })),
+  );
+  console.log(insertedOrUpdatedUsers);
+}
+```
+
+By default, all the columns will be updated when a conflict is encountered. You can alternatively specify exactly which columns to update. For example:
+
+```typescript
+import db, {users} from './database';
+
+export async function setFavoriteColor(
+  emails: string[],
+  favoriteColor: string,
+) {
+  const insertedOrUpdatedUsers = await users(db).insertOrUpdate(
+    {onConflict: [`email`], set: [`updated_at`, `favorite_color`]},
+    ...emails.map((email) => ({
+      created_at: new Date(),
+      updated_at: new Date(),
       email,
       favorite_color: favoriteColor,
     })),
@@ -299,6 +321,27 @@ import db, {users} from './database';
 users(db).tableName; // 'users'
 ```
 
+### conditionToSql(whereValues, tableAlias)
+
+If you want to build parts of the query yourself, you can still use pg-typed to help you construct the condition in your where clause. This can be useful for join statements. In the following example the condition is very simple, so it might have been easier to simply write that SQL by hand, but in more complex conditions the type safety can still be helpful.
+
+```typescript
+import db, {users, blog_posts, DbUser, DbBlogPost} from './database';
+
+interface ActiveUserBlogPost {
+  username: DbUser['username'];
+  title: DbBlogPost['title'];
+}
+async function activeUserBlogPosts(): Promise<ActiveUserBlogPost[]> {
+  return await db.query(sql`
+    SELECT u.username, b.title
+    FROM users AS u
+    INNER JOIN blog_posts AS b ON u.id=b.created_by_id
+    WHERE ${users(db).conditionToSql({active: true}, `u`)}
+  `);
+}
+```
+
 ### bulkFind(options)
 
 This is like the regular `.find(condition)` API, but it lets you specify multiple distinct conditions that are efficiently or'ed together. Once you've started a query using `bulkFind` you can call `.orderByAsc`/`.orderByDesc`/`.select`/etc. just like you could if you started a query with a call to `find`. You can find more details on how this API works in [@databases/pg-bulk](pg-bulk.md).
@@ -320,11 +363,11 @@ async function getPosts() {
 
 ### bulkInsert(options)
 
-To insert thousands of records at a time, you can use the bulk insert API. This requires you to specify any optional fields that you want to pass in. Any required (i.e. `NOT NULL` and no default value) fields are automatically expected. You can find more details on how this API works in [@databases/pg-bulk](pg-bulk.md). `bulkInsert` also returns the inserted records.
+To insert thousands of records at a time, you can use the bulk insert API. This requires you to specify any optional columns that you want to pass in. Any required (i.e. `NOT NULL` and no default value) columns are automatically expected. You can find more details on how this API works in [@databases/pg-bulk](pg-bulk.md). `bulkInsert` also returns the inserted records.
 
 ```typescript
 async function insertUsers() {
-  // This example assumes that `email` is a non-nullable field
+  // This example assumes that `email` is a non-nullable column
   await tables.users(db).bulkInsert({
     columnsToInsert: [`favorite_color`],
     records: [
@@ -367,7 +410,7 @@ Updating multiple records in one go, where each record needs to be updated to a 
 
 ```typescript
 async function updateUsers() {
-  // This example assumes that `email` is a non-nullable field
+  // This example assumes that `email` is a non-nullable column
   await tables.users(db).bulkUpdate({
     whereColumnNames: [`email`],
     setColumnNames: [`favorite_color`],
@@ -403,7 +446,7 @@ This will delete results that match: `(org_id=1 AND user_id=10) OR (org_id=2 AND
 
 ## SelectQuery
 
-A `SelectQuery` is a query for records within a table. The actual query is sent when you call one of the methods that returns a `Promise`, i.e. `all()`, `first()` or `limit(count)`.
+A `SelectQuery` is a query for records within a table. The actual query is sent when you call one of the methods that returns a `Promise`, i.e. `all()`, `one()`, `oneRequired()`, `first()` or `limit(count)`.
 
 ### andWhere(condition)
 
@@ -428,9 +471,13 @@ export async function getPostsSince(since: Date) {
 }
 ```
 
-### select(...fields)
+### distinct(...columns)
 
-Only return the provided fields. This can be useful if you have database records with many fields or where some fields are very large, and you typically only care about a small subset of the fields. The default is to return all fields, i.e. `*`.
+Only return distinct results for the given columns. If you call `.distinct()` without passing any column names, the entire row is checked. You cannot specify a sort order using `.orderByAsc`/`.orderByDesc` if you are using `.distinct` and you cannot rely on the data being returned in any particular order. If you need to only return distinct rows and sort your data, you should use `.orderByAscDistinct` or `.orderByDescDistinct` instead.
+
+### select(...columns)
+
+Only return the provided columns. This can be useful if you have database records with many columns or where some columns are very large, and you typically only care about a small subset of the columns. The default is to return all columns, i.e. `*`.
 
 ```typescript
 import db, {users} from './database';
@@ -438,6 +485,27 @@ import db, {users} from './database';
 export async function getEmails() {
   const records = await users(db).find().select(`email`).all();
   return records.map((record) => record.email);
+}
+```
+
+### toSql()
+
+If you want to run the query yourself, or perhaps use it as part of another more complex query, you can use the `toSql` method to return the SQLQuery
+
+Example:
+
+```typescript
+import db, {users} from './database';
+
+export async function getDistinctUserFirstNamesCount(): Promise<number> {
+  const distinctFirstNameQuery = users(db)
+    .find()
+    .distinct(`first_name`)
+    .toSql();
+  const records = await db.query(sql`
+    SELECT COUNT(*) AS row_count FROM (${distinctFirstNameQuery}) AS u
+  `);
+  return parseInt(`${records[0].row_count}`, 10);
 }
 ```
 
@@ -539,7 +607,7 @@ export async function getEmails() {
 
 ### one()
 
-Return a single record (or null). If multiple records in the table match `whereValues`, an error is thrown. If no records match `whereValues`, `null` is returned. This is useful if you want to do `.findOne` but only need a sub-set of the fields.
+Return a single record (or null). If multiple records in the table match `whereValues`, an error is thrown. If no records match `whereValues`, `null` is returned. This is useful if you want to do `.findOne` but only need a sub-set of the columns.
 
 ```typescript
 import db, {users} from './database';
@@ -730,7 +798,7 @@ export async function getUsersWithValidPreference() {
 }
 ```
 
-### key(fieldName, whereClause)
+### key(columnName, whereClause)
 
 There is also a helper on the table itself to allow you to do `inQueryResults`, but in a type safe way:
 
@@ -756,7 +824,7 @@ export async function getPostsByUserEmail(email: string) {
 
 ## or(conditions) / and(conditions)
 
-To `or`/`and` values/conditions for a single field, you can use `anyOf`/`allOf`, but the `or` utility helps if you want to have multiple distinct queries. If you anticipate many conditions in an or, you may be get better performance by using `.bulkFind`/`.bulkDelete` instead of `or`.
+To `or`/`and` values/conditions for a single column, you can use `anyOf`/`allOf`, but the `or` utility helps if you want to have multiple distinct queries. If you anticipate many conditions in an or, you may be get better performance by using `.bulkFind`/`.bulkDelete` instead of `or`.
 
 ```typescript
 import {or, and, greaterThan} from '@databases/pg-typed';
@@ -792,7 +860,7 @@ async function getPopularPostsByAuthor(authorId: User['id']) {
 }
 ```
 
-You can often avoid using the `and` helper by simply duplicating some fields in the query:
+You can often avoid using the `and` helper by simply duplicating some columns in the query:
 
 ```typescript
 import {or, greaterThan} from '@databases/pg-typed';
