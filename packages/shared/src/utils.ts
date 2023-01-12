@@ -85,16 +85,12 @@ export async function txInternal<
   factories: TransactionFactory<TDriver, TTransaction>,
   fn: (connection: TTransaction) => Promise<TResult>,
   options: TTransactionOptions | undefined,
+  addPostCommitStep: (fn: () => Promise<void>) => void,
 ): Promise<TResult> {
   let failureCount = 0;
   while (true) {
     await driver.beginTransaction(options);
-    const postCommitSteps: (() => Promise<void>)[] = [];
-    const tx = factories.createTransaction(driver, {
-      addPostCommitStep: (fn) => {
-        postCommitSteps.push(fn);
-      },
-    });
+    const tx = factories.createTransaction(driver, {addPostCommitStep});
     let result;
     try {
       result = await fn(tx);
@@ -109,9 +105,6 @@ export async function txInternal<
         continue;
       }
       throw ex;
-    }
-    for (const step of postCommitSteps) {
-      await step();
     }
     return result;
   }

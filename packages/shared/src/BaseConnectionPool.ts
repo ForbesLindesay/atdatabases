@@ -4,7 +4,7 @@ import createConnectionPool, {
 } from '@databases/connection-pool';
 import splitSqlQuery from '@databases/split-sql-query';
 import type {SQLQuery} from '@databases/sql';
-import Factory, {Disposable} from './Factory';
+import Factory, {Disposable, TransactionFactory} from './Factory';
 import Driver from './Driver';
 import QueryableType from './QueryableType';
 import {
@@ -94,7 +94,22 @@ export default class BaseConnectionPool<
     options?: TransactionOptions<TDriver>,
   ): Promise<TResult> {
     this._throwIfDisposed();
-    return this._withDriverFromPool(txInternal, this._factories, fn, options);
+    const postCommitSteps: (() => Promise<void>)[] = [];
+    const result = await this._withDriverFromPool<
+      [
+        TransactionFactory<TDriver, TTransaction>,
+        (connection: TTransaction) => Promise<TResult>,
+        TransactionOptions<TDriver> | undefined,
+        (fn: () => Promise<void>) => void,
+      ],
+      TResult
+    >(txInternal, this._factories, fn, options, (fn) => {
+      postCommitSteps.push(fn);
+    });
+    for (const step of postCommitSteps) {
+      await step();
+    }
+    return result;
   }
 
   async query(query: SQLQuery): Promise<any[]>;

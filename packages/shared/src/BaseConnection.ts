@@ -59,12 +59,26 @@ export default class BaseConnection<
     options?: TransactionOptions<TDriver>,
   ): Promise<TResult> {
     this._throwIfDisposed();
+    const postCommitSteps: (() => Promise<void>)[] = [];
     await this._lock.acquireLock();
+    let result: TResult;
     try {
-      return await txInternal(this._driver, this._factories, fn, options);
+      result = await txInternal(
+        this._driver,
+        this._factories,
+        fn,
+        options,
+        (fn) => {
+          postCommitSteps.push(fn);
+        },
+      );
     } finally {
       this._lock.releaseLock();
     }
+    for (const step of postCommitSteps) {
+      await step();
+    }
+    return result;
   }
 
   async query(query: SQLQuery): Promise<any[]>;
