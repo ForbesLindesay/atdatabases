@@ -13,7 +13,7 @@ N.B. you should only have one process connected to a given SQLite database at a 
 ## Usage
 
 ```typescript
-import connect, {value sql} from '@databases/sqlite-sync';
+import connect, {sql} from '@databases/sqlite-sync';
 // or in CommonJS:
 // const connect = require('@databases/sqlite-sync');
 // const {sql} = require('@databases/sqlite-sync');
