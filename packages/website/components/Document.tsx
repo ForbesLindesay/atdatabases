@@ -28,6 +28,7 @@ const nodeRenderers: {
   listItem: DocumentListItem,
   paragraph: DocumentParagraph,
   strong: DocumentStrong,
+  emphasis: DocumentStrong,
   table: DocumentTable,
   text: DocumentText,
 };
@@ -73,8 +74,8 @@ function DocumentElement({
       if (NodeRenderer !== undefined) {
         return <NodeRenderer index={index} node={node} />;
       }
-      // throw new Error(`Unknown node type: ${node.type}`);
-      return <pre>{JSON.stringify(node, null, `  `)}</pre>;
+      throw new Error(`Unknown node type: ${node.type}`);
+    // return <pre>{JSON.stringify(node, null, `  `)}</pre>;
   }
 }
 
@@ -117,7 +118,7 @@ function DocumentHeading({index, node}: {index: number; node: m.Heading}) {
         tabIndex={-1}
       />
       <a
-        href="#cli"
+        href={`#${id}`}
         aria-hidden
         tw="flex flex-shrink-0 justify-center items-center -ml-6 w-6 opacity-0 group-hover:opacity-100"
         tabIndex={-1}
@@ -296,7 +297,7 @@ function DocumentParagraph({index, node}: {index: number; node: m.Paragraph}) {
   );
 }
 
-function DocumentStrong({node}: {node: m.Strong}) {
+function DocumentStrong({node}: {node: m.Strong | m.Emphasis}) {
   return (
     <strong tw="text-black font-semibold">
       <DocumentChildren>{node}</DocumentChildren>
