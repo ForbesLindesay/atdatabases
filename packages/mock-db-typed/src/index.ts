@@ -55,9 +55,9 @@ class FieldQuery<T> {
 
 export type {FieldQuery};
 
-export type WhereCondition<TRecord> = Partial<
-  {[key in keyof TRecord]: TRecord[key] | FieldQuery<TRecord[key]>}
->;
+export type WhereCondition<TRecord> = Partial<{
+  [key in keyof TRecord]: TRecord[key] | FieldQuery<TRecord[key]>;
+}>;
 
 export function anyOf<T>(values: {
   [Symbol.iterator](): IterableIterator<T | FieldQuery<T>>;
@@ -254,7 +254,7 @@ class Table<TRecord, TInsertParameters> {
 
     const columnNamesSet = new Set<keyof TInsertParameters>();
     for (const row of rows) {
-      for (const columnName of Object.keys(row)) {
+      for (const columnName of Object.keys(row as any)) {
         columnNamesSet.add(columnName as keyof typeof row);
       }
     }
@@ -267,7 +267,7 @@ class Table<TRecord, TInsertParameters> {
       (row) =>
         sql`(${sql.join(
           columnNames.map((columnName) =>
-            columnName in row
+            columnName in (row as any)
               ? sql.value(this._value(columnName as string, row[columnName]))
               : sql`DEFAULT`,
           ),

@@ -5,9 +5,7 @@ jest.setTimeout(30000);
 const db = connect();
 
 test('streaming', () => {
-  db.query(
-    sql`CREATE TABLE stream_values (id BIGINT NOT NULL PRIMARY KEY);`,
-  );
+  db.query(sql`CREATE TABLE stream_values (id BIGINT NOT NULL PRIMARY KEY);`);
   const allValues = [];
   for (let batch = 0; batch < 10; batch++) {
     const batchValues = [];

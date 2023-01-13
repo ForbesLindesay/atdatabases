@@ -60,3 +60,44 @@ test('transaction', () => {
     }
   `);
 });
+
+test('multiple-statements', () => {
+  db.query(
+    sql`CREATE TABLE multiple_statements_test(id INT NOT NULL PRIMARY KEY, message VARCHAR(1000) NOT NULL)`,
+  );
+  expect(
+    db.query(sql`
+      INSERT INTO multiple_statements_test (id, message)
+      VALUES (42, 'The answer to life, the universe and everything');
+      SELECT * FROM multiple_statements_test;
+    `),
+  ).toMatchInlineSnapshot(`
+    Array [
+      Object {
+        "id": 42,
+        "message": "The answer to life, the universe and everything",
+      },
+    ]
+  `);
+  expect(
+    db.query([
+      sql`SELECT * FROM multiple_statements_test`,
+      sql`SELECT id, message AS aliased_message FROM multiple_statements_test`,
+    ]),
+  ).toMatchInlineSnapshot(`
+    Array [
+      Array [
+        Object {
+          "id": 42,
+          "message": "The answer to life, the universe and everything",
+        },
+      ],
+      Array [
+        Object {
+          "aliased_message": "The answer to life, the universe and everything",
+          "id": 42,
+        },
+      ],
+    ]
+  `);
+});

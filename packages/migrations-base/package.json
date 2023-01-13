@@ -8,7 +8,7 @@
     "assert-never": "^1.2.1",
     "chalk": "^4.1.0",
     "deep-equal": "^2.0.4",
-    "interrogator": "^1.1.0",
+    "interrogator": "^2.0.0",
     "is-interactive": "^1.0.0",
     "parameter-reducers": "^2.0.0",
     "semver": "^7.3.2"

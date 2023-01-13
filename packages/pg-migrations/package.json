@@ -13,7 +13,7 @@
     "@databases/pg-config": "^0.0.0",
     "assert-never": "^1.2.1",
     "chalk": "^4.1.0",
-    "interrogator": "^1.1.0",
+    "interrogator": "^2.0.0",
     "is-interactive": "^1.0.0",
     "parameter-reducers": "^2.0.0",
     "semver": "^7.3.2",

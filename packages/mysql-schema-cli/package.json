@@ -12,7 +12,7 @@
     "@databases/mysql-schema-introspect": "^0.0.0",
     "@databases/mysql-schema-print-types": "^0.0.0",
     "chalk": "^4.1.0",
-    "interrogator": "^1.1.0",
+    "interrogator": "^2.0.0",
     "is-interactive": "^1.0.0",
     "parameter-reducers": "^2.0.0"
   },

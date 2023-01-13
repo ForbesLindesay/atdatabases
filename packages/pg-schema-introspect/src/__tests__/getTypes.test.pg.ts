@@ -194,7 +194,7 @@ test('get built in types', async () => {
   });
 
   const groupedTypes = builtInTypesFromFile.reduce<{
-    [key: string]: typeof builtInTypesFromFile[number][];
+    [key: string]: (typeof builtInTypesFromFile)[number][];
   }>((result, ty) => {
     const category = Object.keys(TypeCateogry).find(
       (c) => (TypeCateogry as any)[c] === ty.category,

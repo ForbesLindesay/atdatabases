@@ -503,9 +503,9 @@ class WhereCombinedCondition<TRecord> {
 export type {WhereCombinedCondition};
 
 export type WhereCondition<TRecord> =
-  | Partial<
-      {readonly [key in keyof TRecord]: TRecord[key] | FieldQuery<TRecord[key]>}
-    >
+  | Partial<{
+      readonly [key in keyof TRecord]: TRecord[key] | FieldQuery<TRecord[key]>;
+    }>
   | WhereCombinedCondition<TRecord>
   | SQLQuery;
 
@@ -735,10 +735,9 @@ class SelectQueryImplementation<TRecord>
 
 type BulkRecord<TParameters, TKey extends keyof TParameters> = {
   readonly [key in TKey]-?: Exclude<TParameters[key], undefined>;
-} &
-  {
-    readonly [key in Exclude<keyof TParameters, TKey>]?: undefined;
-  };
+} & {
+  readonly [key in Exclude<keyof TParameters, TKey>]?: undefined;
+};
 
 type BulkInsertFields<
   TInsertParameters,
@@ -842,7 +841,7 @@ class Table<TRecord, TInsertParameters> {
 
   async bulkInsert<
     TColumnsToInsert extends readonly [
-      ...(readonly (keyof TInsertParameters)[])
+      ...(readonly (keyof TInsertParameters)[]),
     ],
   >({
     columnsToInsert,
@@ -874,7 +873,7 @@ class Table<TRecord, TInsertParameters> {
 
   async bulkInsertOrIgnore<
     TColumnsToInsert extends readonly [
-      ...(readonly (keyof TInsertParameters)[])
+      ...(readonly (keyof TInsertParameters)[]),
     ],
   >({
     columnsToInsert,
@@ -906,7 +905,7 @@ class Table<TRecord, TInsertParameters> {
 
   async bulkInsertOrUpdate<
     TColumnsToInsert extends readonly [
-      ...(readonly (keyof TInsertParameters)[])
+      ...(readonly (keyof TInsertParameters)[]),
     ],
   >({
     columnsToInsert,
@@ -917,11 +916,11 @@ class Table<TRecord, TInsertParameters> {
     readonly columnsToInsert: TColumnsToInsert;
     readonly columnsThatConflict: readonly [
       TColumnsToInsert[number],
-      ...TColumnsToInsert[number][]
+      ...TColumnsToInsert[number][],
     ];
     readonly columnsToUpdate: readonly [
       TColumnsToInsert[number],
-      ...TColumnsToInsert[number][]
+      ...TColumnsToInsert[number][],
     ];
     readonly records: readonly BulkInsertRecord<
       TInsertParameters,
@@ -1050,7 +1049,7 @@ class Table<TRecord, TInsertParameters> {
       (row) =>
         sql`(${sql.join(
           columnNames.map((columnName) =>
-            columnName in row
+            columnName in (row as any)
               ? sql.value(this._value(columnName as string, row[columnName]))
               : sql`DEFAULT`,
           ),
@@ -1077,18 +1076,15 @@ class Table<TRecord, TInsertParameters> {
       ? TRecordsToInsert
       : readonly ({
           readonly [key in keyof TInsertParameters]: TInsertParameters[key];
-        } &
-          {
-            readonly [key in Exclude<
-              keyof TRecordsToInsert[number],
-              keyof TInsertParameters
-            >]: never;
-          })[]
-  ): Promise<
-    {
-      -readonly [key in keyof TRecordsToInsert]: TRecord;
-    }
-  > {
+        } & {
+          readonly [key in Exclude<
+            keyof TRecordsToInsert[number],
+            keyof TInsertParameters
+          >]: never;
+        })[]
+  ): Promise<{
+    -readonly [key in keyof TRecordsToInsert]: TRecord;
+  }> {
     return this._insert(null, ...rows) as any;
   }
 
@@ -1107,13 +1103,12 @@ class Table<TRecord, TInsertParameters> {
         },
     ...rows: keyof TRecordsToInsert[number] extends keyof TInsertParameters
       ? TRecordsToInsert
-      : readonly ({[key in keyof TInsertParameters]: TInsertParameters[key]} &
-          {
-            [key in Exclude<
-              keyof TRecordsToInsert[number],
-              keyof TInsertParameters
-            >]: never;
-          })[]
+      : readonly ({[key in keyof TInsertParameters]: TInsertParameters[key]} & {
+          [key in Exclude<
+            keyof TRecordsToInsert[number],
+            keyof TInsertParameters
+          >]: never;
+        })[]
   ): Promise<{-readonly [key in keyof TRecordsToInsert]: TRecord}> {
     const getOption = (
       k: 'onConflict' | 'set' | 'doNotSet',
@@ -1152,13 +1147,12 @@ class Table<TRecord, TInsertParameters> {
       ? TRecordsToInsert
       : readonly ({
           readonly [key in keyof TInsertParameters]: TInsertParameters[key];
-        } &
-          {
-            readonly [key in Exclude<
-              keyof TRecordsToInsert[number],
-              keyof TInsertParameters
-            >]: never;
-          })[]
+        } & {
+          readonly [key in Exclude<
+            keyof TRecordsToInsert[number],
+            keyof TInsertParameters
+          >]: never;
+        })[]
   ): Promise<TRecord[]> {
     const {sql} = this._underlyingDb;
     return await this._insert(() => sql`ON CONFLICT DO NOTHING`, ...rows);

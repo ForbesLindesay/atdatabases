@@ -7,6 +7,7 @@
   "dependencies": {
     "@databases/escape-identifier": "^0.0.0",
     "@databases/sql": "^0.0.0",
+    "@databases/split-sql-query": "^0.0.0",
     "@types/better-sqlite3": "^7.6.0",
     "better-sqlite3": "^7.6.2"
   },
@@ -17,7 +18,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "homepage": "https://www.atdatabases.org/docs/sqlite",
+  "homepage": "https://www.atdatabases.org/docs/sqlite-sync",
   "files": [
     "lib/"
   ]
