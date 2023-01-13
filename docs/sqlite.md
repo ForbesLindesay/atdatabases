@@ -4,7 +4,9 @@ title: SQLite
 sidebar_label: API
 ---
 
-The `@databases/sqlite` library provides a safe and convenient API for querying SQLite databases in node.js.
+The `@databases/sqlite` library provides an asynchronous, safe and convenient
+API for querying SQLite databases in node.js. Built on top of
+[sqlite3](https://www.npmjs.com/package/sqlite3).
 
 N.B. you should only have one process connected to a given SQLite database at a time.
 

@@ -9,6 +9,7 @@
     "noUnusedParameters": false,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
+    "esModuleInterop": true,
     "jsx": "preserve",
     "lib": ["es2020", "dom"],
     "pretty": true

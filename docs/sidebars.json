@@ -73,6 +73,7 @@
     ],
     "SQLite": [
       "sqlite",
+      "sqlite-sync",
       "sqlite-test"
     ],
     "Expo/Web SQL": [
