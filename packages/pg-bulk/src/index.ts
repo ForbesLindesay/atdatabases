@@ -66,11 +66,13 @@ function select<TColumnName extends ColumnName>(
     columns.map(({name, getValue}) => {
       const typeName = columnTypes[name];
       if (!typeName) {
-        throw new Error(`Missing type name for ${name}`);
+        throw new Error(`Missing type name for ${name as string}`);
       }
       return sql`${records.map((r) => {
         const value = getValue ? getValue(r) : r[name];
-        return serializeValue ? serializeValue(`${name}`, value) : value;
+        return serializeValue
+          ? serializeValue(`${name as string}`, value)
+          : value;
       })}::${typeName}[]`;
     }),
     `,`,
@@ -197,7 +199,7 @@ export async function bulkUpdate<
         (columnName) =>
           sql`${sql.ident(columnName)} = ${sql.ident(
             `bulk_query`,
-            `updated_value_of_${columnName}`,
+            `updated_value_of_${columnName as string}`,
           )}`,
       ),
       `,`,
@@ -218,7 +220,7 @@ export async function bulkUpdate<
       [
         ...whereColumnNames.map((columnName) => sql.ident(columnName)),
         ...setColumnNames.map((columnName) =>
-          sql.ident(`updated_value_of_${columnName}`),
+          sql.ident(`updated_value_of_${columnName as string}`),
         ),
       ],
       `,`,

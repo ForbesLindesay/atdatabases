@@ -1,7 +1,7 @@
 ---
 id: sqlite
 title: SQLite
-sidebar_label: API
+sidebar_label: Asynchronous API
 ---
 
 The `@databases/sqlite` library provides an asynchronous, safe and convenient
@@ -50,6 +50,7 @@ In memory:
 
 ```ts
 import connect from '@databases/sqlite';
+
 const db = connect();
 ```
 
@@ -57,16 +58,17 @@ File system:
 
 ```ts
 import connect from '@databases/sqlite';
+
 const db = connect(FILE_NAME);
 ```
 
-The `Database` inherits from `DatabaseTransaction`, so you call `Database.query` directly instead of having to create a transaction for every query. Since SQLite has very limited support for actual transactions, we only support running one transaction at a time, but multiple queries can be run in parallel. You should therefore only use transactions when you actually need them.
+The `DatabaseConnection` inherits from `DatabaseTransaction`, so you call `DatabaseConnection.query` directly instead of having to create a transaction for every query. Since SQLite has very limited support for actual transactions, we only support running one transaction at a time, but multiple queries can be run in parallel. You should therefore only use transactions when you actually need them.
 
-### `Connection.query(SQLQuery): Promise<any[]>`
+### `DatabaseConnection.query(SQLQuery): Promise<any[]>`
 
 Run an SQL Query and get a promise for an array of results.
 
-### `Connection.queryStream(SQLQuery): AsyncIterable<any>`
+### `DatabaseConnection.queryStream(SQLQuery): AsyncIterable<any>`
 
 Run an SQL Query and get an async iterable of the results. e.g.
 
@@ -76,11 +78,9 @@ for await (const record of db.queryStream(sql`SELECT * FROM massive_table`)) {
 }
 ```
 
-### `Connection.tx(fn): Promise<T>`
+### `DatabaseConnection.tx(fn): Promise<T>`
 
 Executes a callback function as a transaction, with automatically managed connection.
-
-When invoked on the ConnectionPool object, the method allocates the Connection from the pool, executes the callback, and once finished - releases the connection back to the pool. However, when invoked inside another task or transaction, the method reuses the parent Connection.
 
 A transaction wraps a regular task with additional queries:
 
@@ -97,6 +97,6 @@ const result = await db.tx(async (transaction) => {
 // => 4
 ```
 
-### `ConnectionPool.dispose(): Promise<void>`
+### `DatabaseConnection.dispose(): Promise<void>`
 
-Dispose the connection pool. Once this is called, any subsequent queries will fail.
+Dispose the DatabaseConnection. Once this is called, any subsequent queries will fail.

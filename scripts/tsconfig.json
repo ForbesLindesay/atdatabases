@@ -16,7 +16,6 @@
     {"path": "../packages/mysql-schema-print-types"},
     {"path": "../packages/mysql-test"},
     {"path": "../packages/mysql-typed"},
-    {"path": "../packages/node_modules"},
     {"path": "../packages/pg"},
     {"path": "../packages/pg-bulk"},
     {"path": "../packages/pg-cluster"},

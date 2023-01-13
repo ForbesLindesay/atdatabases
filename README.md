@@ -53,6 +53,7 @@ Package Name | Version | Docs
 @databases/split-sql-query | [![NPM version](https://img.shields.io/npm/v/@databases/split-sql-query?style=for-the-badge)](https://www.npmjs.com/package/@databases/split-sql-query) | [https://www.atdatabases.org/docs/split-sql-query](https://www.atdatabases.org/docs/split-sql-query)
 @databases/sql | [![NPM version](https://img.shields.io/npm/v/@databases/sql?style=for-the-badge)](https://www.npmjs.com/package/@databases/sql) | [https://www.atdatabases.org/docs/sql](https://www.atdatabases.org/docs/sql)
 @databases/sqlite | [![NPM version](https://img.shields.io/npm/v/@databases/sqlite?style=for-the-badge)](https://www.npmjs.com/package/@databases/sqlite) | [https://www.atdatabases.org/docs/sqlite](https://www.atdatabases.org/docs/sqlite)
+@databases/sqlite-sync | [![NPM version](https://img.shields.io/npm/v/@databases/sqlite-sync?style=for-the-badge)](https://www.npmjs.com/package/@databases/sqlite-sync) | [https://www.atdatabases.org/docs/sqlite-sync](https://www.atdatabases.org/docs/sqlite-sync)
 @databases/validate-unicode | [![NPM version](https://img.shields.io/npm/v/@databases/validate-unicode?style=for-the-badge)](https://www.npmjs.com/package/@databases/validate-unicode) | [https://www.atdatabases.org/docs/validate-unicode](https://www.atdatabases.org/docs/validate-unicode)
 @databases/websql | [![NPM version](https://img.shields.io/npm/v/@databases/websql?style=for-the-badge)](https://www.npmjs.com/package/@databases/websql) | [https://www.atdatabases.org/docs/websql](https://www.atdatabases.org/docs/websql)
 @databases/migrations-base | [![NPM version](https://img.shields.io/npm/v/@databases/migrations-base?style=for-the-badge)](https://www.npmjs.com/package/@databases/migrations-base) | Not documented yet
@@ -62,7 +63,6 @@ Package Name | Version | Docs
 @databases/mysql-schema-cli | [![NPM version](https://img.shields.io/npm/v/@databases/mysql-schema-cli?style=for-the-badge)](https://www.npmjs.com/package/@databases/mysql-schema-cli) | Not documented yet
 @databases/mysql-schema-introspect | [![NPM version](https://img.shields.io/npm/v/@databases/mysql-schema-introspect?style=for-the-badge)](https://www.npmjs.com/package/@databases/mysql-schema-introspect) | Not documented yet
 @databases/mysql-schema-print-types | [![NPM version](https://img.shields.io/npm/v/@databases/mysql-schema-print-types?style=for-the-badge)](https://www.npmjs.com/package/@databases/mysql-schema-print-types) | Not documented yet
-@databases/node_modules | [![NPM version](https://img.shields.io/npm/v/@databases/node_modules?style=for-the-badge)](https://www.npmjs.com/package/@databases/node_modules) | Not documented yet
 @databases/pg-config | [![NPM version](https://img.shields.io/npm/v/@databases/pg-config?style=for-the-badge)](https://www.npmjs.com/package/@databases/pg-config) | Not documented yet
 @databases/pg-connection-string | [![NPM version](https://img.shields.io/npm/v/@databases/pg-connection-string?style=for-the-badge)](https://www.npmjs.com/package/@databases/pg-connection-string) | Not documented yet
 @databases/pg-create | [![NPM version](https://img.shields.io/npm/v/@databases/pg-create?style=for-the-badge)](https://www.npmjs.com/package/@databases/pg-create) | Not documented yet
@@ -74,7 +74,6 @@ Package Name | Version | Docs
 @databases/push-to-async-iterable | [![NPM version](https://img.shields.io/npm/v/@databases/push-to-async-iterable?style=for-the-badge)](https://www.npmjs.com/package/@databases/push-to-async-iterable) | Not documented yet
 @databases/shared | [![NPM version](https://img.shields.io/npm/v/@databases/shared?style=for-the-badge)](https://www.npmjs.com/package/@databases/shared) | Not documented yet
 @databases/shared-print-types | [![NPM version](https://img.shields.io/npm/v/@databases/shared-print-types?style=for-the-badge)](https://www.npmjs.com/package/@databases/shared-print-types) | Not documented yet
-@databases/sqlite-sync | [![NPM version](https://img.shields.io/npm/v/@databases/sqlite-sync?style=for-the-badge)](https://www.npmjs.com/package/@databases/sqlite-sync) | Not documented yet
 @databases/websql-core | [![NPM version](https://img.shields.io/npm/v/@databases/websql-core?style=for-the-badge)](https://www.npmjs.com/package/@databases/websql-core) | Not documented yet
 @databases/with-container | [![NPM version](https://img.shields.io/npm/v/@databases/with-container?style=for-the-badge)](https://www.npmjs.com/package/@databases/with-container) | Not documented yet
 <!-- VERSION_TABLE -->

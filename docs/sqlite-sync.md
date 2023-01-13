@@ -1,7 +1,7 @@
 ---
-id: sqlite
+id: sqlite-sync
 title: SQLite Sync
-sidebar_label: API
+sidebar_label: Synchronous API
 ---
 
 The `@databases/sqlite-sync` library provides a _synchronous_, safe and convenient API
@@ -29,7 +29,7 @@ const {sql} = require('@databases/sqlite-sync');
 
 const db = connect();
 
-console.log(db.query(sql`SELECT * FROM users;`))
+console.log(db.query(sql`SELECT * FROM users;`));
 ```
 
 > For details on how to build queries, see [Building SQL Queries](sql.md)
@@ -43,24 +43,26 @@ Create a database connection for a given database. You should only create one co
 In memory:
 
 ```ts
-import connect from '@databases/sqlite';
+import connect from '@databases/sqlite-sync';
+
 const db = connect();
 ```
 
 File system:
 
 ```ts
-import connect from '@databases/sqlite';
+import connect from '@databases/sqlite-sync';
+
 const db = connect(FILE_NAME);
 ```
 
 The `Database` inherits from `DatabaseTransaction`, so you call `Database.query` directly instead of having to create a transaction for every query.
 
-### `Connection.query(SQLQuery): any[]`
+### `DatabaseConnection.query(SQLQuery): any[]`
 
 Run an SQL Query and get a promise for an array of results.
 
-### `Connection.queryStream(SQLQuery): Iterable<any>`
+### `DatabaseConnection.queryStream(SQLQuery): Iterable<any>`
 
 Run an SQL Query and get an iterable of the results. e.g.
 
@@ -70,9 +72,9 @@ for (const record of db.queryStream(sql`SELECT * FROM massive_table`)) {
 }
 ```
 
-### `Connection.tx(fn): T`
+### `DatabaseConnection.tx(fn): T`
 
-Executes a callback function as a transaction, with automatically managed connection.
+Executes a callback function as a transaction.
 
 A transaction wraps the queries executed by the callback with additional queries:
 
@@ -89,6 +91,6 @@ const result = db.tx((transaction) => {
 // => 4
 ```
 
-### `ConnectionPool.dispose(): Promise<void>`
+### `DatabaseConnection.dispose(): void`
 
 Dispose the connection pool. Once this is called, any subsequent queries will fail.
