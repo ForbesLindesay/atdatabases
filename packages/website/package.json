@@ -25,7 +25,7 @@
     "mdast-util-from-markdown": "^0.8.5",
     "mdast-util-gfm-table": "^0.1.6",
     "micromark-extension-gfm-table": "^0.4.3",
-    "next": "10.0.9",
+    "next": "12.1.0",
     "react": "17.0.1",
     "react-ace": "^9.4.0",
     "react-dom": "17.0.1"
