@@ -32,7 +32,10 @@ To generate the types, you will need your database connection string from [Insta
 You can then generate types by running:
 
 ```npm
-npx @databases/mysql-schema-cli --database mysql://test-user:password@localhost:3306/test-db --directory src/__generated__
+npx @databases/mysql-schema-cli \
+  --database mysql://test-user:password@localhost:3306/ \
+  --schemaName test-db \
+  --directory src/__generated__
 ```
 
 You will need to replace the connection string in this example with your actual connection string.
