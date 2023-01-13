@@ -113,11 +113,11 @@ function runQuery(query: SQLQuery | SQLQuery[], database: Database) {
   }
   return runOneQuery(lastQuery, database);
 }
-function runOneQuery(query: SQLQuery, database: Database) {
+function runOneQuery(query: SQLQuery, database: Database): any[] {
   const {text, values} = query.format(sqliteFormat);
   const stm = database.prepare(text);
   try {
-    return stm.all(...values) as any[];
+    return stm.all(...values);
   } catch (_err) {
     const err = _err as Error;
     // TODO we should be able to catch this before calling all()
