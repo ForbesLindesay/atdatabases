@@ -248,14 +248,13 @@ function getExport(mod: any, filename: string) {
 }
 
 async function getPgVersion(connection: Queryable): Promise<[number, number]> {
-  // e.g. PostgreSQL 10.1 on x86_64-apple-darwin16.7.0, compiled by Apple LLVM version 9.0.0 (clang-900.0.38), 64-bit
-  const [{version: sqlVersionString}] = await connection.query(
-    connection.sql`SELECT version();`,
+  // server_version -> 10.6.0
+  const [{server_version: sqlVersionString}] = await connection.query(
+    connection.sql`SHOW server_version;`,
   );
-  const match = /PostgreSQL (\d+).(\d+)/.exec(sqlVersionString);
-  if (match) {
-    const [, major, minor] = match;
-    return [parseInt(major, 10), parseInt(minor, 10)];
+  const versions = sqlVersionString.split('.');
+  if (versions.length > 1) {
+    return [parseInt(versions[0], 10), parseInt(versions[1], 10)];
   }
   return [0, 0];
 }
