@@ -11,6 +11,7 @@ import {
   txInternal,
 } from './utils';
 import {Lock, createLock} from '@databases/lock';
+import IdleConnectionTracker from './types/IdleConnectionTracker';
 
 type TransactionOptions<TDriver extends Driver<any, any>> =
   TDriver extends Driver<infer TTransactionOptions, any>
@@ -40,13 +41,19 @@ export default class BaseConnection<
 
   protected readonly _driver: TDriver;
   private readonly _factories: TransactionFactory<TDriver, TTransaction>;
+  private readonly _idleConnectionTracker: IdleConnectionTracker | undefined;
   constructor(
     driver: TDriver,
     factories: TransactionFactory<TDriver, TTransaction>,
+    idleConnectionTracker?: IdleConnectionTracker,
   ) {
     this._driver = driver;
     this._factories = factories;
     this._lock = createLock(driver.acquireLockTimeoutMilliseconds);
+    this._idleConnectionTracker = idleConnectionTracker;
+    if (this._idleConnectionTracker) {
+      this._idleConnectionTracker.markIdle();
+    }
   }
 
   async task<T>(fn: (connection: this) => Promise<T>): Promise<T> {
@@ -60,6 +67,9 @@ export default class BaseConnection<
   ): Promise<TResult> {
     this._throwIfDisposed();
     const postCommitSteps: (() => Promise<void>)[] = [];
+    if (this._idleConnectionTracker) {
+      this._idleConnectionTracker.markInUse();
+    }
     await this._lock.acquireLock();
     let result: TResult;
     try {
@@ -74,6 +84,9 @@ export default class BaseConnection<
       );
     } finally {
       this._lock.releaseLock();
+      if (this._idleConnectionTracker) {
+        this._idleConnectionTracker.markIdle();
+      }
     }
     for (const step of postCommitSteps) {
       await step();
@@ -88,13 +101,22 @@ export default class BaseConnection<
     this._throwIfDisposed();
     if (Array.isArray(query)) {
       if (query.length === 0) return [];
+      if (this._idleConnectionTracker) {
+        this._idleConnectionTracker.markInUse();
+      }
       await this._lock.acquireLock();
       try {
         return await queryInternal(this._driver, query, executeAndReturnAll);
       } finally {
         this._lock.releaseLock();
+        if (this._idleConnectionTracker) {
+          this._idleConnectionTracker.markIdle();
+        }
       }
     } else {
+      if (this._idleConnectionTracker) {
+        this._idleConnectionTracker.markInUse();
+      }
       await this._lock.acquireLock();
       try {
         return await queryInternal(
@@ -104,6 +126,9 @@ export default class BaseConnection<
         );
       } finally {
         this._lock.releaseLock();
+        if (this._idleConnectionTracker) {
+          this._idleConnectionTracker.markIdle();
+        }
       }
     }
   }
@@ -118,6 +143,9 @@ export default class BaseConnection<
   ): AsyncGenerator<any, void, unknown> {
     assertSql(query);
     this._throwIfDisposed();
+    if (this._idleConnectionTracker) {
+      this._idleConnectionTracker.markInUse();
+    }
     await this._lock.acquireLock();
     try {
       for await (const record of this._driver.queryStream(query, options)) {
@@ -125,10 +153,16 @@ export default class BaseConnection<
       }
     } finally {
       this._lock.releaseLock();
+      if (this._idleConnectionTracker) {
+        this._idleConnectionTracker.markIdle();
+      }
     }
   }
 
   async dispose() {
+    if (this._idleConnectionTracker) {
+      this._idleConnectionTracker.markInUse();
+    }
     return this._disposed || (this._disposed = this._lock.pool());
   }
 }

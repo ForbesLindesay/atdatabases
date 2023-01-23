@@ -1,4 +1,9 @@
-import {BaseConnectionPool, Factory, PoolOptions} from '@databases/shared';
+import {
+  BaseConnectionPool,
+  Factory,
+  PoolOptions,
+  IdleConnectionTracker,
+} from '@databases/shared';
 import sql, {SQLQuery} from '@databases/sql';
 import {escapePostgresIdentifier} from '@databases/escape-identifier';
 import Connection from './Connection';
@@ -16,15 +21,6 @@ import PgDriver from './Driver';
 import createConnectionSource, {PgOptions} from './ConnectionSource';
 import definePrecondition from './definePrecondition';
 import {SQLErrorCode} from '@databases/pg-errors';
-
-const factories: Factory<PgDriver, Connection, Transaction> = {
-  createTransaction(driver, transactionParentContext) {
-    return new Transaction(driver, factories, transactionParentContext);
-  },
-  createConnection(driver) {
-    return new Connection(driver, factories);
-  },
-};
 
 const getConnectionPoolOptions = (
   srcConfig: PgOptions,
@@ -122,6 +118,8 @@ export default class ConnectionPool
       schema,
       handlers: {onError, ...handlers},
       acquireLockTimeoutMilliseconds,
+      connectionIdleTimeoutMilliseconds,
+      onConnectionIdleTimeout,
     }: {
       poolOptions?: Omit<
         PoolOptions<PgDriver>,
@@ -132,8 +130,47 @@ export default class ConnectionPool
         onError: (err: Error) => void;
       };
       acquireLockTimeoutMilliseconds: number;
+
+      connectionIdleTimeoutMilliseconds?: number;
+      onConnectionIdleTimeout?: () => void;
     },
   ) {
+    const getIdleTracker = (): undefined | IdleConnectionTracker => {
+      if (!onConnectionIdleTimeout) return undefined;
+      let inUseCount = 0;
+      let timeout: NodeJS.Timeout | undefined;
+      return {
+        markIdle() {
+          inUseCount--;
+          if (inUseCount === 0) {
+            timeout = setTimeout(
+              onConnectionIdleTimeout,
+              connectionIdleTimeoutMilliseconds ?? 100,
+            );
+          }
+        },
+        markInUse() {
+          inUseCount++;
+          if (timeout) {
+            clearTimeout(timeout);
+            timeout = undefined;
+          }
+        },
+      };
+    };
+    const factories: Factory<PgDriver, Connection, Transaction> = {
+      createTransaction(driver, transactionParentContext) {
+        return new Transaction(
+          driver,
+          factories,
+          transactionParentContext,
+          getIdleTracker(),
+        );
+      },
+      createConnection(driver) {
+        return new Connection(driver, factories, getIdleTracker());
+      },
+    };
     super(
       getConnectionPoolOptions(
         options,

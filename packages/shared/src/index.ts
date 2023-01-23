@@ -11,8 +11,9 @@ import QueryableType from './QueryableType';
 import BaseTransaction from './BaseTransaction';
 import BaseConnection from './BaseConnection';
 import BaseConnectionPool, {PoolOptions} from './BaseConnectionPool';
+import IdleConnectionTracker from './types/IdleConnectionTracker';
 
-export type {Lock};
+export type {Lock, IdleConnectionTracker};
 
 export type {SQLQuery, PoolOptions};
 

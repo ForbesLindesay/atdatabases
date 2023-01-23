@@ -10,6 +10,7 @@ import Driver from './Driver';
 import QueryableType from './QueryableType';
 import {Lock, createLock} from '@databases/lock';
 import {assertSql} from './utils';
+import IdleConnectionTracker from './types/IdleConnectionTracker';
 
 type QueryStreamOptions<TDriver extends Driver<any, any>> =
   TDriver extends Driver<any, infer TQueryStreamOptions>
@@ -36,15 +37,21 @@ export default class BaseTransaction<
   protected readonly _driver: TDriver;
   private readonly _factories: TransactionFactory<TDriver, TTransaction>;
   private readonly _parentContext: TransactionParentContext;
+  private readonly _idleConnectionTracker: IdleConnectionTracker | undefined;
   constructor(
     driver: TDriver,
     factories: TransactionFactory<TDriver, TTransaction>,
     parentContext: TransactionParentContext,
+    idleConnectionTracker?: IdleConnectionTracker,
   ) {
     this._driver = driver;
     this._factories = factories;
     this._lock = createLock(driver.acquireLockTimeoutMilliseconds);
     this._parentContext = parentContext;
+    this._idleConnectionTracker = idleConnectionTracker;
+    if (this._idleConnectionTracker) {
+      this._idleConnectionTracker.markIdle();
+    }
   }
 
   async task<T>(fn: (connection: this) => Promise<T>): Promise<T> {
@@ -53,6 +60,9 @@ export default class BaseTransaction<
   }
   async tx<T>(fn: (connection: TTransaction) => Promise<T>): Promise<T> {
     this._throwIfDisposed();
+    if (this._idleConnectionTracker) {
+      this._idleConnectionTracker.markInUse();
+    }
     await this._lock.acquireLock();
     try {
       const savepointName = cuid();
@@ -73,6 +83,9 @@ export default class BaseTransaction<
       }
     } finally {
       this._lock.releaseLock();
+      if (this._idleConnectionTracker) {
+        this._idleConnectionTracker.markIdle();
+      }
     }
   }
 
@@ -81,6 +94,9 @@ export default class BaseTransaction<
   async query(query: SQLQuery | SQLQuery[]): Promise<any[]> {
     assertSql(query);
     this._throwIfDisposed();
+    if (this._idleConnectionTracker) {
+      this._idleConnectionTracker.markInUse();
+    }
     await this._lock.acquireLock();
     try {
       if (Array.isArray(query)) {
@@ -91,6 +107,9 @@ export default class BaseTransaction<
       }
     } finally {
       this._lock.releaseLock();
+      if (this._idleConnectionTracker) {
+        this._idleConnectionTracker.markIdle();
+      }
     }
   }
 
@@ -104,6 +123,9 @@ export default class BaseTransaction<
   ): AsyncGenerator<any, void, unknown> {
     assertSql(query);
     this._throwIfDisposed();
+    if (this._idleConnectionTracker) {
+      this._idleConnectionTracker.markInUse();
+    }
     await this._lock.acquireLock();
     try {
       for await (const record of this._driver.queryStream(query, options)) {
@@ -111,10 +133,16 @@ export default class BaseTransaction<
       }
     } finally {
       this._lock.releaseLock();
+      if (this._idleConnectionTracker) {
+        this._idleConnectionTracker.markIdle();
+      }
     }
   }
 
   async dispose() {
+    if (this._idleConnectionTracker) {
+      this._idleConnectionTracker.markInUse();
+    }
     return this._disposed || (this._disposed = this._lock.pool());
   }
 }

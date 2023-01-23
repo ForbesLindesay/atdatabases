@@ -196,6 +196,20 @@ export interface ConnectionPoolConfig extends ClientConfig, EventHandlers {
    */
   acquireLockTimeoutMilliseconds?: number;
 
+  /**
+   * Time in milliseconds that a connection can be idle while
+   * not being released to the pool before onConnectionAcquiredButIdleTimeout
+   * is called.
+   *
+   * Defaults to 100ms if onConnectionAcquiredButIdleTimeout is specified
+   */
+  connectionAcquiredButIdleTimeoutMilliseconds?: number;
+  /**
+   * Function to call when a connection is held without running any
+   * queries for longer than connectionAcquiredButIdleTimeoutMilliseconds.
+   */
+  onConnectionAcquiredButIdleTimeout?: () => void;
+
   onError?: (err: Error) => void;
 }
 
