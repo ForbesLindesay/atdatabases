@@ -1,4 +1,6 @@
-import {sql, SQLQuery, Queryable} from '@databases/mysql';
+import {sql, SQLQuery, Queryable as FullQueryable} from '@databases/mysql';
+
+export type Queryable = Pick<FullQueryable, 'sql' | 'query'>;
 
 export interface SelectQuery<TRecord> {
   all(): Promise<TRecord[]>;

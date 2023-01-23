@@ -1,5 +1,5 @@
 import assertNever from 'assert-never';
-import {SQLQuery, Queryable} from '@databases/pg';
+import {SQLQuery, Queryable as FullQueryable} from '@databases/pg';
 import {
   bulkUpdate,
   bulkDelete,
@@ -7,6 +7,8 @@ import {
   bulkCondition,
   bulkInsertStatement,
 } from '@databases/pg-bulk';
+
+export type Queryable = Pick<FullQueryable, 'query' | 'sql'>;
 
 const NO_RESULT_FOUND = `NO_RESULT_FOUND`;
 const MULTIPLE_RESULTS_FOUND = `MULTIPLE_RESULTS_FOUND`;

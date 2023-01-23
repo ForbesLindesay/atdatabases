@@ -2,7 +2,7 @@ import {SQLQuery, Queryable} from '@databases/pg';
 
 type ColumnName = string | number | symbol;
 export interface BulkOperationOptions<TColumnName extends ColumnName> {
-  readonly database: Queryable;
+  readonly database: Pick<Queryable, 'query' | 'sql'>;
   readonly tableName: string;
   readonly columnTypes: {readonly [K in TColumnName]: SQLQuery};
   readonly schemaName?: string;
