@@ -36,6 +36,7 @@ Each database driver is published to npm as a separate module, so you don't need
 Package Name | Version | Docs
 -------------|---------|------
 @databases/bigquery | [![NPM version](https://img.shields.io/npm/v/@databases/bigquery?style=for-the-badge)](https://www.npmjs.com/package/@databases/bigquery) | [https://www.atdatabases.org/docs/bigquery](https://www.atdatabases.org/docs/bigquery)
+@databases/cache | [![NPM version](https://img.shields.io/npm/v/@databases/cache?style=for-the-badge)](https://www.npmjs.com/package/@databases/cache) | [https://www.atdatabases.org/docs/cache](https://www.atdatabases.org/docs/cache)
 @databases/connection-pool | [![NPM version](https://img.shields.io/npm/v/@databases/connection-pool?style=for-the-badge)](https://www.npmjs.com/package/@databases/connection-pool) | [https://www.atdatabases.org/docs/connection-pool](https://www.atdatabases.org/docs/connection-pool)
 @databases/escape-identifier | [![NPM version](https://img.shields.io/npm/v/@databases/escape-identifier?style=for-the-badge)](https://www.npmjs.com/package/@databases/escape-identifier) | [https://www.atdatabases.org/docs/escape-identifier](https://www.atdatabases.org/docs/escape-identifier)
 @databases/expo | [![NPM version](https://img.shields.io/npm/v/@databases/expo?style=for-the-badge)](https://www.npmjs.com/package/@databases/expo) | [https://www.atdatabases.org/docs/websql](https://www.atdatabases.org/docs/websql)

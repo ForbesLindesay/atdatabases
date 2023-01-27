@@ -86,6 +86,7 @@
       "bigquery-dataset"
     ],
     "Utilities": [
+      "cache",
       "connection-pool",
       "escape-identifier",
       "lock",
