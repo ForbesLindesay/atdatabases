@@ -89,6 +89,7 @@ function getType(
         case 'await':
         case 'from':
         case 'require':
+        case 'interface':
           return CodeTokenType.Keyword;
         default:
           return CodeTokenType.Identifier;
@@ -479,85 +480,90 @@ const syntaxHighlight = ({
   }, ``);
   const language = getLanguage(rawLanguage);
   if (language === `typescript` || language === `javascript`) {
-    const tokens = parse(code, {
-      allowImportExportEverywhere: true,
-      allowAwaitOutsideFunction: true,
-      allowReturnOutsideFunction: true,
-      allowSuperOutsideMethod: true,
-      allowUndeclaredExports: true,
-      plugins: [
-        `asyncGenerators`,
-        `bigInt`,
-        `classPrivateMethods`,
-        `classPrivateProperties`,
-        `classProperties`,
-        `classStaticBlock`,
-        `dynamicImport`,
-        `exportDefaultFrom`,
-        `exportNamespaceFrom`,
-        `jsx`,
-        `topLevelAwait`,
-        ...(language === `typescript` ? ([`typescript`] as const) : []),
-      ],
-      sourceType: 'module',
-      tokens: true,
-    }).tokens!.reverse();
-    let i = 0;
-    const result: {type: CodeTokenType; value: string}[] = [];
-    let sqlState = SqlState.None;
-    let previousToken: any;
-    while (i < code.length) {
-      const token = tokens.pop();
-      if (!token) {
-        const value = code.substring(i);
-        result.push({type: getType(token, value, previousToken), value});
-        break;
-      } else {
-        if (i < token.start) {
-          result.push({
-            type: CodeTokenType.Text,
-            value: code.substring(i, token.start),
-          });
-          i = token.start;
-        }
-        if (i < token.end) {
-          const value = code.substring(Math.max(i, token.start), token.end);
-          if (
-            token.type.label === 'template' &&
-            sqlState === SqlState.Template
-          ) {
-            result.push(...highlightSQL(value));
-            i = token.end;
-          } else {
+    try {
+      const tokens = parse(code, {
+        allowImportExportEverywhere: true,
+        allowAwaitOutsideFunction: true,
+        allowReturnOutsideFunction: true,
+        allowSuperOutsideMethod: true,
+        allowUndeclaredExports: true,
+        plugins: [
+          `asyncGenerators`,
+          `bigInt`,
+          `classPrivateMethods`,
+          `classPrivateProperties`,
+          `classProperties`,
+          `classStaticBlock`,
+          `dynamicImport`,
+          `exportDefaultFrom`,
+          `exportNamespaceFrom`,
+          `jsx`,
+          `topLevelAwait`,
+          ...(language === `typescript` ? ([`typescript`] as const) : []),
+        ],
+        sourceType: 'module',
+        tokens: true,
+      }).tokens!.reverse();
+      let i = 0;
+      const result: {type: CodeTokenType; value: string}[] = [];
+      let sqlState = SqlState.None;
+      let previousToken: any;
+      while (i < code.length) {
+        const token = tokens.pop();
+        if (!token) {
+          const value = code.substring(i);
+          result.push({type: getType(token, value, previousToken), value});
+          break;
+        } else {
+          if (i < token.start) {
             result.push({
-              type: getType(token, value, previousToken),
-              value,
+              type: CodeTokenType.Text,
+              value: code.substring(i, token.start),
             });
-            i = token.end;
+            i = token.start;
           }
-          if (token.type.label === 'name' && value === 'sql') {
-            sqlState = SqlState.Keyword;
-          } else if (
-            token.type.label === '`' &&
-            sqlState === SqlState.Keyword
-          ) {
-            sqlState = SqlState.Template;
-          } else if (
-            token.type.label === '`' &&
-            sqlState === SqlState.Template
-          ) {
-            sqlState = SqlState.None;
-          } else if (sqlState === SqlState.Keyword) {
-            sqlState = SqlState.None;
+          if (i < token.end) {
+            const value = code.substring(Math.max(i, token.start), token.end);
+            if (
+              token.type.label === 'template' &&
+              sqlState === SqlState.Template
+            ) {
+              result.push(...highlightSQL(value));
+              i = token.end;
+            } else {
+              result.push({
+                type: getType(token, value, previousToken),
+                value,
+              });
+              i = token.end;
+            }
+            if (token.type.label === 'name' && value === 'sql') {
+              sqlState = SqlState.Keyword;
+            } else if (
+              token.type.label === '`' &&
+              sqlState === SqlState.Keyword
+            ) {
+              sqlState = SqlState.Template;
+            } else if (
+              token.type.label === '`' &&
+              sqlState === SqlState.Template
+            ) {
+              sqlState = SqlState.None;
+            } else if (sqlState === SqlState.Keyword) {
+              sqlState = SqlState.None;
+            }
           }
         }
+        previousToken = token;
       }
-      previousToken = token;
+      return {
+        lang: language,
+        code: highlightResult(simplifyResult(result), highlights),
+      };
+    } catch (ex: any) {
+      ex.message += code.split(`\n`).filter(Boolean)[0];
+      throw ex;
     }
-    return {
-      lang: language,
-      code: highlightResult(simplifyResult(result), highlights),
-    };
   }
   if (language === `yarn` || language === `npm`) {
     return {
