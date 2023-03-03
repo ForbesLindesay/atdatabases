@@ -79,6 +79,7 @@ function getType(
     case 'try':
     case 'catch':
     case 'finally':
+    case 'extends':
       return CodeTokenType.Keyword;
     case 'name':
       if (previousToken?.type.label === '.') {

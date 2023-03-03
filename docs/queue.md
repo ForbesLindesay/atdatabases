@@ -1,7 +1,7 @@
 ---
 id: queue
 title: '@databases/queue'
-sidebar_label: queue
+sidebar_label: Queue
 ---
 
 The `@databases/queue` package provides a high speed queue, and a special "async" queue. Using a JavaScript Array as a Queue is very inefficient because each time you remove an item from the start of an Array, JavaScript must re-index every item in the array.

@@ -1,7 +1,7 @@
 ---
 id: lock
 title: '@databases/lock'
-sidebar_label: lock
+sidebar_label: Lock
 ---
 
 The `@databases/lock` package allows you to create efficient locks around async operations in TypeScript / JavaScript. This is used in @databases to ensure that only one operation is running on a connection at any given time.

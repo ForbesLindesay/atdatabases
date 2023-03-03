@@ -1,7 +1,7 @@
 ---
 id: escape-identifier
 title: '@databases/escape-identifier'
-sidebar_label: escape-identifier
+sidebar_label: Escape Identifier
 ---
 
 The `@databases/escape-identifier` package escapes identifiers for use in SQL strings. Pass `{extended: true}` to enable unicode support. By default, identifiers are restricted to ASCII chracters

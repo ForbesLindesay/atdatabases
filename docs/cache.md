@@ -1,7 +1,7 @@
 ---
 id: cache
 title: '@databases/cache'
-sidebar_label: cache
+sidebar_label: Cache
 ---
 
 The `@databases/cache` package is an in-memory, least recently used (LRU) cache for JavaScript/TypeScript. It allows you to store data retrieved from your database in memory and automatically evict/discard the least recently used keys from the cache once there is not enough memory to store more items.
