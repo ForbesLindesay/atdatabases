@@ -267,7 +267,7 @@ import database from './database';
 // Does not detect conflicts if two Ids are generated at the same time by separate processes
 function getIdGenerator(tableName: SQLQuery, columnName: SQLQuery) {
   // For a proposed set of IDs, get a set of the IDs that are already in use
-  const getConflictingIds = (ids: number[]): Promise<Set<number>> => {
+  const getConflictingIds = async (ids: number[]): Promise<Set<number>> => {
     return new Set<number>(
       await database
         .query(
