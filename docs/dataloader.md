@@ -10,7 +10,7 @@ The `@databases/dataloader` package contains utilities for batching and deduplic
 
 ### Batch
 
-Batching is a great way to avoid "the n+1 problem" which is common in GraphQL where you end up needing to make 101 queries to the database when loading a list of 100 items due to having 1 query to get the list of items, and another per item to get some sub-item for each item.
+Batching is a great way to avoid "the n+1 problem" which is common in GraphQL where you end up needing to make 101 queries to the database when loading a list of 100 items due to having 1 query to get the list of items, and another per item to get some sub-item for each item. By default it does not cache/deduplicate requests, but does optimize resource usage on the database.
 
 #### Batch primary keys
 
@@ -255,6 +255,70 @@ SELECT * FROM blog_posts WHERE is_published=TRUE AND author_id=ANY(${[1, 2, 3]})
 SELECT * FROM blog_posts WHERE id_published=FALSE AND author_id=4;
 ```
 
+#### Batching Random ID Generation
+
+```typescript
+import {randomBytes} from 'crypto';
+import {SQLQuery} from '@database/sql';
+import {batch} from '@databases/dataloader';
+import database from './database';
+
+// Assumes columnName is an INT column in tableName.
+// Does not detect conflicts if two Ids are generated at the same time by separate processes
+function getIdGenerator(tableName: SQLQuery, columnName: SQLQuery) {
+  // For a proposed set of IDs, get a set of the IDs that are already in use
+  const getConflictingIds = (ids: number[]): Promise<Set<number>> => {
+    return new Set<number>(
+      await database
+        .query(
+          sql`SELECT ${columName} AS id FROM ${tableName} WHERE ${columnName} = ANY(${ids})`,
+        )
+        .map((r: any) => r.id),
+    );
+  };
+
+  // Get the requested number of positive INT32s
+  const getRandomIntegers = (count: number): number[] => {
+    const buffer = randomBytes(count * 4);
+    const result = [];
+    for (let i = 0; i < count; i++) {
+      result.push(Math.abs(buffer.readInt32BE(i * 4)));
+    }
+    if (new Set(result).size !== count) {
+      // In the unlikely case that multiple IDs in the same batch conflict, just try again from scratch
+      return getRandomIntegers(count);
+    }
+    return result;
+  };
+
+  const generateId = batch<undefined, number>(async (requests) => {
+    // Generate a random ID for each request
+    let ids = getRandomIntegers(requests.length);
+
+    // Check for conflicts with existing IDs
+    let existingIds = await getConflictingIds(ids);
+
+    while (existingIds.size) {
+      // Generate new IDs for any records that conflict with existing records
+      const newRandomIds = getRandomIntegers(existingIds.size);
+      let i = 0;
+      ids = ids.map((id) =>
+        existingIds.has(id) ? newRandomIntegers[i++] : id,
+      );
+
+      existingIds = await getConflictingIds(ids);
+    }
+
+    // Return the generated random IDs, which are guaranteed not to conflict with existing records
+    return ids;
+  });
+
+  return async (): Promise<number> => await generateId(undefined);
+}
+
+export const generateUserId = getIdGenerator(sql`users`, sql`id`);
+```
+
 ### Dedupe
 
 Deduplicating can help when you have some data that is requested very frequently. You can deduplicate within a single request, meaning you would probably not need to worry about clearing your caches at all. You can also deduplicate across requests using a [Least Recently Used Cache](cache.md).
@@ -301,14 +365,14 @@ const getUser = dedupeSync<[number, number], number>(
 );
 ```
 
-### Leveled Cache
+### Namespaced Cache
 
 #### Caching within a request
 
 One of the challenges of caches is knowing how/when to reset them. A GraphQL call can often request the same data many times. This means that if you can't deal with the complexities of clearing caches when data is updated, you can still potentially benefit from deduplicating calls within a single request.
 
 ```typescript
-import {dedupeAsync, createLeveledCache} from '@databases/dataloader';
+import {dedupeAsync, createNamespacedCache} from '@databases/dataloader';
 import database, {tables, DbUser} from './database';
 
 // ([resolverContext, userId]: [ResolverContext, DbUser['id']]) => Promise<DbUser>
@@ -317,8 +381,10 @@ const getUser = dedupeAsync<[ResolverContext, DbUser['id']], DbUser>(
     return await tables.users(database).findOneRequired({id: userId});
   },
   {
-    cache: createLeveledCache<ResolverContext>({getCache: () => new WeakMap()})
-      .addLevel<DbUser['id']>()
+    cache: createNamespacedCache<ResolverContext>({
+      getCache: <T>() => new WeakMap<ResolverContext, T>(),
+    })
+      .addNamespace<DbUser['id']>()
       .build<DbUser>(),
   },
 );
@@ -332,13 +398,16 @@ The first level of our cache uses a `WeakMap` with the `ResolverContext` as the 
 
 The batch function is used to batch requests to a load function. The load function is called with an array of keys and must return a promise that resolves to a `BatchResponse`.
 
-The `BatchResponse` can be either a function that takes a key and returns a result, or an object with a `get` method that takes a key and returns a result (such as a Map).
+The `BatchResponse` can be either:
+
+- a function that takes a key and index and returns a result
+- an object with a `get` method that takes a key and returns a result (such as a Map).
+- an array of the same length and in the same order as the keys passed into the function.
 
 #### BatchOptions
 
 - `maxBatchSize` - The maximum number of keys to include in a single batch. If this number of keys is reached, the function is called immediately and subsequent requests sill result in a new batch.
 - `batchScheduleFn` - A function to be called before each batch is executed (unless `maxBatchSize` is reached). `batch` will wait for the promise returned by `batchScheduleFn` to be resolved before it sends the request. By default, this waits until any currently resolved promises have been processed, which works well for batching calls that are run as part of a GraphQL request or in `Promise.all`. If you want to batch requests from a wider time range, you can return a function that is delayed for some time.
-- `mapKey` - The `batch` function deduplicates requests within a single batch. If you want to control how this deduplication happens, you can use `mapKey`. If you want to prevent this deduplication, you can use a `mapKey` function that always returns a different value. e.g. `mapKey: () => ({})`.
 
 ### batchGroups(fn, options)
 
@@ -352,36 +421,36 @@ The function passed in is called with the batch key, and an array of the keys wi
 
 - `maxBatchSize` - The maximum number of keys to include in a single batch. If this number of keys is reached, the function is called immediately and subsequent requests sill result in a new batch.
 - `batchScheduleFn` - A function to be called before each batch is executed (unless `maxBatchSize` is reached). `batch` will wait for the promise returned by `batchScheduleFn` to be resolved before it sends the request. By default, this waits until any currently resolved promises have been processed, which works well for batching calls that are run as part of a GraphQL request or in `Promise.all`. If you want to batch requests from a wider time range, you can return a function that is delayed for some time.
-- `mapKey` - The `batchGroups` function deduplicates requests within a single batch. If you want to control how this deduplication happens, you can use `mapKey`. If you want to prevent this deduplication, you can use a `mapKey` function that always returns a different value. e.g. `mapKey: () => ({})`.
 - `mapGroupKey` - If your group keys are objects, you can use `mapGroupKey` to convert them to a primitive value such as a `string` or `number`.
+- `groupMap` - Override the `Map` object used to store batches that are in-flight.
 
-### createLeveledCache(options)
+### createNamespacedCache(options)
 
-Creates a multi level cache builder. This can be used to cache composite keys, or to have caches tied to a given context. It returns a `LeveledCacheBuilder`. You must call `.build()` to create the actual cache.
+Creates a namespaced cache builder. This can be used to cache composite keys, or to have caches tied to a given context. It returns a `NamespacedCacheBuilder`. You must call `.build()` to create the actual cache.
 
-#### LeveledCacheBuilder.addLevel(options)
+#### NamespacedCacheBuilder.addNamespace(options)
 
-Adds a level to a leveled cache.
+Adds a level to a namespaced cache.
 
-#### LeveledCacheBuilder.build()
+#### NamespacedCacheBuilder.build()
 
-Creates the actual leveled cache. Returns a `LeveledCache`
+Creates the actual namespaced cache. Returns a `NamespacedCache`
 
-#### LeveledCache.get(keys)
+#### NamespacedCache.get(keys)
 
 Takes an array representing the key and returns the value, or `undefined` if the value is not in the cache.
 
-#### LeveledCache.set(keys, value)
+#### NamespacedCache.set(keys, value)
 
 Takes an array representing the key, and a value. The value will be stored at the path specified by the keys.
 
-#### LeveledCache.delete(keys)
+#### NamespacedCache.delete(keys)
 
-If you pass an array representing a full key. The value at that key will be removed from the LeveledCache.
+If you pass an array representing a full key. The value at that key will be removed from the NamespacedCache.
 
 If you pass a shorter array, all keys under that prefix will be removed.
 
-#### LeveledCache.clear()
+#### NamespacedCache.clear()
 
 Removes all keys from the cache.
 
@@ -441,12 +510,12 @@ function parametersArrayToSpread<TParameters extends unknown[], TResult>(
 }
 ```
 
-#### addFallbackForUndefined(fn, fallback)
+#### addFallbackForUndefinedSync(fn, fallback)
 
 Take a function that may return `undefined`, and return a new function that will call the fallback instead of returning `undefined`.
 
 ```typescript
-function addFallbackForUndefined<TParameters extends unknown[], TResult>(
+function addFallbackForUndefinedSync<TParameters extends unknown[], TResult>(
   fn: (...args: TParameters) => TResult | undefined,
   fallback: (...args: TParameters) => TResult,
 ): (...args: TParameters) => TResult {

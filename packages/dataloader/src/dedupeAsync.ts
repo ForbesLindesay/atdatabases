@@ -33,15 +33,9 @@ export type DedupeAsyncOptions<TKey, TResult, TMappedKey> =
  */
 export default function dedupeAsync<TKey, TResult, TMappedKey = TKey>(
   fn: (key: TKey) => Promise<TResult>,
-  options: DedupeAsyncOptions<TKey, TResult, TMappedKey> = {},
+  options?: DedupeAsyncOptions<TKey, TResult, TMappedKey>,
 ): DedupedAsyncFunction<TKey, TResult> {
-  // @ts-expect-error If not using mapKey, then TMappedKey is TKey
-  const cache: CacheMapInput<TMappedKey, Promise<TResult>> = options.cache ??
-  new Map();
-  // @ts-expect-error If not using mapKey, then TMappedKey is TKey
-  const mapKey: (key: TKey) => TMappedKey =
-    options.mapKey ?? ((key: TKey) => key);
-
+  const {cache, mapKey, shouldCache} = normalizeDedupeAsyncOptions(options);
   return Object.assign(
     (key: TKey): Promise<TResult> => {
       const cacheKey = mapKey(key);
@@ -49,7 +43,7 @@ export default function dedupeAsync<TKey, TResult, TMappedKey = TKey>(
       if (cached !== undefined) return cached;
       const fresh = fn(key).then(
         (result) => {
-          if (options.shouldCache && !options.shouldCache(result, key)) {
+          if (!shouldCache(result, key)) {
             cache.delete(cacheKey);
           }
           return result;
@@ -88,4 +82,21 @@ export default function dedupeAsync<TKey, TResult, TMappedKey = TKey>(
       },
     },
   );
+}
+
+interface NormalizedDedupeAsyncOptions<TKey, TResult, TMappedKey> {
+  cache: CacheMapInput<TMappedKey, Promise<TResult>>;
+  mapKey: (key: TKey) => TMappedKey;
+  shouldCache: (value: TResult, key: TKey) => boolean;
+}
+function normalizeDedupeAsyncOptions<TKey, TResult, TMappedKey>(
+  options?: DedupeAsyncOptions<TKey, TResult, TMappedKey>,
+): NormalizedDedupeAsyncOptions<TKey, TResult, TMappedKey> {
+  return {
+    // @ts-expect-error If not using mapKey, then TMappedKey is TKey
+    cache: options?.cache ?? new Map(),
+    // @ts-expect-error If not using mapKey, then TMappedKey is TKey
+    mapKey: options?.mapKey ?? ((key: TKey) => key),
+    shouldCache: options?.shouldCache ?? (() => true),
+  };
 }

@@ -23,27 +23,10 @@ export type DedupeSyncOptions<TKey, TResult, TMappedKey> =
 
 export default function dedupeSync<TKey, TResult, TMappedKey = TKey>(
   fn: (key: TKey) => TResult,
-  options: DedupeSyncOptions<TKey, TResult, TMappedKey> = {},
+  options?: DedupeSyncOptions<TKey, TResult, TMappedKey>,
 ): DedupedSyncFunction<TKey, TResult> {
-  // @ts-expect-error If not using mapKey, then TMappedKey is TKey
-  const cache: CacheMapInput<TMappedKey, TResult> = options.cache ?? new Map();
-  // @ts-expect-error If not using mapKey, then TMappedKey is TKey
-  const mapKey: (key: TKey) => TMappedKey =
-    options.mapKey ?? ((key: TKey) => key);
-
-  const onNewValue = (
-    key: TKey,
-    value: TResult,
-    mappedKey: TMappedKey,
-  ): void => {
-    if (!options.onNewValue) return;
-    try {
-      options.onNewValue(value, key);
-    } catch (error) {
-      cache.delete(mappedKey);
-      throw error;
-    }
-  };
+  const {cache, mapKey, shouldCache, onNewValue} =
+    normalizeDedupeSyncOptions(options);
   return Object.assign(
     (key: TKey): TResult => {
       const cacheKey = mapKey(key);
@@ -52,8 +35,13 @@ export default function dedupeSync<TKey, TResult, TMappedKey = TKey>(
       const fresh = fn(key);
       cache.set(cacheKey, fresh);
       if (fresh !== undefined) {
-        onNewValue(key, fresh, cacheKey);
-        if (options.shouldCache && !options.shouldCache(fresh, key)) {
+        try {
+          onNewValue(fresh, key);
+        } catch (error) {
+          cache.delete(cacheKey);
+          throw error;
+        }
+        if (!shouldCache(fresh, key)) {
           cache.delete(cacheKey);
         }
       }
@@ -85,4 +73,23 @@ export default function dedupeSync<TKey, TResult, TMappedKey = TKey>(
       },
     },
   );
+}
+
+interface NormalizedDedupeSyncOptions<TKey, TResult, TMappedKey> {
+  cache: CacheMapInput<TMappedKey, TResult>;
+  mapKey: (key: TKey) => TMappedKey;
+  shouldCache: (value: TResult, key: TKey) => boolean;
+  onNewValue: (value: TResult, key: TKey) => void;
+}
+function normalizeDedupeSyncOptions<TKey, TResult, TMappedKey>(
+  options?: DedupeSyncOptions<TKey, TResult, TMappedKey>,
+): NormalizedDedupeSyncOptions<TKey, TResult, TMappedKey> {
+  return {
+    // @ts-expect-error If not using mapKey, then TMappedKey is TKey
+    cache: options?.cache ?? new Map(),
+    // @ts-expect-error If not using mapKey, then TMappedKey is TKey
+    mapKey: options?.mapKey ?? ((key: TKey) => key),
+    shouldCache: options?.shouldCache ?? (() => true),
+    onNewValue: options?.onNewValue ?? (() => {}),
+  };
 }

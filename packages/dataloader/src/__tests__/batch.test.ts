@@ -1,5 +1,5 @@
 import batch, {batchGroups} from '../batch';
-import createLeveledCache from '../createLeveledCache';
+import createNamespacedCache from '../createNamespacedCache';
 import requestsTester from './requestsTester';
 
 test('batch', async () => {
@@ -319,7 +319,7 @@ test('batchGroups - dedupe with leveled cache', async () => {
         ]),
     );
   }).dedupe({
-    cache: createLeveledCache<number>().addLevel<string>().build(),
+    cache: createNamespacedCache<number>().addNamespace<string>().build(),
     shouldCache: (v) => v !== undefined,
   });
 
@@ -379,9 +379,9 @@ for (const [name, options] of [
   [
     `leveled cache`,
     {
-      groupMap: createLeveledCache<number>()
-        .addLevel<number>()
-        .addLevel<number>()
+      groupMap: createNamespacedCache<number>()
+        .addNamespace<number>()
+        .addNamespace<number>()
         .build<Promise<{source: string}>>(),
     },
   ],

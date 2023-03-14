@@ -10,7 +10,10 @@ export function parametersArrayToSpread<TParameters extends unknown[], TResult>(
   return (args) => fn(...args);
 }
 
-export function addFallbackForUndefined<TParameters extends unknown[], TResult>(
+export function addFallbackForUndefinedSync<
+  TParameters extends unknown[],
+  TResult,
+>(
   fn: (...args: TParameters) => TResult | undefined,
   fallback: (...args: TParameters) => TResult,
 ): (...args: TParameters) => TResult {

@@ -7,12 +7,12 @@ export type {
   DedupedBatchedGroupFunction,
 } from './batch';
 export type {
-  LeveledCache,
-  LevelOptions,
-  LevelOptionsWithMapKey,
-  LevelOptionsWithoutMapKey,
-  LeveledCacheBuilder,
-} from './createLeveledCache';
+  NamespacedCache,
+  NamespaceOptions,
+  NamespaceOptionsWithMapKey,
+  NamespaceOptionsWithoutMapKey,
+  NamespacedCacheBuilder,
+} from './createNamespacedCache';
 export type {
   DedupedAsyncFunction,
   DedupeAsyncOptions,
@@ -28,7 +28,7 @@ export type {
 export type {CacheMapInput, CacheMap} from './types';
 
 export {default as batch, batchGroups} from './batch';
-export {default as createLeveledCache} from './createLeveledCache';
+export {default as createNamespacedCache} from './createNamespacedCache';
 export {default as dedupeAsync} from './dedupeAsync';
 export {default as dedupeSync} from './dedupeSync';
 export {default as groupToMap} from './groupToMap';
@@ -36,6 +36,6 @@ export {default as groupToMap} from './groupToMap';
 export {
   parametersSpreadToArray,
   parametersArrayToSpread,
-  addFallbackForUndefined,
+  addFallbackForUndefinedSync,
   addFallbackForUndefinedAsync,
 } from './utils';
