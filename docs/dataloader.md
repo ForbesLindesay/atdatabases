@@ -382,7 +382,7 @@ const getUser = dedupeAsync<[ResolverContext, DbUser['id']], DbUser>(
   },
   {
     cache: createNamespacedCache<ResolverContext>({
-      getCache: <T>() => new WeakMap<ResolverContext, T>(),
+      getCache: () => new WeakMap(),
     })
       .addNamespace<DbUser['id']>()
       .build<DbUser>(),
