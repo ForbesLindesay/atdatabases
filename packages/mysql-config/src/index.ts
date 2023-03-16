@@ -1,21 +1,23 @@
-import cosmiconfig = require('cosmiconfig');
+import {cosmiconfig, cosmiconfigSync} from 'cosmiconfig';
 import MySqlConfig, {MySqlConfigSchema} from './MySqlConfig';
 
-const explorer = cosmiconfig('mysql');
+const asyncExplorer = cosmiconfig('mysql');
+const syncExplorer = cosmiconfigSync('mysql');
+
 export async function getMySqlConfig(
   searchFrom?: string,
 ): Promise<MySqlConfig> {
-  return parseResult(await explorer.search(searchFrom));
+  return parseResult(await asyncExplorer.search(searchFrom));
 }
 export function getMySqlConfigSync(searchFrom?: string): MySqlConfig {
-  return parseResult(explorer.searchSync(searchFrom));
+  return parseResult(syncExplorer.search(searchFrom));
 }
 
 export function readMySqlConfigSync(filename: string): MySqlConfig {
-  return parseResult(explorer.loadSync(filename));
+  return parseResult(syncExplorer.load(filename));
 }
 
-function parseResult(result: cosmiconfig.CosmiconfigResult): MySqlConfig {
+function parseResult(result: null | {config: unknown}): MySqlConfig {
   return MySqlConfigSchema.parse(result ? result.config : {});
 }
 

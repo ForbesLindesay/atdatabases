@@ -1,19 +1,20 @@
-import cosmiconfig = require('cosmiconfig');
+import {cosmiconfig, cosmiconfigSync} from 'cosmiconfig';
 import PgConfig, {PgConfigSchema} from './PgConfig';
 
-const explorer = cosmiconfig('pg');
+const asyncExplorer = cosmiconfig('pg');
+const syncExplorer = cosmiconfigSync('pg');
 export async function getPgConfig(searchFrom?: string): Promise<PgConfig> {
-  return parseResult(await explorer.search(searchFrom));
+  return parseResult(await asyncExplorer.search(searchFrom));
 }
 export function getPgConfigSync(searchFrom?: string): PgConfig {
-  return parseResult(explorer.searchSync(searchFrom));
+  return parseResult(syncExplorer.search(searchFrom));
 }
 
 export function readPgConfigSync(filename: string): PgConfig {
-  return parseResult(explorer.loadSync(filename));
+  return parseResult(syncExplorer.load(filename));
 }
 
-function parseResult(result: cosmiconfig.CosmiconfigResult): PgConfig {
+function parseResult(result: null | {config: unknown}): PgConfig {
   return PgConfigSchema.parse(result ? result.config : {});
 }
 
