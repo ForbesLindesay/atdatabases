@@ -5,11 +5,8 @@
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {
-    "cosmiconfig": "^5.0.7",
+    "cosmiconfig": "^8.1.0",
     "funtypes": "^4.1.0"
-  },
-  "devDependencies": {
-    "@types/cosmiconfig": "^5.0.3"
   },
   "scripts": {},
   "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/pg-config",
