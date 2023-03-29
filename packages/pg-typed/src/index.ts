@@ -149,14 +149,14 @@ class FieldQuery<T> {
     columnName: SQLQuery,
     sql: Queryable['sql'],
     toValue: (value: unknown) => unknown,
-  ) => SQLQuery;
+  ) => SQLQuery | 'TRUE' | 'FALSE';
   protected readonly __special: SpecialFieldQuery<T> | undefined;
   constructor(
     query: (
       columnName: SQLQuery,
       sql: Queryable['sql'],
       toValue: (value: unknown) => unknown,
-    ) => SQLQuery,
+    ) => SQLQuery | 'TRUE' | 'FALSE',
     special?: SpecialFieldQuery<T>,
   ) {
     this.__query = query;
@@ -172,7 +172,7 @@ class FieldQuery<T> {
     q: FieldQuery<T> | unknown,
     sql: Queryable['sql'],
     toValue: (value: unknown) => unknown,
-  ): SQLQuery {
+  ): SQLQuery | 'TRUE' | 'FALSE' {
     if (q === null) {
       return sql`${columnName} IS NULL`;
     }
@@ -191,9 +191,6 @@ class FieldQuery<T> {
   }
 }
 
-const FALSE_FIELD_QUERY = new FieldQuery<any>((_columnName, sql) => sql`FALSE`);
-const TRUE_FIELD_QUERY = new FieldQuery<any>((_columnName, sql) => sql`TRUE`);
-
 export type {FieldQuery};
 
 export function anyOf<T>(values: {
@@ -204,15 +201,9 @@ export function anyOf<T>(values: {
   const caseInsensitiveParts: (T | FieldQuery<T>)[] = [];
   const negatedParts: (T | FieldQuery<T>)[] = [];
   for (const value of values) {
-    if (value === TRUE_FIELD_QUERY) {
-      return TRUE_FIELD_QUERY;
-    }
-    if (value === FALSE_FIELD_QUERY) {
-      continue;
-    }
     if (value === null) {
       parts.push(
-        new FieldQuery((columnName, sql, toValue) =>
+        new FieldQuery<T>((columnName, sql, toValue) =>
           FieldQuery.query(columnName, null, sql, toValue),
         ),
       );
@@ -241,9 +232,6 @@ export function anyOf<T>(values: {
     }
   }
   if (valuesSet.size) {
-    if (valuesSet.size === 1 && parts.length === 0) {
-      return [...valuesSet][0];
-    }
     if (valuesSet.size === 1) {
       parts.push(
         new FieldQuery<T>((columnName, sql, toValue) =>
@@ -259,40 +247,32 @@ export function anyOf<T>(values: {
       );
     }
   }
-  if (parts.length === 0) {
-    return FALSE_FIELD_QUERY;
-  }
-  if (parts.length === 1) {
-    return parts[0];
-  }
-  return new FieldQuery<T>(
-    (columnName, sql, toValue) =>
-      sql`(${sql.join(
-        parts.map((p) => FieldQuery.query(columnName, p, sql, toValue)),
-        ' OR ',
-      )})`,
-  );
+  return new FieldQuery<T>((columnName, sql, toValue) => {
+    const sqlParts: SQLQuery[] = [];
+    for (const p of parts) {
+      const part = FieldQuery.query(columnName, p, sql, toValue);
+      if (part === 'TRUE') return 'TRUE';
+      if (part !== 'FALSE') sqlParts.push(part);
+    }
+    if (sqlParts.length === 0) return 'FALSE';
+    if (sqlParts.length === 1) return sqlParts[0];
+    return sql`(${sql.join(sqlParts, ' OR ')})`;
+  });
 }
 
 export function allOf<T>(values: {
   [Symbol.iterator](): IterableIterator<T | FieldQuery<T>>;
 }): T | FieldQuery<T> {
   const valuesSet = new Set<T>();
-  const ordinaryParts: FieldQuery<T>[] = [];
+  const parts: FieldQuery<T>[] = [];
   const negated: (T | FieldQuery<T>)[] = [];
   for (const q of values) {
-    if (q === FALSE_FIELD_QUERY) {
-      return FALSE_FIELD_QUERY;
-    }
-    if (q === TRUE_FIELD_QUERY) {
-      continue;
-    }
     if (q && q instanceof FieldQuery) {
       const special = FieldQuery.getSpecial(q);
       if (special?.type === 'not') {
         negated.push(special.query);
       } else {
-        ordinaryParts.push(q);
+        parts.push(q);
       }
     } else {
       valuesSet.add(q);
@@ -301,58 +281,57 @@ export function allOf<T>(values: {
   if (negated.length) {
     const n = not(anyOf(negated));
     if (n && n instanceof FieldQuery) {
-      ordinaryParts.push(n);
+      parts.push(n);
     } else {
       valuesSet.add(n);
     }
   }
   if (valuesSet.size > 1) {
-    return FALSE_FIELD_QUERY;
+    return new FieldQuery<T>(() => `FALSE`);
   } else if (valuesSet.size) {
-    ordinaryParts.push(
-      new FieldQuery((columnName, sql, toValue) =>
+    parts.push(
+      new FieldQuery<T>((columnName, sql, toValue) =>
         FieldQuery.query(columnName, [...valuesSet][0], sql, toValue),
       ),
     );
   }
-  if (ordinaryParts.length === 0) {
-    return TRUE_FIELD_QUERY;
-  }
-  if (ordinaryParts.length === 1) {
-    return ordinaryParts[0];
-  }
-  return new FieldQuery<T>(
-    (columnName, sql, toValue) =>
-      sql`(${sql.join(
-        ordinaryParts.map((p) => FieldQuery.query(columnName, p, sql, toValue)),
-        ' AND ',
-      )})`,
-  );
+  return new FieldQuery<T>((columnName, sql, toValue) => {
+    const sqlParts: SQLQuery[] = [];
+    for (const p of parts) {
+      const part = FieldQuery.query(columnName, p, sql, toValue);
+      if (part === 'FALSE') return 'FALSE';
+      if (part !== 'TRUE') sqlParts.push(part);
+    }
+    if (sqlParts.length === 0) return 'TRUE';
+    if (sqlParts.length === 1) return sqlParts[0];
+    return sql`(${sql.join(sqlParts, ' AND ')})`;
+  });
 }
 
 export function not<T>(value: T | FieldQuery<T>): T | FieldQuery<T> {
-  if (value === TRUE_FIELD_QUERY) {
-    return FALSE_FIELD_QUERY;
-  } else if (value === FALSE_FIELD_QUERY) {
-    return TRUE_FIELD_QUERY;
-  }
   const special = FieldQuery.getSpecial(value);
   if (special?.type === 'not') {
     return special.query;
   }
   return new FieldQuery<T>(
-    (columnName, sql, toValue) =>
-      sql`NOT (${FieldQuery.query(columnName, value, sql, toValue)})`,
+    (columnName, sql, toValue) => {
+      const subQuery = FieldQuery.query(columnName, value, sql, toValue);
+      if (subQuery === 'TRUE') return 'FALSE';
+      if (subQuery === 'FALSE') return 'TRUE';
+      return sql`NOT (${subQuery})`;
+    },
     {type: 'not', query: value},
   );
 }
 
 function internalInQueryResults(
-  query: (sql: Queryable['sql']) => SQLQuery | FieldQuery<any>,
+  query: (sql: Queryable['sql']) => SQLQuery | 'FALSE',
 ): FieldQuery<any> {
-  return new FieldQuery<any>(
-    (columnName, sql) => sql`${columnName} IN (${query(sql)})`,
-  );
+  return new FieldQuery<any>((columnName, sql) => {
+    const subQuery = query(sql);
+    if (!sql.isSqlQuery(subQuery)) return subQuery;
+    return sql`${columnName} IN (${subQuery})`;
+  });
 }
 
 export function inQueryResults(query: SQLQuery): FieldQuery<any> {
@@ -413,7 +392,7 @@ class WhereCombinedCondition<TRecord> {
   }
   static query<T>(
     recordIdentifier: string | null,
-    q: WhereCombinedCondition<T> | WhereCondition<T>,
+    q: WhereCondition<T>,
     sql: Queryable['sql'],
     toValue: (columnName: string, value: unknown) => unknown,
     parentType?: 'AND' | 'OR',
@@ -432,15 +411,10 @@ class WhereCombinedCondition<TRecord> {
       switch (q.__combiner) {
         case 'AND': {
           for (const c of conditions) {
-            if (c === 'FALSE') {
-              return 'FALSE';
-            } else if (c !== 'TRUE') {
-              significantConditions.push(c);
-            }
+            if (c === 'FALSE') return 'FALSE';
+            if (c !== 'TRUE') significantConditions.push(c);
           }
-          if (!significantConditions.length) {
-            return 'TRUE';
-          }
+          if (!significantConditions.length) return 'TRUE';
           if (significantConditions.length === 1) {
             return significantConditions[0];
           }
@@ -449,15 +423,10 @@ class WhereCombinedCondition<TRecord> {
         }
         case 'OR': {
           for (const c of conditions) {
-            if (c === 'TRUE') {
-              return 'TRUE';
-            } else if (c !== 'FALSE') {
-              significantConditions.push(c);
-            }
+            if (c === 'TRUE') return 'TRUE';
+            if (c !== 'FALSE') significantConditions.push(c);
           }
-          if (!significantConditions.length) {
-            return 'FALSE';
-          }
+          if (!significantConditions.length) return 'FALSE';
           if (significantConditions.length === 1) {
             return significantConditions[0];
           }
@@ -475,20 +444,16 @@ class WhereCombinedCondition<TRecord> {
     const entries = Object.entries(q);
     const fieldTests: SQLQuery[] = [];
     for (const [columnName, value] of entries) {
-      if (value === FALSE_FIELD_QUERY) {
-        return 'FALSE';
-      } else if (value !== TRUE_FIELD_QUERY) {
-        fieldTests.push(
-          FieldQuery.query(
-            recordIdentifier
-              ? sql.ident(recordIdentifier, columnName)
-              : sql.ident(columnName),
-            value,
-            sql,
-            (v) => toValue(columnName, v),
-          ),
-        );
-      }
+      const sqlFieldTest = FieldQuery.query(
+        recordIdentifier
+          ? sql.ident(recordIdentifier, columnName)
+          : sql.ident(columnName),
+        value,
+        sql,
+        (v) => toValue(columnName, v),
+      );
+      if (sqlFieldTest === 'FALSE') return 'FALSE';
+      if (sqlFieldTest !== 'TRUE') fieldTests.push(sqlFieldTest);
     }
     if (fieldTests.length === 0) {
       return 'TRUE';
@@ -1359,7 +1324,7 @@ function getTable<TRecord, TInsertParameters>(
             serializeValue,
           );
           if (whereCondition === 'FALSE') {
-            return FALSE_FIELD_QUERY;
+            return 'FALSE' as const;
           }
           const tableId = schemaName
             ? sql.ident(schemaName, tableName)
