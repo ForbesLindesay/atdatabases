@@ -12,6 +12,7 @@ export interface BulkOperationOptions<TColumnName extends ColumnName> {
 export interface BulkInsertOptions<TColumnToInsert extends ColumnName>
   extends BulkOperationOptions<TColumnToInsert> {
   readonly columnsToInsert: readonly TColumnToInsert[];
+  readonly sharedColumnValues?: Partial<Record<TColumnToInsert, unknown>>;
   readonly records: readonly any[];
 }
 
@@ -53,7 +54,11 @@ function tableId<TColumnName extends ColumnName>(
 }
 
 function select<TColumnName extends ColumnName>(
-  columns: readonly {
+  sharedColumns: readonly {
+    readonly name: TColumnName;
+    readonly value: unknown;
+  }[],
+  recordColumns: readonly {
     readonly name: TColumnName;
     readonly getValue?: (record: any) => unknown;
   }[],
@@ -62,8 +67,14 @@ function select<TColumnName extends ColumnName>(
 ) {
   const {database, columnTypes, serializeValue} = options;
   const {sql} = database;
-  return sql`SELECT * FROM UNNEST(${sql.join(
-    columns.map(({name, getValue}) => {
+  return sql`SELECT ${sql.join(
+    [
+      ...sharedColumns.map((c) => sql`${c.value} AS ${sql.ident(c.name)}`),
+      sql`*`,
+    ],
+    `, `,
+  )} FROM UNNEST(${sql.join(
+    recordColumns.map(({name, getValue}) => {
       const typeName = columnTypes[name];
       if (!typeName) {
         throw new Error(`Missing type name for ${name as string}`);
@@ -82,13 +93,30 @@ function select<TColumnName extends ColumnName>(
 export function bulkInsertStatement<TColumnToInsert extends ColumnName>(
   options: BulkInsertOptions<TColumnToInsert>,
 ): SQLQuery {
-  const {database, columnsToInsert, records} = options;
+  const {database, columnsToInsert, sharedColumnValues = {}, records} = options;
   const {sql} = database;
+  const sharedColumnNames = columnsToInsert.filter(
+    (name) => name in sharedColumnValues,
+  );
+  const recordColumnNames = columnsToInsert.filter(
+    (name) => !(name in sharedColumnValues),
+  );
+  if (!recordColumnNames.length) {
+    throw new Error(
+      `Cannot bulk insert without any columns on the individual records.`,
+    );
+  }
   return sql`INSERT INTO ${tableId(options)} (${sql.join(
-    columnsToInsert.map((columnName) => sql.ident(columnName)),
+    [...sharedColumnNames, ...recordColumnNames].map((columnName) =>
+      sql.ident(columnName),
+    ),
     `,`,
   )}) ${select(
-    columnsToInsert.map((name) => ({name})),
+    sharedColumnNames.map((name) => ({
+      name,
+      value: (sharedColumnValues as any)[name],
+    })),
+    recordColumnNames.map((name) => ({name})),
     records,
     options,
   )}`;
@@ -121,6 +149,7 @@ export function bulkCondition<TWhereColumn extends ColumnName>(
     whereColumnNames.map((columnName) => sql.ident(columnName)),
     `,`,
   )}) IN (${select(
+    [],
     whereColumnNames.map((columnName) => ({name: columnName})),
     whereConditions,
     options,
@@ -204,6 +233,7 @@ export async function bulkUpdate<
       ),
       `,`,
     )} FROM (${select(
+      [],
       [
         ...whereColumnNames.map((columnName) => ({
           name: columnName,

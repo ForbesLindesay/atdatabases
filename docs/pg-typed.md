@@ -267,6 +267,53 @@ export async function updateFavoriteColor(
 }
 ```
 
+You can use SQL or the ComputedValue helpers to do more complex updates:
+
+```typescript
+import {anyOf, add, currentTimestamp} from '@databases/pg-typed';
+import db, {users} from './database';
+
+export async function updateLoginCount(emails: string[]) {
+  const updatedUsers = await users(db).update(
+    {email: anyOf(emails)},
+    {login_count: add(1), updated_at: currentTimestamp()},
+  );
+  console.log(updatedUsers);
+}
+
+export async function toggleIsActive(emails: string[]) {
+  const updatedUsers = await users(db).update(
+    {email: anyOf(emails)},
+    {is_active: sql`NOT(is_active)`},
+  );
+  console.log(updatedUsers);
+}
+```
+
+If you don't want to return the updated records, or you only want to return a subset of fields, you can pass the `columnsToReturn` option:
+
+```typescript
+import {anyOf, add, currentTimestamp} from '@databases/pg-typed';
+import db, {users} from './database';
+
+export async function updateLoginCount(emails: string[]) {
+  await users(db).update(
+    {email: anyOf(emails)},
+    {login_count: add(1), updated_at: currentTimestamp()},
+    {columnsToReturn: []},
+  );
+}
+
+export async function toggleIsActive(emails: string[]) {
+  const updatedUsers = await users(db).update(
+    {email: anyOf(emails)},
+    {is_active: sql`NOT(is_active)`},
+    {columnsToReturn: [`email`, `is_active`]},
+  );
+  console.log(updatedUsers);
+}
+```
+
 ### delete(whereValues)
 
 Finds all the records that match the `whereValues` condition and deletes them.
@@ -888,6 +935,51 @@ async function getPopularPostsByAuthor(authorId: User['id']) {
         },
       ),
     )
+    .all();
+}
+```
+
+## Computed Values
+
+In many places it is possible to use a computed value that will be resolved by Postgres.
+
+### currentTimestamp()
+
+This is equivalent to the SQL query `CURRENT_TIMESTAMP` it can often be used in places where you might otherwise use a `Date`.
+
+### add(a, b)
+
+`add(a, b?)` returns a `Value<number>` that can be used in many places where you would otherwise use a `number`.
+
+This adds two numbers together within Postgres. It is primarily useful when one of the two values is not a simple `number`. If you are using it in an `update` statement, the second value is optional and defaults to the current value of the column being updated. The values can be any positive or negative integer, or even an SQL query that returns an integer.
+
+```typescript
+import {add, currentTimestamp} from '@databases/pg-typed';
+import db, {users} from './database';
+
+export async function updateLoginCount(email: string) {
+  return await users(db).update(
+    {email},
+    {login_count: add(1), updated_at: currentTimestamp()},
+  );
+}
+```
+
+### add(timestamp, interval) / add(interval)
+
+`add(timestamp, interval)` returns a `Value<Date>` that can be used in many places where you would otherwise use a `Date`.
+
+This adds `interval` to `timestamp` within Postgres. It is primarily useful when `timestamp` is not a simple `Date`. If you are using it in an `update` statement, the `timestamp` is optional and defaults to the current value of the column being updated.
+
+The `interval` should be an interval string that will be understood by Postgres, such as `"1 HOUR"` or `"-1 DAY"`.
+
+```typescript
+import {gt, increment, currentTimestamp} from '@databases/pg-typed';
+import db, {users} from './database';
+
+export async function getUsersUpdatedInPast24Hours() {
+  return await users(db)
+    .find({updated_at: gt(add(currentTimestamp(), '-24 HOUR'))})
     .all();
 }
 ```

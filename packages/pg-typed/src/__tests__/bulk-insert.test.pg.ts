@@ -1,13 +1,44 @@
 import connect, {sql} from '@databases/pg';
 import Schema from './__generated__';
-import defineTables, {anyOf} from '..';
+import defineTables, {add, anyOf} from '..';
 
 const {users} = defineTables<Schema>({
   schemaName: 'typed_queries_bulk_insert',
   databaseSchema: require('./__generated__/schema.json'),
 });
 
-const db = connect({bigIntMode: 'number'});
+let queries: {readonly text: string; readonly values: readonly any[]}[] = [];
+
+const db = connect({
+  bigIntMode: 'number',
+  onQueryStart(_q, q) {
+    queries.push({
+      text: q.text.split(`"typed_queries_bulk_insert".`).join(``),
+      values: q.values.map((v) =>
+        Array.isArray(v)
+          ? `Array<${[...new Set(v.map((v) => typeof v))].join(` | `)}, ${
+              v.length
+            }>`
+          : v,
+      ),
+    });
+  },
+});
+
+function expectQueries(fn: () => Promise<void>) {
+  return expect(
+    (async () => {
+      try {
+        queries = [];
+        await fn();
+        return queries;
+      } catch (ex) {
+        console.error(queries);
+        throw ex;
+      }
+    })(),
+  ).resolves;
+}
 
 afterAll(async () => {
   await db.dispose();
@@ -134,13 +165,22 @@ test('create users in bulk', async () => {
   for (let i = 0; i < 50_000; i++) {
     names.push(`bulk_insert_name_${i}`);
   }
-  const inserted = await users(db).bulkInsert({
-    columnsToInsert: [`age`],
-    records: names.map((n) => ({screen_name: n, age: 42})),
-  });
 
-  expect(inserted.map((i) => i.screen_name)).toEqual(names);
-  expect(inserted.map((i) => i.age)).toEqual(names.map(() => 42));
+  await expectQueries(async () => {
+    const inserted = await users(db).bulkInsert({
+      columnsToInsert: [`age`],
+      sharedColumnsToInsert: {age: 42},
+      records: names.map((n) => ({screen_name: n})),
+    });
+
+    expect(inserted.map((i) => i.screen_name)).toEqual(names);
+    expect(inserted.map((i) => i.age)).toEqual(names.map(() => 42));
+  }).toEqual([
+    {
+      text: `INSERT INTO "users" ("age","screen_name") SELECT $1 AS "age", * FROM UNNEST($2::TEXT[]) RETURNING "users".*`,
+      values: [42, `Array<string, 50000>`],
+    },
+  ]);
 
   const records = await users(db)
     .find({screen_name: anyOf(names)})
@@ -279,24 +319,61 @@ test('insertOrIgnore users in bulk', async () => {
     {screen_name: `bulk_insert_name_20`, age: 42},
     {screen_name: `bulk_insert_or_ignore_name_1`, age: 56},
   ]);
+
+  await users(db).bulkInsertOrIgnore({
+    columnsToInsert: [`age`],
+    sharedColumnsToInsert: {age: 56},
+    records: [
+      {screen_name: `bulk_insert_name_18`},
+      {screen_name: `bulk_insert_name_19`},
+      {screen_name: `bulk_insert_name_20`},
+      {screen_name: `bulk_insert_or_ignore_name_2`},
+    ],
+  });
+  expect(
+    await users(db)
+      .find({
+        screen_name: anyOf([
+          `bulk_insert_name_18`,
+          `bulk_insert_name_19`,
+          `bulk_insert_name_20`,
+          `bulk_insert_or_ignore_name_1`,
+          `bulk_insert_or_ignore_name_2`,
+        ]),
+      })
+      .select(`screen_name`, `age`)
+      .orderByAsc(`screen_name`)
+      .all(),
+  ).toEqual([
+    {screen_name: `bulk_insert_name_18`, age: 42},
+    {screen_name: `bulk_insert_name_19`, age: 42},
+    {screen_name: `bulk_insert_name_20`, age: 42},
+    {screen_name: `bulk_insert_or_ignore_name_1`, age: 56},
+    {screen_name: `bulk_insert_or_ignore_name_2`, age: 56},
+  ]);
 });
 
 test('insertOrUpdate users in bulk', async () => {
-  await users(db).bulkInsertOrUpdate({
-    columnsToInsert: [`screen_name`, `age`, `bio`],
-    columnsThatConflict: [`screen_name`],
-    columnsToUpdate: [`bio`],
-    records: [
-      {screen_name: `bulk_insert_name_21`, age: 56, bio: `Updated in bulk`},
-      {screen_name: `bulk_insert_name_22`, age: 56, bio: `Updated in bulk`},
-      {screen_name: `bulk_insert_name_23`, age: 56, bio: `Updated in bulk`},
-      {
-        screen_name: `bulk_insert_or_update_name_1`,
-        age: 56,
-        bio: `Updated in bulk`,
-      },
-    ],
-  });
+  await expectQueries(async () => {
+    await users(db).bulkInsertOrUpdate({
+      columnsToInsert: [`screen_name`, `age`, `bio`],
+      columnsThatConflict: [`screen_name`],
+      columnsToUpdate: [`bio`],
+      sharedColumnsToInsert: {bio: `Updated in bulk`},
+      records: [
+        {screen_name: `bulk_insert_name_21`, age: 1},
+        {screen_name: `bulk_insert_name_22`, age: 2},
+        {screen_name: `bulk_insert_name_23`, age: 3},
+        {screen_name: `bulk_insert_or_update_name_1`, age: 4},
+      ],
+    });
+  }).toEqual([
+    {
+      text: `INSERT INTO "users" ("bio","age","screen_name") SELECT $1 AS "bio", * FROM UNNEST($2::INTEGER[],$3::TEXT[]) ON CONFLICT ("screen_name") DO UPDATE SET "bio"=EXCLUDED."bio" RETURNING "users".*`,
+      values: [`Updated in bulk`, `Array<number, 4>`, `Array<string, 4>`],
+    },
+  ]);
+
   expect(
     await users(db)
       .find({
@@ -316,7 +393,51 @@ test('insertOrUpdate users in bulk', async () => {
     {screen_name: `bulk_insert_name_23`, age: 42, bio: `Updated in bulk`},
     {
       screen_name: `bulk_insert_or_update_name_1`,
-      age: 56,
+      age: 4,
+      bio: `Updated in bulk`,
+    },
+  ]);
+
+  await expectQueries(async () => {
+    await users(db).bulkInsertOrUpdate({
+      columnsToInsert: [`screen_name`, `age`],
+      columnsThatConflict: [`screen_name`],
+      columnsToUpdate: [`age`],
+      sharedColumnsToInsert: {age: 0},
+      sharedColumnsToUpdate: {age: add(1)},
+      records: [
+        {screen_name: `bulk_insert_name_21`},
+        {screen_name: `bulk_insert_name_22`},
+        {screen_name: `bulk_insert_name_23`},
+        {screen_name: `bulk_insert_or_update_name_1`},
+      ],
+    });
+  }).toEqual([
+    {
+      text: `INSERT INTO "users" ("age","screen_name") SELECT $1 AS "age", * FROM UNNEST($2::TEXT[]) ON CONFLICT ("screen_name") DO UPDATE SET "age"="users"."age"+$3 RETURNING "users".*`,
+      values: [0, `Array<string, 4>`, 1],
+    },
+  ]);
+  expect(
+    await users(db)
+      .find({
+        screen_name: anyOf([
+          `bulk_insert_name_21`,
+          `bulk_insert_name_22`,
+          `bulk_insert_name_23`,
+          `bulk_insert_or_update_name_1`,
+        ]),
+      })
+      .select(`screen_name`, `age`, `bio`)
+      .orderByAsc(`screen_name`)
+      .all(),
+  ).toEqual([
+    {screen_name: `bulk_insert_name_21`, age: 43, bio: `Updated in bulk`},
+    {screen_name: `bulk_insert_name_22`, age: 43, bio: `Updated in bulk`},
+    {screen_name: `bulk_insert_name_23`, age: 43, bio: `Updated in bulk`},
+    {
+      screen_name: `bulk_insert_or_update_name_1`,
+      age: 5,
       bio: `Updated in bulk`,
     },
   ]);

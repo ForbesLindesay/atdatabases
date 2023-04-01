@@ -136,6 +136,51 @@ export type UnorderedSelectQuery<TRecord> = PartialSelectQuery<
   UnorderedSelectQueryMethods
 >;
 
+class ComputedValue<T> {
+  protected readonly __query: (
+    sql: Queryable['sql'],
+    toValue: (value: unknown) => unknown,
+  ) => SQLQuery;
+  constructor(
+    query: (
+      sql: Queryable['sql'],
+      toValue: (value: unknown) => unknown,
+    ) => SQLQuery,
+  ) {
+    this.__query = query;
+  }
+  protected __checkFieldValueType(): T {
+    throw new Error(
+      'This method is only there to help TypeScript interpret the type',
+    );
+  }
+  static query<T>(
+    q: Value<T>,
+    sql: Queryable['sql'],
+    toValue: (value: unknown) => unknown,
+  ): SQLQuery {
+    if (q && q instanceof ComputedValue) {
+      return q.__query(sql, toValue);
+    }
+    if (typeof sql.isSqlQuery === 'function' && sql.isSqlQuery(q)) {
+      return q;
+    }
+    return sql.value(toValue(q));
+  }
+}
+export type {ComputedValue};
+export type Value<T> = T | ComputedValue<T> | SQLQuery;
+
+export type InsertParameters<TInsertParameters> = {
+  [TColumnName in keyof TInsertParameters]: Value<
+    TInsertParameters[TColumnName]
+  >;
+};
+
+export type UpdateParameters<TRecord> = {
+  [TColumnName in keyof TRecord]?: FieldUpdate<TRecord[TColumnName]>;
+};
+
 type SpecialFieldQuery<T> =
   | {
       type: 'json_path';
@@ -144,6 +189,7 @@ type SpecialFieldQuery<T> =
     }
   | {type: 'case_insensitive'; query: T | FieldQuery<T>}
   | {type: 'not'; query: T | FieldQuery<T>};
+
 class FieldQuery<T> {
   protected readonly __query: (
     columnName: SQLQuery,
@@ -338,15 +384,29 @@ export function inQueryResults(query: SQLQuery): FieldQuery<any> {
   return internalInQueryResults(() => query);
 }
 
-export function lessThan<T>(value: T): FieldQuery<T> {
+export function lessThan<T>(value: Value<T>): FieldQuery<T> {
   return new FieldQuery<T>(
-    (columnName, sql, toValue) => sql`${columnName} < ${toValue(value)}`,
+    (columnName, sql, toValue) =>
+      sql`${columnName} < ${ComputedValue.query(value, sql, toValue)}`,
+  );
+}
+export function lessThanOrEqualTo<T>(value: Value<T>): FieldQuery<T> {
+  return new FieldQuery<T>(
+    (columnName, sql, toValue) =>
+      sql`${columnName} <= ${ComputedValue.query(value, sql, toValue)}`,
   );
 }
 
-export function greaterThan<T>(value: T): FieldQuery<T> {
+export function greaterThan<T>(value: Value<T>): FieldQuery<T> {
   return new FieldQuery<T>(
-    (columnName, sql, toValue) => sql`${columnName} > ${toValue(value)}`,
+    (columnName, sql, toValue) =>
+      sql`${columnName} > ${ComputedValue.query(value, sql, toValue)}`,
+  );
+}
+export function greaterThanOrEqualTo<T>(value: Value<T>): FieldQuery<T> {
+  return new FieldQuery<T>(
+    (columnName, sql, toValue) =>
+      sql`${columnName} >= ${ComputedValue.query(value, sql, toValue)}`,
   );
 }
 
@@ -483,6 +543,90 @@ export function or<TRecord>(
   ...conditions: readonly WhereCondition<TRecord>[]
 ): WhereCondition<TRecord> {
   return new WhereCombinedCondition(conditions, 'OR');
+}
+
+export type FieldUpdate<T> = Value<T> | ComputedFieldUpdate<T>;
+class ComputedFieldUpdate<T> {
+  protected readonly __query: (
+    columnName: SQLQuery,
+    sql: Queryable['sql'],
+    toValue: (value: unknown) => unknown,
+  ) => SQLQuery;
+  constructor(
+    query: (
+      columnName: SQLQuery,
+      sql: Queryable['sql'],
+      toValue: (value: unknown) => unknown,
+    ) => SQLQuery,
+  ) {
+    this.__query = query;
+  }
+  protected __checkFieldUpdateType(): T {
+    throw new Error(
+      'This method is only there to help TypeScript interpret the type',
+    );
+  }
+  static query<T>(
+    columnName: SQLQuery,
+    q: FieldUpdate<T>,
+    sql: Queryable['sql'],
+    toValue: (value: unknown) => unknown,
+  ): SQLQuery {
+    if (q && q instanceof ComputedFieldUpdate) {
+      return q.__query(columnName, sql, toValue);
+    }
+
+    return sql`${ComputedValue.query(q, sql, toValue)}`;
+  }
+}
+export type {ComputedFieldUpdate};
+
+type Interval = `${number} ${
+  | 'SECOND'
+  | 'MINUTE'
+  | 'HOUR'
+  | 'DAY'
+  | 'WEEK'
+  | 'MONTH'
+  | 'YEAR'}`;
+export function add(count: Value<number>): FieldUpdate<number>;
+export function add(a: Value<number>, b?: Value<number>): Value<number>;
+export function add(interval: Interval): FieldUpdate<Date>;
+export function add(timestamp: Value<Date>, interval: Interval): Value<Date>;
+export function add(
+  a: Value<number> | Value<Date> | Interval,
+  b?: Value<number> | Interval,
+): FieldUpdate<number> | Value<number> | FieldUpdate<Date> | Value<Date> {
+  if (typeof a === 'string') {
+    return new ComputedFieldUpdate<Date>(
+      (columnName, sql) => sql`${columnName}+${a}`,
+    );
+  }
+  if (typeof b === 'string') {
+    return new ComputedValue<Date>(
+      (sql, toValue) => sql`${ComputedValue.query(a, sql, toValue)}+${b}`,
+    );
+  }
+  if (b === undefined) {
+    return new ComputedFieldUpdate<number>(
+      (columnName, sql, toValue) =>
+        sql`${columnName}+${ComputedValue.query(a, sql, toValue)}`,
+    );
+  }
+  return new ComputedValue<number>(
+    (sql, toValue) =>
+      sql`${ComputedValue.query(a, sql, toValue)}+${ComputedValue.query(
+        b,
+        sql,
+        toValue,
+      )}`,
+  );
+}
+const CURRENT_TIMESTAMP = new ComputedValue<Date>(
+  (sql) => sql`CURRENT_TIMESTAMP`,
+);
+export function currentTimestamp(): Value<Date> {
+  return CURRENT_TIMESTAMP;
 }
 
 class SelectQueryImplementation<TRecord>
@@ -698,10 +842,17 @@ class SelectQueryImplementation<TRecord>
   }
 }
 
-type BulkRecord<TParameters, TKey extends keyof TParameters> = {
-  readonly [key in TKey]-?: Exclude<TParameters[key], undefined>;
+type BulkRecord<
+  TParameters,
+  TKey extends keyof TParameters,
+  TSharedKey extends string | number | symbol,
+> = {
+  readonly [key in Exclude<TKey, TSharedKey>]-?: Exclude<
+    TParameters[key],
+    undefined
+  >;
 } & {
-  readonly [key in Exclude<keyof TParameters, TKey>]?: undefined;
+  readonly [key in TSharedKey | Exclude<keyof TParameters, TKey>]?: undefined;
 };
 
 type BulkInsertFields<
@@ -718,7 +869,12 @@ type BulkInsertFields<
 type BulkInsertRecord<
   TInsertParameters,
   TKey extends keyof TInsertParameters,
-> = BulkRecord<TInsertParameters, BulkInsertFields<TInsertParameters, TKey>>;
+  TSharedKey extends string | number | symbol,
+> = BulkRecord<
+  TInsertParameters,
+  BulkInsertFields<TInsertParameters, TKey>,
+  TSharedKey
+>;
 
 type BulkOperationOptionsBase<
   TColumnName extends string | number | symbol,
@@ -808,16 +964,32 @@ class Table<TRecord, TInsertParameters> {
     TColumnsToInsert extends readonly [
       ...(readonly (keyof TInsertParameters)[]),
     ],
+    TSharedColumnsToInsert extends Partial<
+      InsertParameters<Pick<TInsertParameters, TColumnsToInsert[number]>>
+    >,
   >({
     columnsToInsert,
+    sharedColumnsToInsert,
     records,
-  }: {
-    readonly columnsToInsert: TColumnsToInsert;
-    readonly records: readonly BulkInsertRecord<
-      TInsertParameters,
-      TColumnsToInsert[number]
-    >[];
-  }): Promise<TRecord[]> {
+  }:
+    | {
+        readonly columnsToInsert: TColumnsToInsert;
+        readonly sharedColumnsToInsert?: undefined;
+        readonly records: readonly BulkInsertRecord<
+          TInsertParameters,
+          TColumnsToInsert[number],
+          never
+        >[];
+      }
+    | {
+        readonly columnsToInsert: TColumnsToInsert;
+        readonly sharedColumnsToInsert: TSharedColumnsToInsert;
+        readonly records: readonly BulkInsertRecord<
+          TInsertParameters,
+          TColumnsToInsert[number],
+          keyof TSharedColumnsToInsert
+        >[];
+      }): Promise<TRecord[]> {
     if (records.length === 0) {
       return [];
     }
@@ -825,6 +997,7 @@ class Table<TRecord, TInsertParameters> {
     return await this._underlyingDb.query(
       sql`${bulkInsertStatement<keyof TInsertParameters>({
         ...this._getBulkOperationOptions(),
+        sharedColumnValues: sharedColumnsToInsert,
         columnsToInsert: [
           ...new Set([
             ...columnsToInsert,
@@ -840,16 +1013,32 @@ class Table<TRecord, TInsertParameters> {
     TColumnsToInsert extends readonly [
       ...(readonly (keyof TInsertParameters)[]),
     ],
+    TSharedColumnsToInsert extends Partial<
+      InsertParameters<Pick<TInsertParameters, TColumnsToInsert[number]>>
+    >,
   >({
     columnsToInsert,
+    sharedColumnsToInsert,
     records,
-  }: {
-    readonly columnsToInsert: TColumnsToInsert;
-    readonly records: readonly BulkInsertRecord<
-      TInsertParameters,
-      TColumnsToInsert[number]
-    >[];
-  }): Promise<TRecord[]> {
+  }:
+    | {
+        readonly columnsToInsert: TColumnsToInsert;
+        readonly sharedColumnsToInsert?: undefined;
+        readonly records: readonly BulkInsertRecord<
+          TInsertParameters,
+          TColumnsToInsert[number],
+          never
+        >[];
+      }
+    | {
+        readonly columnsToInsert: TColumnsToInsert;
+        readonly sharedColumnsToInsert: TSharedColumnsToInsert;
+        readonly records: readonly BulkInsertRecord<
+          TInsertParameters,
+          TColumnsToInsert[number],
+          keyof TSharedColumnsToInsert
+        >[];
+      }): Promise<TRecord[]> {
     if (records.length === 0) {
       return [];
     }
@@ -863,6 +1052,7 @@ class Table<TRecord, TInsertParameters> {
             ...this._getBulkOperationOptions().requiredInsertColumnNames,
           ]),
         ].sort(),
+        sharedColumnValues: sharedColumnsToInsert,
         records,
       })} ON CONFLICT DO NOTHING RETURNING ${this.tableId}.*`,
     );
@@ -872,26 +1062,53 @@ class Table<TRecord, TInsertParameters> {
     TColumnsToInsert extends readonly [
       ...(readonly (keyof TInsertParameters)[]),
     ],
+    TSharedColumnsToInsert extends Partial<
+      InsertParameters<Pick<TInsertParameters, TColumnsToInsert[number]>>
+    >,
   >({
     columnsToInsert,
     columnsThatConflict,
     columnsToUpdate,
+    sharedColumnsToInsert,
+    sharedColumnsToUpdate,
     records,
-  }: {
-    readonly columnsToInsert: TColumnsToInsert;
-    readonly columnsThatConflict: readonly [
-      TColumnsToInsert[number],
-      ...TColumnsToInsert[number][],
-    ];
-    readonly columnsToUpdate: readonly [
-      TColumnsToInsert[number],
-      ...TColumnsToInsert[number][],
-    ];
-    readonly records: readonly BulkInsertRecord<
-      TInsertParameters,
-      TColumnsToInsert[number]
-    >[];
-  }): Promise<TRecord[]> {
+  }:
+    | {
+        readonly columnsToInsert: TColumnsToInsert;
+        readonly columnsThatConflict: readonly [
+          TColumnsToInsert[number],
+          ...TColumnsToInsert[number][],
+        ];
+        readonly columnsToUpdate: readonly [
+          TColumnsToInsert[number],
+          ...TColumnsToInsert[number][],
+        ];
+        readonly sharedColumnsToInsert?: undefined;
+        readonly sharedColumnsToUpdate?: UpdateParameters<TRecord>;
+        readonly records: readonly BulkInsertRecord<
+          TInsertParameters,
+          TColumnsToInsert[number],
+          never
+        >[];
+      }
+    | {
+        readonly columnsToInsert: TColumnsToInsert;
+        readonly columnsThatConflict: readonly [
+          TColumnsToInsert[number],
+          ...TColumnsToInsert[number][],
+        ];
+        readonly columnsToUpdate: readonly [
+          TColumnsToInsert[number],
+          ...TColumnsToInsert[number][],
+        ];
+        readonly sharedColumnsToInsert: TSharedColumnsToInsert;
+        readonly sharedColumnsToUpdate?: UpdateParameters<TRecord>;
+        readonly records: readonly BulkInsertRecord<
+          TInsertParameters,
+          TColumnsToInsert[number],
+          keyof TSharedColumnsToInsert
+        >[];
+      }): Promise<TRecord[]> {
     if (records.length === 0) {
       return [];
     }
@@ -899,6 +1116,7 @@ class Table<TRecord, TInsertParameters> {
     return await this._underlyingDb.query(
       sql`${bulkInsertStatement<keyof TInsertParameters>({
         ...this._getBulkOperationOptions(),
+        sharedColumnValues: sharedColumnsToInsert,
         columnsToInsert: [
           ...new Set([
             ...columnsToInsert,
@@ -910,8 +1128,15 @@ class Table<TRecord, TInsertParameters> {
         columnsThatConflict.map((k) => sql.ident(k)),
         sql`, `,
       )}) DO UPDATE SET ${sql.join(
-        columnsToUpdate.map(
-          (key) => sql`${sql.ident(key)}=EXCLUDED.${sql.ident(key)}`,
+        columnsToUpdate.map((columnName) =>
+          sharedColumnsToUpdate && columnName in sharedColumnsToUpdate
+            ? sql`${sql.ident(columnName)}=${ComputedFieldUpdate.query(
+                sql`${this.tableId}.${sql.ident(columnName)}`,
+                (sharedColumnsToUpdate as any)[columnName],
+                sql,
+                (v) => this._value(columnName as string, v),
+              )}`
+            : sql`${sql.ident(columnName)}=EXCLUDED.${sql.ident(columnName)}`,
         ),
         sql`, `,
       )} RETURNING ${this.tableId}.*`,
@@ -925,7 +1150,8 @@ class Table<TRecord, TInsertParameters> {
     readonly whereColumnNames: TWhereColumns;
     readonly whereConditions: readonly BulkRecord<
       TRecord,
-      TWhereColumns[number]
+      TWhereColumns[number],
+      never
     >[];
   }): UnorderedSelectQuery<TRecord> {
     const bulkOperationOptions = this._getBulkOperationOptions();
@@ -943,18 +1169,75 @@ class Table<TRecord, TInsertParameters> {
   async bulkUpdate<
     TWhereColumns extends readonly [...(readonly (keyof TRecord)[])],
     TSetColumns extends readonly [...(readonly (keyof TRecord)[])],
+    TSharedWhereColumns extends WhereCondition<
+      Pick<TRecord, TWhereColumns[number]>
+    >,
+    TSharedSetColumns extends UpdateParameters<
+      Pick<TRecord, TSetColumns[number]>
+    >,
   >({
     whereColumnNames,
     setColumnNames,
+    sharedWhereColumns,
+    sharedSetColumns,
     updates,
-  }: {
-    readonly whereColumnNames: TWhereColumns;
-    readonly setColumnNames: TSetColumns;
-    readonly updates: readonly {
-      readonly where: BulkRecord<TRecord, TWhereColumns[number]>;
-      readonly set: BulkRecord<TRecord, TSetColumns[number]>;
-    }[];
-  }): Promise<TRecord[]> {
+  }:
+    | {
+        readonly whereColumnNames: TWhereColumns;
+        readonly setColumnNames: TSetColumns;
+        readonly sharedWhereColumns?: undefined;
+        readonly sharedSetColumns?: undefined;
+        readonly updates: readonly {
+          readonly where: BulkRecord<TRecord, TWhereColumns[number], never>;
+          readonly set: BulkRecord<TRecord, TSetColumns[number], never>;
+        }[];
+      }
+    | {
+        readonly whereColumnNames: TWhereColumns;
+        readonly setColumnNames: TSetColumns;
+        readonly sharedWhereColumns: TSharedWhereColumns;
+        readonly sharedSetColumns?: undefined;
+        readonly updates: readonly {
+          readonly where: BulkRecord<
+            TRecord,
+            TWhereColumns[number],
+            keyof TSharedWhereColumns
+          >;
+          readonly set: BulkRecord<TRecord, TSetColumns[number], never>;
+        }[];
+      }
+    | {
+        readonly whereColumnNames: TWhereColumns;
+        readonly setColumnNames: TSetColumns;
+        readonly sharedWhereColumns?: undefined;
+        readonly sharedSetColumns: TSharedSetColumns;
+        readonly updates: readonly {
+          readonly where: BulkRecord<TRecord, TWhereColumns[number], never>;
+          readonly set: BulkRecord<
+            TRecord,
+            TSetColumns[number],
+            keyof TSharedSetColumns
+          >;
+        }[];
+      }
+    | {
+        readonly whereColumnNames: TWhereColumns;
+        readonly setColumnNames: TSetColumns;
+        readonly sharedWhereColumns: TSharedWhereColumns;
+        readonly sharedSetColumns: TSharedSetColumns;
+        readonly updates: readonly {
+          readonly where: BulkRecord<
+            TRecord,
+            TWhereColumns[number],
+            keyof TSharedWhereColumns
+          >;
+          readonly set: BulkRecord<
+            TRecord,
+            TSetColumns[number],
+            keyof TSharedSetColumns
+          >;
+        }[];
+      }): Promise<TRecord[]> {
     if (updates.length === 0) {
       return [];
     }
@@ -977,7 +1260,8 @@ class Table<TRecord, TInsertParameters> {
     readonly whereColumnNames: TWhereColumns;
     readonly whereConditions: readonly BulkRecord<
       TRecord,
-      TWhereColumns[number]
+      TWhereColumns[number],
+      never
     >[];
   }) {
     if (whereConditions.length === 0) {
@@ -990,7 +1274,9 @@ class Table<TRecord, TInsertParameters> {
     });
   }
 
-  private async _insert<TRecordsToInsert extends readonly TInsertParameters[]>(
+  private async _insert<
+    TRecordsToInsert extends readonly InsertParameters<TInsertParameters>[],
+  >(
     onConflict:
       | null
       | ((columnNames: Array<keyof TRecordsToInsert[number]>) => SQLQuery),
@@ -1015,7 +1301,9 @@ class Table<TRecord, TInsertParameters> {
         sql`(${sql.join(
           columnNames.map((columnName) =>
             columnName in (row as any)
-              ? sql.value(this._value(columnName as string, row[columnName]))
+              ? ComputedValue.query(row[columnName], sql, (v) =>
+                  this._value(columnName as string, v),
+                )
               : sql`DEFAULT`,
           ),
           `,`,
@@ -1036,7 +1324,9 @@ class Table<TRecord, TInsertParameters> {
     return results;
   }
 
-  async insert<TRecordsToInsert extends readonly TInsertParameters[]>(
+  async insert<
+    TRecordsToInsert extends readonly InsertParameters<TInsertParameters>[],
+  >(
     ...rows: keyof TRecordsToInsert[number] extends keyof TInsertParameters
       ? TRecordsToInsert
       : readonly ({
@@ -1053,7 +1343,9 @@ class Table<TRecord, TInsertParameters> {
     return this._insert(null, ...rows) as any;
   }
 
-  async insertOrUpdate<TRecordsToInsert extends readonly TInsertParameters[]>(
+  async insertOrUpdate<
+    TRecordsToInsert extends readonly InsertParameters<TInsertParameters>[],
+  >(
     options:
       | readonly [keyof TRecord, ...(keyof TRecord)[]]
       | {
@@ -1107,17 +1399,8 @@ class Table<TRecord, TInsertParameters> {
     }, ...rows) as any;
   }
 
-  async insertOrIgnore<TRecordsToInsert extends readonly TInsertParameters[]>(
-    ...rows: keyof TRecordsToInsert[number] extends keyof TInsertParameters
-      ? TRecordsToInsert
-      : readonly ({
-          readonly [key in keyof TInsertParameters]: TInsertParameters[key];
-        } & {
-          readonly [key in Exclude<
-            keyof TRecordsToInsert[number],
-            keyof TInsertParameters
-          >]: never;
-        })[]
+  async insertOrIgnore(
+    ...rows: readonly InsertParameters<TInsertParameters>[]
   ): Promise<TRecord[]> {
     const {sql} = this._underlyingDb;
     return await this._insert(() => sql`ON CONFLICT DO NOTHING`, ...rows);
@@ -1125,8 +1408,18 @@ class Table<TRecord, TInsertParameters> {
 
   async update(
     whereValues: WhereCondition<TRecord>,
-    updateValues: Partial<TRecord>,
-  ): Promise<TRecord[]> {
+    updateValues: UpdateParameters<TRecord>,
+  ): Promise<TRecord[]>;
+  async update<TReturningColumns extends readonly (keyof TRecord)[]>(
+    whereValues: WhereCondition<TRecord>,
+    updateValues: UpdateParameters<TRecord>,
+    options: {columnsToReturn: TReturningColumns},
+  ): Promise<Pick<TRecord, TReturningColumns[number]>[]>;
+  async update<TReturningColumns extends readonly (keyof TRecord)[]>(
+    whereValues: WhereCondition<TRecord>,
+    updateValues: UpdateParameters<TRecord>,
+    options?: {columnsToReturn: TReturningColumns},
+  ): Promise<Pick<TRecord, TReturningColumns[number]>[]> {
     const {sql} = this._underlyingDb;
     const whereConditions = WhereCombinedCondition.query(
       null,
@@ -1139,22 +1432,32 @@ class Table<TRecord, TInsertParameters> {
     }
     const setClause = sql.join(
       Object.entries(updateValues).map(([columnName, value]) => {
-        return sql`${sql.ident(columnName)} = ${this._value(
-          columnName,
+        const columnId = sql.ident(columnName);
+        return sql`${columnId}=${ComputedFieldUpdate.query(
+          columnId,
           value,
+          sql,
+          (v) => this._value(columnName, v),
         )}`;
       }),
       sql`, `,
     );
-    if (whereConditions === 'TRUE') {
-      return await this.untypedQuery(
-        sql`UPDATE ${this.tableId} SET ${setClause} RETURNING *`,
-      );
-    } else {
-      return await this.untypedQuery(
-        sql`UPDATE ${this.tableId} SET ${setClause} WHERE ${whereConditions} RETURNING *`,
-      );
+    const parts = [sql`UPDATE ${this.tableId} SET ${setClause}`];
+    if (whereConditions !== 'TRUE') {
+      parts.push(sql`WHERE ${whereConditions}`);
     }
+    if (options?.columnsToReturn.length) {
+      parts.push(
+        sql`RETURNING ${sql.join(
+          options.columnsToReturn.map((n) => sql.ident(n)),
+          ', ',
+        )}`,
+      );
+    } else if (options?.columnsToReturn.length !== 0) {
+      parts.push(sql`RETURNING *`);
+    }
+
+    return await this.untypedQuery(sql.join(parts, sql` `));
   }
 
   async delete(whereValues: WhereCondition<TRecord>): Promise<void> {
@@ -1506,4 +1809,6 @@ module.exports = Object.assign(defineTables, {
   or,
   isNoResultFoundError,
   isMultipleResultsFoundError,
+  currentTimestamp,
+  add,
 });
