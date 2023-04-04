@@ -4,7 +4,7 @@ import splitSqlQuery from '@databases/split-sql-query';
 import {Statement, Options as DatabaseOptions, Database} from 'better-sqlite3';
 import DatabaseConstructor = require('better-sqlite3');
 
-export type {SQLQuery};
+export type {SQLQuery, DatabaseOptions};
 export {sql, isSqlQuery};
 
 const sqliteFormat: FormatConfig = {

@@ -75,6 +75,7 @@ Package Name | Version | Docs
 @databases/push-to-async-iterable | [![NPM version](https://img.shields.io/npm/v/@databases/push-to-async-iterable?style=for-the-badge)](https://www.npmjs.com/package/@databases/push-to-async-iterable) | Not documented yet
 @databases/shared | [![NPM version](https://img.shields.io/npm/v/@databases/shared?style=for-the-badge)](https://www.npmjs.com/package/@databases/shared) | Not documented yet
 @databases/shared-print-types | [![NPM version](https://img.shields.io/npm/v/@databases/shared-print-types?style=for-the-badge)](https://www.npmjs.com/package/@databases/shared-print-types) | Not documented yet
+@databases/sqlite-pool | [![NPM version](https://img.shields.io/npm/v/@databases/sqlite-pool?style=for-the-badge)](https://www.npmjs.com/package/@databases/sqlite-pool) | Not documented yet
 @databases/websql-core | [![NPM version](https://img.shields.io/npm/v/@databases/websql-core?style=for-the-badge)](https://www.npmjs.com/package/@databases/websql-core) | Not documented yet
 @databases/with-container | [![NPM version](https://img.shields.io/npm/v/@databases/with-container?style=for-the-badge)](https://www.npmjs.com/package/@databases/with-container) | Not documented yet
 <!-- VERSION_TABLE -->
