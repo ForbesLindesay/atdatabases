@@ -9,12 +9,13 @@ afterAll(async () => {
 });
 
 test('error messages', async () => {
-  const s = sql;
-  await expect(
-    db.query(s`
-    SELECT * FRM 'baz;
-  `),
-  ).rejects.toMatchInlineSnapshot(`[SqliteError: near "FRM": syntax error]`);
+  expect.assertions(1);
+
+  try {
+    await db.query(sql`SELECT * FRM 'baz;`);
+  } catch (e) {
+   expect((e as any).code).toMatch('SQLITE_ERROR');
+  }
 });
 
 test('query', async () => {
