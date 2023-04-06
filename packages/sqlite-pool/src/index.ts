@@ -5,6 +5,7 @@ import connect, {
 } from '@databases/sqlite-sync';
 import createBaseConnectionPool, {
   ConnectionPool,
+  PoolConnection,
   PoolOptions,
 } from '@databases/connection-pool';
 import {once} from 'events';
@@ -23,34 +24,49 @@ export interface DatabaseConnection extends DatabaseTransaction {
   dispose(): Promise<void>;
 }
 
+async function* transactionalQueryStream(
+  transaction: TransactionImplementation,
+  query: SQLQuery,
+): AsyncIterableIterator<any> {
+  const connection = transaction.connection;
+  for (const row of connection.queryStream(query)) {
+    if (transaction.aborted) {
+      throw new Error('Transaction aborted');
+    }
+    yield row;
+  }
+}
+
 class TransactionImplementation implements DatabaseTransaction {
-  #connection: SyncDatabaseConnection;
+  connection: SyncDatabaseConnection;
   aborted: boolean = false;
 
   constructor(connection: SyncDatabaseConnection) {
-    this.#connection = connection;
+    this.connection = connection;
   }
 
   async query(query: SQLQuery): Promise<any[]> {
     if (this.aborted) {
       throw new Error('Transaction aborted');
     }
-    return this.#connection.query(query);
+    return this.connection.query(query);
   }
 
   queryStream(query: SQLQuery): AsyncIterableIterator<any> {
-    const connection = this.#connection;
-    const that = this;
-    return (async function* () {
-      for (const row of connection.queryStream(query)) {
-        if (that.aborted) {
-          throw new Error('Transaction aborted');
-        }
-        yield row;
-      }
-    })();
+    return transactionalQueryStream(this, query);
   }
 }
+
+async function* queryStream(maybePoolConnection: Promise<PoolConnection<SyncDatabaseConnectionWithController>>, query: SQLQuery) {
+  const poolConnection = await maybePoolConnection;
+  try {
+    for (const row of poolConnection.connection.queryStream(query)) {
+      yield row;
+    }
+  } finally {
+    poolConnection.release();
+  }
+};
 
 type PartialPoolOptions = Omit<
   PoolOptions<SyncDatabaseConnection>,
@@ -100,17 +116,7 @@ class DatabaseConnectionImplementation implements DatabaseConnection {
   }
 
   queryStream(query: SQLQuery): AsyncIterableIterator<any> {
-    const that = this;
-    return (async function* () {
-      const poolConnection = await that.#pool.getConnection();
-      try {
-        for (const row of poolConnection.connection.queryStream(query)) {
-          yield row;
-        }
-      } finally {
-        poolConnection.release();
-      }
-    })();
+    return queryStream(this.#pool.getConnection(), query);
   }
 
   async tx<T>(fn: (db: DatabaseTransaction) => Promise<T>): Promise<T> {
@@ -132,7 +138,9 @@ class DatabaseConnectionImplementation implements DatabaseConnection {
     } catch (e) {
       try {
         connection.query(sql`ROLLBACK`);
-      } catch {}
+      } catch {
+        // Deliberately swallow this error
+      }
       throw e;
     } finally {
       poolConnection.release();

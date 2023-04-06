@@ -32,8 +32,8 @@ test('two parallel queries', async () => {
 
 test('never releasing', async () => {
   try {
-    await db.tx(() => {
-      return new Promise(function () {
+    await db.tx(async () => {
+      return new Promise(() => {
         // not calling resolve
       });
     });
