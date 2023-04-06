@@ -14,9 +14,7 @@ test('error messages', async () => {
     db.query(s`
     SELECT * FRM 'baz;
   `),
-  ).rejects.toMatchInlineSnapshot(
-    `[SqliteError: near "FRM": syntax error]`,
-  );
+  ).rejects.toMatchInlineSnapshot(`[SqliteError: near "FRM": syntax error]`);
 });
 
 test('query', async () => {
@@ -66,7 +64,7 @@ Object {
 });
 
 test('two parallel queries', async () => {
-  async function query () {
+  async function query() {
     const [{foo}] = await db.query(sql`SELECT 1 + 1 as foo`);
     expect(foo).toBe(2);
   }

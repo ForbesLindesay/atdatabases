@@ -1,7 +1,13 @@
 import sql, {SQLQuery, isSqlQuery} from '@databases/sql';
-import connect, { DatabaseOptions, DatabaseConnection as SyncDatabaseConnection } from '@databases/sqlite-sync';
-import createBaseConnectionPool, { ConnectionPool, PoolOptions } from '@databases/connection-pool';
-import { once } from 'events';
+import connect, {
+  DatabaseOptions,
+  DatabaseConnection as SyncDatabaseConnection,
+} from '@databases/sqlite-sync';
+import createBaseConnectionPool, {
+  ConnectionPool,
+  PoolOptions,
+} from '@databases/connection-pool';
+import {once} from 'events';
 
 export type {SQLQuery};
 export {sql, isSqlQuery};
@@ -25,11 +31,11 @@ class TransactionImplementation implements DatabaseTransaction {
     this.#connection = connection;
   }
 
-  async query (query: SQLQuery) : Promise<any[]> {
+  async query(query: SQLQuery): Promise<any[]> {
     if (this.aborted) {
       throw new Error('Transaction aborted');
     }
-    return this.#connection.query(query)
+    return this.#connection.query(query);
   }
 
   queryStream(query: SQLQuery): AsyncIterableIterator<any> {
@@ -46,23 +52,30 @@ class TransactionImplementation implements DatabaseTransaction {
   }
 }
 
-type PartialPoolOptions = Omit<PoolOptions<SyncDatabaseConnection>, 'openConnection' | 'closeConnection'>;
+type PartialPoolOptions = Omit<
+  PoolOptions<SyncDatabaseConnection>,
+  'openConnection' | 'closeConnection'
+>;
 
 interface SyncDatabaseConnectionWithController extends SyncDatabaseConnection {
   controller?: AbortController;
 }
 
 class DatabaseConnectionImplementation implements DatabaseConnection {
-  #pool: ConnectionPool<SyncDatabaseConnectionWithController>
+  #pool: ConnectionPool<SyncDatabaseConnectionWithController>;
 
-  constructor(filename?: string, options?: DatabaseOptions, poolOptions?: PartialPoolOptions) {
+  constructor(
+    filename?: string,
+    options?: DatabaseOptions,
+    poolOptions?: PartialPoolOptions,
+  ) {
     this.#pool = createBaseConnectionPool({
       async openConnection() {
         return connect(filename, options);
       },
       async closeConnection(connection) {
         connection.dispose();
-        return
+        return;
       },
       async onReleaseTimeout(connection: SyncDatabaseConnectionWithController) {
         const controller = connection.controller;
@@ -70,13 +83,13 @@ class DatabaseConnectionImplementation implements DatabaseConnection {
           controller.abort();
         }
         connection.dispose();
-        return
+        return;
       },
-      ...poolOptions
+      ...poolOptions,
     });
   }
 
-  async query (query: SQLQuery) : Promise<any[]> {
+  async query(query: SQLQuery): Promise<any[]> {
     const poolConnection = await this.#pool.getConnection();
     try {
       const res = poolConnection.connection.query(query);
@@ -106,11 +119,16 @@ class DatabaseConnectionImplementation implements DatabaseConnection {
     try {
       connection.query(sql`BEGIN`);
       const controller = new AbortController();
-      const tx = new TransactionImplementation(connection)
+      const tx = new TransactionImplementation(connection);
       connection.controller = controller;
-      const res = await Promise.race([fn(tx), once(controller.signal, 'abort').then(() => { throw new Error('Transaction aborted') })]);
+      const res = await Promise.race([
+        fn(tx),
+        once(controller.signal, 'abort').then(() => {
+          throw new Error('Transaction aborted');
+        }),
+      ]);
       connection.query(sql`COMMIT`);
-      return res
+      return res;
     } catch (e) {
       try {
         connection.query(sql`ROLLBACK`);
@@ -126,7 +144,11 @@ class DatabaseConnectionImplementation implements DatabaseConnection {
   }
 }
 
-function createConnectionPool(filename?: string, options?: DatabaseOptions, poolOptions?: PartialPoolOptions): DatabaseConnection {
+function createConnectionPool(
+  filename?: string,
+  options?: DatabaseOptions,
+  poolOptions?: PartialPoolOptions,
+): DatabaseConnection {
   return new DatabaseConnectionImplementation(filename, options, poolOptions);
 }
 

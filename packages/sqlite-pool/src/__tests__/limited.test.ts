@@ -2,7 +2,11 @@ import createConnectionPool, {sql} from '../';
 
 jest.setTimeout(30000);
 
-const db = createConnectionPool(':memory:', {}, { maxSize: 2, releaseTimeoutMilliseconds: 100 });
+const db = createConnectionPool(
+  ':memory:',
+  {},
+  {maxSize: 2, releaseTimeoutMilliseconds: 100},
+);
 
 afterAll(async () => {
   await db.dispose();
@@ -10,7 +14,7 @@ afterAll(async () => {
 
 test('two parallel queries', async () => {
   let concurrent = 0;
-  async function query () {
+  async function query() {
     const result = await db.tx(async (tx) => {
       if (++concurrent > 2) {
         throw new Error('Too many concurrent queries');
@@ -19,8 +23,8 @@ test('two parallel queries', async () => {
       const b = await tx.query(sql`SELECT 1 + 2 as bar;`);
       return {a, b};
     });
-    concurrent--
-    expect(result).toEqual({ a: [ { foo: 42 } ], b: [ { bar: 3 } ]})
+    concurrent--;
+    expect(result).toEqual({a: [{foo: 42}], b: [{bar: 3}]});
   }
 
   await Promise.all([query(), query(), query(), query()]);
@@ -33,7 +37,7 @@ test('never releasing', async () => {
         // not calling resolve
       });
     });
-    fail()
+    fail();
   } catch (e) {
     // pass
     expect((e as Error).message).toEqual('Transaction aborted');
