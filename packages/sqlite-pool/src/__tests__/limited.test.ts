@@ -34,7 +34,8 @@ test('never releasing', async () => {
       });
     });
     fail()
-  } catch {
+  } catch (e) {
     // pass
+    expect((e as Error).message).toEqual('Transaction aborted');
   }
 });
