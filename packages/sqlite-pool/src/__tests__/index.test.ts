@@ -14,7 +14,7 @@ test('error messages', async () => {
   try {
     await db.query(sql`SELECT * FRM 'baz;`);
   } catch (e) {
-   expect((e as any).code).toMatch('SQLITE_ERROR');
+    expect((e as any).code).toMatch('SQLITE_ERROR');
   }
 });
 

@@ -57,7 +57,12 @@ class TransactionImplementation implements DatabaseTransaction {
   }
 }
 
-async function* queryStream(maybePoolConnection: Promise<PoolConnection<SyncDatabaseConnectionWithController>>, query: SQLQuery) {
+async function* queryStream(
+  maybePoolConnection: Promise<
+    PoolConnection<SyncDatabaseConnectionWithController>
+  >,
+  query: SQLQuery,
+) {
   const poolConnection = await maybePoolConnection;
   try {
     for (const row of poolConnection.connection.queryStream(query)) {
@@ -66,7 +71,7 @@ async function* queryStream(maybePoolConnection: Promise<PoolConnection<SyncData
   } finally {
     poolConnection.release();
   }
-};
+}
 
 type PartialPoolOptions = Omit<
   PoolOptions<SyncDatabaseConnection>,
