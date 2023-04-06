@@ -8,7 +8,11 @@ The `@databases/sqlite-pool` library provides an asynchronous, safe and convenie
 API for querying SQLite databases in node.js. Built on top of
 [better-sqlite3](https://www.npmjs.com/package/better-sqlite3).
 
-N.B. you should only have one process createConnectionPooled to a given SQLite database at a time.
+When using this module, consider that:
+
+> SQLite supports multiple simultaneous read transactions coming from separate database
+connections, possibly in separate threads or processes, but only one simultaneous
+write transaction - [source](https://www.sqlite.org/lang_transaction.html).
 
 ## Usage
 
