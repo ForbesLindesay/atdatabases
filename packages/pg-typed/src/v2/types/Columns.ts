@@ -1,9 +1,7 @@
-import {SQLQuery} from '@databases/pg';
 import {NonAggregatedTypedValue} from './SpecialValues';
 
 export interface ColumnReference<T> extends NonAggregatedTypedValue<T> {
-  readonly postgresTypeQuery?: SQLQuery;
-  readonly postgresType?: string;
+  readonly sqlType: string | null;
   setAlias(tableAlias: string): ColumnReference<T>;
 }
 

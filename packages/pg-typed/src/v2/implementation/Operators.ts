@@ -1,48 +1,52 @@
 import {SQLQuery, sql} from '@databases/pg';
-import Value, {
+import {
   AggregatedTypedValue,
-  FieldCondition,
-  ComputedFieldCondition,
-  isSpecialValue,
-  NonAggregatedTypedValue,
-  FieldConditionToSqlContext,
-  RawValue,
   AnyOf,
-  ValueToSqlContext,
-  BaseAggregatedTypedValue,
-  isComputedFieldQuery,
-  ComputedValue,
-  AggregatedValue,
+  ComputedFieldCondition,
+  FieldCondition,
+  FieldConditionToSqlContext,
   isAnyOfCondition,
+  isComputedFieldQuery,
+  isSpecialValue,
+  NonAggregatedValue,
+  RawValue,
+  TypedValue,
+  UnknownValue,
+  Value,
+  ValueToSqlContext,
 } from '../types/SpecialValues';
 import {
   BinaryInput,
   OperatorDefinition,
   OperatorDefinitions,
 } from '../PostgresOperators';
-import {IOperators, List} from '../types/Operators';
+import {
+  AggregatedJsonValue,
+  IOperators,
+  List,
+  NonAggregatedJsonValue,
+} from '../types/Operators';
 import {ColumnReference} from '../types/Columns';
+import WhereCondition from '../WhereCondition';
 
 export function columnReference<T>(
   tableName: string,
   columnName: string,
   isAlias: boolean,
-  postgresTypeQuery?: SQLQuery,
-  postgresType?: string,
-): Value<T> {
+  sqlType: string | null,
+): NonAggregatedValue<T> {
   return new ColumnReferenceImplementation(
     tableName,
     columnName,
     isAlias,
-    postgresTypeQuery,
-    postgresType,
+    sqlType,
   );
 }
 
 export function fieldConditionToPredicateValue<T>(
   column: ColumnReference<T>,
   f: FieldCondition<T>,
-): Value<boolean> {
+): NonAggregatedValue<boolean> {
   const constantValue = fieldConditionToConstant(f);
   if (constantValue !== null) return constantValue;
   return new FieldConditionValue(column, f);
@@ -50,7 +54,7 @@ export function fieldConditionToPredicateValue<T>(
 
 export function valueToSelect<T>(
   alias: string,
-  value: Value<T> | AggregatedValue<T>,
+  value: UnknownValue<T>,
 ): SQLQuery {
   if (
     value instanceof ColumnReferenceImplementation &&
@@ -72,8 +76,8 @@ export function valueToSelect<T>(
 export function aliasTableInValue<T>(
   tableName: string,
   tableAlias: string,
-  value: Value<T>,
-): Value<T> {
+  value: NonAggregatedValue<T>,
+): NonAggregatedValue<T> {
   if (!isSpecialValue(value)) {
     return value;
   }
@@ -81,7 +85,7 @@ export function aliasTableInValue<T>(
 }
 
 export function valueToSql<T>(
-  value: Value<T> | BaseAggregatedTypedValue<T>,
+  value: UnknownValue<T>,
   ctx: ValueToSqlContext,
 ): SQLQuery {
   if (isSpecialValue(value)) return value.toSql(ctx);
@@ -112,13 +116,14 @@ const ORDER_BY_DIRECTION = {
   DESC: sql`DESC`,
 };
 
-abstract class BaseExpression<T>
-  implements BaseAggregatedTypedValue<T>, NonAggregatedTypedValue<T>
-{
+abstract class BaseExpression<T> implements TypedValue<T> {
   public readonly __isSpecialValue = true;
   public readonly __isAggregatedValue = true;
   public readonly __isNonAggregatedComputedValue = true;
-
+  public readonly sqlType: string | null | undefined;
+  constructor(sqlType: string | null | undefined) {
+    this.sqlType = sqlType;
+  }
   public abstract toSql(ctx: ValueToSqlContext): SQLQuery;
   public __getType(): T {
     throw new Error(
@@ -147,23 +152,19 @@ class ColumnReferenceImplementation<T>
   public readonly columnName: string;
   public readonly isAlias: boolean;
 
-  // TODO: make use of schema info
-  public readonly postgresTypeQuery: SQLQuery | undefined;
-  public readonly postgresType: string | undefined;
+  // This property is assigned in the base class
+  public readonly sqlType!: string | null;
 
   constructor(
     tableName: string,
     columnName: string,
     isAlias: boolean,
-    postgresTypeQuery: SQLQuery | undefined,
-    postgresType: string | undefined,
+    sqlType: string | null,
   ) {
-    super();
+    super(sqlType);
     this.tableName = tableName;
     this.columnName = columnName;
     this.isAlias = isAlias;
-    this.postgresTypeQuery = postgresTypeQuery;
-    this.postgresType = postgresType;
   }
   public toSql(ctx: ValueToSqlContext): SQLQuery {
     if (this.isAlias) {
@@ -180,8 +181,7 @@ class ColumnReferenceImplementation<T>
       tableAlias,
       this.columnName,
       true,
-      this.postgresTypeQuery,
-      this.postgresType,
+      this.sqlType,
     );
   }
 }
@@ -193,7 +193,8 @@ class OperatorExpression<
 > extends BaseExpression<TResult> {
   public readonly op: OperatorDefinition<TPreparedInput>;
   public readonly input: TInput;
-  public readonly prepareInput: (
+
+  private readonly _prepareInput: (
     input: TInput,
     ctx: ValueToSqlContext,
   ) => TPreparedInput;
@@ -202,16 +203,17 @@ class OperatorExpression<
     op: OperatorDefinition<TPreparedInput>,
     input: TInput,
     prepareInput: (input: TInput, ctx: ValueToSqlContext) => TPreparedInput,
+    sqlType: string | null | undefined,
   ) {
-    super();
+    super(sqlType);
     this.op = op;
     this.input = input;
-    this.prepareInput = prepareInput;
+    this._prepareInput = prepareInput;
   }
 
   public toSql(ctx: ValueToSqlContext): SQLQuery {
     return this.op.toSql(
-      this.prepareInput(this.input, {
+      this._prepareInput(this.input, {
         ...ctx,
         parentOperatorPrecedence: this.op.precedence,
       }),
@@ -266,9 +268,13 @@ class OperatorFieldQuery<
 
 class NonAggregateFunction<T> extends BaseExpression<T> {
   public readonly fn: keyof typeof NON_AGGREGATE_FUNCTIONS;
-  public readonly values: Value<T>[];
-  constructor(fn: keyof typeof NON_AGGREGATE_FUNCTIONS, values: Value<T>[]) {
-    super();
+  public readonly values: UnknownValue<T>[];
+  constructor(
+    fn: keyof typeof NON_AGGREGATE_FUNCTIONS,
+    values: UnknownValue<T>[],
+    sqlType: string | null | undefined,
+  ) {
+    super(sqlType);
     this.fn = fn;
     this.values = values;
   }
@@ -287,23 +293,27 @@ class AggregateFunction<TResult, TArg>
   implements AggregatedTypedValue<TResult>
 {
   public readonly fn: keyof typeof AGGREGATE_FUNCTIONS;
-  public readonly values: Value<TArg>[];
-  public readonly condition: undefined | Value<boolean>;
+  public readonly values: NonAggregatedValue<TArg>[];
+  public readonly typeCast: SQLQuery | undefined;
+  public readonly condition: undefined | NonAggregatedValue<boolean>;
   public readonly orderByClauses: {
     direction: keyof typeof ORDER_BY_DIRECTION;
-    value: Value<any>;
+    value: NonAggregatedValue<any>;
   }[];
   public readonly isDistinct: boolean;
   constructor(
     fn: keyof typeof AGGREGATE_FUNCTIONS,
-    values: Value<TArg>[],
-    condition?: Value<boolean>,
-    orderBy?: Value<any>[],
+    values: NonAggregatedValue<TArg>[],
+    sqlType: string | null | undefined,
+    typeCast?: SQLQuery,
+    condition?: NonAggregatedValue<boolean>,
+    orderBy?: NonAggregatedValue<any>[],
     distinct?: boolean,
   ) {
-    super();
+    super(sqlType);
     this.fn = fn;
     this.values = values;
+    this.typeCast = typeCast;
     this.condition = condition;
     this.orderByClauses = orderBy ?? [];
     this.isDistinct = distinct ?? false;
@@ -326,19 +336,22 @@ class AggregateFunction<TResult, TArg>
         `, `,
       )}`;
     }
-    if (this.condition !== undefined) {
-      return sql`${fn}(${args}) FILTER (WHERE ${valueToSql(
-        this.condition,
-        ctx,
-      )})`;
+    let result = sql`${fn}(${args})`;
+    if (this.condition) {
+      result = sql`${result} FILTER (WHERE ${valueToSql(this.condition, ctx)})`;
     }
-    return sql`${fn}(${args})`;
+    if (this.typeCast) {
+      result = sql`(${result})::${this.typeCast}`;
+    }
+    return result;
   }
 
   public distinct(): AggregatedTypedValue<TResult> {
     return new AggregateFunction(
       this.fn,
       this.values,
+      this.sqlType,
+      this.typeCast,
       this.condition,
       this.orderByClauses,
       true,
@@ -346,11 +359,13 @@ class AggregateFunction<TResult, TArg>
   }
 
   public orderByAsc<TOrderBy>(
-    value: Value<TOrderBy>,
+    value: NonAggregatedValue<TOrderBy>,
   ): AggregatedTypedValue<TResult> {
     return new AggregateFunction(
       this.fn,
       this.values,
+      this.sqlType,
+      this.typeCast,
       this.condition,
       [...this.orderByClauses, {direction: 'ASC', value}],
       this.isDistinct,
@@ -358,21 +373,27 @@ class AggregateFunction<TResult, TArg>
   }
 
   public orderByDesc<TOrderBy>(
-    value: Value<TOrderBy>,
+    value: NonAggregatedValue<TOrderBy>,
   ): AggregatedTypedValue<TResult> {
     return new AggregateFunction(
       this.fn,
       this.values,
+      this.sqlType,
+      this.typeCast,
       this.condition,
       [...this.orderByClauses, {direction: 'DESC', value}],
       this.isDistinct,
     );
   }
 
-  public filter(condition: Value<boolean>): AggregatedTypedValue<TResult> {
+  public filter(
+    condition: NonAggregatedValue<boolean>,
+  ): AggregatedTypedValue<TResult> {
     return new AggregateFunction(
       this.fn,
       this.values,
+      this.sqlType,
+      this.typeCast,
       condition,
       this.orderByClauses,
       this.isDistinct,
@@ -418,8 +439,8 @@ class AllOf<T> extends BaseFieldQuery<T> {
 
 class AnyOfImplementation<T> extends BaseFieldQuery<T> implements AnyOf<T> {
   public readonly __isAnyOf = true;
-  public readonly values: Value<List<FieldCondition<T>>>;
-  constructor(values: Value<List<FieldCondition<T>>>) {
+  public readonly values: NonAggregatedValue<List<FieldCondition<T>>>;
+  constructor(values: NonAggregatedValue<List<FieldCondition<T>>>) {
     super();
     this.values = values;
   }
@@ -492,15 +513,11 @@ class AnyOfImplementation<T> extends BaseFieldQuery<T> implements AnyOf<T> {
 }
 
 class EqualsAnyOf<T> extends BaseExpression<boolean> {
-  public readonly left: AggregatedValue<T> | Value<T>;
+  public readonly left: UnknownValue<T>;
   public readonly right: AnyOf<T>;
 
-  constructor(
-    op: OperatorDefinition<BinaryInput>,
-    left: AggregatedValue<T> | Value<T>,
-    right: AnyOf<T>,
-  ) {
-    super();
+  constructor(left: UnknownValue<T>, right: AnyOf<T>) {
+    super(`BOOLEAN`);
     this.left = left;
     this.right = right;
   }
@@ -539,121 +556,240 @@ class CaseInsensitive extends BaseFieldQuery<string> {
   }
 }
 
+function prepareUnaryOperatorExpression<TLeft>(
+  expression: UnknownValue<TLeft>,
+  ctx: ValueToSqlContext,
+): SQLQuery {
+  return valueToSql(expression, ctx);
+}
+
 function prepareBinaryOperatorExpression<TLeft, TRight>(
   {
     left,
     right,
   }: {
-    left: AggregatedValue<TLeft> | Value<TLeft>;
-    right: AggregatedValue<TRight> | Value<TRight>;
+    left: UnknownValue<TLeft>;
+    right: UnknownValue<TRight>;
   },
   ctx: ValueToSqlContext,
-) {
-  return {left: valueToSql(left, ctx), right: valueToSql(right, ctx)};
+): BinaryInput {
+  const leftSqlType = isSpecialValue(left) ? left.sqlType : null;
+  const rightSqlType = isSpecialValue(right) ? right.sqlType : null;
+
+  const ctxWithType = setSqlType(
+    ctx,
+    leftSqlType === rightSqlType || rightSqlType === null
+      ? leftSqlType
+      : leftSqlType === null
+      ? rightSqlType
+      : undefined,
+  );
+  return {
+    left: valueToSql(left, ctxWithType),
+    right: valueToSql(right, ctxWithType),
+  };
+}
+
+function prepareUnaryOperatorFieldQuery(
+  _input: null,
+  ctx: FieldConditionToSqlContext,
+): SQLQuery {
+  return ctx.left;
 }
 
 function prepareBinaryOperatorFieldQuery<TRight>(
   right: RawValue<TRight>,
   ctx: FieldConditionToSqlContext,
-) {
+): BinaryInput {
   return {left: ctx.left, right: sql.value(ctx.toValue(right))};
 }
 
 function binaryOperator(
   operator: OperatorDefinition<{left: SQLQuery; right: SQLQuery}>,
+  {
+    getType,
+    getUnaryOperator,
+    handleAnyOf,
+  }: {
+    getType?: <TLeft, TRight>(
+      left: UnknownValue<TLeft>,
+      right: UnknownValue<TRight>,
+    ) => string | null | undefined;
+    getUnaryOperator?: (value: unknown) => null | OperatorDefinition<SQLQuery>;
+    handleAnyOf?: <T>(
+      left: NonAggregatedValue<T>,
+      right: AnyOf<T>,
+    ) => NonAggregatedValue<boolean>;
+  } = {},
 ): (leftOrOnly: any, right?: any) => any {
   return <TLeft, TRight, TResult>(
-    leftOrOnly: AggregatedValue<TLeft> | Value<TLeft> | RawValue<TRight>,
-    right?: AggregatedValue<TRight> | Value<TRight> | AnyOf<TRight>,
-  ):
-    | (Value<TResult> & NonAggregatedTypedValue<TResult>)
-    | FieldCondition<TLeft> => {
+    leftOrOnly: UnknownValue<TLeft> | RawValue<TRight>,
+    right?: UnknownValue<TRight> | AnyOf<TRight>,
+  ): Value<TResult> | FieldCondition<TLeft> => {
     if (right === undefined) {
-      return new OperatorFieldQuery(
+      const unaryOperator = getUnaryOperator?.(leftOrOnly);
+      if (unaryOperator) {
+        return new OperatorFieldQuery<SQLQuery, null, TLeft>(
+          unaryOperator,
+          null,
+          prepareUnaryOperatorFieldQuery,
+          null,
+        );
+      }
+      return new OperatorFieldQuery<BinaryInput, RawValue<TRight>, TLeft>(
         operator,
         leftOrOnly as RawValue<TRight>,
         prepareBinaryOperatorFieldQuery,
         null,
       );
     } else if (isAnyOfCondition(right)) {
-      if (operator !== OperatorDefinitions.EQ) {
-        throw new Error(
-          `The only operator that can be used with "anyOf" is "eq".`,
+      if (handleAnyOf) {
+        return handleAnyOf<TLeft | TRight>(
+          leftOrOnly as NonAggregatedValue<TLeft>,
+          right,
+        ) as any;
+      }
+      throw new Error(`"anyOf" cannot be used with this operator.`);
+    } else {
+      const unaryOperator = getUnaryOperator?.(right);
+      if (unaryOperator) {
+        return new OperatorExpression<SQLQuery, UnknownValue<TLeft>, TResult>(
+          unaryOperator,
+          leftOrOnly as UnknownValue<TLeft>,
+          prepareUnaryOperatorExpression,
+          getType
+            ? getType(leftOrOnly as UnknownValue<TLeft>, right)
+            : `BOOLEAN`,
         );
       }
-      if (
-        right instanceof AnyOfImplementation &&
-        !isSpecialValue(right.values) &&
-        !sql.isSqlQuery(right.values) &&
-        [...right.values].length === 0
-      ) {
-        // @ts-expect-error
-        return false;
-      }
-      return new EqualsAnyOf<TLeft | TRight>(
-        operator,
-        leftOrOnly as AggregatedValue<TLeft> | Value<TLeft>,
-        right,
-      ) as any;
-    } else {
       return new OperatorExpression(
         operator,
-        {left: leftOrOnly as AggregatedValue<TLeft> | Value<TLeft>, right},
+        {
+          left: leftOrOnly as UnknownValue<TLeft>,
+          right,
+        },
         prepareBinaryOperatorExpression,
+        getType ? getType(leftOrOnly as UnknownValue<TLeft>, right) : `BOOLEAN`,
       );
     }
   };
 }
 
 function prepareVariadicOperatorInput<TInput>(
-  inputs: (Value<TInput> | AggregatedTypedValue<TInput>)[],
+  inputs: readonly UnknownValue<TInput>[],
   ctx: ValueToSqlContext,
 ) {
   return inputs.map((input) => valueToSql(input, ctx));
 }
 
-function variadicOperator<TStaticValue = never>(
-  operator: OperatorDefinition<SQLQuery[]>,
-  getConstantValue?: (
-    ...params: (Value<any> | AggregatedTypedValue<any>)[]
-  ) => TStaticValue | undefined,
+function booleanOperator(
+  operatorName: 'AND' | 'OR',
+  {
+    getConstantValue,
+  }: {
+    getConstantValue?: (
+      ...params: UnknownValue<boolean>[]
+    ) => boolean | undefined;
+  },
 ) {
-  return <TInput, TResult>(
-    ...params: (Value<TInput> | AggregatedTypedValue<TInput>)[]
-  ):
-    | TStaticValue
-    | (BaseAggregatedTypedValue<TResult> &
-        NonAggregatedTypedValue<TResult>) => {
-    const flatParams = params.flatMap((p) => {
+  const operator: OperatorDefinition<SQLQuery[]> =
+    OperatorDefinitions[operatorName];
+  const fn = (
+    ...params: readonly (UnknownValue<boolean> | WhereCondition<unknown>)[]
+  ): any => {
+    if (
+      params.some(
+        (p) =>
+          typeof p === 'function' ||
+          (typeof p === 'object' &&
+            p !== null &&
+            !isSpecialValue(p) &&
+            !sql.isSqlQuery(p)),
+      )
+    ) {
+      return (columns: any) => {
+        return fn(
+          ...params.map((condition) => {
+            if (typeof condition === 'function') return condition(columns);
+            if (
+              typeof condition === 'object' &&
+              condition !== null &&
+              !isSpecialValue(condition) &&
+              !sql.isSqlQuery(condition)
+            ) {
+              return Operators.and(
+                ...Object.entries(condition).map(([columnName, value]) =>
+                  fieldConditionToPredicateValue(columns[columnName], value),
+                ),
+              );
+            }
+            return condition;
+          }),
+        );
+      };
+    }
+
+    const flatParams: readonly UnknownValue<boolean>[] = (
+      params as UnknownValue<boolean>[]
+    ).flatMap((p) => {
       if (p instanceof OperatorExpression && p.op === operator) {
-        return p.input as (Value<any> | AggregatedTypedValue<any>)[];
+        return p.input as UnknownValue<boolean>[];
       }
       return [p];
     });
     const constantValue = getConstantValue && getConstantValue(...flatParams);
     if (constantValue !== undefined) return constantValue;
+    if (flatParams.length === 1) {
+      return flatParams[0] as Value<boolean>;
+    }
 
-    return new OperatorExpression(
-      operator,
-      flatParams,
-      prepareVariadicOperatorInput,
+    return new OperatorExpression<
+      SQLQuery[],
+      readonly UnknownValue<boolean>[],
+      boolean
+    >(operator, flatParams, prepareVariadicOperatorInput, `BOOLEAN`);
+  };
+  return fn;
+}
+
+function sqlTypeFromArgs(args: any[]) {
+  return args.reduce<string | null | undefined>((t, arg) => {
+    if (t === undefined) return undefined;
+    if (isSpecialValue(arg) && (arg as any).sqlType !== null) {
+      if (t === null || t === (args as any).sqlType) {
+        return (arg as any).sqlType;
+      } else {
+        return undefined;
+      }
+    }
+    return t;
+  }, null);
+}
+function nonAggregateFunction(
+  fn: keyof typeof NON_AGGREGATE_FUNCTIONS,
+  sqlType?: string,
+) {
+  return <TArgs extends any[], TResult>(...args: TArgs): Value<TResult> => {
+    return new NonAggregateFunction(
+      fn,
+      args,
+      sqlType === undefined ? sqlTypeFromArgs(args) : sqlType,
     );
   };
 }
 
-function nonAggregateFunction(fn: keyof typeof NON_AGGREGATE_FUNCTIONS) {
-  return <TArgs extends any[], TResult>(
-    ...args: TArgs
-  ): ComputedValue<TResult> => {
-    return new NonAggregateFunction(fn, args);
-  };
-}
-
-function aggregateFunction(fn: keyof typeof AGGREGATE_FUNCTIONS) {
+function aggregateFunction(
+  fn: keyof typeof AGGREGATE_FUNCTIONS,
+  sqlType?: string,
+) {
   return <TArgs extends any[], TResult>(
     ...args: TArgs
   ): AggregatedTypedValue<TResult> => {
-    return new AggregateFunction(fn, args);
+    return new AggregateFunction(
+      fn,
+      args,
+      sqlType === undefined ? sqlTypeFromArgs(args) : sqlType,
+    );
   };
 }
 
@@ -662,10 +798,14 @@ function fieldConditionToSql<T>(
   ctx: FieldConditionToSqlContext,
 ) {
   if (isSpecialValue(value)) return value.toSqlCondition(ctx);
+  const v = ctx.toValue(value);
+  if (v === null) {
+    return OperatorDefinitions.IS_NULL.toSql(ctx.left, ctx);
+  }
   return OperatorDefinitions.EQ.toSql(
     {
       left: ctx.left,
-      right: sql.value(ctx.toValue(value)),
+      right: sql.value(v),
     },
     ctx,
   );
@@ -676,26 +816,19 @@ function fieldConditionToConstant<T>(q: FieldCondition<T>): boolean | null {
   return null;
 }
 
-function overload<TKey extends string>(
-  overloads: Record<TKey, (...args: any[]) => any>,
-  chooseOverload: (...args: any[]) => TKey,
-) {
-  return (...args: any[]): any => {
-    return overloads[chooseOverload(...args)](...args);
-  };
-}
-
 class FieldConditionValue<T> extends BaseExpression<boolean> {
   public readonly left: ColumnReference<T>;
   public readonly right: FieldCondition<T>;
   constructor(left: ColumnReference<T>, right: FieldCondition<T>) {
-    super();
+    super(`BOOLEAN`);
     this.left = left;
     this.right = right;
   }
   public toSql(ctx: ValueToSqlContext): SQLQuery {
+    if (this.left.sqlType) {
+    }
     return fieldConditionToSql(this.right, {
-      ...ctx,
+      ...setSqlType(ctx, this.left.sqlType),
       left: valueToSql(this.left, ctx),
     });
   }
@@ -704,9 +837,9 @@ class FieldConditionValue<T> extends BaseExpression<boolean> {
 class AliasTableInValue<T> extends BaseExpression<T> {
   public readonly tableName: string;
   public readonly tableAlias: string;
-  public readonly value: Value<T>;
-  constructor(tableName: string, tableAlias: string, value: Value<T>) {
-    super();
+  public readonly value: UnknownValue<T>;
+  constructor(tableName: string, tableAlias: string, value: UnknownValue<T>) {
+    super(isSpecialValue(value) ? value.sqlType : null);
     this.tableName = tableName;
     this.tableAlias = tableAlias;
     this.value = value;
@@ -722,76 +855,236 @@ class AliasTableInValue<T> extends BaseExpression<T> {
   }
 }
 
+// export interface NonAggregatedJsonValue<TValue> {
+//   asString(): NonAggregatedValue<string>;
+//   asJson(): NonAggregatedValue<TValue>;
+//   prop<TKey extends keyof TValue>(
+//     key: TKey,
+//   ): NonAggregatedJsonValue<TValue[TKey]>;
+// }
+
+// export interface AggregatedJsonValue<TValue> {
+//   asString(): AggregatedValue<string>;
+//   asJson(): AggregatedValue<TValue>;
+//   prop<TKey extends keyof TValue>(key: TKey): AggregatedJsonValue<TValue[TKey]>;
+// }
+
+class JsonValue<TBaseValue, TValueAtPath>
+  implements
+    NonAggregatedJsonValue<TValueAtPath>,
+    AggregatedJsonValue<TValueAtPath>
+{
+  readonly __isSpecialValue = true;
+  private readonly _value: UnknownValue<TBaseValue>;
+  private readonly _path: string[];
+  constructor(value: UnknownValue<TBaseValue>, path: string[]) {
+    this._value = value;
+    this._path = path;
+  }
+  prop<TKey extends keyof TValueAtPath>(key: TKey) {
+    return new JsonValue<TBaseValue, TValueAtPath[TKey]>(this._value, [
+      ...this._path,
+      `${key as string | number}`,
+    ]);
+  }
+  asString(): Value<string> {
+    return new JsonValueResult(this._value, this._path, true, `TEXT`);
+  }
+  asJson(): Value<TValueAtPath> {
+    return new JsonValueResult(
+      this._value,
+      this._path,
+      false,
+      isSpecialValue(this._value) ? this._value.sqlType : null,
+    );
+  }
+}
+
+class JsonValueResult<
+  TBaseValue,
+  TValueAtPath,
+> extends BaseExpression<TValueAtPath> {
+  private readonly _value: UnknownValue<TBaseValue>;
+  private readonly _path: string[];
+  private readonly _asText: boolean;
+  constructor(
+    value: UnknownValue<TBaseValue>,
+    path: string[],
+    asText: boolean,
+    sqlType: string | null | undefined,
+  ) {
+    super(sqlType);
+    this._value = value;
+    this._path = path;
+    this._asText = asText;
+  }
+  public toSql(ctx: ValueToSqlContext): SQLQuery {
+    if (this._asText) {
+      return sql`${valueToSql(this._value, ctx)}#>>${this._path}`;
+    } else {
+      return sql`${valueToSql(this._value, ctx)}#>${this._path}`;
+    }
+  }
+}
+
+// function prepareExpressionAndType<T>(
+//   {expression, type}: {expression: UnknownValue<T>; type: string},
+//   ctx: ValueToSqlContext,
+// ) {
+//   if (!/^[a-z]([a-z0-9_]*[a-z0-9])?(\[\])?$/i.test(type)) {
+//     throw new Error(`Invalid type: ${type}`);
+//   }
+//   return {
+//     expression: valueToSql(expression, ctx),
+//     type: sql.__dangerous__rawValue(type),
+//   };
+// }
+// function typeCast<TInput, TResult>(
+//   expression: UnknownValue<TInput>,
+//   sqlType: string,
+// ): TypedValue<TResult> {
+//   return new OperatorExpression<
+//     {expression: SQLQuery; type: SQLQuery},
+//     {expression: UnknownValue<TInput>; type: string},
+//     TResult
+//   >(
+//     OperatorDefinitions.TYPECAST,
+//     {expression, type: sqlType},
+//     prepareExpressionAndType,
+//     sqlType,
+//   );
+// }
+
+function setSqlType(
+  ctx: ValueToSqlContext,
+  sqlType: string | null | undefined,
+): ValueToSqlContext {
+  if (sqlType === 'JSON' || sqlType === 'JSONB') {
+    return {
+      ...ctx,
+      toValue: (v) => JSON.stringify(v),
+    };
+  }
+  if (sqlType === 'JSON[]' || sqlType === 'JSONB[]') {
+    return {
+      ...ctx,
+      toValue: (v) =>
+        Array.isArray(v) ? v.map((v) => JSON.stringify(v)) : ctx.toValue(v),
+    };
+  }
+  return ctx;
+}
+
 const Operators: IOperators = {
   allOf: (values) => new AllOf(values),
-  and: variadicOperator(OperatorDefinitions.AND, (...params) => {
-    if (params.every((p) => p === true)) return true;
-    if (params.some((p) => p === false)) return false;
-    return undefined;
+  and: booleanOperator(`AND`, {
+    getConstantValue: (...params) => {
+      if (params.every((p) => p === true)) return true;
+      if (params.some((p) => p === false)) return false;
+      return undefined;
+    },
   }),
   anyOf: (values) => new AnyOfImplementation(values),
   caseInsensitive: (value) => new CaseInsensitive(value),
   count(expression) {
-    return new AggregateFunction(`COUNT`, [expression ?? STAR]);
+    return new AggregateFunction(
+      `COUNT`,
+      [expression ?? STAR],
+      `INT`,
+      sql`INT`,
+    );
   },
-  eq: binaryOperator(OperatorDefinitions.EQ),
+  eq: binaryOperator(OperatorDefinitions.EQ, {
+    getUnaryOperator(right) {
+      if (right === null) {
+        return OperatorDefinitions.IS_NULL;
+      }
+      return null;
+    },
+    handleAnyOf<T>(
+      left: NonAggregatedValue<T>,
+      right: AnyOf<T>,
+    ): NonAggregatedValue<boolean> {
+      if (
+        right instanceof AnyOfImplementation &&
+        !isSpecialValue(right.values) &&
+        !sql.isSqlQuery(right.values) &&
+        [...right.values].length === 0
+      ) {
+        return false;
+      }
+      return new EqualsAnyOf<T>(left, right) as any;
+    },
+  }),
   gt: binaryOperator(OperatorDefinitions.GT),
   gte: binaryOperator(OperatorDefinitions.GTE),
   ilike: binaryOperator(OperatorDefinitions.ILIKE),
+  json: <T>(value: UnknownValue<T>): JsonValue<T, T> => {
+    return new JsonValue<T, T>(value, []);
+  },
   like: binaryOperator(OperatorDefinitions.LIKE),
   lower: nonAggregateFunction(`LOWER`),
   lt: binaryOperator(OperatorDefinitions.LT),
   lte: binaryOperator(OperatorDefinitions.LTE),
   max: aggregateFunction(`MAX`),
   min: aggregateFunction(`MIN`),
-  neq: binaryOperator(OperatorDefinitions.NEQ),
-  not: overload(
-    {
-      expression(value: Value<boolean>): Value<boolean> {
-        if (typeof value === 'boolean') return !value;
-        return new OperatorExpression(
-          OperatorDefinitions.NOT,
-          value,
-          valueToSql,
-        );
-      },
-      fieldQuery<T>(value: FieldCondition<T>): FieldCondition<T> {
-        if (isSpecialValue(value)) {
-          const constantValueOfExpression = fieldConditionToConstant(value);
-          const constantValueOfNot =
-            constantValueOfExpression !== null
-              ? !constantValueOfExpression
-              : null;
-          return new OperatorFieldQuery(
-            OperatorDefinitions.NOT,
-            value,
-            fieldConditionToSql,
-            constantValueOfNot,
-          );
-        } else {
-          return new OperatorFieldQuery(
-            OperatorDefinitions.NEQ,
-            value,
-            prepareBinaryOperatorFieldQuery,
-            null,
-          );
-        }
-      },
+  neq: binaryOperator(OperatorDefinitions.NEQ, {
+    getUnaryOperator(right) {
+      if (right === null) {
+        return OperatorDefinitions.IS_NOT_NULL;
+      }
+      return null;
     },
-    (value: any) => {
-      return (isSpecialValue(value) && !isComputedFieldQuery(value)) ||
-        sql.isSqlQuery(value) ||
-        typeof value === 'boolean'
-        ? `expression`
-        : `fieldQuery`;
+  }),
+  not: <T>(value: UnknownValue<boolean> | FieldCondition<T>): any => {
+    if (typeof value === 'boolean') return !value;
+
+    if (isSpecialValue(value) && isComputedFieldQuery(value)) {
+      const constantValueOfExpression = fieldConditionToConstant(value);
+      const constantValueOfNot =
+        constantValueOfExpression !== null ? !constantValueOfExpression : null;
+      return new OperatorFieldQuery<SQLQuery, FieldCondition<T>, T>(
+        OperatorDefinitions.NOT,
+        value,
+        fieldConditionToSql,
+        constantValueOfNot,
+      );
+    }
+
+    if (sql.isSqlQuery(value) || isSpecialValue(value)) {
+      return new OperatorExpression<SQLQuery, UnknownValue<boolean>, boolean>(
+        OperatorDefinitions.NOT,
+        value,
+        valueToSql,
+        `BOOLEAN`,
+      );
+    }
+
+    if (value === null) {
+      return new OperatorFieldQuery<SQLQuery, null, T>(
+        OperatorDefinitions.IS_NOT_NULL,
+        null,
+        prepareUnaryOperatorFieldQuery,
+        null,
+      );
+    } else {
+      return new OperatorFieldQuery<BinaryInput, RawValue<T>, T>(
+        OperatorDefinitions.NEQ,
+        value,
+        prepareBinaryOperatorFieldQuery,
+        null,
+      );
+    }
+  },
+  or: booleanOperator(`OR`, {
+    getConstantValue: (...params) => {
+      if (params.some((p) => p === true)) return true;
+      if (params.every((p) => p === false)) return false;
+      return undefined;
     },
-  ),
-  or: variadicOperator(OperatorDefinitions.OR, (...params) => {
-    if (params.some((p) => p === true)) return true;
-    if (params.every((p) => p === false)) return false;
-    return undefined;
   }),
   sum: aggregateFunction(`SUM`),
+  upper: nonAggregateFunction(`UPPER`),
 };
 
 export default Operators;

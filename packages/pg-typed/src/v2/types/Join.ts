@@ -2,10 +2,12 @@ import GroupByQuery from '../GroupByQuery';
 import {JoinableQueryLeft} from './JoinableQuery';
 import {ProjectedQuery} from './Queries';
 import {AggregatedSelectionSet, SelectionSet} from './SelectionSet';
-import Value from './SpecialValues';
+import {NonAggregatedValue} from './SpecialValues';
 
 export interface JoinQueryBuilder<TColumns> {
-  on(predicate: (column: TColumns) => Value<boolean>): JoinQuery<TColumns>;
+  on(
+    predicate: (column: TColumns) => NonAggregatedValue<boolean>,
+  ): JoinQuery<TColumns>;
 }
 
 export interface JoinQuery<TColumns> extends JoinableQueryLeft<TColumns> {
@@ -19,5 +21,7 @@ export interface JoinQuery<TColumns> extends JoinableQueryLeft<TColumns> {
     aggregation: (column: TColumns) => AggregatedSelectionSet<TAggregation>,
   ): ProjectedQuery<TAggregation>;
 
-  where(predicate: (column: TColumns) => Value<boolean>): JoinQuery<TColumns>;
+  where(
+    predicate: (column: TColumns) => NonAggregatedValue<boolean>,
+  ): JoinQuery<TColumns>;
 }

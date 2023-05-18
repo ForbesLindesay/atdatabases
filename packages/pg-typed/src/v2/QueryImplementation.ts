@@ -1,7 +1,11 @@
 import {Queryable, SQLQuery, sql} from '@databases/pg';
 import {aliasColumns, columns} from './implementation/Columns';
 import WhereCondition from './WhereCondition';
-import Value from './types/SpecialValues';
+import {
+  FieldCondition,
+  NonAggregatedValue,
+  isSpecialValue,
+} from './types/SpecialValues';
 import {Columns} from './types/Columns';
 import Operators, {
   aliasTableInValue,
@@ -96,7 +100,7 @@ interface QueryConfig<TAlias extends string, TRecord, TColumns> {
   projection: Projection | null;
   tableId: SQLQuery;
   tableName: TAlias;
-  where: readonly Value<boolean>[];
+  where: readonly NonAggregatedValue<boolean>[];
 }
 
 interface FinalQueryConfig {
@@ -336,23 +340,36 @@ class SelectQueryImplementation<
   }
 
   where(condition: WhereCondition<TRecord, TColumns>): any {
+    const where = [
+      ...this._config.where,
+      ...(sql.isSqlQuery(condition) ||
+      isSpecialValue(condition) ||
+      typeof condition === 'boolean'
+        ? [condition]
+        : typeof condition === 'function'
+        ? [condition(this._config.columns)]
+        : Object.entries(condition).map(([columnName, value]) =>
+            fieldConditionToPredicateValue(
+              (this._config.columns as Columns<TRecord>)[
+                columnName as keyof Columns<TRecord>
+              ],
+              value as FieldCondition<TRecord[keyof TRecord]>,
+            ),
+          )),
+    ];
     return new SelectQueryImplementation({
-      ...this._config,
-      where: [
-        ...this._config.where,
-        ...(sql.isSqlQuery(condition)
-          ? [condition]
-          : typeof condition === 'function'
-          ? [condition(this._config.columns)]
-          : Object.entries(condition).map(([columnName, value]) =>
-              fieldConditionToPredicateValue(
-                (this._config.columns as Columns<TRecord>)[
-                  columnName as keyof Columns<TRecord>
-                ],
-                value,
-              ),
-            )),
-      ],
+      columns: this._config.columns,
+      distinct: this._config.distinct,
+      distinctColumns: this._config.distinctColumns,
+      groupBy: this._config.groupBy,
+      isAliased: this._config.isAliased,
+      isJoin: this._config.isJoin,
+      limit: this._config.limit,
+      orderBy: this._config.orderBy,
+      projection: this._config.projection,
+      tableId: this._config.tableId,
+      tableName: this._config.tableName,
+      where,
     });
   }
 
@@ -403,15 +420,26 @@ class SelectQueryImplementation<
     distinct: boolean,
     direction: SQLQuery,
   ): ProjectedDistinctColumnsQuery<TRecord> {
+    const distinctColumns = distinct
+      ? [...this._config.distinctColumns, sql.ident(columnName)]
+      : this._config.distinctColumns;
+    const orderBy = [
+      ...this._config.orderBy,
+      sql`${this._orderByColumn(columnName)} ${direction}`,
+    ];
     return new SelectQueryImplementation({
-      ...this._config,
-      distinctColumns: distinct
-        ? [...this._config.distinctColumns, sql.ident(columnName)]
-        : this._config.distinctColumns,
-      orderBy: [
-        ...this._config.orderBy,
-        sql`${this._orderByColumn(columnName)} ${direction}`,
-      ],
+      columns: this._config.columns,
+      distinct: this._config.distinct,
+      distinctColumns,
+      groupBy: this._config.groupBy,
+      isAliased: this._config.isAliased,
+      isJoin: this._config.isJoin,
+      limit: this._config.limit,
+      orderBy,
+      projection: this._config.projection,
+      tableId: this._config.tableId,
+      tableName: this._config.tableName,
+      where: this._config.where,
     });
   }
 
@@ -439,15 +467,34 @@ class SelectQueryImplementation<
       );
     }
     return new SelectQueryImplementation({
-      ...this._config,
+      columns: this._config.columns,
       distinct: true,
       distinctColumns: [],
+      groupBy: this._config.groupBy,
+      isAliased: this._config.isAliased,
+      isJoin: this._config.isJoin,
+      limit: this._config.limit,
+      orderBy: this._config.orderBy,
+      projection: this._config.projection,
+      tableId: this._config.tableId,
+      tableName: this._config.tableName,
+      where: this._config.where,
     });
   }
   limit(n: number): ProjectedLimitQuery<TRecord> {
     return new SelectQueryImplementation({
-      ...this._config,
+      columns: this._config.columns,
+      distinct: this._config.distinct,
+      distinctColumns: this._config.distinctColumns,
+      groupBy: this._config.groupBy,
+      isAliased: this._config.isAliased,
+      isJoin: this._config.isJoin,
       limit: n,
+      orderBy: this._config.orderBy,
+      projection: this._config.projection,
+      tableId: this._config.tableId,
+      tableName: this._config.tableName,
+      where: this._config.where,
     });
   }
 
@@ -463,19 +510,32 @@ class SelectQueryImplementation<
     ) {
       throw new Error(`Right hand side of join is not valid.`);
     }
+    const tableId = sql`${this._config.tableId} INNER JOIN ${otherQuery._config.tableId}`;
+    const columns: any = Object.assign(
+      {[otherQuery._config.tableName]: otherQuery._config.columns},
+      this._config.isJoin
+        ? this._config.columns
+        : {[this._config.tableName]: this._config.columns},
+    );
     return new JoinImplementation<
       InnerJoinedColumns<TAliasedColumns, TRightAlias, TRightRecord>
-    >({
-      ...this._config,
-      tableId: sql`${this._config.tableId} INNER JOIN ${otherQuery._config.tableId}`,
-      where: [...this._config.where, ...otherQuery._config.where],
-      columns: Object.assign(
-        {[otherQuery._config.tableName]: otherQuery._config.columns},
-        this._config.isJoin
-          ? this._config.columns
-          : {[this._config.tableName]: this._config.columns},
-      ) as any,
-    });
+    >(
+      {
+        columns,
+        distinct: this._config.distinct,
+        distinctColumns: this._config.distinctColumns,
+        groupBy: this._config.groupBy,
+        isAliased: this._config.isAliased,
+        isJoin: this._config.isJoin,
+        limit: this._config.limit,
+        orderBy: this._config.orderBy,
+        projection: this._config.projection,
+        tableId,
+        tableName: this._config.tableName,
+        where: this._config.where,
+      },
+      otherQuery._config.where,
+    );
   }
 
   leftOuterJoin<TRightAlias extends string, TRightRecord>(
@@ -490,23 +550,32 @@ class SelectQueryImplementation<
     ) {
       throw new Error(`Right hand side of join is not valid.`);
     }
-    if (otherQuery._config.where.length) {
-      throw new Error(
-        `Right hand side of a LEFT OUTER JOIN cannot have a WHERE clause.`,
-      );
-    }
+    const tableId = sql`${this._config.tableId} LEFT OUTER JOIN ${otherQuery._config.tableId}`;
+    const columns: any = Object.assign(
+      {[otherQuery._config.tableName]: otherQuery._config.columns},
+      this._config.isJoin
+        ? this._config.columns
+        : {[this._config.tableName]: this._config.columns},
+    );
     return new JoinImplementation<
       InnerJoinedColumns<TAliasedColumns, TRightAlias, TRightRecord>
-    >({
-      ...this._config,
-      tableId: sql`${this._config.tableId} LEFT OUTER JOIN ${otherQuery._config.tableId}`,
-      columns: Object.assign(
-        {[otherQuery._config.tableName]: otherQuery._config.columns},
-        this._config.isJoin
-          ? this._config.columns
-          : {[this._config.tableName]: this._config.columns},
-      ) as any,
-    });
+    >(
+      {
+        columns,
+        distinct: this._config.distinct,
+        distinctColumns: this._config.distinctColumns,
+        groupBy: this._config.groupBy,
+        isAliased: this._config.isAliased,
+        isJoin: this._config.isJoin,
+        limit: this._config.limit,
+        orderBy: this._config.orderBy,
+        projection: this._config.projection,
+        tableId,
+        tableName: this._config.tableName,
+        where: this._config.where,
+      },
+      otherQuery._config.where,
+    );
   }
 
   one(): TypedDatabaseQuery<TRecord | undefined> {
@@ -593,20 +662,38 @@ class GroupByQueryImplementation<TAlias extends string, TSelection, TColumns>
 
 class JoinImplementation<TColumns> implements JoinQueryBuilder<TColumns> {
   private readonly _config: QueryConfig<string, unknown, TColumns>;
-  constructor(config: QueryConfig<string, unknown, TColumns>) {
+  private readonly _rightWhere: readonly NonAggregatedValue<boolean>[];
+  constructor(
+    config: QueryConfig<string, unknown, TColumns>,
+    rightWhere: readonly NonAggregatedValue<boolean>[],
+  ) {
     this._config = config;
+    this._rightWhere = rightWhere;
   }
-  on(predicate: (column: TColumns) => Value<boolean>): JoinQuery<TColumns> {
+  on(
+    predicate: (column: TColumns) => NonAggregatedValue<boolean>,
+  ): JoinQuery<TColumns> {
+    const tableId = sql`${this._config.tableId} ON (${valueToSql(
+      Operators.and(predicate(this._config.columns), ...this._rightWhere),
+      {
+        toValue: (v) => v,
+        tableAlias: () => null,
+        parentOperatorPrecedence: null,
+      },
+    )})`;
     return new SelectQueryImplementation<string, unknown, TColumns, TColumns>({
-      ...this._config,
-      tableId: sql`${this._config.tableId} ON (${valueToSql(
-        predicate(this._config.columns),
-        {
-          toValue: (v) => v,
-          tableAlias: () => null,
-          parentOperatorPrecedence: null,
-        },
-      )})`,
+      columns: this._config.columns,
+      distinct: this._config.distinct,
+      distinctColumns: this._config.distinctColumns,
+      groupBy: this._config.groupBy,
+      isAliased: this._config.isAliased,
+      isJoin: this._config.isJoin,
+      limit: this._config.limit,
+      orderBy: this._config.orderBy,
+      projection: this._config.projection,
+      tableId,
+      tableName: this._config.tableName,
+      where: this._config.where,
     });
   }
 }

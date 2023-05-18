@@ -1,4 +1,3 @@
-import {SQLQuery} from '@databases/pg';
 import {columnReference} from './Operators';
 import {Columns} from '../types/Columns';
 
@@ -8,22 +7,15 @@ export function columns<TRecord>(
   tableName: string,
   schema?: {
     columnName: string;
-    postgresTypeQuery?: SQLQuery;
-    postgresType?: string;
+    type?: string;
   }[],
   isAlias: boolean = false,
 ): Columns<TRecord> {
   if (schema) {
     return Object.fromEntries(
-      schema.map(({columnName, postgresTypeQuery, postgresType}) => [
+      schema.map(({columnName, type}) => [
         columnName,
-        columnReference(
-          tableName,
-          columnName,
-          isAlias,
-          postgresTypeQuery,
-          postgresType,
-        ),
+        columnReference(tableName, columnName, isAlias, type ?? null),
       ]),
     ) as Columns<TRecord>;
   } else {
@@ -35,7 +27,7 @@ export function columns<TRecord>(
           if (columnName === 'then' || typeof columnName !== 'string') {
             return undefined;
           }
-          return columnReference(tableName, columnName, isAlias);
+          return columnReference(tableName, columnName, isAlias, null);
         },
       },
     ) as any;
