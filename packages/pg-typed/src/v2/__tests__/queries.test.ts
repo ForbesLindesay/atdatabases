@@ -1,9 +1,9 @@
-import {sql} from '@databases/pg';
+import {SQLQuery, sql} from '@databases/pg';
 import {columns} from '../implementation/Columns';
-import createQuery from '../QueryImplementation';
 import {q} from '..';
 import {escapePostgresIdentifier} from '@databases/escape-identifier';
-import {ProjectedLimitQuery} from '../types/Queries';
+import createTableApi from '../implementation/Table';
+import {TypedDatabaseQuery} from '../types/TypedDatabaseQuery';
 
 interface DbUser {
   id: number;
@@ -16,8 +16,8 @@ interface DbPost {
   created_at: Date;
 }
 
-const users = createQuery<DbUser>('users', sql`users`, columns(`users`));
-const posts = createQuery<DbPost>('posts', sql`posts`, columns(`posts`));
+const users = createTableApi<DbUser>('users', sql`users`, columns(`users`));
+const posts = createTableApi<DbPost>('posts', sql`posts`, columns(`posts`));
 
 const testFormat = {
   escapeIdentifier: escapePostgresIdentifier,
@@ -49,26 +49,44 @@ test(`INNER JOIN`, () => {
       title: p.title,
     }));
   expect(
-    printQueryForTest<{
-      id: number;
-      username: string;
-      title: string;
-    }>(joinWithWhereBeforeJoin),
+    printQueryForTest<
+      {
+        id: number;
+        username: string;
+        title: string;
+      }[]
+    >(joinWithWhereBeforeJoin),
   ).toEqual(
     `SELECT "u"."id","u"."username","p"."title" FROM users AS "u" INNER JOIN posts AS "p" ON ("u"."id"="p"."author_id") WHERE "u"."id"=\${ 10 }`,
   );
   expect(
-    printQueryForTest<{
-      id: number;
-      username: string;
-      title: string;
-    }>(joinWithWhereAfterJoin),
+    printQueryForTest<
+      {
+        id: number;
+        username: string;
+        title: string;
+      }[]
+    >(joinWithWhereAfterJoin),
   ).toEqual(
-    printQueryForTest<{
-      id: number;
-      username: string;
-      title: string;
-    }>(joinWithWhereBeforeJoin),
+    printQueryForTest<
+      {
+        id: number;
+        username: string;
+        title: string;
+      }[]
+    >(joinWithWhereBeforeJoin),
+  );
+
+  const postsWithUsernames = posts
+    .as(`p`)
+    .innerJoin(users.as(`u`))
+    .on(({u, p}) => q.eq(u.id, p.author_id))
+    .select(({u, p}) => q.mergeColumns(q.star(p), {username: u.username}));
+
+  expect(
+    printQueryForTest<(DbPost & {username: string})[]>(postsWithUsernames),
+  ).toEqual(
+    `SELECT "p".*,"u"."username" FROM posts AS "p" INNER JOIN users AS "u" ON ("u"."id"="p"."author_id")`,
   );
 });
 
@@ -88,12 +106,14 @@ test(`group by`, () => {
     .orderByDesc(`last_posted_at`);
 
   expect(
-    printQueryForTest<{
-      id: number;
-      username: string;
-      last_posted_at: Date;
-      total_count: number;
-    }>(groupBy),
+    printQueryForTest<
+      {
+        id: number;
+        username: string;
+        last_posted_at: Date;
+        total_count: number;
+      }[]
+    >(groupBy),
   ).toEqual(
     `SELECT "u"."id","u"."username",MAX("p"."created_at") AS "last_posted_at",(COUNT(*))::INT AS "total_count" FROM users AS "u" INNER JOIN posts AS "p" ON ("u"."id"="p"."author_id") GROUP BY 1,2 ORDER BY 3 DESC`,
   );
@@ -107,7 +127,7 @@ test(`arbitrary SQL conditions`, () => {
       q.and(q.gt(u.id, 1), q.lt(u.id, 20), sql`id % 2 = 0 OR id % 3 = 0`),
     );
 
-  expect(printQueryForTest<DbUser>(conditions)).toEqual(
+  expect(printQueryForTest<DbUser[]>(conditions)).toEqual(
     `SELECT * FROM users WHERE "id"=\${ 10 } AND (username='x' OR username='y') AND "id">\${ 1 } AND "id"<\${ 20 } AND (id % 2 = 0 OR id % 3 = 0)`,
   );
 });
@@ -128,18 +148,18 @@ test(`condition nesting`, () => {
     ),
   );
 
-  expect(printQueryForTest<DbUser>(or)).toEqual(
+  expect(printQueryForTest<DbUser[]>(or)).toEqual(
     `SELECT * FROM users WHERE "id"=\${ 1 } OR "id"=\${ 10 }`,
   );
-  expect(printQueryForTest<DbUser>(and)).toEqual(
+  expect(printQueryForTest<DbUser[]>(and)).toEqual(
     `SELECT * FROM users WHERE "id">=\${ 1 } AND "id"<=\${ 10 }`,
   );
-  expect(printQueryForTest<DbUser>(and_or)).toEqual(
+  expect(printQueryForTest<DbUser[]>(and_or)).toEqual(
     `SELECT * FROM users WHERE ("id"=\${ 1 } OR "id"=\${ 10 }) AND "profile_image_url" IS NOT NULL`,
   );
   // AND already binds more tightly than OR so no extra parentheses are needed here - although extra parentheses
   // would potentially make it easier for humans to read.
-  expect(printQueryForTest<DbUser>(or_and)).toEqual(
+  expect(printQueryForTest<DbUser[]>(or_and)).toEqual(
     `SELECT * FROM users WHERE "id"=\${ 1 } AND "username"=\${ "ForbesLindesay" } OR "id"=\${ 10 }`,
   );
 });
@@ -154,18 +174,18 @@ test(`condition nesting - objects`, () => {
     q.or(q.and<DbUser>({id: 1}, {username: 'ForbesLindesay'}), {id: 10}),
   );
 
-  expect(printQueryForTest<DbUser>(or)).toEqual(
+  expect(printQueryForTest<DbUser[]>(or)).toEqual(
     `SELECT * FROM users WHERE "id"=\${ 1 } OR "id"=\${ 10 }`,
   );
-  expect(printQueryForTest<DbUser>(and)).toEqual(
+  expect(printQueryForTest<DbUser[]>(and)).toEqual(
     `SELECT * FROM users WHERE "id">=\${ 1 } AND "id"<=\${ 10 }`,
   );
-  expect(printQueryForTest<DbUser>(and_or)).toEqual(
+  expect(printQueryForTest<DbUser[]>(and_or)).toEqual(
     `SELECT * FROM users WHERE ("id"=\${ 1 } OR "id"=\${ 10 }) AND "profile_image_url" IS NOT NULL`,
   );
   // AND already binds more tightly than OR so no extra parentheses are needed here - although extra parentheses
   // would potentially make it easier for humans to read.
-  expect(printQueryForTest<DbUser>(or_and)).toEqual(
+  expect(printQueryForTest<DbUser[]>(or_and)).toEqual(
     `SELECT * FROM users WHERE "id"=\${ 1 } AND "username"=\${ "ForbesLindesay" } OR "id"=\${ 10 }`,
   );
 });
@@ -176,10 +196,12 @@ test(`operators - lower`, () => {
     greeting: q.lower('HELLO WORLD'),
   }));
   expect(
-    printQueryForTest<{
-      username: string;
-      greeting: string;
-    }>(lowerUsernames),
+    printQueryForTest<
+      {
+        username: string;
+        greeting: string;
+      }[]
+    >(lowerUsernames),
   ).toEqual(
     `SELECT LOWER("username") AS "username",LOWER(\${ "HELLO WORLD" }) AS "greeting" FROM users`,
   );
@@ -216,7 +238,7 @@ test(`operators - json`, () => {
     id: number;
     data: {foo: string; bar: number};
   }
-  const records = createQuery<DbRecord>(
+  const records = createTableApi<DbRecord>(
     `records`,
     sql`records`,
     columns(`records`, [
@@ -236,10 +258,12 @@ test(`operators - json`, () => {
       bar: q.json(r.data).prop(`bar`).asJson(),
     }));
   expect(
-    printQueryForTest<{
-      foo: string;
-      bar: number;
-    }>(query),
+    printQueryForTest<
+      {
+        foo: string;
+        bar: number;
+      }[]
+    >(query),
   ).toEqual(
     `SELECT "data"#>>\${ ["foo"] } AS "foo","data"#>\${ ["bar"] } AS "bar" FROM records WHERE "data"#>\${ ["foo"] }=\${ "\\"hello\\"" } OR "data"#>>\${ ["foo"] }=\${ "world" }`,
   );
@@ -270,6 +294,9 @@ test(`operators - json`, () => {
     `SELECT MAX(LOWER("username")) AS "username",LOWER(\${ "HELLO WORLD" }) AS "greeting" FROM users`,
   );
 });
-function printQueryForTest<T>(query: ProjectedLimitQuery<T>) {
+
+function printQueryForTest<T>(
+  query: TypedDatabaseQuery<T> & {toSql(): SQLQuery},
+) {
   return query.toSql().format(testFormat).text;
 }

@@ -1,5 +1,5 @@
-import {NonAggregatedValue, FieldCondition} from './types/SpecialValues';
-import {Columns} from './types/Columns';
+import {NonAggregatedValue, FieldCondition} from './SpecialValues';
+import {Columns} from './Columns';
 
 export type WhereConditionObject<TRecord> = {
   readonly [key in keyof TRecord]?: FieldCondition<TRecord[key]>;

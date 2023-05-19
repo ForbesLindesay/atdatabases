@@ -13,7 +13,6 @@ export interface OperatorDefinition<TInput> {
     ctx: {parentOperatorPrecedence: number | null},
   ) => SQLQuery;
   readonly precedence: number;
-  // readonly staticValue?: (input: TStaticValueInput) => boolean | null;
 }
 
 function operatorDefinition<TInput>(

@@ -1,62 +1,104 @@
-import {Queryable, SQLQuery, sql} from '@databases/pg';
-import {aliasColumns, columns} from './implementation/Columns';
-import WhereCondition from './WhereCondition';
+import {SQLQuery, sql} from '@databases/pg';
+import {escapePostgresIdentifier} from '@databases/escape-identifier';
+
+import {aliasColumns, columns} from './Columns';
+import WhereCondition from '../types/WhereCondition';
 import {
   FieldCondition,
   NonAggregatedValue,
   isSpecialValue,
-} from './types/SpecialValues';
-import {Columns} from './types/Columns';
+} from '../types/SpecialValues';
+import {
+  ColumnReference,
+  Columns,
+  InnerJoinedColumns,
+  LeftOuterJoinedColumns,
+} from '../types/Columns';
 import Operators, {
   aliasTableInValue,
   fieldConditionToPredicateValue,
   valueToSelect,
   valueToSql,
-} from './implementation/Operators';
-import {AggregatedSelectionSet, SelectionSet} from './types/SelectionSet';
-import AliasedQuery from './AliasedQuery';
-import {TypedDatabaseQuery} from './types/TypedDatabaseQuery';
-import {escapePostgresIdentifier} from '@databases/escape-identifier';
-
-import SelectQuery from './SelectQuery';
-import GroupByQuery from './GroupByQuery';
+} from './Operators';
 import {
+  AggregatedSelectionSet,
+  SelectionSet,
+  SelectionSetObject,
+} from '../types/SelectionSet';
+import {Queryable, TypedDatabaseQuery} from '../types/TypedDatabaseQuery';
+import {
+  AggregatedQuery,
+  AliasedQuery,
+  GroupByQuery,
+  JoinableQueryLeft,
+  JoinableQueryRight,
+  JoinQuery,
+  JoinQueryBuilder,
   ProjectedDistinctColumnsQuery,
   ProjectedDistinctQuery,
   ProjectedLimitQuery,
-  ProjectedSortedQuery,
   ProjectedQuery,
-} from './types/Queries';
-import {JoinQueryBuilder, JoinQuery} from './types/Join';
-import {
-  InnerJoinedColumns,
-  JoinableQueryLeft,
-  JoinableQueryRight,
-  LeftOuterJoinedColumns,
-} from './types/JoinableQuery';
+  ProjectedSortedQuery,
+  SelectQuery,
+} from '../types/Queries';
+import TableSchema from '../types/TableSchema';
 
 const NO_RESULT_FOUND = `NO_RESULT_FOUND`;
 const MULTIPLE_RESULTS_FOUND = `MULTIPLE_RESULTS_FOUND`;
 
 export default function createQuery<TRecord>(
-  tableName: string,
-  tableId: SQLQuery,
-  columns: Columns<TRecord>,
+  table: TableSchema<TRecord>,
 ): SelectQuery<TRecord> {
   return new SelectQueryImplementation({
-    columns,
+    columns: table.columns,
     distinct: false,
     distinctColumns: [],
     groupBy: 0,
+    hasSideEffects: false,
     isAliased: false,
+    isEmpty: false,
     isJoin: false,
     limit: null,
     orderBy: [],
     projection: null,
-    tableId,
-    tableName,
+    tableId: table.tableId,
+    tableName: table.tableName,
     where: [],
   });
+}
+export function createStatementReturn<TRecord, TSelection>(
+  table: TableSchema<TRecord>,
+  query: SQLQuery | null,
+  selection:
+    | readonly string[]
+    | readonly [(columns: Columns<TRecord>) => SelectionSetObject<TSelection>],
+): SelectQuery<TSelection> {
+  return new StatementReturning<TSelection>(
+    table as any,
+    query,
+    typeof selection[0] === 'function'
+      ? selectionSetToProjection(selection[0](table.columns))
+      : selection[0] === '*'
+      ? null
+      : columnNamesToProjection(selection as string[]),
+  );
+}
+
+interface Projection {
+  /**
+   * The SQL for the selection set.
+   *
+   * e.g. u.name AS user_name, u.email AS user_email, COUNT(*) AS post_count
+   */
+  readonly query: SQLQuery;
+  /**
+   * The column names (in order) returned by this projection.
+   *
+   * e.g. ['user_name', 'user_email', 'post_count']
+   *
+   * Star is used if the number of columns is unknown
+   */
+  readonly columnNames: readonly string[];
 }
 
 interface CompleteQuery<
@@ -73,19 +115,19 @@ interface CompleteQuery<
     ...columnNames: TColumnNames
   ): ProjectedQuery<Pick<TRecord, TColumnNames[number]>>;
   select<TSelection>(
-    selection: (column: TColumns) => SelectionSet<TSelection>,
+    selection: (column: TColumns) => SelectionSetObject<TSelection>,
   ): ProjectedQuery<TSelection>;
 
   groupBy<TColumnNames extends (keyof TRecord)[]>(
     ...columnNames: TColumnNames
   ): GroupByQuery<Pick<TRecord, TColumnNames[number]>, TColumns>;
   groupBy<TSelection>(
-    selection: (column: TColumns) => SelectionSet<TSelection>,
+    selection: (column: TColumns) => SelectionSetObject<TSelection>,
   ): GroupByQuery<TSelection, TColumns>;
 
   selectAggregate<TAggregation>(
     aggregation: (column: TColumns) => AggregatedSelectionSet<TAggregation>,
-  ): ProjectedQuery<TAggregation>;
+  ): AggregatedQuery<TAggregation>;
 }
 
 interface QueryConfig<TAlias extends string, TRecord, TColumns> {
@@ -94,7 +136,9 @@ interface QueryConfig<TAlias extends string, TRecord, TColumns> {
   distinctColumns: readonly SQLQuery[];
   groupBy: number;
   isAliased: boolean;
+  isEmpty: boolean;
   isJoin: boolean;
+  hasSideEffects: boolean;
   limit: number | null;
   orderBy: readonly SQLQuery[];
   projection: Projection | null;
@@ -232,7 +276,7 @@ class SelectQueryImplementation<
 
     return {
       query: sql.join(parts, sql` `),
-      isEmpty: whereCondition === false,
+      isEmpty: whereCondition === false && !this._config.hasSideEffects,
     };
   }
 
@@ -256,7 +300,9 @@ class SelectQueryImplementation<
       distinct: this._config.distinct,
       distinctColumns: this._config.distinctColumns,
       groupBy: this._config.groupBy,
+      hasSideEffects: this._config.hasSideEffects,
       isAliased: this._config.isAliased,
+      isEmpty: this._config.isEmpty,
       isJoin: this._config.isJoin,
       limit: this._config.limit,
       orderBy: this._config.orderBy,
@@ -278,22 +324,20 @@ class SelectQueryImplementation<
         `Table aliases must start with a lower case letter and only contain letters, numbers and underscores`,
       );
     }
-    if (this._config.isAliased) {
-      throw new Error(`Cannot alias a query that has already been aliased`);
-    }
 
     const {
       columns,
       distinct,
       distinctColumns,
       groupBy,
+      isAliased,
+      isJoin,
       limit,
+      orderBy,
       projection,
       tableId,
       tableName,
       where,
-      orderBy,
-      isJoin,
     } = this._config;
 
     const aliasedColumns = aliasColumns(alias, columns as Columns<TRecord>);
@@ -305,14 +349,17 @@ class SelectQueryImplementation<
       isJoin ||
       limit ||
       orderBy.length ||
-      projection
+      projection ||
+      isAliased
     ) {
       return new SelectQueryImplementation({
         columns: aliasedColumns,
         distinct: false,
         distinctColumns: [],
         groupBy: 0,
+        hasSideEffects: this._config.hasSideEffects,
         isAliased: true,
+        isEmpty: this._config.isEmpty || Operators.and(...where) === false,
         isJoin: false,
         limit: null,
         orderBy: [],
@@ -328,7 +375,9 @@ class SelectQueryImplementation<
       distinct: false,
       distinctColumns: [],
       groupBy: 0,
+      hasSideEffects: this._config.hasSideEffects,
       isAliased: true,
+      isEmpty: this._config.isEmpty,
       isJoin: false,
       limit: null,
       orderBy: [],
@@ -352,7 +401,7 @@ class SelectQueryImplementation<
             fieldConditionToPredicateValue(
               (this._config.columns as Columns<TRecord>)[
                 columnName as keyof Columns<TRecord>
-              ],
+              ] as ColumnReference<TRecord[keyof TRecord]>,
               value as FieldCondition<TRecord[keyof TRecord]>,
             ),
           )),
@@ -362,7 +411,9 @@ class SelectQueryImplementation<
       distinct: this._config.distinct,
       distinctColumns: this._config.distinctColumns,
       groupBy: this._config.groupBy,
+      hasSideEffects: this._config.hasSideEffects,
       isAliased: this._config.isAliased,
+      isEmpty: this._config.isEmpty,
       isJoin: this._config.isJoin,
       limit: this._config.limit,
       orderBy: this._config.orderBy,
@@ -376,7 +427,7 @@ class SelectQueryImplementation<
   select<TSelection>(...selection: any[]): ProjectedQuery<TSelection> {
     return this._projectedQuery(
       selection.length === 1 && typeof selection[0] === 'function'
-        ? selectionSetToProjection(
+        ? selectionSetSpecialToProjection(
             selection[0](this._config.columns) as SelectionSet<TSelection>,
           )
         : columnNamesToProjection(selection),
@@ -385,9 +436,11 @@ class SelectQueryImplementation<
 
   selectAggregate<TAggregation>(
     aggregation: (column: TColumns) => AggregatedSelectionSet<TAggregation>,
-  ): ProjectedQuery<TAggregation> {
-    return this._projectedQuery(
-      selectionSetToProjection(aggregation(this._config.columns)),
+  ): AggregatedQuery<TAggregation> {
+    return new AggregatedQueryImplementation(
+      this._projectedQuery(
+        selectionSetToProjection(aggregation(this._config.columns)),
+      ),
     );
   }
 
@@ -395,7 +448,9 @@ class SelectQueryImplementation<
     return new GroupByQueryImplementation<TAlias, TSelection, TColumns>(
       selection.length === 1 && typeof selection[0] === 'function'
         ? selectionSetToProjection(
-            selection[0](this._config.columns) as SelectionSet<TSelection>,
+            selection[0](
+              this._config.columns,
+            ) as SelectionSetObject<TSelection>,
           )
         : columnNamesToProjection(selection),
       this._config,
@@ -403,23 +458,36 @@ class SelectQueryImplementation<
   }
 
   private _orderByColumn(columnName: keyof TRecord): SQLQuery {
-    if (this._config.projection) {
+    if (
+      this._config.projection &&
+      !this._config.projection.columnNames.includes(`*`)
+    ) {
       const index = this._config.projection.columnNames.indexOf(
         columnName as string,
       );
-      if (index === -1) {
-        throw new Error(`Cannot find column: "${columnName as string}"`);
+      if (index !== -1) {
+        return sql.__dangerous__rawValue((index + 1).toString(10));
       }
-      return sql.__dangerous__rawValue((index + 1).toString(10));
-    } else {
-      return sql.ident(columnName);
     }
+    return sql.ident(columnName);
   }
   private _orderByInternal(
     columnName: keyof TRecord,
     distinct: boolean,
     direction: SQLQuery,
   ): ProjectedDistinctColumnsQuery<TRecord> {
+    if (distinct) {
+      if (this._config.distinct) {
+        throw new Error(
+          `Cannot call orderByAscDistinct() or orderByDescDistinct() after distinct()`,
+        );
+      }
+      if (this._config.orderBy.length > this._config.distinctColumns.length) {
+        throw new Error(
+          `Cannot call orderByAscDistinct() or orderByDescDistinct() after orderByAsc() or orderByDesc()`,
+        );
+      }
+    }
     const distinctColumns = distinct
       ? [...this._config.distinctColumns, sql.ident(columnName)]
       : this._config.distinctColumns;
@@ -432,7 +500,9 @@ class SelectQueryImplementation<
       distinct: this._config.distinct,
       distinctColumns,
       groupBy: this._config.groupBy,
+      hasSideEffects: this._config.hasSideEffects,
       isAliased: this._config.isAliased,
+      isEmpty: this._config.isEmpty,
       isJoin: this._config.isJoin,
       limit: this._config.limit,
       orderBy,
@@ -471,7 +541,9 @@ class SelectQueryImplementation<
       distinct: true,
       distinctColumns: [],
       groupBy: this._config.groupBy,
+      hasSideEffects: this._config.hasSideEffects,
       isAliased: this._config.isAliased,
+      isEmpty: this._config.isEmpty,
       isJoin: this._config.isJoin,
       limit: this._config.limit,
       orderBy: this._config.orderBy,
@@ -487,7 +559,9 @@ class SelectQueryImplementation<
       distinct: this._config.distinct,
       distinctColumns: this._config.distinctColumns,
       groupBy: this._config.groupBy,
+      hasSideEffects: this._config.hasSideEffects,
       isAliased: this._config.isAliased,
+      isEmpty: this._config.isEmpty,
       isJoin: this._config.isJoin,
       limit: n,
       orderBy: this._config.orderBy,
@@ -525,7 +599,13 @@ class SelectQueryImplementation<
         distinct: this._config.distinct,
         distinctColumns: this._config.distinctColumns,
         groupBy: this._config.groupBy,
+        hasSideEffects:
+          this._config.hasSideEffects || otherQuery._config.hasSideEffects,
         isAliased: this._config.isAliased,
+        isEmpty:
+          this._config.isEmpty ||
+          otherQuery._config.isEmpty ||
+          Operators.and(...otherQuery._config.where) === false,
         isJoin: this._config.isJoin,
         limit: this._config.limit,
         orderBy: this._config.orderBy,
@@ -565,7 +645,10 @@ class SelectQueryImplementation<
         distinct: this._config.distinct,
         distinctColumns: this._config.distinctColumns,
         groupBy: this._config.groupBy,
+        hasSideEffects:
+          this._config.hasSideEffects || otherQuery._config.hasSideEffects,
         isAliased: this._config.isAliased,
+        isEmpty: this._config.isEmpty,
         isJoin: this._config.isJoin,
         limit: this._config.limit,
         orderBy: this._config.orderBy,
@@ -648,7 +731,9 @@ class GroupByQueryImplementation<TAlias extends string, TSelection, TColumns>
       distinct: false,
       distinctColumns: [],
       groupBy: groupByProjection.columnNames.length,
+      hasSideEffects: this._config.hasSideEffects,
       isAliased: false,
+      isEmpty: this._config.isEmpty,
       isJoin: false,
       limit: this._config.limit,
       orderBy: [],
@@ -686,7 +771,9 @@ class JoinImplementation<TColumns> implements JoinQueryBuilder<TColumns> {
       distinct: this._config.distinct,
       distinctColumns: this._config.distinctColumns,
       groupBy: this._config.groupBy,
+      hasSideEffects: this._config.hasSideEffects,
       isAliased: this._config.isAliased,
+      isEmpty: this._config.isEmpty,
       isJoin: this._config.isJoin,
       limit: this._config.limit,
       orderBy: this._config.orderBy,
@@ -698,25 +785,203 @@ class JoinImplementation<TColumns> implements JoinQueryBuilder<TColumns> {
   }
 }
 
-export interface Projection {
-  /**
-   * The SQL for the selection set.
-   *
-   * e.g. u.name AS user_name, u.email AS user_email, COUNT(*) AS post_count
-   */
-  readonly query: SQLQuery;
-  /**
-   * The column names (in order) returned by this projection.
-   *
-   * e.g. ['user_name', 'user_email', 'post_count']
-   */
-  readonly columnNames: readonly string[];
+class StatementReturning<TRecord> implements SelectQuery<TRecord> {
+  private readonly _table: TableSchema<TRecord>;
+  private readonly _statement: SQLQuery | null;
+  private readonly _projection: Projection | null;
+  constructor(
+    table: TableSchema<TRecord>,
+    statement: SQLQuery | null,
+    projection: Projection | null,
+  ) {
+    this._table = table;
+    this._statement = statement;
+    this._projection = projection;
+  }
+
+  private _query(): FinalQueryConfig {
+    const selection = this._projection?.query ?? sql`*`;
+
+    return {
+      query: this._statement
+        ? sql`${this._statement} RETURNING ${selection}`
+        : sql`SELECT ${selection} WHERE FALSE`,
+      isEmpty: !this._statement,
+    };
+  }
+
+  toSql(): SQLQuery {
+    const {query} = this._query();
+    return query;
+  }
+
+  private _getQuery(): SelectQuery<TRecord> {
+    const {query, isEmpty} = this._query();
+    return new SelectQueryImplementation({
+      columns: this._table.columns,
+      distinct: false,
+      distinctColumns: [],
+      groupBy: 0,
+      hasSideEffects: !isEmpty,
+      isAliased: false,
+      isEmpty,
+      isJoin: false,
+      limit: null,
+      orderBy: [],
+      projection: null,
+      tableId: sql`(${query}) AS ${sql.ident(this._table.tableName)}`,
+      tableName: this._table.tableName,
+      where: [],
+    });
+  }
+  as<TAliasTableName extends string>(
+    alias: TAliasTableName,
+  ): AliasedQuery<TAliasTableName, TRecord> {
+    if (!/^[a-z][a-z0-9_]*$/.test(alias)) {
+      throw new Error(
+        `Table aliases must start with a lower case letter and only contain letters, numbers and underscores`,
+      );
+    }
+    const aliasedColumns = aliasColumns(alias, this._table.columns);
+    const {query, isEmpty} = this._query();
+    return new SelectQueryImplementation({
+      columns: aliasedColumns,
+      distinct: false,
+      distinctColumns: [],
+      groupBy: 0,
+      hasSideEffects: !isEmpty,
+      isAliased: true,
+      isEmpty,
+      isJoin: false,
+      limit: null,
+      orderBy: [],
+      projection: null,
+      tableId: sql`(${query}) AS ${sql.ident(alias)}`,
+      tableName: alias,
+      where: [],
+    });
+  }
+
+  where(condition: WhereCondition<TRecord>): SelectQuery<TRecord> {
+    return this._getQuery().where(condition);
+  }
+  select<TSelection>(...selection: any[]): ProjectedQuery<TSelection> {
+    return this._getQuery().select(...selection) as any;
+  }
+  selectAggregate<TAggregation>(
+    aggregation: (
+      column: Columns<TRecord>,
+    ) => AggregatedSelectionSet<TAggregation>,
+  ): AggregatedQuery<TAggregation> {
+    return this._getQuery().selectAggregate(aggregation);
+  }
+  groupBy<TSelection>(
+    ...selection: any[]
+  ): GroupByQuery<TSelection, Columns<TRecord>> {
+    return this._getQuery().groupBy(...selection);
+  }
+  orderByAscDistinct(
+    columnName: keyof TRecord,
+  ): ProjectedDistinctColumnsQuery<TRecord> {
+    return this._getQuery().orderByAscDistinct(columnName);
+  }
+  orderByDescDistinct(
+    columnName: keyof TRecord,
+  ): ProjectedDistinctColumnsQuery<TRecord> {
+    return this._getQuery().orderByDescDistinct(columnName);
+  }
+  orderByAsc(columnName: keyof TRecord): ProjectedSortedQuery<TRecord> {
+    return this._getQuery().orderByAsc(columnName);
+  }
+  orderByDesc(columnName: keyof TRecord): ProjectedSortedQuery<TRecord> {
+    return this._getQuery().orderByDesc(columnName);
+  }
+  distinct(): ProjectedDistinctQuery<TRecord> {
+    return this._getQuery().distinct();
+  }
+  limit(n: number): ProjectedLimitQuery<TRecord> {
+    return this._getQuery().limit(n);
+  }
+
+  one(): TypedDatabaseQuery<TRecord | undefined> {
+    return new OneQuery(this._query());
+  }
+
+  oneRequired(): TypedDatabaseQuery<TRecord> {
+    return new OneRequiredQuery(this._query());
+  }
+
+  first(): TypedDatabaseQuery<TRecord | undefined> {
+    return new FirstQuery(this._query());
+  }
+
+  async executeQuery(database: Queryable): Promise<TRecord[]> {
+    const {query, isEmpty} = this._query();
+    if (isEmpty) return [];
+    return await database.query(query);
+  }
 }
 
-function selectionSetToProjection(
-  ...selections: (SelectionSet<unknown> | AggregatedSelectionSet<unknown>)[]
+class AggregatedQueryImplementation<TRecord>
+  implements AggregatedQuery<TRecord>
+{
+  private readonly _query: ProjectedLimitQuery<TRecord>;
+  constructor(query: ProjectedLimitQuery<TRecord>) {
+    this._query = query;
+  }
+  toSql(): SQLQuery {
+    return this._query.toSql();
+  }
+  as<TAliasTableName extends string>(
+    alias: TAliasTableName,
+  ): AliasedQuery<TAliasTableName, TRecord> {
+    return this._query.as(alias);
+  }
+
+  async executeQuery(database: Queryable): Promise<TRecord> {
+    const results = await database.query(this._query.toSql());
+    if (results.length !== 1) {
+      throw new Error(
+        `Expected exactly one row to be returned by this query because it is "aggregated"`,
+      );
+    }
+    return results[0];
+  }
+}
+
+function selectionSetSpecialToProjection<TSelection>(
+  selection: SelectionSet<TSelection>,
 ): Projection {
-  const entries = selections.flatMap((selection) => Object.entries(selection));
+  if (isSpecialValue(selection)) {
+    switch (selection.__selectionSetType) {
+      case 'STAR':
+        return {
+          query: sql`${sql.ident(selection.tableName)}.*`,
+          columnNames: [`*`],
+        };
+      case 'MERGED': {
+        const parts: SQLQuery[] = [];
+        const columnNames = [];
+        for (const part of selection.selections) {
+          const projection = selectionSetSpecialToProjection(part);
+          if (projection.columnNames.length) {
+            parts.push(projection.query);
+            columnNames.push(...projection.columnNames);
+          }
+        }
+        return {query: sql.join(parts, `,`), columnNames};
+      }
+    }
+  }
+  return selectionSetToProjection(selection);
+}
+
+function selectionSetToProjection<TSelection>(
+  selection:
+    | SelectionSetObject<TSelection>
+    | AggregatedSelectionSet<TSelection>,
+): Projection {
+  const entries = Object.entries(selection);
   return {
     query: sql.join(
       entries.map(([alias, value]) => valueToSelect(alias, value)),

@@ -2,10 +2,11 @@ import {NonAggregatedTypedValue} from './SpecialValues';
 
 export interface ColumnReference<T> extends NonAggregatedTypedValue<T> {
   readonly sqlType: string | null;
+  serializeValue(value: T): unknown;
   setAlias(tableAlias: string): ColumnReference<T>;
 }
 
-export type Columns<TRecord> = {
+export type Columns<TRecord> = {__isSpecialValue: true; __tableName: string} & {
   [TColumnName in keyof TRecord]: ColumnReference<TRecord[TColumnName]>;
 };
 

@@ -19,7 +19,7 @@ import {
   BinaryInput,
   OperatorDefinition,
   OperatorDefinitions,
-} from '../PostgresOperators';
+} from './OperatorDefinitions';
 import {
   AggregatedJsonValue,
   IOperators,
@@ -27,19 +27,26 @@ import {
   NonAggregatedJsonValue,
 } from '../types/Operators';
 import {ColumnReference} from '../types/Columns';
-import WhereCondition from '../WhereCondition';
+import WhereCondition from '../types/WhereCondition';
+import {
+  SelectionSet,
+  SelectionSetMerged,
+  SelectionSetStar,
+} from '../types/SelectionSet';
 
 export function columnReference<T>(
   tableName: string,
   columnName: string,
   isAlias: boolean,
   sqlType: string | null,
+  serializeValue: (value: T) => unknown,
 ): NonAggregatedValue<T> {
   return new ColumnReferenceImplementation(
     tableName,
     columnName,
     isAlias,
     sqlType,
+    serializeValue,
   );
 }
 
@@ -154,17 +161,20 @@ class ColumnReferenceImplementation<T>
 
   // This property is assigned in the base class
   public readonly sqlType!: string | null;
+  public readonly serializeValue: (value: T) => unknown;
 
   constructor(
     tableName: string,
     columnName: string,
     isAlias: boolean,
     sqlType: string | null,
+    serializeValue: (value: T) => unknown,
   ) {
     super(sqlType);
     this.tableName = tableName;
     this.columnName = columnName;
     this.isAlias = isAlias;
+    this.serializeValue = serializeValue;
   }
   public toSql(ctx: ValueToSqlContext): SQLQuery {
     if (this.isAlias) {
@@ -182,6 +192,7 @@ class ColumnReferenceImplementation<T>
       this.columnName,
       true,
       this.sqlType,
+      this.serializeValue,
     );
   }
 }
@@ -975,6 +986,38 @@ function setSqlType(
   return ctx;
 }
 
+class SelectionSetStarImplementation<TSelection>
+  implements SelectionSetStar<TSelection>
+{
+  public readonly __isSpecialValue = true;
+  public readonly __selectionSetType = 'STAR';
+  public readonly tableName: string;
+  constructor(tableName: string) {
+    this.tableName = tableName;
+  }
+  public __getType(): TSelection {
+    throw new Error(
+      `The "getType" function should not be called. It is only there to help TypeScript infer the correct type.`,
+    );
+  }
+}
+
+class SelectionSetMergedImplementation<TSelection>
+  implements SelectionSetMerged<TSelection>
+{
+  public readonly __isSpecialValue = true;
+  public readonly __selectionSetType = 'MERGED';
+  public readonly selections: SelectionSet<Partial<TSelection>>[];
+  constructor(selections: SelectionSet<Partial<TSelection>>[]) {
+    this.selections = selections;
+  }
+  public __getType(): TSelection {
+    throw new Error(
+      `The "getType" function should not be called. It is only there to help TypeScript infer the correct type.`,
+    );
+  }
+}
+
 const Operators: IOperators = {
   allOf: (values) => new AllOf(values),
   and: booleanOperator(`AND`, {
@@ -1027,6 +1070,8 @@ const Operators: IOperators = {
   lt: binaryOperator(OperatorDefinitions.LT),
   lte: binaryOperator(OperatorDefinitions.LTE),
   max: aggregateFunction(`MAX`),
+  mergeColumns: (...selections) =>
+    new SelectionSetMergedImplementation(selections),
   min: aggregateFunction(`MIN`),
   neq: binaryOperator(OperatorDefinitions.NEQ, {
     getUnaryOperator(right) {
@@ -1083,6 +1128,7 @@ const Operators: IOperators = {
       return undefined;
     },
   }),
+  star: (columns) => new SelectionSetStarImplementation(columns.__tableName),
   sum: aggregateFunction(`SUM`),
   upper: nonAggregateFunction(`UPPER`),
 };

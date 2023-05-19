@@ -1,4 +1,4 @@
-import WhereCondition from '../WhereCondition';
+import WhereCondition from './WhereCondition';
 import {
   AggregatedTypedValue,
   NonAggregatedValue,
@@ -8,6 +8,8 @@ import {
   AggregatedValue,
   Value,
 } from './SpecialValues';
+import {Columns} from './Columns';
+import {SelectionSet, SelectionSetStar} from './SelectionSet';
 
 export interface List<T> {
   [Symbol.iterator](): IterableIterator<T>;
@@ -28,6 +30,16 @@ export interface AggregatedJsonValue<TValue> {
   asJson(): AggregatedValue<TValue>;
   prop<TKey extends keyof TValue>(key: TKey): AggregatedJsonValue<TValue[TKey]>;
 }
+
+export type MergedSelectionSet<T> = SelectionSet<
+  {
+    [TKey in keyof T]: T[TKey] extends SelectionSet<infer TSelection>
+      ? (v: TSelection) => void
+      : never;
+  }[number & keyof T] extends (v: infer TResult) => void
+    ? TResult
+    : never
+>;
 
 // prettier-ignore
 export interface IOperators {
@@ -50,6 +62,8 @@ export interface IOperators {
   gte<T>(left: Value<T>, right: Value<T>): Value<boolean>;
   gte<T>(left: NonAggregatedValue<T>, right: NonAggregatedValue<T>): NonAggregatedValue<boolean>;
   gte<T>(left: AggregatedValue<T>, right: AggregatedValue<T>): AggregatedValue<boolean>;
+
+  mergeColumns<TSelections extends SelectionSet<any>[]>(...selections: {[key in keyof TSelections]: TSelections[key]}): MergedSelectionSet<TSelections>
   neq<T>(left: Value<T>, right: Value<T>): Value<boolean>;
   neq<T>(left: NonAggregatedValue<T>, right: NonAggregatedValue<T>): NonAggregatedValue<boolean>;
   neq<T>(left: AggregatedValue<T>, right: AggregatedValue<T>): AggregatedValue<boolean>;
@@ -83,6 +97,7 @@ export interface IOperators {
   or(...values: NonAggregatedValue<boolean>[]): NonAggregatedValue<boolean>;
   or(...values: AggregatedValue<boolean>[]): AggregatedValue<boolean>;
   or<TRecord>(...conditions: WhereCondition<TRecord>[]): WhereCondition<TRecord>;
+  star<TRecord>(columns: Columns<TRecord>): SelectionSetStar<TRecord>;
   sum<T extends BigInt | number>(value: NonAggregatedValue<T>): AggregatedTypedValue<T>;
   upper(value: Value<string>): Value<string>;
   upper(value: NonAggregatedValue<string>): NonAggregatedValue<string>;
