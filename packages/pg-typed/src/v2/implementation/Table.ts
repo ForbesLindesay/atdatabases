@@ -15,10 +15,21 @@ import {
 import createQuery from './Queries';
 import WhereCondition from '../types/WhereCondition';
 import {ColumnReference, Columns} from '../types/Columns';
-import {AggregatedSelectionSet} from '../types/SelectionSet';
-import {InsertStatement} from '../types/Statements';
+import {
+  AggregatedSelectionSet,
+  SelectionSetObject,
+} from '../types/SelectionSet';
+import {
+  DeleteStatement,
+  InsertStatement,
+  UpdateStatement,
+} from '../types/Statements';
 import {TypedDatabaseQuery, Queryable} from '../types/TypedDatabaseQuery';
-import createInsertStatement from './Statements';
+import {
+  createDeleteStatement,
+  createInsertStatement,
+  createUpdateStatement,
+} from './Statements';
 
 class TableImplementation<TRecord, TInsertParameters>
   implements Table<TRecord, TInsertParameters>
@@ -75,6 +86,25 @@ class TableImplementation<TRecord, TInsertParameters>
         this._table.tableId
       } (${columnNamesSql}) VALUES ${sql.join(values, `,`)}`,
     );
+  }
+
+  update(
+    condition: WhereCondition<TRecord>,
+    updateValues:
+      | Partial<TRecord>
+      | ((column: Columns<TRecord>) => Partial<SelectionSetObject<TRecord>>),
+  ): UpdateStatement<TRecord> {
+    return createUpdateStatement(
+      this._table,
+      condition,
+      typeof updateValues === 'function'
+        ? updateValues(this._table.columns)
+        : (updateValues as Partial<SelectionSetObject<TRecord>>),
+    );
+  }
+
+  delete(condition: WhereCondition<TRecord>): DeleteStatement<TRecord> {
+    return createDeleteStatement(this._table, condition);
   }
 
   // == Methods of SelectQuery<TRecord> ==

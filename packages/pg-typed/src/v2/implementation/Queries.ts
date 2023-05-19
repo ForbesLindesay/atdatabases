@@ -66,6 +66,7 @@ export default function createQuery<TRecord>(
     where: [],
   });
 }
+
 export function createStatementReturn<TRecord, TSelection>(
   table: TableSchema<TRecord>,
   query: SQLQuery | null,
@@ -76,12 +77,35 @@ export function createStatementReturn<TRecord, TSelection>(
   return new StatementReturning<TSelection>(
     table as any,
     query,
-    typeof selection[0] === 'function'
-      ? selectionSetToProjection(selection[0](table.columns))
-      : selection[0] === '*'
+    selection.length === 0
       ? null
+      : typeof selection[0] === 'function'
+      ? selectionSetToProjection(selection[0](table.columns))
       : columnNamesToProjection(selection as string[]),
   );
+}
+
+export function whereConditionToPredicates<
+  TRecord,
+  TColumns = Columns<TRecord>,
+>(
+  columns: TColumns,
+  condition: WhereCondition<TRecord, TColumns>,
+): NonAggregatedValue<boolean>[] {
+  return sql.isSqlQuery(condition) ||
+    isSpecialValue(condition) ||
+    typeof condition === 'boolean'
+    ? [condition]
+    : typeof condition === 'function'
+    ? [condition(columns)]
+    : Object.entries(condition).map(([columnName, value]) =>
+        fieldConditionToPredicateValue(
+          (columns as Columns<TRecord>)[
+            columnName as keyof TRecord
+          ] as ColumnReference<TRecord[keyof TRecord]>,
+          value as FieldCondition<TRecord[keyof TRecord]>,
+        ),
+      );
 }
 
 interface Projection {
@@ -391,20 +415,7 @@ class SelectQueryImplementation<
   where(condition: WhereCondition<TRecord, TColumns>): any {
     const where = [
       ...this._config.where,
-      ...(sql.isSqlQuery(condition) ||
-      isSpecialValue(condition) ||
-      typeof condition === 'boolean'
-        ? [condition]
-        : typeof condition === 'function'
-        ? [condition(this._config.columns)]
-        : Object.entries(condition).map(([columnName, value]) =>
-            fieldConditionToPredicateValue(
-              (this._config.columns as Columns<TRecord>)[
-                columnName as keyof Columns<TRecord>
-              ] as ColumnReference<TRecord[keyof TRecord]>,
-              value as FieldCondition<TRecord[keyof TRecord]>,
-            ),
-          )),
+      ...whereConditionToPredicates(this._config.columns, condition),
     ];
     return new SelectQueryImplementation({
       columns: this._config.columns,

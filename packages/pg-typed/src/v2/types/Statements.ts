@@ -16,13 +16,30 @@ export interface BaseStatement<TRecord> extends TypedDatabaseQuery<void> {
   toSql(): SQLQuery | null;
 
   returningCount(): StatementCount;
-  returning(star: '*'): SelectQuery<TRecord>;
+
+  returning(): SelectQuery<TRecord>;
   returning<TColumnNames extends (keyof TRecord)[]>(
     ...columnNames: TColumnNames
   ): SelectQuery<Pick<TRecord, TColumnNames[number]>>;
   returning<TSelection>(
     selection: (column: Columns<TRecord>) => SelectionSetObject<TSelection>,
   ): SelectQuery<TSelection>;
+
+  returningOne(): TypedDatabaseQuery<TRecord | undefined>;
+  returningOne<TColumnNames extends (keyof TRecord)[]>(
+    ...columnNames: TColumnNames
+  ): TypedDatabaseQuery<Pick<TRecord, TColumnNames[number]> | undefined>;
+  returningOne<TSelection>(
+    selection: (column: Columns<TRecord>) => SelectionSetObject<TSelection>,
+  ): TypedDatabaseQuery<TSelection | undefined>;
+
+  returningOneRequired(): TypedDatabaseQuery<TRecord>;
+  returningOneRequired<TColumnNames extends (keyof TRecord)[]>(
+    ...columnNames: TColumnNames
+  ): TypedDatabaseQuery<Pick<TRecord, TColumnNames[number]>>;
+  returningOneRequired<TSelection>(
+    selection: (column: Columns<TRecord>) => SelectionSetObject<TSelection>,
+  ): TypedDatabaseQuery<TSelection>;
 }
 
 export interface InsertStatementOnConflictBuilder<TRecord> {
@@ -42,3 +59,4 @@ export interface InsertStatement<TRecord> extends BaseStatement<TRecord> {
 }
 
 export interface UpdateStatement<TRecord> extends BaseStatement<TRecord> {}
+export interface DeleteStatement<TRecord> extends BaseStatement<TRecord> {}

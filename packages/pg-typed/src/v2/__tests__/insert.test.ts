@@ -49,7 +49,7 @@ test(`Basic Insert`, async () => {
     ),
   ).toBe(undefined);
 
-  const insertReturningStar = insertOne.returning(`*`);
+  const insertReturningStar = insertOne.returning();
   expect(
     await mockResult<DbUser | undefined>(
       insertReturningStar.one(),
@@ -124,7 +124,7 @@ test(`INNER JOIN`, async () => {
     .innerJoin(
       posts
         .insert({author_id: 1, title: 'test', created_at: new Date(0)})
-        .returning(`*`)
+        .returning()
         .as(`p`),
     )
     .on(({u, p}) => q.eq(u.id, p.author_id))
