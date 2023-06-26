@@ -5,7 +5,7 @@ jest.setTimeout(30000);
 beforeAll(async () => {
   const db = connect();
   await db.query(
-    sql`CREATE TABLE bigint_test_bigints (id INT NOT NULL PRIMARY KEY, test_value BIGINT NOT NULL);`,
+    sql`CREATE TABLE bigint_test_bigints (id INT NOT NULL PRIMARY KEY, test_value BIGINT);`,
   );
   await db.query(sql`
     INSERT INTO bigint_test_bigints (id, test_value)
@@ -13,13 +13,14 @@ beforeAll(async () => {
            (2, ${2}),
            (3, ${2000}),
            (4, ${Number.MAX_SAFE_INTEGER}),
-           (5, ${'9999999999999999'});
+           (5, ${'9999999999999999'}),
+           (6, null);
   `);
   await db.dispose();
 });
 
 test('bigints as number', async () => {
-  const db = connect({bigIntMode: 'number'});
+  const db = connect({nullMode: 'strict', bigIntMode: 'number'});
   const result = await db.query(sql`
     SELECT id, test_value from bigint_test_bigints;
   `);
@@ -30,12 +31,13 @@ test('bigints as number', async () => {
     {id: 4, test_value: Number.MAX_SAFE_INTEGER},
     // N.B. this value is inexact:
     {id: 5, test_value: 10000000000000000},
+    {id: 6, test_value: null},
   ]);
   await db.dispose();
 });
 
 test('bigints as string', async () => {
-  const db = connect({bigIntMode: 'string'});
+  const db = connect({nullMode: 'strict', bigIntMode: 'string'});
   const result = await db.query(sql`
     SELECT id, test_value from bigint_test_bigints;
   `);
@@ -45,12 +47,13 @@ test('bigints as string', async () => {
     {id: 3, test_value: '2000'},
     {id: 4, test_value: Number.MAX_SAFE_INTEGER.toString()},
     {id: 5, test_value: '9999999999999999'},
+    {id: 6, test_value: null},
   ]);
   await db.dispose();
 });
 
 test('bigints as BigInt', async () => {
-  const db = connect({bigIntMode: 'bigint'});
+  const db = connect({nullMode: 'strict', bigIntMode: 'bigint'});
   const result = await db.query(sql`
     SELECT id, test_value from bigint_test_bigints;
   `);
@@ -60,6 +63,7 @@ test('bigints as BigInt', async () => {
     {id: 3, test_value: BigInt('2000')},
     {id: 4, test_value: BigInt(Number.MAX_SAFE_INTEGER.toString())},
     {id: 5, test_value: BigInt('9999999999999999')},
+    {id: 6, test_value: null},
   ]);
   await db.dispose();
 });
