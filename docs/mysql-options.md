@@ -4,6 +4,7 @@ title: MySQL Connection Options
 sidebar_label: Connection Options
 ---
 
+- `nullMode` (`'strict' | 'inconsistent'`, default: `'inconsistent'`) - This option specifies how nulls should be handled, if set to `'strict'` then a null from the database will kept as a null value.
 - `connectionString` (`string | false`, default: `process.env.DATABASE_URL`)
 - `bigIntMode` (`'string' | 'number' | 'bigint'`, default: `'number'`) - This option specifies how BigInts should be returned from MySQL. All types are supported when writing to BigInt fields. `'string'` and `'bigint'` both support any value that can be contained in a MySQL `BigInt` field. `'number'` is simpler to use, but will result in inaccurate values for very large numbers (greater than `Number.MAX_SAFE_INTEGER`). `'bigint'`s cannot be passed to `JSON.stringify`.
 - `poolSize` (`number`, default: `10`) - the maximum number of connections in the connection pool
