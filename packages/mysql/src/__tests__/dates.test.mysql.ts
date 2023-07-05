@@ -440,6 +440,31 @@ test('DATE as utc', async () => {
   await db.dispose();
 });
 
+test('DATE NULL', async () => {
+  const db = connect({timeZone: {client: 'utc'}});
+  await db.query(sql`
+    DROP TABLE IF EXISTS dates_test_pure_dates;
+    CREATE TABLE dates_test_pure_dates (
+      id INT NOT NULL PRIMARY KEY,
+      date_value DATE
+    );
+    INSERT INTO dates_test_pure_dates (id, date_value)
+    VALUES (1, null),
+           (2, ${'2000-06-04'});
+  `);
+  expect(await db.query(sql`SELECT * from dates_test_pure_dates`)).toEqual([
+    {
+      date_value: null,
+      id: 1,
+    },
+    {
+      date_value: new Date('2000-06-04T00:00:00.000Z'),
+      id: 2,
+    },
+  ]);
+  await db.dispose();
+});
+
 test('timestamp NULL', async () => {
   await db.task(async (db) => {
     await db.query(sql`SET time_zone = "+00:00";`);
