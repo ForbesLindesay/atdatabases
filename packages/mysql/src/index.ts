@@ -240,7 +240,7 @@ function validateMySqlUrl(urlString: string) {
 }
 
 function parseNullable<T, R>(value: T, parser: (value: T) => R): R | null {
-  if (value === null) {
+  if (value == null) {
     return null;
   }
 
