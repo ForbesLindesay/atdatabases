@@ -17,7 +17,7 @@ beforeAll(async () => {
 });
 
 test('booleans as number', async () => {
-  const db = connect({nullMode: 'strict', tinyIntMode: 'number'});
+  const db = connect({tinyIntMode: 'number'});
   const result = await db.query(sql`
     SELECT id, test_value from booleans_test_booleans;
   `);
@@ -31,7 +31,7 @@ test('booleans as number', async () => {
 });
 
 test('booleans as boolean', async () => {
-  const db = connect({nullMode: 'strict', tinyIntMode: 'boolean'});
+  const db = connect({tinyIntMode: 'boolean'});
   const result = await db.query(sql`
     SELECT id, test_value from booleans_test_booleans;
   `);

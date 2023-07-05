@@ -20,7 +20,7 @@ beforeAll(async () => {
 });
 
 test('bigints as number', async () => {
-  const db = connect({nullMode: 'strict', bigIntMode: 'number'});
+  const db = connect({bigIntMode: 'number'});
   const result = await db.query(sql`
     SELECT id, test_value from bigint_test_bigints;
   `);
@@ -37,7 +37,7 @@ test('bigints as number', async () => {
 });
 
 test('bigints as string', async () => {
-  const db = connect({nullMode: 'strict', bigIntMode: 'string'});
+  const db = connect({bigIntMode: 'string'});
   const result = await db.query(sql`
     SELECT id, test_value from bigint_test_bigints;
   `);
@@ -53,7 +53,7 @@ test('bigints as string', async () => {
 });
 
 test('bigints as BigInt', async () => {
-  const db = connect({nullMode: 'strict', bigIntMode: 'bigint'});
+  const db = connect({bigIntMode: 'bigint'});
   const result = await db.query(sql`
     SELECT id, test_value from bigint_test_bigints;
   `);

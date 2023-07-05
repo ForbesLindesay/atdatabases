@@ -40,7 +40,7 @@ import createConnectionPool, {sql} from '@databases/mysql';
 
 export {sql};
 
-const db = createConnectionPool({nullMode: 'strict'});
+const db = createConnectionPool();
 export default db;
 ```
 
@@ -49,7 +49,7 @@ export default db;
 
 const createConnectionPool = require('@databases/mysql');
 
-const db = createConnectionPool({nullMode: 'strict'});
+const db = createConnectionPool();
 module.exports = db;
 ```
 

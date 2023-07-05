@@ -18,16 +18,6 @@ const {connectionStringEnvironmentVariable} = getMySqlConfigSync();
 
 export interface ConnectionPoolConfig extends EventHandlers {
   /**
-   * Should the `NULL` type be treated as a `null` or attempted to be parsed?
-   *
-   * If you choose `strict` then any time a `NULL` value is returned from the
-   * database it will be returned as `null`.
-   *
-   * The default is `inconsistent` and will be removed in a future version.
-   */
-  nullMode?: 'strict' | 'inconsistent';
-
-  /**
    * Should the `TINYINT` type be treated as a boolean or a number?
    *
    * MySQL doesn't have a true boolean type, so when you create a column
@@ -161,8 +151,6 @@ export default function createConnectionPool(
   validateMySqlUrl(connectionString);
 
   const {
-    // TODO version 6 change nullMode to 'strict' by default
-    nullMode = 'inconsistent',
     tinyIntMode = 'number',
     bigIntMode = 'number',
     dateMode = 'date-object',
@@ -189,9 +177,9 @@ export default function createConnectionPool(
   const clientTimeZone =
     typeof timeZone === 'string' ? timeZone : timeZone.client;
 
-  const tinyIntParser = getTinyIntParser(nullMode, tinyIntMode);
-  const bigIntParser = getBigIntParser(nullMode, bigIntMode);
-  const dateParer = getDateParser(nullMode, dateMode, clientTimeZone);
+  const tinyIntParser = getTinyIntParser(tinyIntMode);
+  const bigIntParser = getBigIntParser(bigIntMode);
+  const dateParer = getDateParser(dateMode, clientTimeZone);
   const dateTimeParser = getDateTimeParser(dateTimeMode, clientTimeZone);
   const timeStampParser = getDateTimeParser(timeStampMode, clientTimeZone);
   return new ConnectionPoolImplemenation(
@@ -251,12 +239,8 @@ function validateMySqlUrl(urlString: string) {
   }
 }
 
-function parseNullable<T, R>(
-  nullMode: 'strict' | 'inconsistent',
-  value: T,
-  parser: (value: T) => R,
-): R | null {
-  if (nullMode === 'strict' && value === null) {
+function parseNullable<T, R>(value: T, parser: (value: T) => R): R | null {
+  if (value === null) {
     return null;
   }
 
@@ -264,31 +248,28 @@ function parseNullable<T, R>(
 }
 
 function getTinyIntParser(
-  nullMode: 'strict' | 'inconsistent',
   mode: 'boolean' | 'number',
 ): (f: {string(): string}) => any {
   switch (mode) {
     case 'number':
-      return (f) => parseNullable(nullMode, f.string(), (s) => parseInt(s, 10));
+      return (f) => parseNullable(f.string(), (s) => parseInt(s, 10));
     case 'boolean':
-      return (f) => parseNullable(nullMode, f.string(), (s) => s !== '0');
+      return (f) => parseNullable(f.string(), (s) => s !== '0');
   }
 }
 function getBigIntParser(
-  nullMode: 'strict' | 'inconsistent',
   mode: 'string' | 'number' | 'bigint',
 ): (f: {string(): string}) => any {
   switch (mode) {
     case 'number':
-      return (f) => parseNullable(nullMode, f.string(), (s) => parseInt(s, 10));
+      return (f) => parseNullable(f.string(), (s) => parseInt(s, 10));
     case 'string':
       return (f) => f.string();
     case 'bigint':
-      return (f) => parseNullable(nullMode, f.string(), (s) => BigInt(s));
+      return (f) => parseNullable(f.string(), (s) => BigInt(s));
   }
 }
 function getDateParser(
-  nullMode: 'strict' | 'inconsistent',
   mode: 'string' | 'date-object',
   timeZone: 'local' | 'utc',
 ): (f: {string(): string}) => any {
@@ -297,7 +278,7 @@ function getDateParser(
       return (f) => f.string();
     case 'date-object':
       return (f) =>
-        parseNullable(nullMode, f.string(), (s) => {
+        parseNullable(f.string(), (s) => {
           const match = /^(\d{4})\-(\d{2})\-(\d{2})$/.exec(s);
           if (!match) {
             throw new Error('Expected yyyy-mm-dd');

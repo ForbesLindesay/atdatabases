@@ -441,7 +441,7 @@ test('DATE as utc', async () => {
 });
 
 test('DATE NULL', async () => {
-  const db = connect({nullMode: 'strict', timeZone: {client: 'utc'}});
+  const db = connect({timeZone: {client: 'utc'}});
   await db.query(sql`
     DROP TABLE IF EXISTS dates_test_pure_dates;
     CREATE TABLE dates_test_pure_dates (
