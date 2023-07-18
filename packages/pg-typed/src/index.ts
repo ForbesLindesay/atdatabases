@@ -8,7 +8,6 @@ import {
   bulkInsertStatement,
 } from '@databases/pg-bulk';
 import {
-  OrderedSelectQuery,
   OrderedSelectQueryWithOffset,
 } from '@databases/mock-db-typed';
 
@@ -63,6 +62,7 @@ export type UnorderedSelectQueryMethods =
 export type SelectQueryMethods =
   | UnorderedSelectQueryMethods
   | 'first'
+  | 'offset'
   | 'limit';
 export interface SelectQuery<TRecord, TMethods extends SelectQueryMethods> {
   toSql(): SQLQuery;
@@ -99,13 +99,13 @@ export interface SelectQuery<TRecord, TMethods extends SelectQueryMethods> {
     key: keyof TRecord,
   ): PartialSelectQuery<
     TRecord,
-    Exclude<TMethods, 'distinct'> | 'first' | 'limit'
+    Exclude<TMethods, 'distinct'> | 'first' | 'limit' | 'offset'
   >;
   orderByDescDistinct(
     key: keyof TRecord,
   ): PartialSelectQuery<
     TRecord,
-    Exclude<TMethods, 'distinct'> | 'first' | 'limit'
+    Exclude<TMethods, 'distinct'> | 'first' | 'limit' | 'offset'
   >;
   orderByAsc(
     key: keyof TRecord,
@@ -117,6 +117,7 @@ export interface SelectQuery<TRecord, TMethods extends SelectQueryMethods> {
       >
     | 'first'
     | 'limit'
+    | 'offset'
   >;
   orderByDesc(
     key: keyof TRecord,
@@ -128,6 +129,7 @@ export interface SelectQuery<TRecord, TMethods extends SelectQueryMethods> {
       >
     | 'first'
     | 'limit'
+    | 'offset'
   >;
   andWhere(condition: WhereCondition<TRecord>): this;
 }
@@ -669,7 +671,7 @@ class SelectQueryImplementation<TRecord>
     this._limitCount = count;
     return await this._getResults('limit');
   }
-  public async offset(offset: number): Promise<OrderedSelectQuery<TRecord>> {
+  public async offset(offset: number): Promise<OrderedSelectQueryWithOffset<TRecord>> {
     if (!this._orderByQueries.length) {
       throw new Error(
         'You cannot call "offset" until after you call "orderByAsc" or "orderByDesc".',
