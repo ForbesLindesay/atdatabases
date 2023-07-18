@@ -7,6 +7,7 @@ import {
   bulkCondition,
   bulkInsertStatement,
 } from '@databases/pg-bulk';
+import {OrderedSelectQuery, OrderedSelectQueryWithOffset} from "@databases/mock-db-typed";
 
 const NO_RESULT_FOUND = `NO_RESULT_FOUND`;
 const MULTIPLE_RESULTS_FOUND = `MULTIPLE_RESULTS_FOUND`;
@@ -68,6 +69,7 @@ export interface SelectQuery<TRecord, TMethods extends SelectQueryMethods> {
   all(): Promise<TRecord[]>;
   first(): Promise<TRecord | null>;
   limit(count: number): Promise<TRecord[]>;
+  offset(count: number): Promise<OrderedSelectQueryWithOffset<TRecord>>;
 
   select<
     TKeys extends readonly [keyof TRecord, ...(readonly (keyof TRecord)[])],
@@ -494,6 +496,7 @@ class SelectQueryImplementation<TRecord>
     direction: 'ASC' | 'DESC';
   }[] = [];
   private _limitCount: number | undefined;
+  private _offsetCount: number | undefined;
   private _selectFields: readonly string[] | undefined;
   private readonly _whereAnd: WhereCondition<TRecord>[] = [];
 
@@ -525,6 +528,7 @@ class SelectQueryImplementation<TRecord>
     const selectFields = this._selectFields;
     const orderByQueries = this._orderByQueries;
     const limitCount = this._limitCount;
+    const offsetCount = this._offsetCount;
     const distinctColumnNames = this._distinctColumnNames;
 
     const whereCondition =
@@ -578,6 +582,7 @@ class SelectQueryImplementation<TRecord>
             )}`
           : null,
         limitCount ? sql`LIMIT ${limitCount}` : null,
+        offsetCount ? sql`OFFSET ${offsetCount}` : null,
       ].filter(<T>(v: T): v is Exclude<T, null> => v !== null),
       sql` `,
     );
@@ -660,6 +665,15 @@ class SelectQueryImplementation<TRecord>
     }
     this._limitCount = count;
     return await this._getResults('limit');
+  }
+  public async offset(offset: number): Promise<OrderedSelectQuery<TRecord>> {
+    if (!this._orderByQueries.length) {
+      throw new Error(
+        'You cannot call "offset" until after you call "orderByAsc" or "orderByDesc".',
+      );
+    }
+    this._offsetCount = offset;
+    return this;
   }
   public async first() {
     if (!this._orderByQueries.length) {
