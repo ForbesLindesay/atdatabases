@@ -115,6 +115,18 @@ t('create users', async () => {
     ]
   `);
 
+  const photoRecordsOffset = await photos(db)
+    .find({owner_user_id: 1})
+    .orderByAsc('cdn_url')
+    .offset(1)
+    .limit(2);
+  expect(photoRecords.map((p) => p.cdn_url)).toMatchInlineSnapshot(`
+    Array [
+      "http://example.com/2",
+      "http://example.com/3",
+    ]
+  `);
+
   const photoRecordsDesc = await photos(db)
     .find({owner_user_id: 1})
     .orderByDesc('cdn_url')

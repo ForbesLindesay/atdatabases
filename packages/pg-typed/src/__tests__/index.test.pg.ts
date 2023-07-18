@@ -92,9 +92,10 @@ test('create users', async () => {
     .find({owner_user_id: forbes.id})
     .orderByAsc('cdn_url')
     .offset(1)
-    .limit(1);
+    .limit(2);
   expect(photoRecordsOffset.map((p) => p.cdn_url)).toMatchInlineSnapshot(`
     Array [
+      "http://example.com/2",
       "http://example.com/3",
     ]
   `);
