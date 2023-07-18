@@ -7,7 +7,10 @@ import {
   bulkCondition,
   bulkInsertStatement,
 } from '@databases/pg-bulk';
-import {OrderedSelectQuery, OrderedSelectQueryWithOffset} from "@databases/mock-db-typed";
+import {
+  OrderedSelectQuery,
+  OrderedSelectQueryWithOffset,
+} from '@databases/mock-db-typed';
 
 const NO_RESULT_FOUND = `NO_RESULT_FOUND`;
 const MULTIPLE_RESULTS_FOUND = `MULTIPLE_RESULTS_FOUND`;

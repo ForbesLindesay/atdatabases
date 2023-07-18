@@ -15,11 +15,13 @@ export interface OrderedSelectQuery<TRecord> extends SelectQuery<TRecord> {
   first(): Promise<TRecord | null>;
   limit(count: number): Promise<TRecord[]>;
 }
-export interface OrderedSelectQueryWithOffset<TRecord> extends SelectQuery<TRecord> {
+export interface OrderedSelectQueryWithOffset<TRecord>
+  extends SelectQuery<TRecord> {
   first(): Promise<TRecord | null>;
   limit(count: number): Promise<TRecord[]>;
 }
-export interface OrderedSelectQuery<TRecord> extends OrderedSelectQueryWithOffset<TRecord> {
+export interface OrderedSelectQuery<TRecord>
+  extends OrderedSelectQueryWithOffset<TRecord> {
   offset(count: number): Promise<OrderedSelectQueryWithOffset<TRecord>>;
 }
 
@@ -172,7 +174,7 @@ class SelectQueryImplementation<TRecord>
     if (this.limitCount) {
       parts.push(sql`LIMIT ${this.limitCount}`);
     }
-    if(this.offsetCount) {
+    if (this.offsetCount) {
       parts.push(sql`OFFSET ${this.offsetCount}`);
     }
     return this._executeQuery(
