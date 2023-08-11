@@ -545,6 +545,34 @@ export async function getOldestPostVersions() {
 }
 ```
 
+### offset(count)
+
+Skip the first `count` rows. This is generally a less efficient method of pagination than using a field in the query as a "next page token". You can only use this method if you have first called `orderByAsc` or `orderByDesc` at least once.
+
+```typescript
+import db, {users} from './database';
+
+export async function paginatedEmails(page?: number) {
+  const records = await users(db)
+    .find()
+    .orderByAsc(`email`)
+    .offset(10 * (page ?? 0))
+    .limit(10);
+  return records.map((record) => record.email)
+}
+
+export async function printAllEmails() {
+  let pageNumber = 0
+  let records = await paginatedEmails(pageNumber++);
+  while (records.length) {
+    for (const email of records) {
+      console.log(email);
+    }
+    records = await paginatedEmails(pageNumber++);
+  }
+}
+```
+
 ### limit(count)
 
 Return the first `count` rows. N.B. you can only use this method if you have first called `orderByAsc` or `orderByDesc` at least once.
