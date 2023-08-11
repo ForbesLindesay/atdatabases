@@ -213,7 +213,7 @@ class SelectQueryImplementation<TRecord>
     this.limitCount = count;
     return await this._getResults('limit');
   }
-  public async offset(offset: number): Promise<OrderedSelectQueryWithOffset<TRecord>> {
+  public offset(offset: number) {
     if (!this.orderByQueries.length) {
       throw new Error(
         'You cannot call "offset" until after you call "orderByAsc" or "orderByDesc".',
