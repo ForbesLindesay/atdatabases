@@ -17,7 +17,7 @@ export interface OrderedSelectQueryWithOffset<TRecord>
 }
 export interface OrderedSelectQuery<TRecord>
   extends OrderedSelectQueryWithOffset<TRecord> {
-  offset(count: number): Promise<OrderedSelectQueryWithOffset<TRecord>>;
+  offset(count: number): OrderedSelectQueryWithOffset<TRecord>;
 }
 
 class FieldQuery<T> {
