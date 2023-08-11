@@ -7,9 +7,6 @@ import {
   bulkCondition,
   bulkInsertStatement,
 } from '@databases/pg-bulk';
-import {
-  OrderedSelectQueryWithOffset,
-} from '@databases/mock-db-typed';
 
 const NO_RESULT_FOUND = `NO_RESULT_FOUND`;
 const MULTIPLE_RESULTS_FOUND = `MULTIPLE_RESULTS_FOUND`;
@@ -72,7 +69,18 @@ export interface SelectQuery<TRecord, TMethods extends SelectQueryMethods> {
   all(): Promise<TRecord[]>;
   first(): Promise<TRecord | null>;
   limit(count: number): Promise<TRecord[]>;
-  offset(count: number): Promise<OrderedSelectQueryWithOffset<TRecord>>;
+  offset(count: number): PartialSelectQuery<
+    TRecord,
+    Exclude<
+      TMethods,
+      | 'distinct'
+      | 'orderByAscDistinct'
+      | 'orderByDescDistinct'
+      | 'orderByAsc'
+      | 'orderByDesc'
+      | 'offset'
+    >
+  >;
 
   select<
     TKeys extends readonly [keyof TRecord, ...(readonly (keyof TRecord)[])],
@@ -676,6 +684,9 @@ class SelectQueryImplementation<TRecord>
       throw new Error(
         'You cannot call "offset" until after you call "orderByAsc" or "orderByDesc".',
       );
+    }
+    if (this.offsetCount !== undefined) {
+      throw new Error('You cannot call "offset" multiple times');
     }
     this._offsetCount = offset;
     return this;
