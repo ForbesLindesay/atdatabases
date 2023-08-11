@@ -10,11 +10,6 @@ export interface SelectQuery<TRecord> {
     ...fields: TKeys
   ): SelectQuery<Pick<TRecord, TKeys[number]>>;
 }
-
-export interface OrderedSelectQuery<TRecord> extends SelectQuery<TRecord> {
-  first(): Promise<TRecord | null>;
-  limit(count: number): Promise<TRecord[]>;
-}
 export interface OrderedSelectQueryWithOffset<TRecord>
   extends SelectQuery<TRecord> {
   first(): Promise<TRecord | null>;
@@ -223,6 +218,9 @@ class SelectQueryImplementation<TRecord>
       throw new Error(
         'You cannot call "offset" until after you call "orderByAsc" or "orderByDesc".',
       );
+    }
+    if (this.offsetCount !== undefined) {
+      throw new Error('You cannot call "offset" multiple times');
     }
     this.offsetCount = offset;
     return this;
