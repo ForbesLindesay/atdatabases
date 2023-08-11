@@ -69,7 +69,9 @@ export interface SelectQuery<TRecord, TMethods extends SelectQueryMethods> {
   all(): Promise<TRecord[]>;
   first(): Promise<TRecord | null>;
   limit(count: number): Promise<TRecord[]>;
-  offset(count: number): PartialSelectQuery<
+  offset(
+    count: number,
+  ): PartialSelectQuery<
     TRecord,
     Exclude<
       TMethods,
@@ -679,7 +681,7 @@ class SelectQueryImplementation<TRecord>
     this._limitCount = count;
     return await this._getResults('limit');
   }
-  public offset(offset: number){
+  public offset(offset: number) {
     if (!this._orderByQueries.length) {
       throw new Error(
         'You cannot call "offset" until after you call "orderByAsc" or "orderByDesc".',
