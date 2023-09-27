@@ -14,7 +14,7 @@ export default async function getEnumValues(
 ): Promise<EnumValue[]> {
   const conditions = typeQuery(query);
 
-  const enumValues = await connection.query(sql`
+  const enumValues = await connection.query<EnumValue>(sql`
     SELECT
       ns.oid AS "schemaID",
       ns.nspname AS "schemaName",

@@ -1022,7 +1022,7 @@ class Table<TRecord, TInsertParameters> {
         )})`,
     );
 
-    const results = await this._underlyingDb.query(
+    const results = await this._underlyingDb.query<TRecord>(
       onConflict
         ? sql`INSERT INTO ${this.tableId} (${columnNamesSql}) VALUES ${sql.join(
             values,
@@ -1237,12 +1237,12 @@ class Table<TRecord, TInsertParameters> {
     if (whereCondition === `FALSE`) {
       return 0;
     } else if (whereCondition === `TRUE`) {
-      const [result] = await this._underlyingDb.query(
+      const [result] = await this._underlyingDb.query<{count: string}>(
         sql`SELECT count(*) AS count FROM ${this.tableId}`,
       );
       return parseInt(result.count, 10);
     } else {
-      const [result] = await this._underlyingDb.query(
+      const [result] = await this._underlyingDb.query<{count: string}>(
         sql`SELECT count(*) AS count FROM ${this.tableId} WHERE ${whereCondition}`,
       );
       return parseInt(result.count, 10);

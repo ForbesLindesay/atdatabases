@@ -37,7 +37,7 @@ export default async function getConstraints(
 ): Promise<Constraint[]> {
   const conditions = classQuery(query);
 
-  const constraints = await connection.query(sql`
+  const constraints = await connection.query<Constraint>(sql`
     SELECT
       conname AS "constraintName",
       contype AS "constraintType",

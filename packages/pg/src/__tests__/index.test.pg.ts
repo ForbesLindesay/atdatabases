@@ -100,14 +100,14 @@ test('error messages in a transaction', async function testErrorMessages() {
 });
 
 test('query', async () => {
-  const [{foo}] = await db.query(sql`SELECT 1 + 1 as foo`);
+  const [{foo}] = await db.query<{foo: number}>(sql`SELECT 1 + 1 as foo`);
   expect(foo).toBe(2);
 });
 
 test('query - multiple queries', async () => {
-  const resultA = await db.query([sql`SELECT 1 + 1 as foo`]);
+  const resultA = await db.query<[[{foo: number}]]>([sql`SELECT 1 + 1 as foo`]);
   expect(resultA).toEqual([[{foo: 2}]]);
-  const resultB = await db.query([
+  const resultB = await db.query<[[{foo: number}], [{bar: number}]]>([
     sql`SELECT ${1} + 1 as foo;`,
     sql`SELECT 1 + ${2} as bar;`,
   ]);
@@ -115,7 +115,9 @@ test('query - multiple queries', async () => {
 });
 
 test('query with params', async () => {
-  const [{foo}] = await db.query(sql`SELECT 1 + ${41} as ${sql.ident('foo')}`);
+  const [{foo}] = await db.query<{foo: number}>(
+    sql`SELECT 1 + ${41} as ${sql.ident('foo')}`,
+  );
   expect(foo).toBe(42);
 });
 
@@ -128,7 +130,7 @@ test('json', async () => {
     id: string,
     val: unknown,
   ): Promise<{id: string; val: unknown}> {
-    const [result] = await db.query(sql`
+    const [result] = await db.query<{id: string; val: unknown}>(sql`
       INSERT INTO json_test.json (id, val) VALUES (${id}, ${val})
       ON CONFLICT (id) DO UPDATE SET val=EXCLUDED.val
       RETURNING *;
@@ -139,7 +141,7 @@ test('json', async () => {
     id: string,
     val: unknown,
   ): Promise<{id: string; val: unknown}> {
-    const [result] = await db.query(sql`
+    const [result] = await db.query<{id: string; val: unknown}>(sql`
       INSERT INTO json_test.json (id, val) VALUES (${id}, ${JSON.stringify(
       val,
     )})
@@ -154,7 +156,7 @@ test('json', async () => {
       readonly val: unknown;
     }[]
   ): Promise<{id: string; val: unknown}[]> {
-    const results = await db.query(
+    const results = await db.query<{id: string; val: unknown}>(
       values.map(
         ({id, val}) => sql`
           INSERT INTO json_test.json (id, val)

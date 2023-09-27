@@ -109,7 +109,7 @@ test('create users in bulk', async () => {
       values: ['Array<string>', 'Array<number>', 'Array<string>'],
     },
   ]);
-  const records = await db.query(
+  const records = await db.query<{screen_name: string; age: number}>(
     sql`SELECT screen_name, age FROM ${table} ORDER BY screen_name ASC`,
   );
   expect(records.map((i) => i.screen_name)).toEqual(names.sort());

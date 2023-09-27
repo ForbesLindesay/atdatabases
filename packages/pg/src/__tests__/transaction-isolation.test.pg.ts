@@ -31,7 +31,7 @@ async function transaction(
   db: Transaction,
   {from, to, wait}: {from: number; to: number; wait: () => Promise<void>},
 ) {
-  const [{sum}] = await db.query(
+  const [{sum}] = await db.query<{sum: number}>(
     sql`SELECT SUM(value) as sum FROM mytab WHERE class = ${from};`,
   );
   await wait();

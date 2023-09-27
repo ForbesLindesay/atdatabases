@@ -22,7 +22,7 @@ export default async function getClasses(
 ): Promise<Class[]> {
   const conditions = classQuery(query);
 
-  const tables = await connection.query(sql`
+  const tables = await connection.query<Class>(sql`
     SELECT
       ns.oid as "schemaID",
       ns.nspname as "schemaName",

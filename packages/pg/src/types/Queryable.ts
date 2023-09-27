@@ -7,8 +7,8 @@ import TransactionOptions from './TransactionOptions';
 export default interface Queryable {
   readonly type: QueryableType;
   readonly sql: SQL;
-  query(query: SQLQuery): Promise<any[]>;
-  query(query: SQLQuery[]): Promise<any[][]>;
+  query<T>(query: SQLQuery): Promise<T[]>;
+  query<T>(query: SQLQuery[]): Promise<T[][]>;
   queryStream(
     query: SQLQuery,
     {batchSize, signal}: {batchSize?: number; signal?: AbortSignal},

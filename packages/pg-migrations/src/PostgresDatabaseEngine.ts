@@ -97,7 +97,7 @@ export default class PostgresDatabaseEngine
     return await this._connection.tx(async (tx) => {
       return await fn({
         async getVersion(): Promise<string> {
-          const versionRecords = await tx.query(
+          const versionRecords = await tx.query<{version: string}>(
             tx.sql`SELECT version FROM ${versionTableName} WHERE id=0`,
           );
           if (versionRecords.length) {
@@ -129,7 +129,7 @@ export default class PostgresDatabaseEngine
               );
             `);
           }
-          const updatedRecords = await tx.query(tx.sql`
+          const updatedRecords = await tx.query<{id: number}>(tx.sql`
             UPDATE ${versionTableName} SET version=${newVersion}
             RETURNING id
           `);
@@ -249,7 +249,7 @@ function getExport(mod: any, filename: string) {
 
 async function getPgVersion(connection: Queryable): Promise<[number, number]> {
   // e.g. PostgreSQL 10.1 on x86_64-apple-darwin16.7.0, compiled by Apple LLVM version 9.0.0 (clang-900.0.38), 64-bit
-  const [{version: sqlVersionString}] = await connection.query(
+  const [{version: sqlVersionString}] = await connection.query<{version: any}>(
     connection.sql`SELECT version();`,
   );
   const match = /PostgreSQL (\d+).(\d+)/.exec(sqlVersionString);

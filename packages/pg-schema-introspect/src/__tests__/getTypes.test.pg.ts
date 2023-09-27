@@ -520,7 +520,7 @@ test('get custom types', async () => {
 
 async function getPgVersion(): Promise<[number, number]> {
   // e.g. PostgreSQL 10.1 on x86_64-apple-darwin16.7.0, compiled by Apple LLVM version 9.0.0 (clang-900.0.38), 64-bit
-  const [{version: sqlVersionString}] = await db.query(
+  const [{version: sqlVersionString}] = await db.query<{version: any}>(
     db.sql`SELECT version();`,
   );
   const match = /PostgreSQL (\d+).(\d+)/.exec(sqlVersionString);

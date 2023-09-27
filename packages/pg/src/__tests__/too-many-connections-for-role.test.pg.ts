@@ -36,7 +36,9 @@ test(`Handling too many connections for role`, async () => {
       expect(
         await pool.tx(async (db) => {
           await new Promise<void>((r) => setTimeout(() => r(), 500));
-          return (await db.query(sql`SELECT 1+1 AS result`))[0].result;
+          return (
+            await db.query<{result: number}>(sql`SELECT 1+1 AS result`)
+          )[0].result;
         }),
       ).toBe(2);
     }),
