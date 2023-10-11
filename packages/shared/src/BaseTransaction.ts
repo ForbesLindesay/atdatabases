@@ -55,7 +55,7 @@ export default class BaseTransaction<
     this._throwIfDisposed();
     await this._lock.acquireLock();
     try {
-      const savepointName = randomUUID();
+      const savepointName = randomUUID().replace('-', '');
       await this._driver.createSavepoint(savepointName);
       const subTransaction = this._factories.createTransaction(
         this._driver,
