@@ -1,6 +1,6 @@
 import splitSqlQuery from '@databases/split-sql-query';
 import type {SQLQuery} from '@databases/sql';
-import { randomUUID } from 'crypto';
+import {randomUUID} from 'crypto';
 import {
   Disposable,
   TransactionFactory,
