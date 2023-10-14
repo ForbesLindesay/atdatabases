@@ -1,6 +1,6 @@
 import splitSqlQuery from '@databases/split-sql-query';
 import type {SQLQuery} from '@databases/sql';
-import cuid = require('cuid');
+import {randomUUID} from 'crypto';
 import {
   Disposable,
   TransactionFactory,
@@ -55,7 +55,7 @@ export default class BaseTransaction<
     this._throwIfDisposed();
     await this._lock.acquireLock();
     try {
-      const savepointName = cuid();
+      const savepointName = 's' + randomUUID().replace(/-/g, '');
       await this._driver.createSavepoint(savepointName);
       const subTransaction = this._factories.createTransaction(
         this._driver,
