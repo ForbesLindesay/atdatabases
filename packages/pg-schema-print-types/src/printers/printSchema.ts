@@ -9,7 +9,11 @@ export default function printSchema(schema: Schema, context: PgPrintContext) {
     (identifier, {getImport}) => [
       `interface ${identifier} {`,
       ...schema.classes
-        .filter((cls) => cls.kind === ClassKind.OrdinaryTable)
+        .filter(
+          (cls) =>
+            cls.kind === ClassKind.OrdinaryTable ||
+            cls.kind === ClassKind.PartitionedTable,
+        )
         .map((cls) => {
           const {DatabaseRecord, InsertParameters} = printClassDetails(
             cls,
@@ -27,7 +31,11 @@ export default function printSchema(schema: Schema, context: PgPrintContext) {
     {type: 'serializeValue'},
     (identifier) => {
       const tables = schema.classes
-        .filter((cls) => cls.kind === ClassKind.OrdinaryTable)
+        .filter(
+          (cls) =>
+            cls.kind === ClassKind.OrdinaryTable ||
+            cls.kind === ClassKind.PartitionedTable,
+        )
         .map((cls) => {
           const jsonAttributes = cls.attributes
             .filter(
@@ -120,7 +128,11 @@ export default function printSchema(schema: Schema, context: PgPrintContext) {
 
   if (schemaJsonFileName) {
     const schemaJson = schema.classes
-      .filter((cls) => cls.kind === ClassKind.OrdinaryTable)
+      .filter(
+        (cls) =>
+          cls.kind === ClassKind.OrdinaryTable ||
+          cls.kind === ClassKind.PartitionedTable,
+      )
       .map((table) => ({
         name: table.className,
         columns: table.attributes.map((column) => {

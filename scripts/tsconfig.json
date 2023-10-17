@@ -4,7 +4,6 @@
     {"path": "../packages/bigquery"},
     {"path": "../packages/cache"},
     {"path": "../packages/connection-pool"},
-    {"path": "../packages/dataloader"},
     {"path": "../packages/escape-identifier"},
     {"path": "../packages/expo"},
     {"path": "../packages/lock"},
