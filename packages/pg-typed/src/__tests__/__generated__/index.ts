@@ -8,18 +8,24 @@
 /* eslint-disable */
 // tslint:disable
 
-import Partitioned, {Partitioned_InsertParameters} from './partitioned'
-import PartitionedP0, {PartitionedP0_InsertParameters} from './partitioned_p0'
-import PartitionedP1, {PartitionedP1_InsertParameters} from './partitioned_p1'
-import Photo, {Photos_InsertParameters} from './photos'
-import User, {Users_InsertParameters} from './users'
+import Partitioned, {Partitioned_InsertParameters} from './partitioned';
+import PartitionedP0, {PartitionedP0_InsertParameters} from './partitioned_p0';
+import PartitionedP1, {PartitionedP1_InsertParameters} from './partitioned_p1';
+import Photo, {Photos_InsertParameters} from './photos';
+import User, {Users_InsertParameters} from './users';
 
 interface DatabaseSchema {
-  partitioned: {record: Partitioned, insert: Partitioned_InsertParameters};
-  partitioned_p0: {record: PartitionedP0, insert: PartitionedP0_InsertParameters};
-  partitioned_p1: {record: PartitionedP1, insert: PartitionedP1_InsertParameters};
-  photos: {record: Photo, insert: Photos_InsertParameters};
-  users: {record: User, insert: Users_InsertParameters};
+  partitioned: {record: Partitioned; insert: Partitioned_InsertParameters};
+  partitioned_p0: {
+    record: PartitionedP0;
+    insert: PartitionedP0_InsertParameters;
+  };
+  partitioned_p1: {
+    record: PartitionedP1;
+    insert: PartitionedP1_InsertParameters;
+  };
+  photos: {record: Photo; insert: Photos_InsertParameters};
+  users: {record: User; insert: Users_InsertParameters};
 }
 export default DatabaseSchema;
 
@@ -30,9 +36,9 @@ export default DatabaseSchema;
  * in a JSON or JSONB column.
  */
 function serializeValue(t: string, c: string, v: unknown): unknown {
-  if (t === "photos" && c === "metadata") {
+  if (t === 'photos' && c === 'metadata') {
     return JSON.stringify(v);
   }
   return v;
 }
-export {serializeValue}
+export {serializeValue};

@@ -9,13 +9,13 @@
 // tslint:disable
 
 interface PartitionedP0 {
-  create_date: Date
-  id: number
+  create_date: Date;
+  id: number;
 }
 export default PartitionedP0;
 
 interface PartitionedP0_InsertParameters {
-  create_date: Date
-  id: number
+  create_date: Date;
+  id: number;
 }
-export type {PartitionedP0_InsertParameters}
+export type {PartitionedP0_InsertParameters};

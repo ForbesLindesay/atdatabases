@@ -9,13 +9,13 @@
 // tslint:disable
 
 interface Partitioned {
-  create_date: Date
-  id: number
+  create_date: Date;
+  id: number;
 }
 export default Partitioned;
 
 interface Partitioned_InsertParameters {
-  create_date: Date
-  id: number
+  create_date: Date;
+  id: number;
 }
-export type {Partitioned_InsertParameters}
+export type {Partitioned_InsertParameters};
