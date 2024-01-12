@@ -157,12 +157,14 @@ jobs:
       - run: "mkdir .netlify && echo '{\"siteId\": \"${{secrets.NETLIFY_SITE_ID}}\"}' >
           .netlify/state.json"
       - if: ${{ github.event_name == 'push' }}
-        run: netlify deploy --cwd . --prod --dir=packages/website/out
+        run: netlify deploy --cwd . --filter @databases/website --prod
+          --dir=packages/website/out
         env:
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
       - if: ${{ github.event_name != 'push' }}
-        run: netlify deploy --cwd . --dir=packages/website/out
+        run: netlify deploy --cwd . --filter @databases/website
+          --dir=packages/website/out
         env:
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
