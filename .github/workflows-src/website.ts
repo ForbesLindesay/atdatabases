@@ -36,26 +36,20 @@ export default createWorkflow(({setWorkflowName, addTrigger, addJob}) => {
       interpolate`mkdir .netlify && echo '{"siteId": "${secrets.NETLIFY_SITE_ID}"}' > .netlify/state.json`,
     );
     when(eq(github.event_name, `push`), () => {
-      run(
-        `netlify deploy --filter @databases/website --prod --dir=packages/website/out`,
-        {
-          env: {
-            NETLIFY_SITE_ID: secrets.NETLIFY_SITE_ID,
-            NETLIFY_AUTH_TOKEN: secrets.NETLIFY_AUTH_TOKEN,
-          },
+      run(`netlify deploy --cwd . --prod --dir=packages/website/out`, {
+        env: {
+          NETLIFY_SITE_ID: secrets.NETLIFY_SITE_ID,
+          NETLIFY_AUTH_TOKEN: secrets.NETLIFY_AUTH_TOKEN,
         },
-      );
+      });
     });
     when(neq(github.event_name, `push`), () => {
-      run(
-        `netlify deploy --filter @databases/website --dir=packages/website/out`,
-        {
-          env: {
-            NETLIFY_SITE_ID: secrets.NETLIFY_SITE_ID,
-            NETLIFY_AUTH_TOKEN: secrets.NETLIFY_AUTH_TOKEN,
-          },
+      run(`netlify deploy --cwd . --dir=packages/website/out`, {
+        env: {
+          NETLIFY_SITE_ID: secrets.NETLIFY_SITE_ID,
+          NETLIFY_AUTH_TOKEN: secrets.NETLIFY_AUTH_TOKEN,
         },
-      );
+      });
     });
   });
 });
