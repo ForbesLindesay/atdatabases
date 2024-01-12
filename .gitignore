@@ -34,3 +34,5 @@ packages/*/.cache
 .last_build
 
 website/build
+# Local Netlify folder
+.netlify

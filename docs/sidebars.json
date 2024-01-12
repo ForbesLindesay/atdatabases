@@ -88,6 +88,7 @@
     "Utilities": [
       "cache",
       "connection-pool",
+      "dataloader",
       "escape-identifier",
       "lock",
       "queue",

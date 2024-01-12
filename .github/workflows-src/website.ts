@@ -32,20 +32,26 @@ export default createWorkflow(({setWorkflowName, addTrigger, addJob}) => {
     run('yarn workspace @databases/website build');
 
     when(eq(github.event_name, `push`), () => {
-      run(`netlify deploy --prod --dir=packages/website/out`, {
-        env: {
-          NETLIFY_SITE_ID: secrets.NETLIFY_SITE_ID,
-          NETLIFY_AUTH_TOKEN: secrets.NETLIFY_AUTH_TOKEN,
+      run(
+        `netlify deploy --cwd . --filter @databases/website --prod --dir=packages/website/out`,
+        {
+          env: {
+            NETLIFY_SITE_ID: secrets.NETLIFY_SITE_ID,
+            NETLIFY_AUTH_TOKEN: secrets.NETLIFY_AUTH_TOKEN,
+          },
         },
-      });
+      );
     });
     when(neq(github.event_name, `push`), () => {
-      run(`netlify deploy --dir=packages/website/out`, {
-        env: {
-          NETLIFY_SITE_ID: secrets.NETLIFY_SITE_ID,
-          NETLIFY_AUTH_TOKEN: secrets.NETLIFY_AUTH_TOKEN,
+      run(
+        `netlify deploy --cwd . --filter @databases/website --dir=packages/website/out`,
+        {
+          env: {
+            NETLIFY_SITE_ID: secrets.NETLIFY_SITE_ID,
+            NETLIFY_AUTH_TOKEN: secrets.NETLIFY_AUTH_TOKEN,
+          },
         },
-      });
+      );
     });
   });
 });

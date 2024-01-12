@@ -10,6 +10,21 @@ import syntaxHighlight from './syntaxHighlight';
 const tableSyntax = require('micromark-extension-gfm-table');
 const tableExtension = require('mdast-util-gfm-table');
 
+type PreparedContent =
+  | Content
+  | {
+      type: 'codeBlocks';
+      blocks: {
+        lang: string;
+        code: {
+          type: CodeTokenType;
+          value: string;
+        }[];
+      }[];
+    }
+  | (Image & {width: number; height: number})
+  | {type: 'collapse'; heading: PreparedContent[]; body: PreparedContent[]};
+
 interface Context {
   filename: string;
   slugger: GithubSlugger;
@@ -19,7 +34,11 @@ export async function parseMarkdown(src: string, filename: string) {
     extensions: [tableSyntax],
     mdastExtensions: [tableExtension.fromMarkdown],
   });
-  return await prepareParent(ast, {filename, slugger: new GithubSlugger()});
+  const result = await prepareParent(ast, {
+    filename,
+    slugger: new GithubSlugger(),
+  });
+  return result;
 }
 export function printSummaryFromMarkdown(node: Root, purpose: 'google' | 'og') {
   const result: string[] = [];
@@ -91,24 +110,46 @@ function printMarkdownElementAsString(
       return assertNever(node);
   }
 }
-async function prepareParent<TNode extends {children: readonly Content[]}>(
-  node: TNode,
-  ctx: Context,
-): Promise<TNode> {
+async function prepareParent<
+  TNode extends {children: readonly PreparedContent[]},
+>(node: TNode, ctx: Context): Promise<TNode> {
+  let ignoreUntil = 0;
   return {
     ...node,
-    children: (
-      await Promise.all(
-        node.children.map(async (child, index, children) => {
+    children: await Promise.all(
+      node.children
+        .flatMap((child, index, children): PreparedContent[] => {
+          if (index < ignoreUntil) return [];
           if (child.type === 'html' && child.value === '<!--truncate-->') {
             return [];
           }
-          if (
-            child.type === 'code' &&
-            index > 0 &&
-            children[index - 1].type === 'code'
-          ) {
-            return [];
+          if (child.type === 'html' && child.value === '<collapse-heading/>') {
+            let foundEnd = false;
+            const heading: PreparedContent[] = [];
+            const body: PreparedContent[] = [];
+            let currentSection = heading;
+            for (
+              ignoreUntil = index + 1;
+              ignoreUntil < children.length;
+              ignoreUntil++
+            ) {
+              const child = children[ignoreUntil];
+
+              if (child.type == 'html' && child.value === '<collapse-end/>') {
+                foundEnd = true;
+                break;
+              }
+              if (child.type == 'html' && child.value === '<collapse-body/>') {
+                currentSection = body;
+              } else {
+                currentSection.push(child);
+              }
+            }
+            if (!foundEnd) {
+              throw new Error(`Missing <!--collapse-end-->`);
+            }
+            ignoreUntil++;
+            return [{type: 'collapse', heading, body}];
           }
           if (child.type === 'code') {
             const blocks: {
@@ -119,13 +160,14 @@ async function prepareParent<TNode extends {children: readonly Content[]}>(
               }[];
             }[] = [];
             for (
-              let i = index;
-              i < children.length && children[i].type === 'code';
-              i++
+              ignoreUntil = index;
+              ignoreUntil < children.length &&
+              children[ignoreUntil].type === 'code';
+              ignoreUntil++
             ) {
-              const child = children[i];
+              const child = children[ignoreUntil];
               if (child.type !== 'code') {
-                break;
+                throw new Error(`This should be unreachable`);
               }
               blocks.push(
                 syntaxHighlight({
@@ -141,17 +183,23 @@ async function prepareParent<TNode extends {children: readonly Content[]}>(
               },
             ];
           }
-          return [await prepare(child, ctx)];
-        }),
-      )
-    ).flat(1),
+          return [child];
+        })
+        .map(async (child) => await prepare(child, ctx)),
+    ),
   } as any;
 }
 async function prepare(
-  node: Content,
+  node: PreparedContent,
   ctx: Context,
-): Promise<Content | (Image & {width: number; height: number})> {
+): Promise<PreparedContent> {
   switch (node.type) {
+    case 'collapse':
+      return {
+        ...node,
+        heading: (await prepareParent({children: node.heading}, ctx)).children,
+        body: (await prepareParent({children: node.body}, ctx)).children,
+      };
     case 'code':
       return node;
     case 'image': {

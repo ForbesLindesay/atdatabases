@@ -1,7 +1,7 @@
 ---
 id: cache
 title: '@databases/cache'
-sidebar_label: cache
+sidebar_label: Cache
 ---
 
 The `@databases/cache` package is an in-memory, least recently used (LRU) cache for JavaScript/TypeScript. It allows you to store data retrieved from your database in memory and automatically evict/discard the least recently used keys from the cache once there is not enough memory to store more items.
@@ -100,6 +100,8 @@ export default createCache;
 Within your cache realm you create the actual "caches" themselves. Typically you'll have at least 1 per type of record you want to cache, but you can have multiple for the same type of record if there are a range of different ways that you query the same records.
 
 The individual caches are where you configure the types, as well as how keys are serialized, how value sizes are measured, and whether entries expire.
+
+> Instead of calling `.get` and `.set` manually, you can use `dedupeAsync` from [`@databases/dataloader`](dataloader.md) and pass the cache created by `createCache` as the `cache` option.
 
 #### Database Record Cache
 

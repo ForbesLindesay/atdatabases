@@ -37,7 +37,9 @@ jobs:
         with:
           path: |-
             packages/bigquery/lib
+            packages/cache/lib
             packages/connection-pool/lib
+            packages/dataloader/lib
             packages/escape-identifier/lib
             packages/expo/lib
             packages/lock/lib
@@ -78,7 +80,9 @@ jobs:
             packages/websql-core/lib
             packages/with-container/lib
             packages/bigquery/.last_build
+            packages/cache/.last_build
             packages/connection-pool/.last_build
+            packages/dataloader/.last_build
             packages/escape-identifier/.last_build
             packages/expo/.last_build
             packages/lock/.last_build
@@ -119,7 +123,8 @@ jobs:
             packages/websql-core/.last_build
             packages/with-container/.last_build
           key: v2-build-output-${{hashFiles('yarn.lock', 'packages/bigquery/src',
-            'packages/connection-pool/src', 'packages/escape-identifier/src',
+            'packages/cache/src', 'packages/connection-pool/src',
+            'packages/dataloader/src', 'packages/escape-identifier/src',
             'packages/expo/src', 'packages/lock/src',
             'packages/migrations-base/src', 'packages/mock-db/src',
             'packages/mock-db-typed/src', 'packages/mysql/src',
@@ -150,12 +155,14 @@ jobs:
           restore-keys: next-
       - run: yarn workspace @databases/website build
       - if: ${{ github.event_name == 'push' }}
-        run: netlify deploy --prod --dir=packages/website/out
+        run: netlify deploy --cwd . --filter @databases/website --prod
+          --dir=packages/website/out
         env:
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
       - if: ${{ github.event_name != 'push' }}
-        run: netlify deploy --dir=packages/website/out
+        run: netlify deploy --cwd . --filter @databases/website
+          --dir=packages/website/out
         env:
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}

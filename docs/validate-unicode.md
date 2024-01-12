@@ -1,7 +1,7 @@
 ---
 id: validate-unicode
 title: '@databases/validate-unicode'
-sidebar_label: validate-unicode
+sidebar_label: Validate Unicode
 ---
 
 The `@databases/validate-unicode` package validates and strips out invalid byte sequences from unicode strings in JavaScript. This is important because JavaScript does not enforce that strings with multi-byte characters are valid, but many other systems can crash or behave in unexpected ways when encountering these strings.
