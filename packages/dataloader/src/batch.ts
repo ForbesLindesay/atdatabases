@@ -44,7 +44,7 @@ class Batch<TKey, TResult> {
     return this._requests.length;
   }
 
-  loadOne(key: TKey): Promise<TResult> {
+  async loadOne(key: TKey): Promise<TResult> {
     return new Promise<TResult>((resolve, reject) => {
       if (this._started) {
         reject(
@@ -93,10 +93,11 @@ export default function batch<TKey, TResult>(
 ): (key: TKey) => Promise<TResult> {
   const {maxBatchSize, batchScheduleFn} = normalizeBatchOptions(options);
   let batch: Batch<TKey, TResult> | null = null;
-  return (key: TKey): Promise<TResult> => {
+  return async (key: TKey): Promise<TResult> => {
     if (batch === null) {
       const newBatch = new Batch<TKey, TResult>(load);
       batch = newBatch;
+      /* tslint:disable:no-floating-promises */
       batchScheduleFn().then(() => {
         if (batch === newBatch) {
           newBatch.processBatch();
@@ -185,7 +186,10 @@ export function batchGroups<
       options,
     );
 
-  const batchedFunction = (group: TGroupKey, key: TKey): Promise<TResult> => {
+  const batchedFunction = async (
+    group: TGroupKey,
+    key: TKey,
+  ): Promise<TResult> => {
     const groupKey = mapGroupKey(group);
     let batch = groupMap.get(groupKey);
     if (batch === undefined) {

@@ -42,8 +42,8 @@ test('dedupeAsync', async () => {
     ).toEqual([{source: 'hello'}, {source: 'world'}, 'Errored', undefined]);
   });
 
-  expect(load.cache.get('hello')).resolves.toEqual({source: 'hello'});
-  expect(load.cache.get('world')).resolves.toEqual({source: 'world'});
+  await expect(load.cache.get('hello')).resolves.toEqual({source: 'hello'});
+  await expect(load.cache.get('world')).resolves.toEqual({source: 'world'});
 
   load.cache.delete('hello');
   load.cache.set('world', {source: 'from set'});
@@ -107,8 +107,12 @@ test('dedupeAsync - mapKey', async () => {
     ).toEqual([{source: 'hello'}, {source: 'world'}, 'Errored']);
   });
 
-  expect(load.cache.get({id: 'hello'})).resolves.toEqual({source: 'hello'});
-  expect(load.cache.get({id: 'world'})).resolves.toEqual({source: 'world'});
+  await expect(load.cache.get({id: 'hello'})).resolves.toEqual({
+    source: 'hello',
+  });
+  await expect(load.cache.get({id: 'world'})).resolves.toEqual({
+    source: 'world',
+  });
 
   load.cache.delete({id: 'hello'});
   load.cache.set({id: 'world'}, {source: 'from set'});
@@ -219,8 +223,12 @@ test('dedupeAsync - WeakMap', async () => {
     ).toEqual([{source: 'hello'}, {source: 'world'}, 'Errored']);
   });
 
-  expect(load.cache.get(HELLO_REQUEST)).resolves.toEqual({source: 'hello'});
-  expect(load.cache.get(WORLD_REQUEST)).resolves.toEqual({source: 'world'});
+  await expect(load.cache.get(HELLO_REQUEST)).resolves.toEqual({
+    source: 'hello',
+  });
+  await expect(load.cache.get(WORLD_REQUEST)).resolves.toEqual({
+    source: 'world',
+  });
 
   load.cache.delete(HELLO_REQUEST);
   load.cache.set(WORLD_REQUEST, {source: 'from set'});

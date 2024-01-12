@@ -37,6 +37,7 @@ export default function requestsTester<T>(): RequestsTester<T> {
 
         requests = null;
       };
+      /* tslint:disable:no-unbound-method */
       if (fnResult && typeof fnResult.then === 'function') {
         return fnResult.then(afterFn);
       } else {

@@ -32,7 +32,6 @@ test('twoLevels', () => {
   expect(cache.get([1, 3])).toBe(undefined);
   expect(cache.get([3, 1])).toBe(undefined);
 
-  debugger;
   cache.delete([1, 1]);
   expect(cache.size).toBe(3);
   expect(cache.get([1, 1])).toBe(undefined);

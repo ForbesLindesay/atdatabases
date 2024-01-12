@@ -37,7 +37,7 @@ export default function dedupeAsync<TKey, TResult, TMappedKey = TKey>(
 ): DedupedAsyncFunction<TKey, TResult> {
   const {cache, mapKey, shouldCache} = normalizeDedupeAsyncOptions(options);
   return Object.assign(
-    (key: TKey): Promise<TResult> => {
+    async (key: TKey): Promise<TResult> => {
       const cacheKey = mapKey(key);
       const cached = cache.get(cacheKey);
       if (cached !== undefined) return cached;

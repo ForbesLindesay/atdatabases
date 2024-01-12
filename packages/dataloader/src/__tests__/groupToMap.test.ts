@@ -26,6 +26,7 @@ test('groupToMap', () => {
 });
 
 test('groupToMap - sparse array', () => {
+  /* tslint:disable:no-sparse-arrays*/
   const result = groupBy([1, , 3], (x) => x);
   expect(result(undefined)).toEqual([undefined]);
   expect(result(1)).toEqual([1]);

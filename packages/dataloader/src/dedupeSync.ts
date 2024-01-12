@@ -59,7 +59,9 @@ interface NormalizedDedupeSyncOptions<TKey, TResult, TMappedKey> {
 }
 const identityFn = <T>(arg: T): T => arg;
 const trueFn = (): true => true;
-const noop = () => {};
+const noop = () => {
+  // noop
+};
 function normalizeDedupeSyncOptions<TKey, TResult, TMappedKey>(
   options?: DedupeSyncOptions<TKey, TResult, TMappedKey>,
 ): NormalizedDedupeSyncOptions<TKey, TResult, TMappedKey> {

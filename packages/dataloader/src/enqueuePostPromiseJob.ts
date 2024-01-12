@@ -1,3 +1,5 @@
+/* tslint:disable */
+
 // This helper was adapted from Facebook's dataloader:
 // https://github.com/graphql/dataloader/blob/249b2b966a8807c50e07746ff04acb8c48fa4357/src/index.js#L206-L245
 
