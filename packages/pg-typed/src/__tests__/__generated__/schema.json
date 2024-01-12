@@ -1,5 +1,62 @@
 [
   {
+    "name": "partitioned",
+    "columns": [
+      {
+        "name": "create_date",
+        "isNullable": false,
+        "hasDefault": false,
+        "typeId": 1082,
+        "typeName": "DATE"
+      },
+      {
+        "name": "id",
+        "isNullable": false,
+        "hasDefault": false,
+        "typeId": 23,
+        "typeName": "INTEGER"
+      }
+    ]
+  },
+  {
+    "name": "partitioned_p0",
+    "columns": [
+      {
+        "name": "create_date",
+        "isNullable": false,
+        "hasDefault": false,
+        "typeId": 1082,
+        "typeName": "DATE"
+      },
+      {
+        "name": "id",
+        "isNullable": false,
+        "hasDefault": false,
+        "typeId": 23,
+        "typeName": "INTEGER"
+      }
+    ]
+  },
+  {
+    "name": "partitioned_p1",
+    "columns": [
+      {
+        "name": "create_date",
+        "isNullable": false,
+        "hasDefault": false,
+        "typeId": 1082,
+        "typeName": "DATE"
+      },
+      {
+        "name": "id",
+        "isNullable": false,
+        "hasDefault": false,
+        "typeId": 23,
+        "typeName": "INTEGER"
+      }
+    ]
+  },
+  {
     "name": "photos",
     "columns": [
       {

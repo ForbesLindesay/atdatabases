@@ -41,6 +41,7 @@ export default async function getSchema(
       schemaName,
       kind: [
         ClassKind.OrdinaryTable,
+        ClassKind.PartitionedTable,
         ClassKind.View,
         ClassKind.MaterializedView,
       ],
