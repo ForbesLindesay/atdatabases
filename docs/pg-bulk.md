@@ -112,7 +112,7 @@ import {usersOptions} from './database';
 
 export async function getUsers() {
   return await bulkSelect({
-    ...options,
+    ...usersOptions,
     whereColumnNames: [`email`, `favorite_color`],
     whereConditions: [
       {email: `joe@example.com`, favorite_color: `red`},
@@ -132,7 +132,7 @@ const {usersOptions} = require('./database');
 
 async function getUsers() {
   return await bulkSelect({
-    ...options,
+    ...usersOptions,
     whereColumnNames: [`email`, `favorite_color`],
     whereConditions: [
       {email: `joe@example.com`, favorite_color: `red`},
@@ -177,7 +177,7 @@ import {usersOptions} from './database';
 
 export async function updateFavoriteColors() {
   return await bulkUpdate({
-    ...options,
+    ...usersOptions,
     whereColumnNames: [`email`],
     setColumnNames: [`favorite_color`],
     updates: [
@@ -194,7 +194,7 @@ const {usersOptions} = require('./database');
 
 async function updateFavoriteColors() {
   return await bulkUpdate({
-    ...options,
+    ...usersOptions,
     whereColumnNames: [`email`],
     setColumnNames: [`favorite_color`],
     updates: [
@@ -240,7 +240,7 @@ import {usersOptions} from './database';
 
 export async function deleteUsers() {
   return await bulkDelete({
-    ...options,
+    ...usersOptions,
     whereColumnNames: [`email`, `favorite_color`],
     whereConditions: [
       {email: `joe@example.com`, favorite_color: `red`},
@@ -256,7 +256,7 @@ const {usersOptions} = require('./database');
 
 async function deleteUsers() {
   return await bulkDelete({
-    ...options,
+    ...usersOptions,
     whereColumnNames: [`email`, `favorite_color`],
     whereConditions: [
       {email: `joe@example.com`, favorite_color: `red`},
