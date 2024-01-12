@@ -154,8 +154,6 @@ jobs:
           key: next-${{hashFiles('yarn.lock')}}
           restore-keys: next-
       - run: yarn workspace @databases/website build
-      - run: "mkdir .netlify && echo '{\"siteId\": \"${{secrets.NETLIFY_SITE_ID}}\"}' >
-          .netlify/state.json"
       - if: ${{ github.event_name == 'push' }}
         run: netlify deploy --cwd . --filter @databases/website --prod
           --dir=packages/website/out

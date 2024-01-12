@@ -32,9 +32,9 @@ export default createWorkflow(({setWorkflowName, addTrigger, addJob}) => {
     run('yarn workspace @databases/website build');
 
     // run(`npm install netlify-cli`);
-    run(
-      interpolate`mkdir .netlify && echo '{"siteId": "${secrets.NETLIFY_SITE_ID}"}' > .netlify/state.json`,
-    );
+    // run(
+    //   interpolate`mkdir .netlify && echo '{"siteId": "${secrets.NETLIFY_SITE_ID}"}' > .netlify/state.json`,
+    // );
     when(eq(github.event_name, `push`), () => {
       run(
         `netlify deploy --cwd . --filter @databases/website --prod --dir=packages/website/out`,
