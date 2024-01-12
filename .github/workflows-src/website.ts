@@ -32,7 +32,7 @@ export default createWorkflow(({setWorkflowName, addTrigger, addJob}) => {
     run('yarn workspace @databases/website build');
 
     when(eq(github.event_name, `push`), () => {
-      run(`netlify deploy --prod --dir=packages/website/out`, {
+      run(`cd packages/website && netlify deploy --prod --dir=out`, {
         env: {
           NETLIFY_SITE_ID: secrets.NETLIFY_SITE_ID,
           NETLIFY_AUTH_TOKEN: secrets.NETLIFY_AUTH_TOKEN,
@@ -40,7 +40,7 @@ export default createWorkflow(({setWorkflowName, addTrigger, addJob}) => {
       });
     });
     when(neq(github.event_name, `push`), () => {
-      run(`netlify deploy --dir=packages/website/out`, {
+      run(`cd packages/website && netlify deploy --dir=out`, {
         env: {
           NETLIFY_SITE_ID: secrets.NETLIFY_SITE_ID,
           NETLIFY_AUTH_TOKEN: secrets.NETLIFY_AUTH_TOKEN,
