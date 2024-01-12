@@ -1,7 +1,7 @@
-import createNamespacedCache from '../createNamespacedCache';
+import createMultiKeyMap from '../MultiKeyMap';
 
 test('oneLevel', () => {
-  const cache = createNamespacedCache<number>().build<string>();
+  const cache = createMultiKeyMap<[number], string>();
   cache.set([1], 'one');
   expect(cache.get([1])).toBe('one');
   expect(cache.get([2])).toBe(undefined);
@@ -17,14 +17,13 @@ test('oneLevel', () => {
 });
 
 test('twoLevels', () => {
-  const cache = createNamespacedCache<number>()
-    .addNamespace<number>()
-    .build<string>();
+  const cache = createMultiKeyMap<[number, number], string>();
 
   cache.set([1, 1], 'one-one');
   cache.set([1, 2], 'one-two');
   cache.set([2, 1], 'two-one');
   cache.set([2, 2], 'two-two');
+  expect(cache.size).toBe(4);
 
   expect(cache.get([1, 1])).toBe('one-one');
   expect(cache.get([1, 2])).toBe('one-two');
@@ -33,7 +32,9 @@ test('twoLevels', () => {
   expect(cache.get([1, 3])).toBe(undefined);
   expect(cache.get([3, 1])).toBe(undefined);
 
+  debugger;
   cache.delete([1, 1]);
+  expect(cache.size).toBe(3);
   expect(cache.get([1, 1])).toBe(undefined);
   expect(cache.get([1, 2])).toBe('one-two');
 
@@ -53,10 +54,7 @@ test('twoLevels', () => {
 });
 
 test('threeLevels', () => {
-  const cache = createNamespacedCache<number>()
-    .addNamespace<number>()
-    .addNamespace<number>()
-    .build<string>();
+  const cache = createMultiKeyMap<[number, number, number], string>();
 
   cache.set([1, 1, 1], 'one-one-one');
   cache.set([1, 2, 1], 'one-two-one');
@@ -92,11 +90,10 @@ test('threeLevels', () => {
 });
 
 test('twoLevels - custom cache and mapKey', () => {
-  const cache = createNamespacedCache<{}>({
-    getCache: <T>() => new WeakMap<{}, T>(),
-  })
-    .addNamespace<{id: number}, number>({mapKey: (k) => k.id})
-    .build<string>();
+  const cache = createMultiKeyMap<[{}, {id: number}], string, [{}, number]>([
+    {getCache: <T>() => new WeakMap<{}, T>()},
+    {mapKey: (k) => k.id},
+  ]);
 
   const A = {};
   const B = {};

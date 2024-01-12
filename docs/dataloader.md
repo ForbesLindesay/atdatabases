@@ -4,19 +4,21 @@ title: '@databases/dataloader'
 sidebar_label: Data Loader
 ---
 
-The `@databases/dataloader` package contains utilities for batching and deduplicating requests to load data from a database.
+The `@databases/dataloader` package contains utilities for batching and deduplicating (aka caching) requests to load data from a database (or anywhere else you get data from). You can use `@databases/dataloader` with or without the rest of `@databases`.
 
-## Usage
+## Usage Examples
 
 ### Batch
 
-Batching is a great way to avoid "the n+1 problem" which is common in GraphQL where you end up needing to make 101 queries to the database when loading a list of 100 items due to having 1 query to get the list of items, and another per item to get some sub-item for each item. By default it does not cache/deduplicate requests, but does optimize resource usage on the database.
+Batching is a great way to avoid "the n+1 problem" which is common in GraphQL where you end up needing to make 101 queries to the database when loading a list of 100 items due to having 1 query to get the list of items, and another per item to get some sub-item for each item. By default it does not cache/deduplicate requests, but does optimize resource usage on the database by combining related queries.
 
 #### Batch primary keys
 
+This example creates a function to get users by ID from a database. It allows you to fetch multiple different users in parallel while automatically combining the requests into a single query.
+
 ```typescript
 import {batch} from '@databases/dataloader';
-import database, {tables, DbUser} from './database';
+import database, {anyOf, tables, DbUser} from './database';
 
 // (id: DbUser['id']) => Promise<DbUser | undefined>
 const getUser = batch<DbUser['id'], DbUser | undefined>(async (userIds) => {
@@ -28,7 +30,7 @@ const getUser = batch<DbUser['id'], DbUser | undefined>(async (userIds) => {
 });
 ```
 
-If you were to call this async function:
+If you were to call this async function three times in parallel:
 
 ```typescript
 async function getThreeUsers() {
@@ -46,7 +48,7 @@ This is much more efficient than running the queries separately.
 
 <collapse-heading/>
 
-You can also add a cache by wrapping the batched function in `dedupeAsync`
+You can also add a cache by wrapping the batched function in `dedupeAsync`.
 
 <collapse-body/>
 
@@ -75,11 +77,13 @@ function onUserChanged(id: DbUser['id']) {
 }
 ```
 
+If you want a suitable LRU cache to use here, check out [`@databases/cache`](cache.md).
+
 <collapse-end/>
 
 <collapse-heading/>
 
-Since this is a common approach, there is a `.dedupe()` helper on the batched function.
+If you want to throw errors, rather than returning undefined on missing records, you can return a function instead of a Map.
 
 <collapse-body/>
 
@@ -87,15 +91,18 @@ Since this is a common approach, there is a `.dedupe()` helper on the batched fu
 import {batch} from '@databases/dataloader';
 import database, {tables, DbUser} from './database';
 
-// (id: DbUser['id']) => Promise<DbUser | undefined>
-const getUser = batch<DbUser['id'], DbUser | undefined>(async (userIds) => {
+// (id: DbUser['id']) => Promise<DbUser>
+const getUser = batch<DbUser['id'], DbUser>(async (userIds) => {
   const users = await tables
     .users(database)
     .find({id: anyOf(userIds)})
     .all();
-  return new Map(users.map((u) => [u.id, u]));
-}).dedupe({
-  cache: createCache({name: 'Users'}),
+  const results = new Map(users.map((u) => [u.id, u]));
+  return (userId) => {
+    const result = results.get(userId);
+    if (!result) throw new Error(`Unable to find user with id ${userId}`);
+    return result;
+  };
 });
 
 function onUserChanged(id: DbUser['id']) {
@@ -107,9 +114,11 @@ function onUserChanged(id: DbUser['id']) {
 
 #### Batch foreign keys
 
+This example creates a function to get blog posts by their author ID from a database. It allows you to fetch posts by multiple different authors in parallel while automatically combining the requests into a single query and separating the results back out in `O(n)` time where `n` is the total number of posts retrieved.
+
 ```typescript
-import {batch, groupToMap} from '@databases/dataloader';
-import database, {tables, DbBlogPost} from './database';
+import {batch, groupBy} from '@databases/dataloader';
+import database, {anyOf, tables, DbBlogPost} from './database';
 
 // (authorId: DbBlogPost['author_id']) => Promise<DbBlogPost[]>
 const getBlogPostsByAuthor = batch<DbBlogPost['author_id'], DbBlogPost[]>(
@@ -119,9 +128,7 @@ const getBlogPostsByAuthor = batch<DbBlogPost['author_id'], DbBlogPost[]>(
       .find({author_id: anyOf(authorIds)})
       .all();
 
-    const postsByAuthor = groupToMap(posts, (p) => p.author_id);
-
-    return (authorId) => postsByAuthor.get(authorId) ?? [];
+    return groupBy(posts, (p) => p.author_id);
   },
 );
 ```
@@ -133,7 +140,7 @@ Just like with the primary key, you can also use `dedupeAsync` to cache these re
 <collapse-body/>
 
 ```typescript
-import {dedupeAsync, batch, groupToMap} from '@databases/dataloader';
+import {dedupeAsync, batch, groupBy} from '@databases/dataloader';
 import database, {tables, DbBlogPost} from './database';
 
 // (authorId: DbBlogPost['author_id']) => Promise<DbBlogPost[]>
@@ -144,9 +151,7 @@ const getBlogPostsByAuthor = dedupeAsync<DbBlogPost['author_id'], DbBlogPost[]>(
       .find({author_id: anyOf(authorIds)})
       .all();
 
-    const postsByAuthor = groupToMap(posts, (p) => p.author_id);
-
-    return (authorId) => postsByAuthor.get(authorId) ?? [];
+    return groupBy(posts, (p) => p.author_id);
   }),
   {
     cache: createCache({name: 'BlogPostsByAuthor'}),
@@ -163,7 +168,7 @@ function onBlogPostChanged(before: DbBlogPost, after: DbBlogPost) {
 
 #### Batch for a longer time period
 
-This example batches any requests that come within 100ms of each other, up to 100 requests.
+This example batches any requests that come within 100ms of each other, up to 100 requests. We use a function that returns `void` as the return value to indicate that these requests do not need a response.
 
 ```typescript
 import {setTimeout} from 'timers/promises';
@@ -196,7 +201,7 @@ It can be tempting to add batching logic to all the queries to our database, giv
 
 ```typescript
 import {batchGroups} from '@databases/dataloader';
-import {Queryable, tables, DbUser} from './database';
+import {anyOf, tables, DbUser, Queryable} from './database';
 
 // (database: Queryable, id: DbUser['id']) => Promise<DbUser | undefined>
 const getUser = batchGroups<Queryable, DbUser['id'], DbUser | undefined>(
@@ -210,12 +215,12 @@ const getUser = batchGroups<Queryable, DbUser['id'], DbUser | undefined>(
 );
 ```
 
-#### Batching queries with a filter
+#### Batching queries with a common filter
 
 If you have complex filters that are typically the same between all the requests you want to batch, it can simplify things to only batch requests that have the same filter. You can do this using `batchGroups`.
 
 ```typescript
-import {batchGroups, groupToMap} from '@databases/dataloader';
+import {batchGroups, groupBy} from '@databases/dataloader';
 import database, {tables, DbBlogPost} from './database';
 
 // (filter: Partial<DbBlogPost>, authorId: DbBlogPost['author_id']) => Promise<DbBlogPost[]>
@@ -223,16 +228,17 @@ const getBlogPostsByAuthor = batchGroups<
   Partial<DbBlogPost>,
   DbBlogPost['author_id'],
   DbBlogPost[]
->(async (filter, authorIds) => {
-  const posts = await tables
-    .blog_posts(database)
-    .find({...filter, author_id: anyOf(authorIds)})
-    .all();
+>(
+  async (filter, authorIds) => {
+    const posts = await tables
+      .blog_posts(database)
+      .find({...filter, author_id: anyOf(authorIds)})
+      .all();
 
-  const postsByAuthor = groupToMap(posts, (p) => p.author_id);
-
-  return (authorId) => postsByAuthor.get(authorId) ?? [];
-});
+    return groupBy(posts, (p) => p.author_id);
+  },
+  {mapGroupKey: (filter) => JSON.stringify(filter)},
+);
 ```
 
 Now if you call:
@@ -257,8 +263,9 @@ SELECT * FROM blog_posts WHERE id_published=FALSE AND author_id=4;
 
 #### Batching Random ID Generation
 
+Because `batch` does not make any attempt to deduplicate, you can use it to batch calls that do not take any parameters by simply using `undefined` as the request type.
+
 ```typescript
-import {randomBytes} from 'crypto';
 import {SQLQuery} from '@database/sql';
 import {batch} from '@databases/dataloader';
 import database from './database';
@@ -279,16 +286,12 @@ function getIdGenerator(tableName: SQLQuery, columnName: SQLQuery) {
 
   // Get the requested number of positive INT32s
   const getRandomIntegers = (count: number): number[] => {
-    const buffer = randomBytes(count * 4);
-    const result = [];
-    for (let i = 0; i < count; i++) {
-      result.push(Math.abs(buffer.readInt32BE(i * 4)));
-    }
+    const result = crypto.getRandomValues(new Int32Array(count)).map(Math.abs);
     if (new Set(result).size !== count) {
       // In the unlikely case that multiple IDs in the same batch conflict, just try again from scratch
       return getRandomIntegers(count);
     }
-    return result;
+    return Array.from(result);
   };
 
   const generateId = batch<undefined, number>(async (requests) => {
@@ -321,7 +324,7 @@ export const generateUserId = getIdGenerator(sql`users`, sql`id`);
 
 ### Dedupe
 
-Deduplicating can help when you have some data that is requested very frequently. You can deduplicate within a single request, meaning you would probably not need to worry about clearing your caches at all. You can also deduplicate across requests using a [Least Recently Used Cache](cache.md).
+Deduplicating can help when you have some data that is requested frequently. You can deduplicate within a single request, meaning you would probably not need to worry about clearing your caches at all. You can also deduplicate across requests using a [Least Recently Used Cache](cache.md).
 
 #### Caching database lookups
 
@@ -346,12 +349,36 @@ function onUserChanged(id: DbUser['id']) {
 }
 ```
 
-#### Caching expensive computation
+#### Caching fetch requests
 
-The following example caches the result of a multiplication. This is a contrived example, since it's probably always faster to just re-compute this sum.
+The following example caches requests to load a user from some imaginary API.
 
 ```typescript
 import {dedupeAsync} from '@databases/dataloader';
+
+// (userId: number) => Promise<User>
+const getUser = dedupeAsync<number, User>(
+  async (userId) => {
+    const res = await fetch(`https://example.com/api/users/${userId}`);
+    if (!res.ok) {
+      throw new Error(
+        `Failed to get user. Server responded with: ${await res.text()}`,
+      );
+    }
+    return await res.json();
+  },
+  {
+    cache: createCache({name: 'Users', expireAfterMilliseconds: 60_000}),
+  },
+);
+```
+
+#### Caching expensive computation
+
+The following example caches the result of a multiplication. This is a contrived example, since it's always faster to just re-compute this sum.
+
+```typescript
+import {dedupeSync} from '@databases/dataloader';
 import database, {tables, DbUser} from './database';
 
 // (values: [number, number]) => number
@@ -365,14 +392,12 @@ const getUser = dedupeSync<[number, number], number>(
 );
 ```
 
-### Namespaced Cache
-
 #### Caching within a request
 
 One of the challenges of caches is knowing how/when to reset them. A GraphQL call can often request the same data many times. This means that if you can't deal with the complexities of clearing caches when data is updated, you can still potentially benefit from deduplicating calls within a single request.
 
 ```typescript
-import {dedupeAsync, createNamespacedCache} from '@databases/dataloader';
+import {dedupeAsync, createMultiKeyMap} from '@databases/dataloader';
 import database, {tables, DbUser} from './database';
 
 // ([resolverContext, userId]: [ResolverContext, DbUser['id']]) => Promise<DbUser>
@@ -381,11 +406,10 @@ const getUser = dedupeAsync<[ResolverContext, DbUser['id']], DbUser>(
     return await tables.users(database).findOneRequired({id: userId});
   },
   {
-    cache: createNamespacedCache<ResolverContext>({
-      getCache: () => new WeakMap(),
-    })
-      .addNamespace<DbUser['id']>()
-      .build<DbUser>(),
+    cache: createMultiKeyMap<[ResolverContext, DbUser['id']], Promise<DbUser>>([
+      {getCache: () => new WeakMap()},
+      {},
+    ]),
   },
 );
 ```
@@ -396,7 +420,16 @@ The first level of our cache uses a `WeakMap` with the `ResolverContext` as the 
 
 ### batch(fn, options)
 
-The batch function is used to batch requests to a load function. The load function is called with an array of keys and must return a promise that resolves to a `BatchResponse`.
+The batch function is used to batch requests to a load function. The load function is called with an array of keys and must return a promise that resolves to a `BatchResponse`. The result is a function like `(key: TKey) => Promise<TResponse>`, that takes a single request and returns a promise for the single response to that request.
+
+```typescript
+function batch<TKey, TResponse>(
+  load: (keys: TKey[]) => Promise<BatchResponse<TKey, TResponse>>,
+  options?: BatchOptions,
+): (key: TKey) => Promise<TResponse>;
+```
+
+#### BatchResponse
 
 The `BatchResponse` can be either:
 
@@ -404,9 +437,28 @@ The `BatchResponse` can be either:
 - an object with a `get` method that takes a key and returns a result (such as a Map).
 - an array of the same length and in the same order as the keys passed into the function.
 
+```typescript
+type BatchResponseFunction<TKey, TResult> = (
+  key: TKey,
+  index: number,
+  keys: TKey[],
+) => Promise<TResult> | TResult;
+
+type BatchResponseMap<TKey, TResult> = {
+  get(key: TKey): Promise<TResult> | TResult;
+};
+
+type BatchResponseArray<TResult> = readonly (Promise<TResult> | TResult)[];
+
+type BatchResponse<TKey, TResult> =
+  | BatchResponseFunction<TKey, TResult>
+  | BatchResponseMap<TKey, TResult>
+  | BatchResponseArray<TResult>;
+```
+
 #### BatchOptions
 
-- `maxBatchSize` - The maximum number of keys to include in a single batch. If this number of keys is reached, the function is called immediately and subsequent requests sill result in a new batch.
+- `maxBatchSize` - The maximum number of keys to include in a single batch. If this number of keys is reached, the function is called immediately and subsequent requests will result in a new batch.
 - `batchScheduleFn` - A function to be called before each batch is executed (unless `maxBatchSize` is reached). `batch` will wait for the promise returned by `batchScheduleFn` to be resolved before it sends the request. By default, this waits until any currently resolved promises have been processed, which works well for batching calls that are run as part of a GraphQL request or in `Promise.all`. If you want to batch requests from a wider time range, you can return a function that is delayed for some time.
 
 ### batchGroups(fn, options)
@@ -424,39 +476,62 @@ The function passed in is called with the batch key, and an array of the keys wi
 - `mapGroupKey` - If your group keys are objects, you can use `mapGroupKey` to convert them to a primitive value such as a `string` or `number`.
 - `groupMap` - Override the `Map` object used to store batches that are in-flight.
 
-### createNamespacedCache(options)
+### createMultiKeyMap(options)
 
-Creates a namespaced cache builder. This can be used to cache composite keys, or to have caches tied to a given context. It returns a `NamespacedCacheBuilder`. You must call `.build()` to create the actual cache.
+Creates a Map to use as a cache that can handle an array of keys. This can be used to cache composite keys, or to have caches tied to a given context.
 
-#### NamespacedCacheBuilder.addNamespace(options)
+```typescript
+function createMultiKeyMap<
+  TKeys extends Path,
+  TValue,
+  TMappedKeys extends Record<keyof TKeys, unknown> = TKeys,
+>(
+  options?: MultiKeyMapOptions<TKeys, TValue, TMappedKeys>,
+): MultiKeyMap<TKeys, TValue>;
+```
 
-Adds a level to a namespaced cache.
+#### MultiKeyMapOptions
 
-#### NamespacedCacheBuilder.build()
+The MultiKeyMapOptions lets you customize the handling of each key. If provided, it should be an array with one object per section in the path. Each of these objects can specify:
 
-Creates the actual namespaced cache. Returns a `NamespacedCache`
+- `getCache` - defaults to a function returning `new Map()`. You can use this to override the default Map used to store keys at this level.
+- `mapKey` - you can use this to automatically map the key at this level
 
-#### NamespacedCache.get(keys)
+For example:
+
+```typescript
+const postsByUserAndFilterMap = createMultiKeyMap<
+  [Queryable, DbUser, PostFilter], // Keys
+  DbPost[], // Value stored at each key
+  [Queryable, DbUser['id'], string] // Mapped Keys
+>([
+  {getCache: () => new WeakMap()},
+  {mapKey: (user) => user.id},
+  {mapKey: (filter) => JSON.stringify(filter)},
+]);
+```
+
+#### MultiKeyMap.get(keys)
 
 Takes an array representing the key and returns the value, or `undefined` if the value is not in the cache.
 
-#### NamespacedCache.set(keys, value)
+#### MultiKeyMap.set(keys, value)
 
 Takes an array representing the key, and a value. The value will be stored at the path specified by the keys.
 
-#### NamespacedCache.delete(keys)
+#### MultiKeyMap.delete(keys)
 
-If you pass an array representing a full key. The value at that key will be removed from the NamespacedCache.
+If you pass an array representing a full key. The value at that key will be removed from the MultiKeyMap.
 
 If you pass a shorter array, all keys under that prefix will be removed.
 
-#### NamespacedCache.clear()
+#### MultiKeyMap.clear()
 
 Removes all keys from the cache.
 
 ### dedupeAsync(fn, options)
 
-`dedupeAsync` wraps a function that returns a Promise and deduplicates calls to the function with the same key.
+`dedupeAsync` wraps a function that returns a Promise and deduplicates calls to the function with the same key. The promise for the result is added to the cache immediately, meaning that even concurrent request are deduplicated. If the function throws an error/the returned promise is rejected, it is removed from the cache.
 
 The returned function also has a `fn.cache` property that can be used to access the underlying `Map`. For example, you can use this to delete cached entries after they change.
 
@@ -464,7 +539,7 @@ The returned function also has a `fn.cache` property that can be used to access 
 
 - `cache?: CacheMapInput<TKey, Promise<TResult>>` is the map used to store the cached results.
 - `mapKey?: (key: TKey) => TMappedKey` is an optional function used to map keys before passing them to the cache. This can be useful if your keys are complex objects and you want to serialize them to a string for use as cache keys.
-- `shouldCache?: (value: TResult, key: TKey) => boolean` an optional function that is called after each response to determine whether the item should remain in the cache. This can be used to prevent `dedupeAsync` from caching missing results.
+- `shouldCache?: (value: TResult, key: TKey) => boolean` an optional function that is called after each response to determine whether the item should remain in the cache. This can be used to prevent `dedupeAsync` from caching results that are not considered errors, but should still be immediately revalidated.
 
 ### dedupeSync(fn, options)
 
@@ -472,19 +547,41 @@ The returned function also has a `fn.cache` property that can be used to access 
 
 The returned function also has a `fn.cache` property that can be used to access the underlying `Map`. For example, you can use this to delete cached entries after they change.
 
+> N.B. If `dedupeSync` returns `undefined`, the result will not be cached.
+
 #### DedupeSyncOptions
 
 - `cache?: CacheMapInput<TKey, TResult>` is the map used to store the cached results.
 - `mapKey?: (key: TKey) => TMappedKey` is an optional function used to map keys before passing them to the cache. This can be useful if your keys are complex objects and you want to serialize them to a string for use as cache keys.
-- `shouldCache?: (value: TResult, key: TKey) => boolean` an optional function that is called after each response to determine whether the item should remain in the cache. This can be used to prevent `dedupeSync` from caching missing results.
+- `shouldCache?: (value: TResult, key: TKey) => boolean` an optional function that is called after each response to determine whether the item should remain in the cache. This can be used to prevent `dedupeSync` from caching results that are not considered errors, but should still be immediately revalidated.
+- `onNewValue?: (value: TResult, key: TKey) => void` an optional function to be called for each fresh value added to the cache. This can be helpful when working with recursive data structures that may contain cycles. If `onNewValue` throws an error, the value is removed from the cache.
 
 ### Utils
 
-#### groupToMap(array, getKey)
+#### groupBy(array, getKey)
 
-Implementation of [Array.groupToMap](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/groupToMap) as a function. This is included as it's so frequently useful in handling batched queries, and it's not yet available on node.js
+Inspired by [Array.groupToMap](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/groupToMap).
 
-The `groupToMap` function groups the elements of the `array` using the values returned by a provided `getKey` function. The final returned `Map` uses the unique values from the `getKey` function as keys, which can be used to get the array of elements in each group.
+The `groupBy` function groups the elements of the `array` using the values returned by a provided `getKey` function. It then returns a function to get an array of the results that match the given key. If no results match the key, it will return the empty array.
+
+For example:
+
+```typescript
+import {groupBy} from '@databases/dataloader';
+
+const blogPosts = [
+  {author: 1, title: 'Hello'},
+  {author: 1, title: 'World'},
+  {author: 2, title: 'Awesome'},
+];
+const blogPostsByAuthor = groupBy(blogPosts, (p) => p.author);
+const authorOne = blogPostsByAuthor(1).map((p) => p.title);
+// => ['Hello', 'World']
+const authorTwo = blogPostsByAuthor(2).map((p) => p.title);
+// => ['Awesome']
+const authorThree = blogPostsByAuthor(3).map((p) => p.title);
+// => []
+```
 
 #### parametersSpreadToArray(fn)
 
@@ -507,39 +604,5 @@ function parametersArrayToSpread<TParameters extends unknown[], TResult>(
   fn: (...args: TParameters) => TResult,
 ): (args: TParameters) => TResult {
   return (args) => fn(...args);
-}
-```
-
-#### addFallbackForUndefinedSync(fn, fallback)
-
-Take a function that may return `undefined`, and return a new function that will call the fallback instead of returning `undefined`.
-
-```typescript
-function addFallbackForUndefinedSync<TParameters extends unknown[], TResult>(
-  fn: (...args: TParameters) => TResult | undefined,
-  fallback: (...args: TParameters) => TResult,
-): (...args: TParameters) => TResult {
-  return (...args: TParameters) => {
-    const result = fn(...args);
-    return result === undefined ? fallback(...args) : result;
-  };
-}
-```
-
-#### addFallbackForUndefinedAsync(fn, fallback)
-
-Take a function that may return `undefined` or `Promise<undefined>`, and return a new function that will call the fallback instead of returning `undefined`.
-
-```typescript
-function addFallbackForUndefinedAsync<TParameters extends unknown[], TResult>(
-  fn: (
-    ...args: TParameters
-  ) => Promise<TResult | undefined> | TResult | undefined,
-  fallback: (...args: TParameters) => Promise<TResult> | TResult,
-): (...args: TParameters) => Promise<TResult> {
-  return async (...args: TParameters) => {
-    const result = await fn(...args);
-    return result === undefined ? await fallback(...args) : result;
-  };
 }
 ```

@@ -101,6 +101,8 @@ Within your cache realm you create the actual "caches" themselves. Typically you
 
 The individual caches are where you configure the types, as well as how keys are serialized, how value sizes are measured, and whether entries expire.
 
+> Instead of calling `.get` and `.set` manually, you can use `dedupeAsync` from [`@databases/dataloader`](dataloader.md) and pass the cache created by `createCache` as the `cache` option.
+
 #### Database Record Cache
 
 This example caches calls to `getUser` and removes the cache entries when the user is updated. It assumes you've already created a Cache Realm using one of the examples for `createCacheRealm`.

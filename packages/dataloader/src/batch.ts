@@ -1,27 +1,27 @@
-import dedupeAsync, {
-  DedupeAsyncOptions,
-  DedupeAsyncOptionsWithCache,
-  DedupeAsyncOptionsWithMapKey,
-  DedupedAsyncFunction,
-} from './dedupeAsync';
 import enqueuePostPromiseJob from './enqueuePostPromiseJob';
-import {AsyncCacheMap, CacheMapInput} from './types';
+import {CacheMapInput} from './types';
+
+export type BatchResponseFunction<TKey, TResult> = (
+  key: TKey,
+  index: number,
+  keys: TKey[],
+) => Promise<TResult> | TResult;
+export type BatchResponseMap<TKey, TResult> = {
+  get(key: TKey): Promise<TResult> | TResult;
+};
+export type BatchResponseArray<TResult> = readonly (
+  | Promise<TResult>
+  | TResult
+)[];
 
 export type BatchResponse<TKey, TResult> =
-  | ((key: TKey, index: number, keys: TKey[]) => Promise<TResult> | TResult)
-  | {get(key: TKey): Promise<TResult> | TResult}
-  | readonly TResult[];
+  | BatchResponseFunction<TKey, TResult>
+  | BatchResponseMap<TKey, TResult>
+  | BatchResponseArray<TResult>;
 
-export interface BatchOptions<TKey> {
-  maxBatchSize?: number;
-  batchScheduleFn?: () => Promise<void>;
-}
-
-export interface BatchedFunction<TKey, TResult> {
-  (key: TKey): Promise<TResult>;
-  dedupe<TMappedKey = TKey>(
-    options?: DedupeAsyncOptions<TKey, TResult, TMappedKey>,
-  ): DedupedAsyncFunction<TKey, TResult>;
+export interface BatchOptions {
+  readonly maxBatchSize?: number;
+  readonly batchScheduleFn?: () => Promise<void>;
 }
 
 class Batch<TKey, TResult> {
@@ -64,24 +64,10 @@ class Batch<TKey, TResult> {
     const keys = this._requests.map((v) => v.key);
     this._loadBatch(keys)
       .then((response) => {
-        if (typeof response === 'function') {
-          this._requests.forEach(({key, resolve}, index) => {
-            resolve(response(key, index, keys));
-          });
-        } else if (isReadonlyArray(response)) {
-          if (response.length !== this._requests.length) {
-            throw new Error(
-              `Batch response length does not match request length. Expected ${this._requests.length} but got ${response.length}`,
-            );
-          }
-          this._requests.forEach(({resolve}, index) => {
-            resolve(response[index]);
-          });
-        } else {
-          for (const {key, resolve} of this._requests) {
-            resolve(response.get(key));
-          }
-        }
+        const responseFn = normalizeBatchResponse(response);
+        this._requests.forEach(({key, resolve}, index) => {
+          resolve(responseFn(key, index, keys));
+        });
       })
       .catch((err) => {
         for (const {reject} of this._requests) {
@@ -89,12 +75,6 @@ class Batch<TKey, TResult> {
         }
       });
   }
-}
-
-function isReadonlyArray<TValues, TOther>(
-  value: TOther | readonly TValues[],
-): value is readonly TValues[] {
-  return Array.isArray(value);
 }
 
 /**
@@ -109,11 +89,11 @@ function isReadonlyArray<TValues, TOther>(
  */
 export default function batch<TKey, TResult>(
   load: (requests: TKey[]) => Promise<BatchResponse<TKey, TResult>>,
-  options?: BatchOptions<TKey>,
-): BatchedFunction<TKey, TResult> {
+  options?: BatchOptions,
+): (key: TKey) => Promise<TResult> {
   const {maxBatchSize, batchScheduleFn} = normalizeBatchOptions(options);
   let batch: Batch<TKey, TResult> | null = null;
-  const batchedFunction = (source: TKey): Promise<TResult> => {
+  return (key: TKey): Promise<TResult> => {
     if (batch === null) {
       const newBatch = new Batch<TKey, TResult>(load);
       batch = newBatch;
@@ -124,66 +104,61 @@ export default function batch<TKey, TResult>(
         }
       });
     }
-    const result = batch.loadOne(source);
+    const result = batch.loadOne(key);
     if (batch.getSize() >= maxBatchSize) {
       batch.processBatch();
       batch = null;
     }
     return result;
   };
-  return Object.assign(batchedFunction, {
-    dedupe<TMappedKey = TKey>(
-      options?: DedupeAsyncOptions<TKey, TResult, TMappedKey>,
-    ) {
-      return dedupeAsync(batchedFunction, options);
-    },
-  });
 }
 
-interface NormalizedBatchOptions<TKey, TResult> {
+function normalizeBatchResponse<TKey, TResult>(
+  response: BatchResponse<TKey, TResult>,
+): BatchResponseFunction<TKey, TResult> {
+  if (typeof response === 'function') return response;
+  if (isReadonlyArray(response)) return fromArrayResponse(response);
+  return fromMapResponse(response);
+}
+
+function fromArrayResponse<TKey, TResult>(
+  response: BatchResponseArray<TResult>,
+): BatchResponseFunction<TKey, TResult> {
+  return (_key, index) => response[index];
+}
+
+function fromMapResponse<TKey, TResult>(
+  response: BatchResponseMap<TKey, TResult>,
+): BatchResponseFunction<TKey, TResult> {
+  return (key) => response.get(key);
+}
+
+interface NormalizedBatchOptions {
   maxBatchSize: number;
   batchScheduleFn: () => Promise<void>;
 }
-function normalizeBatchOptions<TKey, TResult>(
-  options?: BatchOptions<TKey>,
-): NormalizedBatchOptions<TKey, TResult> {
+function normalizeBatchOptions(options?: BatchOptions): NormalizedBatchOptions {
   return {
     maxBatchSize: options?.maxBatchSize ?? Infinity,
     batchScheduleFn: options?.batchScheduleFn ?? enqueuePostPromiseJob,
   };
 }
 
-export interface BatchGroupsOptionsWithMapGroupKey<
-  TGroupKey,
-  TKey,
-  TMappedGroupKey,
-> extends BatchOptions<TKey> {
-  groupMap?: CacheMapInput<TMappedGroupKey, unknown>;
-  mapGroupKey: (key: TGroupKey) => TMappedGroupKey;
+export interface BatchGroupsOptionsWithMapGroupKey<TGroupKey, TMappedGroupKey>
+  extends BatchOptions {
+  readonly groupMap?: CacheMapInput<TMappedGroupKey, unknown>;
+  readonly mapGroupKey: (key: TGroupKey) => TMappedGroupKey;
 }
 
-export interface BatchGroupsOptionsWithoutMapGroupKey<TGroupKey, TKey>
-  extends BatchOptions<TKey> {
-  groupMap?: CacheMapInput<TGroupKey, unknown>;
-  mapGroupKey?: undefined;
+export interface BatchGroupsOptionsWithoutMapGroupKey<TGroupKey>
+  extends BatchOptions {
+  readonly groupMap?: CacheMapInput<TGroupKey, unknown>;
+  readonly mapGroupKey?: undefined;
 }
 
-export type BatchGroupsOptions<TGroupKey, TKey, TMappedGroupKey = TGroupKey> =
-  | BatchGroupsOptionsWithMapGroupKey<TGroupKey, TKey, TMappedGroupKey>
-  | BatchGroupsOptionsWithoutMapGroupKey<TGroupKey, TKey>;
-
-export interface BatchedGroupFunction<TGroupKey, TKey, TResult> {
-  (group: TGroupKey, key: TKey): Promise<TResult>;
-  dedupe<TMappedKey = TKey>(
-    options:
-      | DedupeAsyncOptionsWithCache<[TGroupKey, TKey], TResult>
-      | DedupeAsyncOptionsWithMapKey<[TGroupKey, TKey], TResult, TMappedKey>,
-  ): DedupedBatchedGroupFunction<TGroupKey, TKey, TResult>;
-}
-export interface DedupedBatchedGroupFunction<TGroupKey, TKey, TResult> {
-  (group: TGroupKey, key: TKey): Promise<TResult>;
-  cache: AsyncCacheMap<[TGroupKey, TKey], TResult>;
-}
+export type BatchGroupsOptions<TGroupKey, TMappedGroupKey = TGroupKey> =
+  | BatchGroupsOptionsWithMapGroupKey<TGroupKey, TMappedGroupKey>
+  | BatchGroupsOptionsWithoutMapGroupKey<TGroupKey>;
 
 /**
  * The batchGroups function is used to batch requests to a load function. The
@@ -203,8 +178,8 @@ export function batchGroups<
     group: TGroupKey,
     requests: TKey[],
   ) => Promise<BatchResponse<TKey, TResult>>,
-  options?: BatchGroupsOptions<TGroupKey, TKey, TMappedGroupKey>,
-): BatchedGroupFunction<TGroupKey, TKey, TResult> {
+  options?: BatchGroupsOptions<TGroupKey, TMappedGroupKey>,
+): (group: TGroupKey, key: TKey) => Promise<TResult> {
   const {maxBatchSize, batchScheduleFn, mapGroupKey, groupMap} =
     normalizeBatchGroupOptions<TGroupKey, TKey, TResult, TMappedGroupKey>(
       options,
@@ -233,33 +208,16 @@ export function batchGroups<
     }
     return result;
   };
-  return Object.assign(batchedFunction, {
-    dedupe<TMappedKey>(
-      options:
-        | DedupeAsyncOptionsWithCache<[TGroupKey, TKey], TResult>
-        | DedupeAsyncOptionsWithMapKey<[TGroupKey, TKey], TResult, TMappedKey>,
-    ) {
-      const fn = dedupeAsync<[TGroupKey, TKey], TResult, TMappedKey>(
-        ([groupKey, key]) => batchedFunction(groupKey, key),
-        options,
-      );
-      return Object.assign(
-        (groupKey: TGroupKey, key: TKey) => fn([groupKey, key]),
-        {
-          cache: fn.cache,
-        },
-      );
-    },
-  });
+  return batchedFunction;
 }
 
 interface NormalizedBatchGroupOptions<TGroupKey, TKey, TResult, TMappedGroupKey>
-  extends NormalizedBatchOptions<TKey, TResult> {
+  extends NormalizedBatchOptions {
   mapGroupKey: (key: TGroupKey) => TMappedGroupKey;
   groupMap: Map<TMappedGroupKey, Batch<TKey, TResult>>;
 }
 function normalizeBatchGroupOptions<TGroupKey, TKey, TResult, TMappedGroupKey>(
-  options?: BatchGroupsOptions<TGroupKey, TKey, TMappedGroupKey>,
+  options?: BatchGroupsOptions<TGroupKey, TMappedGroupKey>,
 ): NormalizedBatchGroupOptions<TGroupKey, TKey, TResult, TMappedGroupKey> {
   return {
     ...normalizeBatchOptions(options),
@@ -268,4 +226,10 @@ function normalizeBatchGroupOptions<TGroupKey, TKey, TResult, TMappedGroupKey>(
     // @ts-expect-error If not using mapGroupKey, then TMappedGroupKey is TGroupKey. We also don't export the Batch<TKey, TResult> type
     groupMap: options?.groupMap ?? new Map<TMappedGroupKey, unknown>(),
   };
+}
+
+function isReadonlyArray<TValues, TOther>(
+  value: TOther | readonly TValues[],
+): value is readonly TValues[] {
+  return Array.isArray(value);
 }

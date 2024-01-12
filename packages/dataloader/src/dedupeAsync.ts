@@ -56,31 +56,7 @@ export default function dedupeAsync<TKey, TResult, TMappedKey = TKey>(
       cache.set(cacheKey, fresh);
       return fresh;
     },
-    {
-      cache: {
-        get size() {
-          return cache.size;
-        },
-        get: (key: TKey): Promise<TResult> | undefined => {
-          const cacheKey = mapKey(key);
-          return cache.get(cacheKey);
-        },
-        set: (key: TKey, value: TResult | Promise<TResult>): void => {
-          const cacheKey = mapKey(key);
-          cache.set(cacheKey, Promise.resolve(value));
-        },
-        delete: (key: TKey): void => {
-          const cacheKey = mapKey(key);
-          cache.delete(cacheKey);
-        },
-        clear: (): void => {
-          if (!cache.clear) {
-            throw new Error(`This cache does not support clearing`);
-          }
-          cache.clear();
-        },
-      },
-    },
+    {cache: new AsyncCacheMapImplementation(cache, mapKey)},
   );
 }
 
@@ -89,6 +65,8 @@ interface NormalizedDedupeAsyncOptions<TKey, TResult, TMappedKey> {
   mapKey: (key: TKey) => TMappedKey;
   shouldCache: (value: TResult, key: TKey) => boolean;
 }
+const identityFn = <T>(arg: T): T => arg;
+const trueFn = (): true => true;
 function normalizeDedupeAsyncOptions<TKey, TResult, TMappedKey>(
   options?: DedupeAsyncOptions<TKey, TResult, TMappedKey>,
 ): NormalizedDedupeAsyncOptions<TKey, TResult, TMappedKey> {
@@ -96,7 +74,43 @@ function normalizeDedupeAsyncOptions<TKey, TResult, TMappedKey>(
     // @ts-expect-error If not using mapKey, then TMappedKey is TKey
     cache: options?.cache ?? new Map(),
     // @ts-expect-error If not using mapKey, then TMappedKey is TKey
-    mapKey: options?.mapKey ?? ((key: TKey) => key),
-    shouldCache: options?.shouldCache ?? (() => true),
+    mapKey: options?.mapKey ?? identityFn,
+    shouldCache: options?.shouldCache ?? trueFn,
   };
+}
+
+class AsyncCacheMapImplementation<TKey, TResult, TMappedKey>
+  implements AsyncCacheMap<TKey, TResult>
+{
+  private readonly _map: CacheMapInput<TMappedKey, Promise<TResult>>;
+  private readonly _mapKey: (key: TKey) => TMappedKey;
+  constructor(
+    map: CacheMapInput<TMappedKey, Promise<TResult>>,
+    mapKey: (key: TKey) => TMappedKey,
+  ) {
+    this._map = map;
+    this._mapKey = mapKey;
+  }
+
+  get size() {
+    return this._map.size;
+  }
+  get(key: TKey): Promise<TResult> | undefined {
+    const cacheKey = this._mapKey(key);
+    return this._map.get(cacheKey);
+  }
+  set(key: TKey, value: TResult | Promise<TResult>): void {
+    const cacheKey = this._mapKey(key);
+    this._map.set(cacheKey, Promise.resolve(value));
+  }
+  delete(key: TKey): void {
+    const cacheKey = this._mapKey(key);
+    this._map.delete(cacheKey);
+  }
+  clear(): void {
+    if (!this._map.clear) {
+      throw new Error(`This cache does not support clearing`);
+    }
+    this._map.clear();
+  }
 }

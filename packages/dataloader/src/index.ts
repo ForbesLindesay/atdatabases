@@ -1,23 +1,25 @@
 export type {
-  BatchResponse,
-  BatchOptions,
-  BatchedFunction,
   BatchGroupsOptions,
-  BatchedGroupFunction,
-  DedupedBatchedGroupFunction,
+  BatchGroupsOptionsWithMapGroupKey,
+  BatchGroupsOptionsWithoutMapGroupKey,
+  BatchOptions,
+  BatchResponse,
+  BatchResponseArray,
+  BatchResponseFunction,
+  BatchResponseMap,
 } from './batch';
 export type {
-  NamespacedCache,
-  NamespaceOptions,
-  NamespaceOptionsWithMapKey,
-  NamespaceOptionsWithoutMapKey,
-  NamespacedCacheBuilder,
-} from './createNamespacedCache';
+  MultiKeyMap,
+  MultiKeyMapOption,
+  MultiKeyMapOptions,
+  MultiKeyMapOptionWithMapKey,
+  MultiKeyMapOptionWithoutMapKey,
+} from './MultiKeyMap';
 export type {
-  DedupedAsyncFunction,
   DedupeAsyncOptions,
   DedupeAsyncOptionsWithMapKey,
   DedupeAsyncOptionsWithoutMapKey,
+  DedupedAsyncFunction,
 } from './dedupeAsync';
 export type {
   DedupedSyncFunction,
@@ -28,14 +30,12 @@ export type {
 export type {CacheMapInput, CacheMap} from './types';
 
 export {default as batch, batchGroups} from './batch';
-export {default as createNamespacedCache} from './createNamespacedCache';
+export {default as createMultiKeyMap} from './MultiKeyMap';
 export {default as dedupeAsync} from './dedupeAsync';
 export {default as dedupeSync} from './dedupeSync';
-export {default as groupToMap} from './groupToMap';
 
 export {
+  groupBy,
   parametersSpreadToArray,
   parametersArrayToSpread,
-  addFallbackForUndefinedSync,
-  addFallbackForUndefinedAsync,
 } from './utils';

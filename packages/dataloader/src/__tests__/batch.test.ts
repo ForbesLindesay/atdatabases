@@ -1,5 +1,6 @@
+import createMultiKeyMap from '../MultiKeyMap';
 import batch, {batchGroups} from '../batch';
-import createNamespacedCache from '../createNamespacedCache';
+import dedupeAsync from '../dedupeAsync';
 import requestsTester from './requestsTester';
 
 test('batch', async () => {
@@ -93,8 +94,8 @@ test('batch - maxBatchSize', async () => {
 
 test('batch - dedupe', async () => {
   const requests = requestsTester<string[]>();
-  const load = batch<string, {source: string} | undefined>(
-    async (req: string[]) => {
+  const load = dedupeAsync(
+    batch<string, {source: string} | undefined>(async (req: string[]) => {
       requests.add([...req]);
       return new Map(
         req
@@ -106,8 +107,8 @@ test('batch - dedupe', async () => {
               : {source: key},
           ]),
       );
-    },
-  ).dedupe();
+    }),
+  );
 
   await requests.expect([['hello', 'world']], async () => {
     expect(await Promise.all([load('hello'), load('world')])).toEqual([
@@ -141,8 +142,8 @@ test('batch - dedupe', async () => {
 
 test('batch - dedupe with shouldCache', async () => {
   const requests = requestsTester<string[]>();
-  const load = batch<string, {source: string} | undefined>(
-    async (req: string[]) => {
+  const load = dedupeAsync(
+    batch<string, {source: string} | undefined>(async (req: string[]) => {
       requests.add([...req]);
       return new Map(
         req
@@ -154,8 +155,9 @@ test('batch - dedupe with shouldCache', async () => {
               : {source: key},
           ]),
       );
-    },
-  ).dedupe({shouldCache: (v) => v !== undefined});
+    }),
+    {shouldCache: (v) => v !== undefined},
+  );
 
   await requests.expect([['hello', 'world']], async () => {
     expect(await Promise.all([load('hello'), load('world')])).toEqual([
@@ -180,7 +182,7 @@ test('batch - dedupe with shouldCache', async () => {
       await Promise.all([
         load('hello'),
         load('world'),
-        load('ERROR_THIS').catch((ex) => ex.message),
+        load('ERROR_THIS').catch((ex: any) => ex.message),
         load('NOT_FOUND'),
       ]),
     ).toEqual([{source: 'hello'}, {source: 'world'}, 'Errored', undefined]);
@@ -233,157 +235,10 @@ test('batchGroups', async () => {
   );
 });
 
-test('batchGroups - dedupe with mapKey', async () => {
-  const requests = requestsTester<[number, string[]]>();
-  const load = batchGroups(async (group: number, req: string[]) => {
-    requests.add([group, [...req]]);
-    return new Map<string, Promise<{source: string}>>(
-      req
-        .filter((key) => key !== 'NOT_FOUND')
-        .map((key) => [
-          key,
-          key === 'ERROR_THIS'
-            ? Promise.reject(new Error('Errored'))
-            : Promise.resolve({group, source: key}),
-        ]),
-    );
-  }).dedupe({
-    mapKey: ([group, req]) => `${group}:${req}`,
-    shouldCache: (v) => v !== undefined,
-  });
-
-  await requests.expect([[1, ['hello', 'world']]], async () => {
-    expect(await Promise.all([load(1, 'hello'), load(1, 'world')])).toEqual([
-      {group: 1, source: 'hello'},
-      {group: 1, source: 'world'},
-    ]);
-  });
-
-  await requests.expect(
-    [
-      [1, ['ERROR_THIS']],
-      [2, ['world', 'NOT_FOUND']],
-    ],
-    async () => {
-      expect(
-        await Promise.all([
-          load(1, 'hello'),
-          load(2, 'world'),
-          load(1, 'ERROR_THIS').catch((ex) => ex.message),
-          load(2, 'NOT_FOUND'),
-        ]),
-      ).toEqual([
-        {group: 1, source: 'hello'},
-        {group: 2, source: 'world'},
-        'Errored',
-        undefined,
-      ]);
-    },
-  );
-
-  await requests.expect(
-    [
-      [1, ['ERROR_THIS']],
-      [2, ['NOT_FOUND']],
-    ],
-    async () => {
-      expect(
-        await Promise.all([
-          load(1, 'hello'),
-          load(2, 'world'),
-          load(1, 'ERROR_THIS').catch((ex) => ex.message),
-          load(2, 'NOT_FOUND'),
-        ]),
-      ).toEqual([
-        {group: 1, source: 'hello'},
-        {group: 2, source: 'world'},
-        'Errored',
-        undefined,
-      ]);
-    },
-  );
-});
-
-test('batchGroups - dedupe with leveled cache', async () => {
-  const requests = requestsTester<[number, string[]]>();
-  const load = batchGroups(async (group: number, req: string[]) => {
-    requests.add([group, [...req]]);
-    return new Map<string, Promise<{source: string}>>(
-      req
-        .filter((key) => key !== 'NOT_FOUND')
-        .map((key) => [
-          key,
-          key === 'ERROR_THIS'
-            ? Promise.reject(new Error('Errored'))
-            : Promise.resolve({group, source: key}),
-        ]),
-    );
-  }).dedupe({
-    cache: createNamespacedCache<number>().addNamespace<string>().build(),
-    shouldCache: (v) => v !== undefined,
-  });
-
-  await requests.expect([[1, ['hello', 'world']]], async () => {
-    expect(await Promise.all([load(1, 'hello'), load(1, 'world')])).toEqual([
-      {group: 1, source: 'hello'},
-      {group: 1, source: 'world'},
-    ]);
-  });
-
-  await requests.expect(
-    [
-      [1, ['ERROR_THIS']],
-      [2, ['world', 'NOT_FOUND']],
-    ],
-    async () => {
-      expect(
-        await Promise.all([
-          load(1, 'hello'),
-          load(2, 'world'),
-          load(1, 'ERROR_THIS').catch((ex) => ex.message),
-          load(2, 'NOT_FOUND'),
-        ]),
-      ).toEqual([
-        {group: 1, source: 'hello'},
-        {group: 2, source: 'world'},
-        'Errored',
-        undefined,
-      ]);
-    },
-  );
-
-  await requests.expect(
-    [
-      [1, ['ERROR_THIS']],
-      [2, ['NOT_FOUND']],
-    ],
-    async () => {
-      expect(
-        await Promise.all([
-          load(1, 'hello'),
-          load(2, 'world'),
-          load(1, 'ERROR_THIS').catch((ex) => ex.message),
-          load(2, 'NOT_FOUND'),
-        ]),
-      ).toEqual([
-        {group: 1, source: 'hello'},
-        {group: 2, source: 'world'},
-        'Errored',
-        undefined,
-      ]);
-    },
-  );
-});
-
 for (const [name, options] of [
   [
     `leveled cache`,
-    {
-      groupMap: createNamespacedCache<number>()
-        .addNamespace<number>()
-        .addNamespace<number>()
-        .build<Promise<{source: string}>>(),
-    },
+    {groupMap: createMultiKeyMap<[number, number, number], {source: string}>()},
   ],
   [
     `map group key`,
@@ -398,12 +253,15 @@ for (const [name, options] of [
         return new Map<string, Promise<{source: string}>>(
           req
             .filter((key) => key !== 'NOT_FOUND')
-            .map((key) => [
-              key,
-              key === 'ERROR_THIS'
-                ? Promise.reject(new Error('Errored'))
-                : Promise.resolve({group, source: key}),
-            ]),
+            .map(
+              (key) =>
+                [
+                  key,
+                  key === 'ERROR_THIS'
+                    ? Promise.reject(new Error('Errored'))
+                    : Promise.resolve({group, source: key}),
+                ] as const,
+            ),
         );
       },
       options as any,
