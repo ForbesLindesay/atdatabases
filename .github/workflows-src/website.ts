@@ -31,10 +31,13 @@ export default createWorkflow(({setWorkflowName, addTrigger, addJob}) => {
 
     run('yarn workspace @databases/website build');
 
-    run(`npm install netlify-cli`);
+    // run(`npm install netlify-cli`);
+    run(
+      interpolate`mkdir .netlify && echo '{"siteId": "${secrets.NETLIFY_SITE_ID}"}' > .netlify/state.json`,
+    );
     when(eq(github.event_name, `push`), () => {
       run(
-        `npx netlify-cli deploy --filter @databases/website --prod --dir=packages/website/out`,
+        `netlify deploy --filter @databases/website --prod --dir=packages/website/out`,
         {
           env: {
             NETLIFY_SITE_ID: secrets.NETLIFY_SITE_ID,
@@ -45,7 +48,7 @@ export default createWorkflow(({setWorkflowName, addTrigger, addJob}) => {
     });
     when(neq(github.event_name, `push`), () => {
       run(
-        `npx netlify-cli deploy --filter @databases/website --dir=packages/website/out`,
+        `netlify deploy --filter @databases/website --dir=packages/website/out`,
         {
           env: {
             NETLIFY_SITE_ID: secrets.NETLIFY_SITE_ID,
