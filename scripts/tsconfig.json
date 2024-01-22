@@ -2,7 +2,9 @@
   "extends": "../tsconfig.json",
   "references": [
     {"path": "../packages/bigquery"},
+    {"path": "../packages/cache"},
     {"path": "../packages/connection-pool"},
+    {"path": "../packages/dataloader"},
     {"path": "../packages/escape-identifier"},
     {"path": "../packages/expo"},
     {"path": "../packages/lock"},
@@ -37,6 +39,7 @@
     {"path": "../packages/split-sql-query"},
     {"path": "../packages/sql"},
     {"path": "../packages/sqlite"},
+    {"path": "../packages/sqlite-sync"},
     {"path": "../packages/validate-unicode"},
     {"path": "../packages/websql"},
     {"path": "../packages/websql-core"},

@@ -45,13 +45,13 @@ test('replace filter', async () => {
         "filename": "index.ts",
       },
       Object {
-        "content": "interface TableName {
-    }
-    export default TableName;
-
-    interface TableMyNameInsert {
+        "content": "interface TableMyNameInsert {
     }
     export type {TableMyNameInsert}
+
+    interface TableName {
+    }
+    export default TableName;
     ",
         "filename": "my_table_my_name.ts",
       },

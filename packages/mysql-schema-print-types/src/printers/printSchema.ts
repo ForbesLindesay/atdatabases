@@ -5,13 +5,13 @@ import TypeID from '../TypeID';
 import printTableDetails from './printTableDetails';
 
 export default function printSchema(
-  type: Schema,
+  schema: Schema,
   context: PrintContext<TypeID>,
   options: MySqlPrintOptions,
 ) {
   context.pushTypeDeclaration({type: 'schema'}, (identifier, {getImport}) => [
     `interface ${identifier} {`,
-    ...type.tables
+    ...schema.tables
       .filter((table) => table.tableType === TableType.BaseTable)
       .map((table) => {
         const {DatabaseRecord, InsertParameters} = printTableDetails(
@@ -26,7 +26,7 @@ export default function printSchema(
     `}`,
   ]);
   context.pushValueDeclaration({type: 'serializeValue'}, (identifier) => {
-    const tables = type.tables
+    const tables = schema.tables
       .filter((table) => table.tableType === TableType.BaseTable)
       .map((table) => {
         const jsonAttributes = table.columns

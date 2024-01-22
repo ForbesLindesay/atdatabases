@@ -301,6 +301,49 @@ test('JSON values can be of any type', async () => {
   ]);
 });
 
+test('sub queries', async () => {
+  const expectedUser = await users(db).findOneRequired({
+    screen_name: 'photo-owner',
+  });
+
+  await expectQueries(async () => {
+    const usersWithPhotos = await users(db)
+      .find({
+        id: photos.key(`owner_user_id`, {}),
+      })
+      .all();
+    expect(usersWithPhotos).toEqual([expectedUser]);
+  }).toEqual([
+    {
+      text: `SELECT * FROM "users" WHERE "id" IN (SELECT "owner_user_id" FROM "photos")`,
+      values: [],
+    },
+  ]);
+
+  await expectQueries(async () => {
+    const noUsersWithQuery = await users(db)
+      .find({
+        id: photos.key(`owner_user_id`, {id: -1}),
+      })
+      .all();
+    expect(noUsersWithQuery).toEqual([]);
+  }).toEqual([
+    {
+      text: `SELECT * FROM "users" WHERE "id" IN (SELECT "owner_user_id" FROM "photos" WHERE "id" = $1)`,
+      values: [-1],
+    },
+  ]);
+
+  await expectQueries(async () => {
+    const noUsersWithoutNeedingQuery = await users(db)
+      .find({
+        id: photos.key(`owner_user_id`, {id: allOf([1, 2])}),
+      })
+      .all();
+    expect(noUsersWithoutNeedingQuery).toEqual([]);
+  }).toEqual([]);
+});
+
 test('case insensitive', async () => {
   const USER_NAME_A = `USERwithMIXEDcaseNAME_A`;
   const USER_NAME_B = `USERwithMIXEDcaseNAME_B`;

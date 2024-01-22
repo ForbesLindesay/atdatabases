@@ -125,7 +125,7 @@ class DatabaseConnectionImplementation implements DatabaseConnection {
         });
       });
       try {
-        const result = fn(
+        const result = await fn(
           new DatabaseTransactionImplementation(this._database),
         );
         await new Promise<void>((resolve, reject) => {
@@ -137,7 +137,7 @@ class DatabaseConnectionImplementation implements DatabaseConnection {
         return result;
       } catch (ex) {
         await new Promise<void>((resolve, reject) => {
-          this._database.run('REVERT', (err) => {
+          this._database.run('ROLLBACK', (err) => {
             if (err) reject(err);
             else resolve();
           });

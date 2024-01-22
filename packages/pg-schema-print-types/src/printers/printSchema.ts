@@ -3,13 +3,17 @@ import PgDataTypeID from '@databases/pg-data-type-id';
 import PgPrintContext from '../PgPrintContext';
 import printClassDetails from './printClassDetails';
 
-export default function printSchema(type: Schema, context: PgPrintContext) {
+export default function printSchema(schema: Schema, context: PgPrintContext) {
   context.printer.pushTypeDeclaration(
     {type: 'schema'},
     (identifier, {getImport}) => [
       `interface ${identifier} {`,
-      ...type.classes
-        .filter((cls) => cls.kind === ClassKind.OrdinaryTable)
+      ...schema.classes
+        .filter(
+          (cls) =>
+            cls.kind === ClassKind.OrdinaryTable ||
+            cls.kind === ClassKind.PartitionedTable,
+        )
         .map((cls) => {
           const {DatabaseRecord, InsertParameters} = printClassDetails(
             cls,
@@ -26,8 +30,12 @@ export default function printSchema(type: Schema, context: PgPrintContext) {
   context.printer.pushValueDeclaration(
     {type: 'serializeValue'},
     (identifier) => {
-      const tables = type.classes
-        .filter((cls) => cls.kind === ClassKind.OrdinaryTable)
+      const tables = schema.classes
+        .filter(
+          (cls) =>
+            cls.kind === ClassKind.OrdinaryTable ||
+            cls.kind === ClassKind.PartitionedTable,
+        )
         .map((cls) => {
           const jsonAttributes = cls.attributes
             .filter(
@@ -98,7 +106,7 @@ export default function printSchema(type: Schema, context: PgPrintContext) {
           typeof typeId === 'number' ? ([typeId, typeName] as const) : null,
         )
         .filter(<T>(v: T): v is Exclude<T, null> => v !== null),
-      ...type.types.map((t) => [t.typeID, t.typeName] as const),
+      ...schema.types.map((t) => [t.typeID, t.typeName] as const),
     ]
       .map(
         ([typeId, typeName]) =>
@@ -119,8 +127,12 @@ export default function printSchema(type: Schema, context: PgPrintContext) {
   const schemaJsonFileName = context.options.getSchemaJsonFileName();
 
   if (schemaJsonFileName) {
-    const schemaJson = type.classes
-      .filter((cls) => cls.kind === ClassKind.OrdinaryTable)
+    const schemaJson = schema.classes
+      .filter(
+        (cls) =>
+          cls.kind === ClassKind.OrdinaryTable ||
+          cls.kind === ClassKind.PartitionedTable,
+      )
       .map((table) => ({
         name: table.className,
         columns: table.attributes.map((column) => {

@@ -5,10 +5,10 @@ import TypeID from './TypeID';
 
 export default class PgPrintOptions implements PrintOptions<TypeID> {
   private readonly _config: Partial<PgConfig['types']>;
-
   constructor(config: Partial<PgConfig['types']>) {
     this._config = config;
   }
+
   private _v<TKey extends keyof PgConfig['types']>(
     key: Literal<TKey>,
   ): PgConfig['types'][Literal<TKey>] {

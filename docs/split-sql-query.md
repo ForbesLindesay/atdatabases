@@ -1,7 +1,7 @@
 ---
 id: split-sql-query
 title: '@databases/split-sql-query'
-sidebar_label: split-sql-query
+sidebar_label: Split SQL Query
 ---
 
 The `@databases/split-sql-query` package allows you to automatically split an `SQLQuery` into an array of `SQLQuery`s where each query contains one statement.

@@ -239,14 +239,22 @@ function validateMySqlUrl(urlString: string) {
   }
 }
 
+function parseNullable<T, R>(value: T, parser: (value: T) => R): R | null {
+  if (value == null) {
+    return null;
+  }
+
+  return parser(value);
+}
+
 function getTinyIntParser(
   mode: 'boolean' | 'number',
 ): (f: {string(): string}) => any {
   switch (mode) {
     case 'number':
-      return (f) => parseInt(f.string(), 10);
+      return (f) => parseNullable(f.string(), (s) => parseInt(s, 10));
     case 'boolean':
-      return (f) => f.string() !== '0';
+      return (f) => parseNullable(f.string(), (s) => s !== '0');
   }
 }
 function getBigIntParser(
@@ -254,11 +262,11 @@ function getBigIntParser(
 ): (f: {string(): string}) => any {
   switch (mode) {
     case 'number':
-      return (f) => parseInt(f.string(), 10);
+      return (f) => parseNullable(f.string(), (s) => parseInt(s, 10));
     case 'string':
       return (f) => f.string();
     case 'bigint':
-      return (f) => BigInt(f.string());
+      return (f) => parseNullable(f.string(), (s) => BigInt(s));
   }
 }
 function getDateParser(
@@ -269,14 +277,26 @@ function getDateParser(
     case 'string':
       return (f) => f.string();
     case 'date-object':
-      return (f) => {
-        const match = /^(\d{4})\-(\d{2})\-(\d{2})$/.exec(f.string());
-        if (!match) {
-          throw new Error('Expected yyyy-mm-dd');
-        }
-        if (timeZone === 'utc') {
-          return new Date(
-            Date.UTC(
+      return (f) =>
+        parseNullable(f.string(), (s) => {
+          const match = /^(\d{4})\-(\d{2})\-(\d{2})$/.exec(s);
+          if (!match) {
+            throw new Error('Expected yyyy-mm-dd');
+          }
+          if (timeZone === 'utc') {
+            return new Date(
+              Date.UTC(
+                parseInt(match[1], 10),
+                parseInt(match[2], 10) - 1,
+                parseInt(match[3], 10),
+                0,
+                0,
+                0,
+                0,
+              ),
+            );
+          } else {
+            return new Date(
               parseInt(match[1], 10),
               parseInt(match[2], 10) - 1,
               parseInt(match[3], 10),
@@ -284,20 +304,9 @@ function getDateParser(
               0,
               0,
               0,
-            ),
-          );
-        } else {
-          return new Date(
-            parseInt(match[1], 10),
-            parseInt(match[2], 10) - 1,
-            parseInt(match[3], 10),
-            0,
-            0,
-            0,
-            0,
-          );
-        }
-      };
+            );
+          }
+        });
   }
 }
 

@@ -1,7 +1,7 @@
 import 'twin.macro';
 import type * as m from 'mdast';
 import tw from 'twin.macro';
-import {createContext, memo, useContext} from 'react';
+import {createContext, memo, useContext, useState} from 'react';
 import {CodeBlock, CodeTokenType, EnvironmentEditor} from './CodeBlock';
 
 const HeadingContext = createContext(false);
@@ -28,6 +28,7 @@ const nodeRenderers: {
   listItem: DocumentListItem,
   paragraph: DocumentParagraph,
   strong: DocumentStrong,
+  emphasis: DocumentStrong,
   table: DocumentTable,
   text: DocumentText,
 };
@@ -37,11 +38,31 @@ const Document = memo(({document}: {document: m.Root}) => {
 export default Document;
 
 function DocumentChildren({children}: {children: m.Parent}) {
+  let index = 0;
   return (
     <>
-      {children.children.map((node, index) => (
-        <DocumentElement key={index} index={index} node={node} />
-      ))}
+      {children.children.map((node) => {
+        const currentIndex = index++;
+        const preparedNode =
+          (node as any).type === 'collapse'
+            ? {
+                ...node,
+                heading: (node as any).heading.map((node: any) => (
+                  <DocumentElement key={index++} index={index++} node={node} />
+                )),
+                body: (node as any).body.map((node: any) => (
+                  <DocumentElement key={index++} index={index++} node={node} />
+                )),
+              }
+            : node;
+        return (
+          <DocumentElement
+            key={currentIndex}
+            index={currentIndex}
+            node={preparedNode}
+          />
+        );
+      })}
     </>
   );
 }
@@ -62,19 +83,22 @@ function DocumentElement({
             value: string;
           }[];
         }[];
-      };
+      }
+    | {type: 'collapse'; heading: React.ReactNode; body: React.ReactNode};
 }) {
   const isInBlockquote = useIsInBlockquote();
   switch (node.type) {
     case 'codeBlocks':
       return <CodeBlock blocks={node.blocks} isInBlockquote={isInBlockquote} />;
+    case 'collapse':
+      return <Collapse heading={node.heading} body={node.body} />;
     default:
       const NodeRenderer: any = nodeRenderers[node.type];
       if (NodeRenderer !== undefined) {
         return <NodeRenderer index={index} node={node} />;
       }
-      // throw new Error(`Unknown node type: ${node.type}`);
-      return <pre>{JSON.stringify(node, null, `  `)}</pre>;
+      throw new Error(`Unknown node type: ${(node as any).type}`);
+    // return <pre>{JSON.stringify(node, null, `  `)}</pre>;
   }
 }
 
@@ -117,7 +141,7 @@ function DocumentHeading({index, node}: {index: number; node: m.Heading}) {
         tabIndex={-1}
       />
       <a
-        href="#cli"
+        href={`#${id}`}
         aria-hidden
         tw="flex flex-shrink-0 justify-center items-center -ml-6 w-6 opacity-0 group-hover:opacity-100"
         tabIndex={-1}
@@ -296,7 +320,7 @@ function DocumentParagraph({index, node}: {index: number; node: m.Paragraph}) {
   );
 }
 
-function DocumentStrong({node}: {node: m.Strong}) {
+function DocumentStrong({node}: {node: m.Strong | m.Emphasis}) {
   return (
     <strong tw="text-black font-semibold">
       <DocumentChildren>{node}</DocumentChildren>
@@ -340,4 +364,29 @@ function DocumentTable({node}: {node: m.Table}) {
 
 function DocumentText({node}: {node: m.Text}) {
   return <>{node.value}</>;
+}
+
+function Collapse({
+  heading,
+  body,
+}: {
+  heading: React.ReactNode;
+  body: React.ReactNode;
+}) {
+  const [collapsed, setCollapsed] = useState(true);
+  return (
+    <>
+      <div tw="flex items-start">
+        <div>{heading}</div>
+        <div tw="flex-1" />
+        <button
+          onClick={() => setCollapsed((v) => !v)}
+          tw="flex-shrink-0 py-1 mt-4 ml-8 block rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-gray-300 text-gray-600 hover:text-gray-900"
+        >
+          {collapsed ? 'Show' : 'Hide'} Example
+        </button>
+      </div>
+      {collapsed ? null : <div tw="mt-4">{body}</div>}
+    </>
+  );
 }

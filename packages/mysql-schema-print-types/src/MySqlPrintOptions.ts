@@ -6,7 +6,6 @@ import {Schema, TableDetails} from '@databases/mysql-schema-introspect';
 export default class MySqlPrintOptions implements PrintOptions<TypeID> {
   private readonly _config: Partial<MySqlConfig['types']>;
   private readonly _tables: Map<string, TableDetails>;
-
   constructor(config: Partial<MySqlConfig['types']>, schema: Schema) {
     this._config = config;
     this._tables = new Map(

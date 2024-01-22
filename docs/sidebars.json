@@ -73,6 +73,7 @@
     ],
     "SQLite": [
       "sqlite",
+      "sqlite-sync",
       "sqlite-test"
     ],
     "Expo/Web SQL": [
@@ -85,7 +86,9 @@
       "bigquery-dataset"
     ],
     "Utilities": [
+      "cache",
       "connection-pool",
+      "dataloader",
       "escape-identifier",
       "lock",
       "queue",

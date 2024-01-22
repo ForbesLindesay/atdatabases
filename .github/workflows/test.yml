@@ -37,7 +37,9 @@ jobs:
         with:
           path: |-
             packages/bigquery/lib
+            packages/cache/lib
             packages/connection-pool/lib
+            packages/dataloader/lib
             packages/escape-identifier/lib
             packages/expo/lib
             packages/lock/lib
@@ -52,6 +54,8 @@ jobs:
             packages/mysql-test/lib
             packages/mysql-typed/lib
             packages/pg/lib
+            packages/pg-bulk/lib
+            packages/pg-cluster/lib
             packages/pg-config/lib
             packages/pg-connection-string/lib
             packages/pg-create/lib
@@ -70,12 +74,15 @@ jobs:
             packages/split-sql-query/lib
             packages/sql/lib
             packages/sqlite/lib
+            packages/sqlite-sync/lib
             packages/validate-unicode/lib
             packages/websql/lib
             packages/websql-core/lib
             packages/with-container/lib
             packages/bigquery/.last_build
+            packages/cache/.last_build
             packages/connection-pool/.last_build
+            packages/dataloader/.last_build
             packages/escape-identifier/.last_build
             packages/expo/.last_build
             packages/lock/.last_build
@@ -90,6 +97,8 @@ jobs:
             packages/mysql-test/.last_build
             packages/mysql-typed/.last_build
             packages/pg/.last_build
+            packages/pg-bulk/.last_build
+            packages/pg-cluster/.last_build
             packages/pg-config/.last_build
             packages/pg-connection-string/.last_build
             packages/pg-create/.last_build
@@ -108,12 +117,14 @@ jobs:
             packages/split-sql-query/.last_build
             packages/sql/.last_build
             packages/sqlite/.last_build
+            packages/sqlite-sync/.last_build
             packages/validate-unicode/.last_build
             packages/websql/.last_build
             packages/websql-core/.last_build
             packages/with-container/.last_build
           key: v2-build-output-${{hashFiles('yarn.lock', 'packages/bigquery/src',
-            'packages/connection-pool/src', 'packages/escape-identifier/src',
+            'packages/cache/src', 'packages/connection-pool/src',
+            'packages/dataloader/src', 'packages/escape-identifier/src',
             'packages/expo/src', 'packages/lock/src',
             'packages/migrations-base/src', 'packages/mock-db/src',
             'packages/mock-db-typed/src', 'packages/mysql/src',
@@ -121,6 +132,7 @@ jobs:
             'packages/mysql-schema-introspect/src',
             'packages/mysql-schema-print-types/src', 'packages/mysql-test/src',
             'packages/mysql-typed/src', 'packages/pg/src',
+            'packages/pg-bulk/src', 'packages/pg-cluster/src',
             'packages/pg-config/src', 'packages/pg-connection-string/src',
             'packages/pg-create/src', 'packages/pg-data-type-id/src',
             'packages/pg-errors/src', 'packages/pg-migrations/src',
@@ -130,8 +142,9 @@ jobs:
             'packages/queue/src', 'packages/shared/src',
             'packages/shared-print-types/src', 'packages/split-sql-query/src',
             'packages/sql/src', 'packages/sqlite/src',
-            'packages/validate-unicode/src', 'packages/websql/src',
-            'packages/websql-core/src', 'packages/with-container/src')}}
+            'packages/sqlite-sync/src', 'packages/validate-unicode/src',
+            'packages/websql/src', 'packages/websql-core/src',
+            'packages/with-container/src')}}
           restore-keys: v2-build-output-
       - run: yarn build
       - name: "Save output: build"
@@ -143,50 +156,6 @@ jobs:
             packages/*/.last_build
     outputs:
       output: build
-  publish_website:
-    needs:
-      - build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
-        with:
-          node-version: 14.x
-          registry-url: https://registry.npmjs.org
-      - name: Get yarn cache directory path
-        run: echo "::set-output name=dir::$(yarn cache dir)"
-        id: step_3
-      - name: Enable Cache
-        uses: actions/cache@v2
-        with:
-          path: |-
-            ${{steps.step_3.outputs.dir}}
-            node_modules
-            packages/*/node_modules
-          key: ${{runner.os}}-14.x-${{hashFiles('yarn.lock')}}-2
-      - run: yarn install --prefer-offline
-      - name: "Load output: ${{needs.build.outputs.output}}"
-        uses: actions/download-artifact@v2
-        with:
-          name: ${{ needs.build.outputs.output }}
-          path: packages/
-      - name: Enable NextJS Cache
-        uses: actions/cache@v2
-        with:
-          path: packages/website/.next/cache
-          key: next-${{hashFiles('yarn.lock')}}
-          restore-keys: next-
-      - run: yarn workspace @databases/website build
-      - if: ${{ github.event_name == 'push' }}
-        run: netlify deploy --prod --dir=packages/website/out
-        env:
-          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
-          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-      - if: ${{ github.event_name != 'push' }}
-        run: netlify deploy --dir=packages/website/out
-        env:
-          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
-          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
   test_node:
     needs:
       - build
@@ -194,8 +163,9 @@ jobs:
     strategy:
       matrix:
         node:
-          - 12.x
           - 14.x
+          - 16.x
+          - 18.x
       fail-fast: false
     steps:
       - uses: actions/checkout@v2
@@ -228,8 +198,8 @@ jobs:
     strategy:
       matrix:
         node:
-          - 12.x
           - 14.x
+          - 18.x
         pg:
           - 10.14-alpine
           - 11.9-alpine
@@ -270,8 +240,8 @@ jobs:
     strategy:
       matrix:
         node:
-          - 12.x
           - 14.x
+          - 18.x
         mysql:
           - 5.6.51
           - 5.7.33

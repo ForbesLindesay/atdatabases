@@ -1,7 +1,7 @@
 ---
 id: connection-pool
 title: '@databases/connection-pool'
-sidebar_label: connection-pool
+sidebar_label: Connection Pool
 ---
 
 The `@databases/connection-pool` package provides a generic, async connection pool for use with database connections and any other similar resource. This is useful when either:

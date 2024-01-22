@@ -35,6 +35,13 @@ test('getClasses', async () => {
       CREATE MATERIALIZED VIEW print_types.view_a AS SELECT * FROM print_types.users;
       CREATE VIEW print_types.view_b AS SELECT * FROM print_types.photos;
 
+      CREATE TABLE print_types.partitioned (
+        id INT NOT NULL,
+        create_date DATE NOT NULL
+      ) PARTITION BY RANGE (create_date);
+      CREATE TABLE print_types.partitioned_p0 PARTITION OF print_types.partitioned FOR VALUES FROM ('1900-01-01') TO ('1999-12-31');
+      CREATE TABLE print_types.partitioned_p1 PARTITION OF print_types.partitioned FOR VALUES FROM ('2000-01-01') TO ('2100-12-31');
+
       COMMENT ON TABLE print_types.photos IS 'This is a great table';
       COMMENT ON VIEW print_types.view_b IS 'This is a great view';
     `,
@@ -69,10 +76,16 @@ test('getClasses', async () => {
   expect(printContext.printer.getFiles()).toMatchInlineSnapshot(`
     Array [
       Object {
-        "content": "import Photo, {Photos_InsertParameters} from './photos'
+        "content": "import Partitioned, {Partitioned_InsertParameters} from './partitioned'
+    import PartitionedP0, {PartitionedP0_InsertParameters} from './partitioned_p0'
+    import PartitionedP1, {PartitionedP1_InsertParameters} from './partitioned_p1'
+    import Photo, {Photos_InsertParameters} from './photos'
     import User, {Users_InsertParameters} from './users'
 
     interface DatabaseSchema {
+      partitioned: {record: Partitioned, insert: Partitioned_InsertParameters};
+      partitioned_p0: {record: PartitionedP0, insert: PartitionedP0_InsertParameters};
+      partitioned_p1: {record: PartitionedP1, insert: PartitionedP1_InsertParameters};
       photos: {record: Photo, insert: Photos_InsertParameters};
       users: {record: User, insert: Users_InsertParameters};
     }
@@ -93,6 +106,51 @@ test('getClasses', async () => {
     export {serializeValue}
     ",
         "filename": "index.ts",
+      },
+      Object {
+        "content": "interface Partitioned {
+      create_date: Date
+      id: number
+    }
+    export default Partitioned;
+
+    interface Partitioned_InsertParameters {
+      create_date: Date
+      id: number
+    }
+    export type {Partitioned_InsertParameters}
+    ",
+        "filename": "partitioned.ts",
+      },
+      Object {
+        "content": "interface PartitionedP0 {
+      create_date: Date
+      id: number
+    }
+    export default PartitionedP0;
+
+    interface PartitionedP0_InsertParameters {
+      create_date: Date
+      id: number
+    }
+    export type {PartitionedP0_InsertParameters}
+    ",
+        "filename": "partitioned_p0.ts",
+      },
+      Object {
+        "content": "interface PartitionedP1 {
+      create_date: Date
+      id: number
+    }
+    export default PartitionedP1;
+
+    interface PartitionedP1_InsertParameters {
+      create_date: Date
+      id: number
+    }
+    export type {PartitionedP1_InsertParameters}
+    ",
+        "filename": "partitioned_p1.ts",
       },
       Object {
         "content": "import User from './users'
@@ -164,6 +222,63 @@ test('getClasses', async () => {
       },
       Object {
         "content": "[
+      {
+        \\"name\\": \\"partitioned\\",
+        \\"columns\\": [
+          {
+            \\"name\\": \\"create_date\\",
+            \\"isNullable\\": false,
+            \\"hasDefault\\": false,
+            \\"typeId\\": 1082,
+            \\"typeName\\": \\"DATE\\"
+          },
+          {
+            \\"name\\": \\"id\\",
+            \\"isNullable\\": false,
+            \\"hasDefault\\": false,
+            \\"typeId\\": 23,
+            \\"typeName\\": \\"INTEGER\\"
+          }
+        ]
+      },
+      {
+        \\"name\\": \\"partitioned_p0\\",
+        \\"columns\\": [
+          {
+            \\"name\\": \\"create_date\\",
+            \\"isNullable\\": false,
+            \\"hasDefault\\": false,
+            \\"typeId\\": 1082,
+            \\"typeName\\": \\"DATE\\"
+          },
+          {
+            \\"name\\": \\"id\\",
+            \\"isNullable\\": false,
+            \\"hasDefault\\": false,
+            \\"typeId\\": 23,
+            \\"typeName\\": \\"INTEGER\\"
+          }
+        ]
+      },
+      {
+        \\"name\\": \\"partitioned_p1\\",
+        \\"columns\\": [
+          {
+            \\"name\\": \\"create_date\\",
+            \\"isNullable\\": false,
+            \\"hasDefault\\": false,
+            \\"typeId\\": 1082,
+            \\"typeName\\": \\"DATE\\"
+          },
+          {
+            \\"name\\": \\"id\\",
+            \\"isNullable\\": false,
+            \\"hasDefault\\": false,
+            \\"typeId\\": 23,
+            \\"typeName\\": \\"INTEGER\\"
+          }
+        ]
+      },
       {
         \\"name\\": \\"photos\\",
         \\"columns\\": [

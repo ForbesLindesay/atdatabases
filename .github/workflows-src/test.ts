@@ -1,12 +1,10 @@
 import {readdirSync, statSync} from 'fs';
 import createWorkflow, {Job, Steps} from 'github-actions-workflow-builder';
-import {github, runner, secrets} from 'github-actions-workflow-builder/context';
+import {runner} from 'github-actions-workflow-builder/context';
 import {
-  eq,
   Expression,
   hashFiles,
   interpolate,
-  neq,
 } from 'github-actions-workflow-builder/expression';
 
 export function yarnInstallWithCache(nodeVersion: Expression<string>): Steps {
@@ -116,43 +114,6 @@ export default createWorkflow(({setWorkflowName, addTrigger, addJob}) => {
 
   const build = addJob('build', buildJob());
 
-  addJob('publish_website', ({addDependencies, add, run, use, when}) => {
-    const {
-      outputs: {output: buildOutput},
-    } = addDependencies(build);
-
-    add(setup());
-
-    add(loadOutput(buildOutput, 'packages/'));
-
-    use('Enable NextJS Cache', 'actions/cache@v2', {
-      with: {
-        path: ['packages/website/.next/cache'].join('\n'),
-        key: interpolate`next-${hashFiles('yarn.lock')}`,
-        'restore-keys': [`next-`].join('\n'),
-      },
-    });
-
-    run('yarn workspace @databases/website build');
-
-    when(eq(github.event_name, `push`), () => {
-      run(`netlify deploy --prod --dir=packages/website/out`, {
-        env: {
-          NETLIFY_SITE_ID: secrets.NETLIFY_SITE_ID,
-          NETLIFY_AUTH_TOKEN: secrets.NETLIFY_AUTH_TOKEN,
-        },
-      });
-    });
-    when(neq(github.event_name, `push`), () => {
-      run(`netlify deploy --dir=packages/website/out`, {
-        env: {
-          NETLIFY_SITE_ID: secrets.NETLIFY_SITE_ID,
-          NETLIFY_AUTH_TOKEN: secrets.NETLIFY_AUTH_TOKEN,
-        },
-      });
-    });
-  });
-
   addJob('test_node', ({setBuildMatrix, addDependencies, add, run}) => {
     const {
       outputs: {output: buildOutput},
@@ -160,7 +121,7 @@ export default createWorkflow(({setWorkflowName, addTrigger, addJob}) => {
 
     const {node} = setBuildMatrix(
       {
-        node: ['12.x', '14.x'],
+        node: ['14.x', '16.x', '18.x'],
       },
       {failFast: false},
     );
@@ -179,7 +140,7 @@ export default createWorkflow(({setWorkflowName, addTrigger, addJob}) => {
 
     const {node, pg} = setBuildMatrix(
       {
-        node: ['12.x', '14.x'],
+        node: ['14.x', '18.x'],
         pg: [
           // '9.6.19-alpine', -- unsupported by pg-migrations
           '10.14-alpine',
@@ -207,7 +168,7 @@ export default createWorkflow(({setWorkflowName, addTrigger, addJob}) => {
 
     const {node, mysql} = setBuildMatrix(
       {
-        node: ['12.x', '14.x'],
+        node: ['14.x', '18.x'],
         mysql: ['5.6.51', '5.7.33', '8.0.23'],
       },
       {failFast: false},

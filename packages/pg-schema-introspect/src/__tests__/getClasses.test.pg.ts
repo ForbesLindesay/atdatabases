@@ -13,6 +13,13 @@ test('getClasses', async () => {
       CREATE MATERIALIZED VIEW getclasses.view_a AS SELECT * FROM getclasses.table_a;
       CREATE VIEW getclasses.view_b AS SELECT * FROM getclasses.table_b;
 
+      CREATE TABLE getclasses.partitioned (
+        id INT NOT NULL,
+        create_date DATE NOT NULL
+      ) PARTITION BY RANGE (create_date);
+      CREATE TABLE getclasses.partitioned_p0 PARTITION OF getclasses.partitioned FOR VALUES FROM ('1900-01-01') TO ('1999-12-31');
+      CREATE TABLE getclasses.partitioned_p1 PARTITION OF getclasses.partitioned FOR VALUES FROM ('2000-01-01') TO ('2100-12-31');
+
       COMMENT ON TABLE getclasses.table_b IS 'This is a great table';
       COMMENT ON VIEW getclasses.view_b IS 'This is a great view';
     `,
@@ -24,6 +31,7 @@ test('getClasses', async () => {
         schemaName: 'getclasses',
         kind: [
           ClassKind.OrdinaryTable,
+          ClassKind.PartitionedTable,
           ClassKind.View,
           ClassKind.MaterializedView,
         ],
@@ -35,6 +43,30 @@ test('getClasses', async () => {
     })),
   ).toMatchInlineSnapshot(`
 Array [
+  Object {
+    "classID": "<oid>",
+    "className": "partitioned",
+    "comment": null,
+    "kind": "p",
+    "schemaID": "<oid>",
+    "schemaName": "getclasses",
+  },
+  Object {
+    "classID": "<oid>",
+    "className": "partitioned_p0",
+    "comment": null,
+    "kind": "r",
+    "schemaID": "<oid>",
+    "schemaName": "getclasses",
+  },
+  Object {
+    "classID": "<oid>",
+    "className": "partitioned_p1",
+    "comment": null,
+    "kind": "r",
+    "schemaID": "<oid>",
+    "schemaName": "getclasses",
+  },
   Object {
     "classID": "<oid>",
     "className": "table_a",

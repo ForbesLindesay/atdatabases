@@ -11,9 +11,12 @@ export default function printClassDetails(
   type: ClassDetails,
   context: PgPrintContext,
 ) {
-  if (type.kind !== ClassKind.OrdinaryTable) {
+  if (
+    type.kind !== ClassKind.OrdinaryTable &&
+    type.kind !== ClassKind.PartitionedTable
+  ) {
     throw new Error(
-      'printClassDetails only supports ordinary tables at the moment.',
+      'printClassDetails only supports ordinary or partitioned tables at the moment.',
     );
   }
   const DatabaseRecord = context.printer.pushTypeDeclaration(

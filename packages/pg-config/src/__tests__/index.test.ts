@@ -19,6 +19,8 @@ test('get root config', () => {
       enumFileName: '_enums.ts',
       enumTypeMode: 'union_alias',
       enumTypeName: '{{ TYPE_NAME | pascal-case }}',
+      ignoreTables: [],
+      includeTables: null,
       primaryKeyFileName: '{{ TABLE_NAME }}.ts',
       primaryKeyTypeMode: 'inline_loose_brand',
       primaryKeyTypeName:
@@ -60,6 +62,8 @@ test('valid config', () => {
       enumFileName: '_enums.ts',
       enumTypeMode: 'union_alias',
       enumTypeName: '{{ TYPE_NAME | pascal-case }}',
+      ignoreTables: [],
+      includeTables: null,
       primaryKeyFileName: '{{ TABLE_NAME }}.ts',
       primaryKeyTypeMode: 'inline_loose_brand',
       primaryKeyTypeName:
@@ -98,6 +102,8 @@ test('valid config', () => {
       enumFileName: '_enums.ts',
       enumTypeMode: 'union_alias',
       enumTypeName: '{{ TYPE_NAME | pascal-case }}',
+      ignoreTables: [],
+      includeTables: null,
       primaryKeyFileName: '{{ TABLE_NAME }}.ts',
       primaryKeyTypeMode: 'inline_loose_brand',
       primaryKeyTypeName:
