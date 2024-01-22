@@ -55,9 +55,9 @@ class FieldQuery<T> {
 
 export type {FieldQuery};
 
-export type WhereCondition<TRecord> = Partial<
-  {[key in keyof TRecord]: TRecord[key] | FieldQuery<TRecord[key]>}
->;
+export type WhereCondition<TRecord> = Partial<{
+  [key in keyof TRecord]: TRecord[key] | FieldQuery<TRecord[key]>;
+}>;
 
 export function anyOf<T>(values: {
   [Symbol.iterator](): IterableIterator<T | FieldQuery<T>>;
@@ -245,13 +245,12 @@ class Table<TRecord, TInsertParameters> {
   async insert<TRecordsToInsert extends readonly TInsertParameters[]>(
     ...rows: keyof TRecordsToInsert[number] extends keyof TInsertParameters
       ? TRecordsToInsert
-      : readonly ({[key in keyof TInsertParameters]: TInsertParameters[key]} &
-          {
-            [key in Exclude<
-              keyof TRecordsToInsert[number],
-              keyof TInsertParameters
-            >]: never;
-          })[]
+      : readonly ({[key in keyof TInsertParameters]: TInsertParameters[key]} & {
+          [key in Exclude<
+            keyof TRecordsToInsert[number],
+            keyof TInsertParameters
+          >]: never;
+        })[]
   ): Promise<void> {
     if (rows.length === 0) return;
     const {sql} = this._underlyingDb;

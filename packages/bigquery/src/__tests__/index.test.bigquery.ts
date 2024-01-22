@@ -157,8 +157,8 @@ test(`insert record with error via SQL`, async () => {
         tableName,
       )} (id, decimal_number, the_date, the_date_time, the_time, the_timestamp)
       VALUES (${42}, ${new Big(
-      `3.14`,
-    )}, ${`not a valid date`}, ${`2000-06-03T06:14:00`}, ${`04:41:00`}, ${testDate})
+        `3.14`,
+      )}, ${`not a valid date`}, ${`2000-06-03T06:14:00`}, ${`04:41:00`}, ${testDate})
     `),
   ).rejects.toMatchObject({
     message: expect.stringMatching(/Invalid date/),

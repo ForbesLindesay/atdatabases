@@ -55,9 +55,9 @@ class FieldQuery<T> {
 
 export type {FieldQuery};
 
-export type WhereCondition<TRecord> = Partial<
-  {[key in keyof TRecord]: TRecord[key] | FieldQuery<TRecord[key]>}
->;
+export type WhereCondition<TRecord> = Partial<{
+  [key in keyof TRecord]: TRecord[key] | FieldQuery<TRecord[key]>;
+}>;
 
 export function anyOf<T>(values: {
   [Symbol.iterator](): IterableIterator<T | FieldQuery<T>>;
