@@ -137,14 +137,14 @@ export interface CacheRealm {
    * Creates a new cache within the realm. All caches within
    * a realm share the same capacity and eviction queue.
    */
-  createCache<TKey, TValue>(
+  createCache: <TKey, TValue>(
     options: CacheOptions<TKey, TValue>,
-  ): Cache<TKey, TValue>;
+  ) => Cache<TKey, TValue>;
 
   /**
    * Replicates a cache delete/clear from another server.
    */
-  writeReplicationEvent(event: ReplicationEvent): void;
+  writeReplicationEvent: (event: ReplicationEvent) => void;
 }
 
 /**
@@ -166,7 +166,7 @@ export interface Cache<TKey, TValue> {
    *
    * Returns undefined if the entry is not in the cache.
    */
-  get(key: TKey): TValue | undefined;
+  get: (key: TKey) => TValue | undefined;
 
   /**
    * If the an item with this key is already in the cache,
@@ -179,13 +179,13 @@ export interface Cache<TKey, TValue> {
    * If the cache realm is full, the least recently used item will
    * be evicted.
    */
-  set(key: TKey, value: TValue): TValue;
+  set: (key: TKey, value: TValue) => TValue;
 
   /**
    * Delete items from the cache and remove them from the
    * eviction queue.
    */
-  delete(...keys: TKey[]): void;
+  delete: (...keys: TKey[]) => void;
 
   /**
    * Delete items where the serialized key has a given prefix.
@@ -193,18 +193,18 @@ export interface Cache<TKey, TValue> {
    * This will throw a runtime error if any keys are not
    * serialized to strings.
    */
-  deletePrefix(prefix: string): void;
+  deletePrefix: (prefix: string) => void;
 
   /**
    * Clear all items from the cache and remove them from the
    * eviction queue.
    */
-  clear(): void;
+  clear: () => void;
 
   /**
    * Dispose of the cache and remove it from the realm.
    */
-  dispose(): void;
+  dispose: () => void;
 }
 
 type SerializedKey = {__type: 'SerializedKey'};

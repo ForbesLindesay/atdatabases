@@ -7,7 +7,7 @@ export type BatchResponseFunction<TKey, TResult> = (
   keys: TKey[],
 ) => Promise<TResult> | TResult;
 export type BatchResponseMap<TKey, TResult> = {
-  get(key: TKey): Promise<TResult> | TResult;
+  get: (key: TKey) => Promise<TResult> | TResult;
 };
 export type BatchResponseArray<TResult> = readonly (
   | Promise<TResult>
