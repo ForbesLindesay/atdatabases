@@ -9,7 +9,29 @@ export interface ReplicationDeleteEvent {
   readonly key: unknown;
 }
 
-export type ReplicationEvent = ReplicationClearEvent | ReplicationDeleteEvent;
+export interface ReplicationDeleteMultipleEvent {
+  readonly kind: 'DELETE_MULTIPLE';
+  readonly name: string;
+  readonly keys: unknown[];
+}
+
+export interface ReplicationDeletePrefixEvent {
+  readonly kind: 'DELETE_PREFIX';
+  readonly name: string;
+  readonly prefix: string;
+}
+
+export type ReplicationEvent =
+  | ReplicationClearEvent
+  | ReplicationDeleteEvent
+  | ReplicationDeleteMultipleEvent
+  | ReplicationDeletePrefixEvent;
+
+type ReplicationEventInternal =
+  | ReplicationClearEvent
+  | {kind: 'DELETE'; name: string; key: SerializedKey}
+  | {kind: 'DELETE_MULTIPLE'; name: string; keys: SerializedKey[]}
+  | ReplicationDeletePrefixEvent;
 
 export interface CacheEvent {
   /**
@@ -25,6 +47,10 @@ export interface CacheKeyEvent extends CacheEvent {
    * the original key.
    */
   readonly key: unknown;
+}
+
+export interface CachePrefixEvent extends CacheEvent {
+  readonly prefix: string;
 }
 
 export interface CacheGetEvent extends CacheKeyEvent {
@@ -64,6 +90,7 @@ export interface CacheRealmOptions {
   readonly onReplicationEvent?: (event: ReplicationEvent) => void;
   readonly onCacheCreate?: (event: CacheEvent) => void;
   readonly onClear?: (event: CacheEvent) => void;
+  readonly onDeletePrefix?: (event: CachePrefixEvent) => void;
   readonly onDelete?: (event: CacheKeyEvent) => void;
   readonly onGet?: (event: CacheGetEvent) => void;
   readonly onSet?: (event: CacheKeyEvent) => void;
@@ -155,10 +182,18 @@ export interface Cache<TKey, TValue> {
   set(key: TKey, value: TValue): TValue;
 
   /**
-   * Delete an item from the cache and remove it from the
+   * Delete items from the cache and remove them from the
    * eviction queue.
    */
-  delete(key: TKey): void;
+  delete(...keys: TKey[]): void;
+
+  /**
+   * Delete items where the serialized key has a given prefix.
+   *
+   * This will throw a runtime error if any keys are not
+   * serialized to strings.
+   */
+  deletePrefix(prefix: string): void;
 
   /**
    * Clear all items from the cache and remove them from the
@@ -181,13 +216,10 @@ interface InternalCacheKeyEvent extends CacheEvent {
 interface InternalCacheRealmOptions {
   readonly maximumSize: number;
   readonly getTime?: () => number;
-  readonly onReplicationEvent?: (
-    event:
-      | {kind: 'CLEAR'; name: string}
-      | {kind: 'DELETE'; name: string; key: SerializedKey},
-  ) => void;
+  readonly onReplicationEvent?: (event: ReplicationEventInternal) => void;
   readonly onCacheCreate?: (event: CacheEvent) => void;
   readonly onClear?: (event: CacheEvent) => void;
+  readonly onDeletePrefix?: (event: CachePrefixEvent) => void;
   readonly onDelete?: (event: InternalCacheKeyEvent) => void;
   readonly onGet?: (event: CacheGetEvent) => void;
   readonly onSet?: (event: InternalCacheKeyEvent) => void;
@@ -252,6 +284,7 @@ export default function createCacheRealm(
     onReplicationEvent,
     onCacheCreate,
     onClear,
+    onDeletePrefix,
     onDelete,
     onGet,
     onSet,
@@ -304,7 +337,10 @@ export default function createCacheRealm(
 
   const caches = new Map<
     string,
-    Pick<CacheImplementation<unknown, unknown>, '_delete' | '_clear'>
+    Pick<
+      CacheImplementation<unknown, unknown>,
+      '_deletePrefix' | '_delete' | '_clear'
+    >
   >();
 
   class CacheImplementation<TKey, TValue> implements Cache<TKey, TValue> {
@@ -348,6 +384,32 @@ export default function createCacheRealm(
       this._clear();
     }
 
+    _deletePrefix(prefix: string): void {
+      for (const [key, item] of this._items) {
+        const k: unknown = key;
+        if (typeof k !== 'string') {
+          throw new Error(
+            `Cache.deletePrefix was called on a cache with non-string keys. You may want to pass the "mapKey" option to createCache to convert the keys into strings.`,
+          );
+        }
+        if (k.startsWith(prefix)) {
+          removeItemFromEvictionQueue(item);
+          this._items.delete(key);
+          usedSize -= item.size;
+        }
+      }
+    }
+    deletePrefix(prefix: string): void {
+      this._assertNotDisposed();
+      this._deletePrefix(prefix);
+      if (onDeletePrefix) {
+        onDeletePrefix({name: this.name, prefix});
+      }
+      if (onReplicationEvent) {
+        onReplicationEvent({kind: 'DELETE_PREFIX', name: this.name, prefix});
+      }
+    }
+
     _delete(k: SerializedKey): void {
       const item = this._items.get(k);
 
@@ -357,16 +419,37 @@ export default function createCacheRealm(
         usedSize -= item.size;
       }
     }
-    delete(key: TKey): void {
+    delete(...keys: TKey[]): void {
       this._assertNotDisposed();
-      const k = this._serializeKey(key);
-      if (onDelete) {
-        onDelete({name: this.name, key: k});
+      if (keys.length === 1) {
+        const key = keys[0];
+        const k = this._serializeKey(key);
+        if (onDelete) {
+          onDelete({name: this.name, key: k});
+        }
+        if (onReplicationEvent) {
+          onReplicationEvent({kind: 'DELETE', name: this.name, key: k});
+        }
+        this._delete(k);
+      } else {
+        const serializedKeys = new Set<SerializedKey>();
+        for (const key of keys) {
+          const k = this._serializeKey(key);
+          if (serializedKeys.has(k)) continue;
+          serializedKeys.add(k);
+          if (onDelete) {
+            onDelete({name: this.name, key: k});
+          }
+          this._delete(k);
+        }
+        if (onReplicationEvent) {
+          onReplicationEvent({
+            kind: 'DELETE_MULTIPLE',
+            name: this.name,
+            keys: [...serializedKeys],
+          });
+        }
       }
-      if (onReplicationEvent) {
-        onReplicationEvent({kind: 'DELETE', name: this.name, key: k});
-      }
-      this._delete(k);
     }
 
     get(key: TKey): TValue | undefined {
@@ -489,14 +572,23 @@ export default function createCacheRealm(
   }
 
   function writeReplicationEvent(event: ReplicationEvent) {
-    const cache = caches.get(event.name);
+    const e = event as ReplicationEventInternal;
+    const cache = caches.get(e.name);
     if (cache) {
-      switch (event.kind) {
+      switch (e.kind) {
         case 'CLEAR':
           cache._clear();
           break;
         case 'DELETE':
-          cache._delete(event.key as SerializedKey);
+          cache._delete(e.key);
+          break;
+        case 'DELETE_MULTIPLE':
+          for (const key of e.keys) {
+            cache._delete(key);
+          }
+          break;
+        case 'DELETE_PREFIX':
+          cache._deletePrefix(e.prefix);
           break;
       }
     }

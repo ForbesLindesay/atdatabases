@@ -271,6 +271,7 @@ Events:
 
 - `onCacheCreate` - Called when a new cache is created
 - `onClear` - Called when `cache.clear()` is called.
+- `onDeletePrefix` - Called when `cache.deletePrefix()` is called.
 - `onDelete` - Called when `cache.delete()` is called.
 - `onGet` - Called when `cache.get()` is called. Use `event.isCacheHit` to determine if the entry was found in the cache or not.
 - `onSet` - Called when `cache.set()` is called.
@@ -322,7 +323,8 @@ interface Cache<TKey, TValue> {
   name: string;
   get(key: TKey): TValue | undefined;
   set(key: TKey, value: TValue): TValue;
-  delete(key: TKey): void;
+  deletePrefix(prefix: string): void;
+  delete(...keys: TKey[]): void;
   clear(): void;
   dispose(): void;
 }
@@ -346,9 +348,46 @@ Otherwise, a new item will be added to the cache and put at the back of the evic
 
 If the cache realm is full, the least recently used item will be evicted.
 
-#### Cache.delete(key)
+#### Cache.deletePrefix(prefix)
 
-Delete an item from the cache and remove it from the eviction queue.
+Deletes all items from the cache where the serialized key starts with prefix. This will throw an error if any of the serialized keys are not strings.
+
+```typescript
+const cache = createCache<{hostname: string; path: string}, WebPage>({
+  name: `WebPages`,
+  mapKey: ({hostname, path}) => `${hostname}${path}`,
+});
+
+// Set cache entries like:
+// cache.set({hostname: `example.com`, path: `/a`}, pageA);
+
+// Call this to delete all pages from the cache for a given hostname.
+function onWebsiteUpdated(hostname: string) {
+  cache.deletePrefix(hostname);
+}
+```
+
+#### Cache.delete(...keys)
+
+Delete items from the cache and remove them from the eviction queue.
+
+You can call `delete` with a single ID:
+
+```typescript
+myCache.delete(42);
+```
+
+You can call `delete` with multiple IDs:
+
+```typescript
+myCache.delete(1, 2, 3);
+```
+
+You can also call `delete` with an array of IDs using spread:
+
+```typescript
+myCache.delete(...updatedRecords.map((r) => r.id));
+```
 
 #### Cache.clear()
 
