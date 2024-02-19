@@ -168,4 +168,66 @@ test(`Can replicate deletes`, () => {
   cacheB.clear();
   expect(cacheA.get(1)).toBe(undefined);
   expect(cacheB.get(1)).toBe(undefined);
+
+  // We can replicate multiple deletes in one message
+  cacheA.set(1, `value`);
+  cacheB.set(1, `valueB`);
+  cacheA.set(2, `value2`);
+  cacheB.set(2, `value2B`);
+  cacheA.set(3, `value3`);
+  cacheB.set(3, `value3B`);
+  cacheB.delete(1, 2);
+  expect(cacheA.get(1)).toBe(undefined);
+  expect(cacheB.get(1)).toBe(undefined);
+  expect(cacheA.get(2)).toBe(undefined);
+  expect(cacheB.get(2)).toBe(undefined);
+  expect(cacheA.get(3)).toBe(`value3`);
+  expect(cacheB.get(3)).toBe(`value3B`);
+});
+
+test(`Can replicate prefix deletes`, () => {
+  const realmA = createCacheRealm({
+    maximumSize: 1_000,
+    onReplicationEvent(e) {
+      realmB.writeReplicationEvent(e);
+    },
+  });
+  const realmB = createCacheRealm({
+    maximumSize: 1_000,
+    onReplicationEvent(e) {
+      realmA.writeReplicationEvent(e);
+    },
+  });
+
+  const cacheA = realmA.createCache<string[], string>({
+    name: `MyCache`,
+    mapKey: (key) => key.join(`:`),
+  });
+  const cacheB = realmB.createCache<string[], string>({
+    name: `MyCache`,
+    mapKey: (key) => key.join(`:`),
+  });
+
+  // We can replicate multiple deletes in one message
+  cacheA.set([`a`, `1`], `value`);
+  cacheB.set([`a`, `1`], `valueB`);
+  cacheA.set([`a`, `2`], `value2`);
+  cacheB.set([`a`, `2`], `value2B`);
+  cacheA.set([`b`, `3`], `value3`);
+  cacheB.set([`b`, `3`], `value3B`);
+
+  expect(cacheA.get([`a`, `1`])).toBe(`value`);
+  expect(cacheB.get([`a`, `1`])).toBe(`valueB`);
+  expect(cacheA.get([`a`, `2`])).toBe(`value2`);
+  expect(cacheB.get([`a`, `2`])).toBe(`value2B`);
+  expect(cacheA.get([`b`, `3`])).toBe(`value3`);
+  expect(cacheB.get([`b`, `3`])).toBe(`value3B`);
+
+  cacheB.deletePrefix(`a:`);
+  expect(cacheA.get([`a`, `1`])).toBe(undefined);
+  expect(cacheB.get([`a`, `1`])).toBe(undefined);
+  expect(cacheA.get([`a`, `2`])).toBe(undefined);
+  expect(cacheB.get([`a`, `2`])).toBe(undefined);
+  expect(cacheA.get([`b`, `3`])).toBe(`value3`);
+  expect(cacheB.get([`b`, `3`])).toBe(`value3B`);
 });
