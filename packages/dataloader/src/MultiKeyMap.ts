@@ -11,10 +11,10 @@ type SubPath<TKeys extends readonly unknown[]> = TKeys extends readonly [
 export interface MultiKeyMap<TKeys extends Path, TValue>
   extends CacheMap<TKeys, TValue> {
   readonly size: number;
-  get(key: TKeys): TValue | undefined;
-  set(key: TKeys, value: TValue): void;
-  delete(key: TKeys | SubPath<TKeys>): void;
-  clear(): void;
+  get: (key: TKeys) => TValue | undefined;
+  set: (key: TKeys, value: TValue) => void;
+  delete: (key: TKeys | SubPath<TKeys>) => void;
+  clear: () => void;
 }
 
 export interface MultiKeyMapOptionWithMapKey<
@@ -59,10 +59,10 @@ export type MultiKeyMapOptions<
 };
 
 interface NormalizedMultiKeyMapOptions<TKeys extends Path, TValue, TMappedKey> {
-  getCache(
+  getCache: (
     depth: number,
-  ): CacheMapInput<TMappedKey, MultiKeyMapNode<TKeys, TValue>>;
-  getKeyMap(depth: number): (key: TKeys[number]) => TMappedKey;
+  ) => CacheMapInput<TMappedKey, MultiKeyMapNode<TKeys, TValue>>;
+  getKeyMap: (depth: number) => (key: TKeys[number]) => TMappedKey;
 }
 const identityFn = <T>(arg: T): T => arg;
 const DEFAULT_OPTIONS: NormalizedMultiKeyMapOptions<any, any, any> = {
@@ -159,9 +159,9 @@ const DELETE_NOOP = new DeleteResult(0, false);
 
 interface MultiKeyMapNode<TKeys extends Path, TValue> {
   get size(): number;
-  get(keys: TKeys): TValue | undefined;
-  set(keys: TKeys, value: TValue): boolean;
-  delete(keys: TKeys | SubPath<TKeys>): DeleteResult;
+  get: (keys: TKeys) => TValue | undefined;
+  set: (keys: TKeys, value: TValue) => boolean;
+  delete: (keys: TKeys | SubPath<TKeys>) => DeleteResult;
 }
 
 class BranchNode<TKeys extends Path, TValue, TMappedKey>
