@@ -1,3 +1,4 @@
+import {createAsyncCacheMap} from './CacheMapImplementation';
 import {AsyncCacheMap, CacheMapInput} from './types';
 
 export interface DedupedAsyncFunction<TKey, TResult> {
@@ -56,7 +57,7 @@ export default function dedupeAsync<TKey, TResult, TMappedKey = TKey>(
       cache.set(cacheKey, fresh);
       return fresh;
     },
-    {cache: new AsyncCacheMapImplementation(cache, mapKey)},
+    {cache: createAsyncCacheMap(cache, mapKey)},
   );
 }
 
@@ -77,40 +78,4 @@ function normalizeDedupeAsyncOptions<TKey, TResult, TMappedKey>(
     mapKey: options?.mapKey ?? identityFn,
     shouldCache: options?.shouldCache ?? trueFn,
   };
-}
-
-class AsyncCacheMapImplementation<TKey, TResult, TMappedKey>
-  implements AsyncCacheMap<TKey, TResult>
-{
-  private readonly _map: CacheMapInput<TMappedKey, Promise<TResult>>;
-  private readonly _mapKey: (key: TKey) => TMappedKey;
-  constructor(
-    map: CacheMapInput<TMappedKey, Promise<TResult>>,
-    mapKey: (key: TKey) => TMappedKey,
-  ) {
-    this._map = map;
-    this._mapKey = mapKey;
-  }
-
-  get size() {
-    return this._map.size;
-  }
-  get(key: TKey): Promise<TResult> | undefined {
-    const cacheKey = this._mapKey(key);
-    return this._map.get(cacheKey);
-  }
-  set(key: TKey, value: TResult | Promise<TResult>): void {
-    const cacheKey = this._mapKey(key);
-    this._map.set(cacheKey, Promise.resolve(value));
-  }
-  delete(key: TKey): void {
-    const cacheKey = this._mapKey(key);
-    this._map.delete(cacheKey);
-  }
-  clear(): void {
-    if (!this._map.clear) {
-      throw new Error(`This cache does not support clearing`);
-    }
-    this._map.clear();
-  }
 }

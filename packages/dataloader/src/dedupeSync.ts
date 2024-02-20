@@ -1,3 +1,4 @@
+import {createCacheMap} from './CacheMapImplementation';
 import {CacheMap, CacheMapInput} from './types';
 
 export interface DedupedSyncFunction<TKey, TResult> {
@@ -41,7 +42,7 @@ export default function dedupeSync<TKey, TResult, TMappedKey = TKey>(
       return fresh;
     },
     {
-      cache: new CacheMapImplementation(cache, mapKey),
+      cache: createCacheMap(cache, mapKey),
     },
   );
 }
@@ -87,40 +88,4 @@ function addErrorHandler<TKey, TResult, TMappedKey>(
       throw error;
     }
   };
-}
-
-class CacheMapImplementation<TKey, TResult, TMappedKey>
-  implements CacheMap<TKey, TResult>
-{
-  private readonly _map: CacheMapInput<TMappedKey, TResult>;
-  private readonly _mapKey: (key: TKey) => TMappedKey;
-  constructor(
-    map: CacheMapInput<TMappedKey, TResult>,
-    mapKey: (key: TKey) => TMappedKey,
-  ) {
-    this._map = map;
-    this._mapKey = mapKey;
-  }
-
-  get size() {
-    return this._map.size;
-  }
-  get(key: TKey): TResult | undefined {
-    const cacheKey = this._mapKey(key);
-    return this._map.get(cacheKey);
-  }
-  set(key: TKey, value: TResult): void {
-    const cacheKey = this._mapKey(key);
-    this._map.set(cacheKey, value);
-  }
-  delete(key: TKey): void {
-    const cacheKey = this._mapKey(key);
-    this._map.delete(cacheKey);
-  }
-  clear(): void {
-    if (!this._map.clear) {
-      throw new Error(`This cache does not support clearing`);
-    }
-    this._map.clear();
-  }
 }

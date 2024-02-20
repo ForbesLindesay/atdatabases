@@ -27,7 +27,14 @@ export type {
   DedupeSyncOptionsWithMapKey,
   DedupeSyncOptionsWithoutMapKey,
 } from './dedupeSync';
-export type {CacheMapInput, CacheMap} from './types';
+export type {
+  AsyncCacheMap,
+  CacheMap,
+  CacheMapInput,
+  KeyPrefix,
+  Path,
+  SubPath,
+} from './types';
 
 export {default as batch, batchGroups} from './batch';
 export {default as createMultiKeyMap} from './MultiKeyMap';

@@ -1,18 +1,10 @@
-import {CacheMap, CacheMapInput} from './types';
+import {CacheMapInput, Path, SubPath} from './types';
 
-type Path = readonly [unknown, ...(readonly unknown[])];
-type SubPath<TKeys extends readonly unknown[]> = TKeys extends readonly [
-  ...infer THead,
-  infer TTail,
-]
-  ? {readonly [i in keyof TKeys]: TKeys[i]} | SubPath<THead>
-  : never;
-
-export interface MultiKeyMap<TKeys extends Path, TValue>
-  extends CacheMap<TKeys, TValue> {
+export interface MultiKeyMap<TKeys extends Path, TValue> {
   readonly size: number;
   get: (key: TKeys) => TValue | undefined;
   set: (key: TKeys, value: TValue) => void;
+  deletePrefix: (key: SubPath<TKeys>) => void;
   delete: (key: TKeys | SubPath<TKeys>) => void;
   clear: () => void;
 }
@@ -135,6 +127,9 @@ class MultiKeyMapImplementation<TKeys extends Path, TValue, TMappedKey>
   }
   set(key: TKeys, value: TValue): void {
     this._root.set(key, value);
+  }
+  deletePrefix(key: SubPath<TKeys>): void {
+    this._root.delete(key);
   }
   delete(key: TKeys | SubPath<TKeys>): void {
     this._root.delete(key);
