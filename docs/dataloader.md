@@ -355,18 +355,23 @@ One downside of this approach is that you can only use this outside of a transac
 import {dedupeAsync} from '@databases/dataloader';
 import database, {tables, DbUser} from './database';
 
-function getUserBase(
+async function getUserBase(
   database: Queryable,
   userId: DbUser['id'],
 ): Promise<DbUser> {
   return await tables.users(database).findOneRequired({id: userId});
 }
+
 // (userId: DbUser['id']) => Promise<DbUser>
 const getUserCached = dedupeAsync<DbUser['id'], DbUser>(
-  async (userId) => getUserBase(userId, database),
+  async (userId) => await getUserBase(userId, database),
   {cache: createCache({name: 'Users'})},
 );
-export function getUser(db: Queryable, userId: DbUser['id']): Promise<DbUser> {
+
+export async function getUser(
+  db: Queryable,
+  userId: DbUser['id'],
+): Promise<DbUser> {
   if (db === database) {
     // If we're using the default connection,
     // it's safe to read from the cache
@@ -374,7 +379,7 @@ export function getUser(db: Queryable, userId: DbUser['id']): Promise<DbUser> {
   } else {
     // If we're inside a transaction, we may
     // need to bypass the cache
-    return getUserBase(db, userId);
+    return await getUserBase(db, userId);
   }
 }
 
