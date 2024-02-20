@@ -1,248 +1,178 @@
-import {SQLQuery, Queryable} from '@databases/pg';
+import {sql, SQLQuery} from '@databases/pg';
 
-type ColumnName = string | number | symbol;
-export interface BulkOperationOptions<TColumnName extends ColumnName> {
-  readonly database: Queryable;
-  readonly tableName: string;
-  readonly columnTypes: {readonly [K in TColumnName]: SQLQuery};
-  readonly schemaName?: string;
-  readonly serializeValue?: (columnName: string, value: unknown) => unknown;
+export interface ConstantOperationValue {
+  readonly getValue?: undefined;
+  readonly value: unknown;
+  readonly type?: undefined;
+}
+export interface DynamicOperationValue<TOperation> {
+  readonly getValue: (
+    operation: TOperation,
+    index: number,
+    operations: readonly TOperation[],
+  ) => unknown;
+  readonly value?: undefined;
+  readonly type: SQLQuery;
+}
+export type BulkOperationValue<TOperation> =
+  | ConstantOperationValue
+  | DynamicOperationValue<TOperation>;
+
+function prepareColumns<TOperation>(
+  columns: Record<string, BulkOperationValue<TOperation>>,
+): readonly [
+  readonly [SQLQuery, unknown][],
+  readonly [SQLQuery, DynamicOperationValue<TOperation>][],
+] {
+  const constantColumns: [SQLQuery, unknown][] = [];
+  const dynamicColumns: [SQLQuery, DynamicOperationValue<TOperation>][] = [];
+  for (const [columnName, value] of Object.entries(columns)) {
+    if (value.getValue) {
+      dynamicColumns.push([sql.ident(columnName), value]);
+    } else {
+      constantColumns.push([sql.ident(columnName), value.value]);
+    }
+  }
+  return [constantColumns, dynamicColumns] as const;
 }
 
-export interface BulkInsertOptions<TColumnToInsert extends ColumnName>
-  extends BulkOperationOptions<TColumnToInsert> {
-  readonly columnsToInsert: readonly TColumnToInsert[];
-  readonly records: readonly any[];
+export interface BulkInsertOptions<TOperation> {
+  readonly table: SQLQuery;
+  readonly columns: Record<string, BulkOperationValue<TOperation>>;
+  readonly operations: readonly TOperation[];
 }
 
-export interface BulkConditionOptions<TWhereColumn extends ColumnName>
-  extends BulkOperationOptions<TWhereColumn> {
-  readonly whereColumnNames: readonly TWhereColumn[];
-  readonly whereConditions: readonly any[];
-}
-export interface BulkSelectOptions<TWhereColumn extends ColumnName>
-  extends BulkConditionOptions<TWhereColumn> {
-  readonly distinctColumnNames?: readonly string[];
-  readonly selectColumnNames?: readonly string[];
-  readonly orderBy?: readonly {
-    readonly columnName: string;
-    readonly direction: 'ASC' | 'DESC';
-  }[];
-  readonly limit?: number;
-}
-
-export interface BulkUpdateOptions<
-  TWhereColumn extends ColumnName,
-  TSetColumn extends ColumnName,
-> extends BulkOperationOptions<TWhereColumn | TSetColumn> {
-  readonly whereColumnNames: readonly TWhereColumn[];
-  readonly setColumnNames: readonly TSetColumn[];
-  readonly updates: readonly {readonly where: any; readonly set: any}[];
-}
-
-export interface BulkDeleteOptions<TWhereColumn extends ColumnName>
-  extends BulkConditionOptions<TWhereColumn> {}
-
-function tableId<TColumnName extends ColumnName>(
-  options: BulkOperationOptions<TColumnName>,
+export function bulkInsertStatement<TOperation>(
+  options: BulkInsertOptions<TOperation>,
 ) {
-  const {sql} = options.database;
-  return options.schemaName
-    ? sql.ident(options.schemaName, options.tableName)
-    : sql.ident(options.tableName);
-}
+  const {table, columns, operations} = options;
 
-function select<TColumnName extends ColumnName>(
-  columns: readonly {
-    readonly name: TColumnName;
-    readonly getValue?: (record: any) => unknown;
-  }[],
-  records: readonly any[],
-  options: BulkOperationOptions<TColumnName>,
-) {
-  const {database, columnTypes, serializeValue} = options;
-  const {sql} = database;
-  return sql`SELECT * FROM UNNEST(${sql.join(
-    columns.map(({name, getValue}) => {
-      const typeName = columnTypes[name];
-      if (!typeName) {
-        throw new Error(`Missing type name for ${name as string}`);
-      }
-      return sql`${records.map((r) => {
-        const value = getValue ? getValue(r) : r[name];
-        return serializeValue
-          ? serializeValue(`${name as string}`, value)
-          : value;
-      })}::${typeName}[]`;
-    }),
+  const [constantColumns, dynamicColumns] = prepareColumns(columns);
+
+  // TODO: handle cases where all columns are constant
+
+  return sql`INSERT INTO ${table} (${sql.join(
+    [...constantColumns, ...dynamicColumns].map(([c]) => c),
+    `,`,
+  )}) SELECT ${sql.join(
+    constantColumns.map(([, value]) => sql`${value}`),
+    `,`,
+  )},* FROM UNNEST(${sql.join(
+    dynamicColumns.map(
+      ([, {getValue, type}]) => sql`${operations.map(getValue)}::${type}[]`,
+    ),
     `,`,
   )})`;
 }
 
-export function bulkInsertStatement<TColumnToInsert extends ColumnName>(
-  options: BulkInsertOptions<TColumnToInsert>,
-): SQLQuery {
-  const {database, columnsToInsert, records} = options;
-  const {sql} = database;
-  return sql`INSERT INTO ${tableId(options)} (${sql.join(
-    columnsToInsert.map((columnName) => sql.ident(columnName)),
+export interface BulkUpdateOptions<TOperation> {
+  readonly table: SQLQuery;
+  readonly setColumns: Record<string, BulkOperationValue<TOperation>>;
+  readonly whereColumns: Record<string, BulkOperationValue<TOperation>>;
+  readonly operations: readonly TOperation[];
+}
+export function bulkUpdateStatement<TOperation>(
+  options: BulkUpdateOptions<TOperation>,
+) {
+  const {table, whereColumns, setColumns, operations} = options;
+  const [constantSetColumns, dynamicSetColumns] = prepareColumns(setColumns);
+  const [constantWhereColumns, dynamicWhereColumns] =
+    prepareColumns(whereColumns);
+
+  if (dynamicSetColumns.length === 0 && dynamicWhereColumns.length === 0) {
+    if (constantWhereColumns.length === 0) {
+      return sql`UPDATE ${table} SET ${sql.join(
+        constantSetColumns.map(([c, v]) => sql`${c} = ${v}`),
+        `,`,
+      )}`;
+    }
+    return sql`UPDATE ${table} SET ${sql.join(
+      constantSetColumns.map(([c, v]) => sql`${c} = ${v}`),
+      `,`,
+    )} WHERE ${sql.join(
+      constantWhereColumns.map(([c, v]) => sql`${c} = ${v}`),
+      ` AND `,
+    )}`;
+  }
+  if (dynamicWhereColumns.length === 0) {
+    throw new Error(
+      `You cannot have dynamic set columns but no dynamic where columns in a bulk update.`,
+    );
+  }
+
+  return sql`UPDATE ${table} SET ${sql.join(
+    [
+      ...constantSetColumns.map(([c, v]) => sql`${c} = ${v}`),
+      ...dynamicSetColumns.map(
+        ([c], i) => sql`${c} = bulk_query.${sql.ident(`set_${i}`)}`,
+      ),
+    ],
     `,`,
-  )}) ${select(
-    columnsToInsert.map((name) => ({name})),
-    records,
-    options,
+  )} FROM UNNEST(${sql.join(
+    [...dynamicSetColumns, ...dynamicWhereColumns].map(
+      ([, {getValue, type}]) => sql`${operations.map(getValue)}::${type}[]`,
+    ),
+    `,`,
+  )}) AS bulk_query(${sql.join(
+    [
+      ...dynamicSetColumns.map((_, i) => sql.ident(`set_${i}`)),
+      ...dynamicWhereColumns.map((_, i) => sql.ident(`where_${i}`)),
+    ],
+    `,`,
+  )}) WHERE ${sql.join(
+    [
+      ...constantWhereColumns.map(([c, v]) => sql`${c} = ${v}`),
+      ...dynamicWhereColumns.map(
+        ([c], i) => sql`${c} = bulk_query.${sql.ident(`where_${i}`)}`,
+      ),
+    ],
+    ` AND `,
   )}`;
 }
 
-export async function bulkInsert<TColumnToInsert extends ColumnName>(
-  options: BulkInsertOptions<TColumnToInsert> & {returning: SQLQuery},
-): Promise<any[]>;
-export async function bulkInsert<TColumnToInsert extends ColumnName>(
-  options: BulkInsertOptions<TColumnToInsert>,
-): Promise<void>;
-export async function bulkInsert<TColumnToInsert extends ColumnName>(
-  options: BulkInsertOptions<TColumnToInsert> & {returning?: SQLQuery},
-): Promise<any[] | void> {
-  const {database, returning} = options;
-  const {sql} = database;
-  return await database.query(
-    returning
-      ? sql`${bulkInsertStatement(options)} RETURNING ${returning}`
-      : bulkInsertStatement(options),
+export interface BulkWhereConditionOptions<TOperation> {
+  readonly table?: SQLQuery;
+  readonly whereColumns: Record<string, BulkOperationValue<TOperation>>;
+  readonly operations: readonly TOperation[];
+}
+export function bulkWhereCondition<TOperation>(
+  options: BulkWhereConditionOptions<TOperation>,
+) {
+  const {table, whereColumns: columns, operations} = options;
+  const [constantColumns, dynamicColumns] = prepareColumns(columns);
+  const conditions: SQLQuery[] = constantColumns.map(([c, v]) =>
+    table ? sql`${table}.${c} = ${v}` : sql`${c} = ${v}`,
   );
-}
-
-export function bulkCondition<TWhereColumn extends ColumnName>(
-  options: BulkConditionOptions<TWhereColumn>,
-): SQLQuery {
-  const {database, whereColumnNames, whereConditions} = options;
-  const {sql} = database;
-  return sql`(${sql.join(
-    whereColumnNames.map((columnName) => sql.ident(columnName)),
-    `,`,
-  )}) IN (${select(
-    whereColumnNames.map((columnName) => ({name: columnName})),
-    whereConditions,
-    options,
-  )})`;
-}
-
-export async function bulkSelect<TWhereColumn extends ColumnName>(
-  options: BulkSelectOptions<TWhereColumn>,
-): Promise<any[]> {
-  const {database, distinctColumnNames, selectColumnNames, orderBy, limit} =
-    options;
-  const {sql} = database;
-  return await database.query(
-    sql.join(
-      [
-        sql`SELECT`,
-        distinctColumnNames?.length
-          ? sql`DISTINCT ON (${sql.join(
-              distinctColumnNames.map((columnName) => sql.ident(columnName)),
-              `,`,
-            )})`
-          : null,
-        selectColumnNames
-          ? sql.join(
-              selectColumnNames.map((columnName) => sql.ident(columnName)),
-              ',',
-            )
-          : sql`*`,
-        sql`FROM ${tableId(options)} WHERE`,
-        bulkCondition(options),
-        orderBy?.length
-          ? sql`ORDER BY ${sql.join(
-              orderBy.map((q) =>
-                q.direction === 'ASC'
-                  ? sql`${sql.ident(q.columnName)} ASC`
-                  : sql`${sql.ident(q.columnName)} DESC`,
-              ),
-              sql`, `,
-            )}`
-          : null,
-        limit ? sql`LIMIT ${limit}` : null,
-      ].filter(<T>(v: T): v is Exclude<T, null> => v !== null),
-      sql` `,
-    ),
-  );
-}
-
-export async function bulkUpdate<
-  TWhereColumn extends ColumnName,
-  TSetColumn extends ColumnName,
->(
-  options: BulkUpdateOptions<TWhereColumn, TSetColumn> & {returning: SQLQuery},
-): Promise<any[]>;
-export async function bulkUpdate<
-  TWhereColumn extends ColumnName,
-  TSetColumn extends ColumnName,
->(options: BulkUpdateOptions<TWhereColumn, TSetColumn>): Promise<void>;
-export async function bulkUpdate<
-  TWhereColumn extends ColumnName,
-  TSetColumn extends ColumnName,
->(
-  options: BulkUpdateOptions<TWhereColumn, TSetColumn> & {returning?: SQLQuery},
-): Promise<any[] | void> {
-  const {
-    database,
-    tableName,
-    whereColumnNames,
-    setColumnNames,
-    updates,
-    returning,
-  } = options;
-  const {sql} = database;
-  return await database.query(
-    sql`UPDATE ${tableId(options)} SET ${sql.join(
-      setColumnNames.map(
-        (columnName) =>
-          sql`${sql.ident(columnName)} = ${sql.ident(
-            `bulk_query`,
-            `updated_value_of_${columnName as string}`,
-          )}`,
+  if (dynamicColumns.length !== 0) {
+    const columns = sql.join(
+      dynamicColumns.map(([columnName]) =>
+        table ? sql`${table}.${columnName}` : columnName,
       ),
       `,`,
-    )} FROM (${select(
-      [
-        ...whereColumnNames.map((columnName) => ({
-          name: columnName,
-          getValue: (u: any) => u.where[columnName],
-        })),
-        ...setColumnNames.map((columnName) => ({
-          name: columnName,
-          getValue: (u: any) => u.set[columnName],
-        })),
-      ],
-      updates,
-      options,
-    )} AS bulk_query(${sql.join(
-      [
-        ...whereColumnNames.map((columnName) => sql.ident(columnName)),
-        ...setColumnNames.map((columnName) =>
-          sql.ident(`updated_value_of_${columnName as string}`),
-        ),
-      ],
-      `,`,
-    )})) AS bulk_query WHERE ${sql.join(
-      whereColumnNames.map(
-        (columnName) =>
-          sql`${sql.ident(tableName, columnName)} = ${sql.ident(
-            `bulk_query`,
-            columnName,
-          )}`,
+    );
+    const unnestExpression = sql`SELECT * FROM UNNEST(${sql.join(
+      dynamicColumns.map(
+        ([, {getValue, type}]) => sql`${operations.map(getValue)}::${type}[]`,
       ),
-      ` AND `,
-    )}${returning ? sql` RETURNING ${returning}` : sql``}`,
-  );
+      `,`,
+    )})`;
+    const condition = sql`(${columns}) IN (${unnestExpression})`;
+    conditions.push(condition);
+  }
+  return sql.join(conditions, ` AND `);
 }
 
-export async function bulkDelete<TWhereColumn extends ColumnName>(
-  options: BulkDeleteOptions<TWhereColumn>,
-): Promise<void> {
-  const {database} = options;
-  const {sql} = database;
-  await database.query(
-    sql`DELETE FROM ${tableId(options)} WHERE ${bulkCondition(options)}`,
-  );
+export interface BulkDeleteOptions<TOperation>
+  extends BulkWhereConditionOptions<TOperation> {
+  readonly table: SQLQuery;
+}
+export function bulkDeleteStatement<TOperation>(
+  options: BulkDeleteOptions<TOperation>,
+) {
+  const {table, whereColumns, operations} = options;
+  const condition = bulkWhereCondition({
+    whereColumns,
+    operations,
+  });
+  return sql`DELETE FROM ${table} WHERE ${condition}`;
 }
