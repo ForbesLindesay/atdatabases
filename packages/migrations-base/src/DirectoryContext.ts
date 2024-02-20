@@ -40,9 +40,7 @@ export default class DirectoryContext<TMigration>
   async listFiles(): Promise<string[]> {
     return (
       await Promise.all(
-        (
-          await promises.readdir(this._directory)
-        ).map(async (file) => {
+        (await promises.readdir(this._directory)).map(async (file) => {
           return (await promises.stat(this._resolve(file))).isFile()
             ? file
             : null;
