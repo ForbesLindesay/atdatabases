@@ -442,7 +442,7 @@ export default function createCacheRealm(
           }
           this._delete(k);
         }
-        if (onReplicationEvent) {
+        if (onReplicationEvent && serializedKeys.size) {
           onReplicationEvent({
             kind: 'DELETE_MULTIPLE',
             name: this.name,

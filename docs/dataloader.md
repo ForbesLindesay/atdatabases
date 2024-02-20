@@ -349,6 +349,45 @@ function onUserChanged(id: DbUser['id']) {
 }
 ```
 
+One downside of this approach is that you can only use this outside of a transaction. The simplest way to resolve this is to separate the implementation from the caching:
+
+```typescript
+import {dedupeAsync} from '@databases/dataloader';
+import database, {tables, DbUser} from './database';
+
+async function getUserBase(
+  database: Queryable,
+  userId: DbUser['id'],
+): Promise<DbUser> {
+  return await tables.users(database).findOneRequired({id: userId});
+}
+
+// (userId: DbUser['id']) => Promise<DbUser>
+const getUserCached = dedupeAsync<DbUser['id'], DbUser>(
+  async (userId) => await getUserBase(userId, database),
+  {cache: createCache({name: 'Users'})},
+);
+
+export async function getUser(
+  db: Queryable,
+  userId: DbUser['id'],
+): Promise<DbUser> {
+  if (db === database) {
+    // If we're using the default connection,
+    // it's safe to read from the cache
+    return await getUserCached(userId);
+  } else {
+    // If we're inside a transaction, we may
+    // need to bypass the cache
+    return await getUserBase(db, userId);
+  }
+}
+
+function onUserChanged(id: DbUser['id']) {
+  getUserCached.cache.delete(id);
+}
+```
+
 #### Caching fetch requests
 
 The following example caches requests to load a user from some imaginary API.
