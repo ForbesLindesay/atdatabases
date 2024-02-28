@@ -1588,10 +1588,10 @@
   dependencies:
     "@babel/types" "^7.3.0"
 
-"@types/better-sqlite3@^7.0.0":
-  version "7.6.4"
-  resolved "https://registry.yarnpkg.com/@types/better-sqlite3/-/better-sqlite3-7.6.4.tgz#102462611e67aadf950d3ccca10292de91e6f35b"
-  integrity sha512-dzrRZCYPXIXfSR1/surNbJ/grU3scTaygS0OMzjlGf71i9sc2fGyHPXXiXmEvNIoE0cGwsanEFMVJxPXmco9Eg==
+"@types/better-sqlite3@^7.6.9":
+  version "7.6.9"
+  resolved "https://registry.yarnpkg.com/@types/better-sqlite3/-/better-sqlite3-7.6.9.tgz#4bff3eb7c5eaaae26f8099606c69279146561c50"
+  integrity sha512-FvktcujPDj9XKMJQWFcl2vVl7OdRIqsSRX9b0acWwTmwLK9CF2eqo/FRcmMLNpugKoX/avA6pb7TorDLmpgTnQ==
   dependencies:
     "@types/node" "*"
 
@@ -2310,13 +2310,13 @@ bcrypt-pbkdf@^1.0.0:
   dependencies:
     tweetnacl "^0.14.3"
 
-better-sqlite3@^8.0.2:
-  version "8.4.0"
-  resolved "https://registry.yarnpkg.com/better-sqlite3/-/better-sqlite3-8.4.0.tgz#aa27bbc6bb42bb438fc55c88b146fcfe5978fa76"
-  integrity sha512-NmsNW1CQvqMszu/CFAJ3pLct6NEFlNfuGM6vw72KHkjOD1UDnL96XNN1BMQc1hiHo8vE2GbOWQYIpZ+YM5wrZw==
+better-sqlite3@^9.4.3:
+  version "9.4.3"
+  resolved "https://registry.yarnpkg.com/better-sqlite3/-/better-sqlite3-9.4.3.tgz#7df39ba3273fbb7c0561cf913572547142868cc4"
+  integrity sha512-ud0bTmD9O3uWJGuXDltyj3R47Nz0OHX8iqPOT5PMspGqlu/qQFn+5S2eFBUCrySpavTjFXbi4EgrfVvPAHlImw==
   dependencies:
     bindings "^1.5.0"
-    prebuild-install "^7.1.0"
+    prebuild-install "^7.1.1"
 
 big.js@^5.2.2:
   version "5.2.2"
@@ -7133,7 +7133,7 @@ pouchdb-collections@^1.0.1:
   resolved "https://registry.yarnpkg.com/pouchdb-collections/-/pouchdb-collections-1.0.1.tgz#fe63a17da977611abef7cb8026cb1a9553fd8359"
   integrity sha512-31db6JRg4+4D5Yzc2nqsRqsA2oOkZS8DpFav3jf/qVNBxusKa2ClkEIZ2bJNpaDbMfWtnuSq59p6Bn+CipPMdg==
 
-prebuild-install@^7.1.0:
+prebuild-install@^7.1.1:
   version "7.1.1"
   resolved "https://registry.yarnpkg.com/prebuild-install/-/prebuild-install-7.1.1.tgz#de97d5b34a70a0c81334fd24641f2a1702352e45"
   integrity sha512-jAXscXWMcCK8GgCoHOfIr0ODh5ai8mj63L2nWrjuAgXE6tDyYGnx4/8o/rCgU+B4JSyZBKbeZqzhtwtC3ovxjw==
