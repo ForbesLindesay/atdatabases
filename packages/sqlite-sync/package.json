@@ -8,8 +8,8 @@
     "@databases/escape-identifier": "^0.0.0",
     "@databases/sql": "^0.0.0",
     "@databases/split-sql-query": "^0.0.0",
-    "@types/better-sqlite3": "^7.0.0",
-    "better-sqlite3": "^8.0.2"
+    "@types/better-sqlite3": "^7.6.9",
+    "better-sqlite3": "^9.4.3"
   },
   "scripts": {},
   "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/sqlite-sync",
