@@ -9,7 +9,7 @@
     "@databases/escape-identifier": "^0.0.0",
     "@databases/split-sql-query": "^0.0.0",
     "@databases/sql": "^0.0.0",
-    "@google-cloud/bigquery": "^5.7.1",
+    "@google-cloud/bigquery": "^7.7.1",
     "@types/big.js": "^6.1.1",
     "assert-never": "^1.2.1",
     "big.js": "^6.0.0"
