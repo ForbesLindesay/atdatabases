@@ -102,6 +102,15 @@ Object {
   "Boolean": Array [
     "16 = bool",
   ],
+  "Char": Array [
+    "18 = char",
+    "4600 = pg_brin_bloom_summary",
+    "4601 = pg_brin_minmax_multi_summary",
+    "3402 = pg_dependencies",
+    "5017 = pg_mcv_list",
+    "3361 = pg_ndistinct",
+    "194 = pg_node_tree",
+  ],
   "DateTime": Array [
     "702 = abstime",
     "1082 = date",
@@ -222,15 +231,6 @@ Object {
     "28 = xid",
     "5069 = xid8",
     "142 = xml",
-  ],
-  "undefined": Array [
-    "18 = char",
-    "4600 = pg_brin_bloom_summary",
-    "4601 = pg_brin_minmax_multi_summary",
-    "3402 = pg_dependencies",
-    "5017 = pg_mcv_list",
-    "3361 = pg_ndistinct",
-    "194 = pg_node_tree",
   ],
 }
 `;

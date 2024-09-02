@@ -805,7 +805,7 @@ enum PgDataTypeID {
    */
   varchar = 1043,
 
-  // === undefined ===
+  // === Char ===
 
   /**
    * single character
