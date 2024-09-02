@@ -69,6 +69,11 @@ enum PgDataTypeID {
   _date = 1182,
 
   /**
+   * Array<datemultirange>
+   */
+  _datemultirange = 6155,
+
+  /**
    * Array<daterange>
    */
   _daterange = 3913,
@@ -109,6 +114,11 @@ enum PgDataTypeID {
   _int4 = 1007,
 
   /**
+   * Array<int4multirange>
+   */
+  _int4multirange = 6150,
+
+  /**
    * Array<int4range>
    */
   _int4range = 3905,
@@ -117,6 +127,11 @@ enum PgDataTypeID {
    * Array<int8>
    */
   _int8 = 1016,
+
+  /**
+   * Array<int8multirange>
+   */
+  _int8multirange = 6157,
 
   /**
    * Array<int8range>
@@ -179,6 +194,11 @@ enum PgDataTypeID {
   _numeric = 1231,
 
   /**
+   * Array<nummultirange>
+   */
+  _nummultirange = 6151,
+
+  /**
    * Array<numrange>
    */
   _numrange = 3907,
@@ -199,14 +219,59 @@ enum PgDataTypeID {
   _path = 1019,
 
   /**
+   * Array<pg_attribute>
+   */
+  _pg_attribute = 270,
+
+  /**
+   * Array<pg_class>
+   */
+  _pg_class = 273,
+
+  /**
+   * Array<pg_ident_file_mappings>
+   */
+  _pg_ident_file_mappings = 12119,
+
+  /**
    * Array<pg_lsn>
    */
   _pg_lsn = 3221,
 
   /**
+   * Array<pg_parameter_acl>
+   */
+  _pg_parameter_acl = 10096,
+
+  /**
+   * Array<pg_proc>
+   */
+  _pg_proc = 272,
+
+  /**
+   * Array<pg_publication_namespace>
+   */
+  _pg_publication_namespace = 10108,
+
+  /**
    * Array<pg_snapshot>
    */
   _pg_snapshot = 5039,
+
+  /**
+   * Array<pg_stat_io>
+   */
+  _pg_stat_io = 12294,
+
+  /**
+   * Array<pg_stat_recovery_prefetch>
+   */
+  _pg_stat_recovery_prefetch = 12241,
+
+  /**
+   * Array<pg_type>
+   */
+  _pg_type = 210,
 
   /**
    * Array<point>
@@ -319,6 +384,11 @@ enum PgDataTypeID {
   _tinterval = 1025,
 
   /**
+   * Array<tsmultirange>
+   */
+  _tsmultirange = 6152,
+
+  /**
    * Array<tsquery>
    */
   _tsquery = 3645,
@@ -327,6 +397,11 @@ enum PgDataTypeID {
    * Array<tsrange>
    */
   _tsrange = 3909,
+
+  /**
+   * Array<tstzmultirange>
+   */
+  _tstzmultirange = 6153,
 
   /**
    * Array<tstzrange>
@@ -412,6 +487,11 @@ enum PgDataTypeID {
   anycompatiblearray = 5078,
 
   /**
+   * pseudo-type representing a multirange over a polymorphic common type
+   */
+  anycompatiblemultirange = 4538,
+
+  /**
    * pseudo-type representing a polymorphic common type that is not an array
    */
   anycompatiblenonarray = 5079,
@@ -430,6 +510,11 @@ enum PgDataTypeID {
    * pseudo-type representing a polymorphic base type that is an enum
    */
   anyenum = 3500,
+
+  /**
+   * pseudo-type representing a polymorphic base type that is a multirange
+   */
+  anymultirange = 4537,
 
   /**
    * pseudo-type representing a polymorphic base type that is not an array
@@ -706,14 +791,36 @@ enum PgDataTypeID {
   bpchar = 1042,
 
   /**
+   * 63-byte type for storing system identifiers
+   */
+  name = 19,
+
+  /**
+   * variable-length string, no limit specified
+   */
+  text = 25,
+
+  /**
+   * varchar(length), non-blank-padded string, variable storage length
+   */
+  varchar = 1043,
+
+  // === undefined ===
+
+  /**
    * single character
    */
   char = 18,
 
   /**
-   * 63-byte type for storing system identifiers
+   * BRIN bloom summary
    */
-  name = 19,
+  pg_brin_bloom_summary = 4600,
+
+  /**
+   * BRIN minmax-multi summary
+   */
+  pg_brin_minmax_multi_summary = 4601,
 
   /**
    * multivariate dependencies
@@ -735,16 +842,6 @@ enum PgDataTypeID {
    */
   pg_node_tree = 194,
 
-  /**
-   * variable-length string, no limit specified
-   */
-  text = 25,
-
-  /**
-   * varchar(length), non-blank-padded string, variable storage length
-   */
-  varchar = 1043,
-
   // === NetworkAddress ===
 
   /**
@@ -760,9 +857,19 @@ enum PgDataTypeID {
   // === Range ===
 
   /**
+   * multirange of dates
+   */
+  datemultirange = 4535,
+
+  /**
    * range of dates
    */
   daterange = 3912,
+
+  /**
+   * multirange of integers
+   */
+  int4multirange = 4451,
 
   /**
    * range of integers
@@ -770,9 +877,19 @@ enum PgDataTypeID {
   int4range = 3904,
 
   /**
+   * multirange of bigints
+   */
+  int8multirange = 4536,
+
+  /**
    * range of bigints
    */
   int8range = 3926,
+
+  /**
+   * multirange of numerics
+   */
+  nummultirange = 4532,
 
   /**
    * range of numerics
@@ -780,9 +897,19 @@ enum PgDataTypeID {
   numrange = 3906,
 
   /**
+   * multirange of timestamps without time zone
+   */
+  tsmultirange = 4533,
+
+  /**
    * range of timestamps without time zone
    */
   tsrange = 3908,
+
+  /**
+   * multirange of timestamps with time zone
+   */
+  tstzmultirange = 4534,
 
   /**
    * range of timestamps with time zone
