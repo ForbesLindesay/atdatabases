@@ -77,7 +77,7 @@ export function buildCache(): Steps {
 
 export function saveOutput(name: string, paths: string[]): Steps<string> {
   return ({use}) => {
-    use(`Save output: ${name}`, 'actions/upload-artifact@v2', {
+    use(`Save output: ${name}`, 'actions/upload-artifact@v4', {
       with: {name, path: paths.join('\n')},
     });
     return name;
@@ -85,7 +85,7 @@ export function saveOutput(name: string, paths: string[]): Steps<string> {
 }
 export function loadOutput(name: Expression<string>, path: string): Steps {
   return ({use}) => {
-    use(interpolate`Load output: ${name}`, 'actions/download-artifact@v2', {
+    use(interpolate`Load output: ${name}`, 'actions/download-artifact@v4', {
       with: {name, path},
     });
   };
