@@ -148,7 +148,7 @@ jobs:
           restore-keys: v2-build-output-
       - run: yarn build
       - name: "Save output: build"
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: build
           path: |-
@@ -186,7 +186,7 @@ jobs:
           key: ${{runner.os}}-${{matrix.node}}-${{hashFiles('yarn.lock')}}-2
       - run: yarn install --prefer-offline
       - name: "Load output: ${{needs.build.outputs.output}}"
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: ${{ needs.build.outputs.output }}
           path: packages/
@@ -225,7 +225,7 @@ jobs:
           key: ${{runner.os}}-${{matrix.node}}-${{hashFiles('yarn.lock')}}-2
       - run: yarn install --prefer-offline
       - name: "Load output: ${{needs.build.outputs.output}}"
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: ${{ needs.build.outputs.output }}
           path: packages/
@@ -266,7 +266,7 @@ jobs:
           key: ${{runner.os}}-${{matrix.node}}-${{hashFiles('yarn.lock')}}-2
       - run: yarn install --prefer-offline
       - name: "Load output: ${{needs.build.outputs.output}}"
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: ${{ needs.build.outputs.output }}
           path: packages/
@@ -317,7 +317,7 @@ jobs:
           key: ${{runner.os}}-14.x-${{hashFiles('yarn.lock')}}-2
       - run: yarn install --prefer-offline
       - name: "Load output: ${{needs.build.outputs.output}}"
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: ${{ needs.build.outputs.output }}
           path: packages/
