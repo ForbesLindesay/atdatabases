@@ -6,7 +6,7 @@
   "types": "./lib/index.d.ts",
   "dependencies": {
     "@databases/websql-core": "^0.0.0",
-    "websql": "^1.0.0"
+    "websql": "^2.0.3"
   },
   "scripts": {},
   "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/websql",
