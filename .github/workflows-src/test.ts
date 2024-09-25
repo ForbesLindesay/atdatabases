@@ -7,6 +7,10 @@ import {
   interpolate,
 } from 'github-actions-workflow-builder/expression';
 
+const DEFAULT_NODE_VERSION = '20.x';
+const ALL_NODE_VERSIONS = ['18.x', '20.x', '22.x'];
+const INTEGRATION_TEST_NODE_VERSIONS = ['18.x', '22.x'];
+
 export function yarnInstallWithCache(nodeVersion: Expression<string>): Steps {
   return ({use, run}) => {
     const {
@@ -15,7 +19,7 @@ export function yarnInstallWithCache(nodeVersion: Expression<string>): Steps {
       `Get yarn cache directory path`,
       `echo "::set-output name=dir::$(yarn cache dir)"`,
     );
-    use('Enable Cache', 'actions/cache@v2', {
+    use('Enable Cache', 'actions/cache@v4', {
       with: {
         path: [
           interpolate`${yarnCacheDir}`,
@@ -30,7 +34,9 @@ export function yarnInstallWithCache(nodeVersion: Expression<string>): Steps {
     run('yarn install --prefer-offline');
   };
 }
-export function setup(nodeVersion: Expression<string> = '14.x'): Steps {
+export function setup(
+  nodeVersion: Expression<string> = DEFAULT_NODE_VERSION,
+): Steps {
   return ({use, add}) => {
     use('actions/checkout@v2');
     use('actions/setup-node@v1', {
@@ -57,7 +63,7 @@ export function buildCache(): Steps {
         }
       })
       .sort();
-    use(`Enable Cache`, 'actions/cache@v2', {
+    use(`Enable Cache`, 'actions/cache@v4', {
       with: {
         path: [
           ...packageNames.map((packageName) => `packages/${packageName}/lib`),
@@ -121,7 +127,7 @@ export default createWorkflow(({setWorkflowName, addTrigger, addJob}) => {
 
     const {node} = setBuildMatrix(
       {
-        node: ['14.x', '16.x', '18.x'],
+        node: ALL_NODE_VERSIONS,
       },
       {failFast: false},
     );
@@ -140,7 +146,7 @@ export default createWorkflow(({setWorkflowName, addTrigger, addJob}) => {
 
     const {node, pg} = setBuildMatrix(
       {
-        node: ['14.x', '18.x'],
+        node: INTEGRATION_TEST_NODE_VERSIONS,
         pg: [
           // '9.6.19-alpine', -- unsupported by pg-migrations
           '10.14-alpine',
@@ -168,7 +174,7 @@ export default createWorkflow(({setWorkflowName, addTrigger, addJob}) => {
 
     const {node, mysql} = setBuildMatrix(
       {
-        node: ['14.x', '18.x'],
+        node: INTEGRATION_TEST_NODE_VERSIONS,
         mysql: ['5.6.51', '5.7.33', '8.0.23'],
       },
       {failFast: false},
