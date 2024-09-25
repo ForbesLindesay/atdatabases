@@ -24,7 +24,7 @@ jobs:
         run: echo "::set-output name=dir::$(yarn cache dir)"
         id: step_3
       - name: Enable Cache
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: |-
             ${{ steps.step_3.outputs.dir }}
@@ -33,7 +33,7 @@ jobs:
           key: ${{ runner.os }}-20.x-${{ hashFiles('yarn.lock') }}-2
       - run: yarn install --prefer-offline
       - name: Enable Cache
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: |-
             packages/bigquery/lib
@@ -148,7 +148,7 @@ jobs:
           restore-keys: v2-build-output-
       - run: yarn build
       - name: Enable NextJS Cache
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: packages/website/.next/cache
           key: next-${{ hashFiles('yarn.lock') }}

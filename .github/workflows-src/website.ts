@@ -21,7 +21,7 @@ export default createWorkflow(({setWorkflowName, addTrigger, addJob}) => {
 
     run('yarn build');
 
-    use('Enable NextJS Cache', 'actions/cache@v2', {
+    use('Enable NextJS Cache', 'actions/cache@v4', {
       with: {
         path: ['packages/website/.next/cache'].join('\n'),
         key: interpolate`next-${hashFiles('yarn.lock')}`,

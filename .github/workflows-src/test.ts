@@ -19,7 +19,7 @@ export function yarnInstallWithCache(nodeVersion: Expression<string>): Steps {
       `Get yarn cache directory path`,
       `echo "::set-output name=dir::$(yarn cache dir)"`,
     );
-    use('Enable Cache', 'actions/cache@v2', {
+    use('Enable Cache', 'actions/cache@v4', {
       with: {
         path: [
           interpolate`${yarnCacheDir}`,
@@ -63,7 +63,7 @@ export function buildCache(): Steps {
         }
       })
       .sort();
-    use(`Enable Cache`, 'actions/cache@v2', {
+    use(`Enable Cache`, 'actions/cache@v4', {
       with: {
         path: [
           ...packageNames.map((packageName) => `packages/${packageName}/lib`),
