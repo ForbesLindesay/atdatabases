@@ -3,7 +3,7 @@ version: 2
 refs:
   - &container
     docker:
-      - image: node:14
+      - image: node:20
         environment:
           PG_URL: 'postgres://test-user@localhost:5432/test-db'
           MYSQL_URL: 'mysql://test-user:password@localhost:3306/test-db'
