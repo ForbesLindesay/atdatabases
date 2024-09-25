@@ -9,7 +9,7 @@
     "@databases/sql": "^0.0.0",
     "@databases/split-sql-query": "^0.0.0",
     "@types/better-sqlite3": "^7.6.9",
-    "better-sqlite3": "^9.4.5"
+    "better-sqlite3": "^11.3.0"
   },
   "scripts": {},
   "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/sqlite-sync",
