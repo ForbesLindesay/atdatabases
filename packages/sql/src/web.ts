@@ -10,7 +10,7 @@ export enum SQLItemType {
 export type SQLItem =
   | {type: SQLItemType.RAW; text: string}
   | {type: SQLItemType.VALUE; value: any}
-  | {type: SQLItemType.IDENTIFIER; names: Array<any>};
+  | {type: SQLItemType.IDENTIFIER; names: readonly any[]};
 
 export interface FormatConfig {
   escapeIdentifier: (str: string) => string;
@@ -57,9 +57,9 @@ class SQLQuery {
    */
   public static query(
     strings: TemplateStringsArray,
-    ...values: Array<any>
+    ...values: readonly any[]
   ): SQLQuery {
-    const items: Array<SQLItem> = [];
+    const items: SQLItem[] = [];
 
     // Add all of the strings as raw items and values as placeholder values.
     for (let i = 0; i < strings.length; i++) {
@@ -114,7 +114,7 @@ class SQLQuery {
    * separator was defined.
    */
   public static join(
-    queries: Array<SQLQuery>,
+    queries: readonly SQLQuery[],
     separator?: LiteralSeparator | SQLQuery,
   ): SQLQuery {
     if (typeof separator === 'string' && !literalSeparators.has(separator)) {
@@ -126,7 +126,7 @@ class SQLQuery {
           .join(', ')}`,
       );
     }
-    const items: Array<SQLItem> = [];
+    const items: SQLItem[] = [];
     const separatorItems: readonly SQLItem[] | undefined = separator
       ? typeof separator === 'string'
         ? [{type: SQLItemType.RAW, text: separator}]
@@ -176,7 +176,7 @@ class SQLQuery {
    * Creates an identifier query. Each name will be escaped, and the
    * names will be concatenated with a period (`.`).
    */
-  public static ident(...names: Array<any>): SQLQuery {
+  public static ident(...names: readonly any[]): SQLQuery {
     return new SQLQuery([{type: SQLItemType.IDENTIFIER, names}]);
   }
 
