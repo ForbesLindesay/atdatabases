@@ -205,6 +205,9 @@ jobs:
           - 11.9-alpine
           - 12.4-alpine
           - 13.0-alpine
+          - 14.9-alpine
+          - 15.8-alpine
+          - 16.4-alpine
       fail-fast: false
     steps:
       - uses: actions/checkout@v2
