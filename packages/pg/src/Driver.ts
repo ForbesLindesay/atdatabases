@@ -177,10 +177,10 @@ export default class PgDriver
     const retrySerializationFailuresCount = !transactionOptions
       ? 0
       : transactionOptions.retrySerializationFailures === true
-      ? 10
-      : typeof transactionOptions.retrySerializationFailures === 'number'
-      ? transactionOptions.retrySerializationFailures
-      : 0;
+        ? 10
+        : typeof transactionOptions.retrySerializationFailures === 'number'
+          ? transactionOptions.retrySerializationFailures
+          : 0;
     if (isSQLError(ex) && ex.code === SQLErrorCode.SERIALIZATION_FAILURE) {
       if (retrySerializationFailuresCount > failureCount) {
         await new Promise((resolve) =>
