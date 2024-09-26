@@ -10,10 +10,14 @@ export interface SelectQuery<TRecord> {
     ...fields: TKeys
   ): SelectQuery<Pick<TRecord, TKeys[number]>>;
 }
-
-export interface OrderedSelectQuery<TRecord> extends SelectQuery<TRecord> {
+export interface OrderedSelectQueryWithOffset<TRecord>
+  extends SelectQuery<TRecord> {
   first(): Promise<TRecord | null>;
   limit(count: number): Promise<TRecord[]>;
+}
+export interface OrderedSelectQuery<TRecord>
+  extends OrderedSelectQueryWithOffset<TRecord> {
+  offset(count: number): OrderedSelectQueryWithOffset<TRecord>;
 }
 
 class FieldQuery<T> {
@@ -134,6 +138,7 @@ class SelectQueryImplementation<TRecord>
 {
   public readonly orderByQueries: SQLQuery[] = [];
   public limitCount: number | undefined;
+  public offsetCount: number | undefined;
   private _selectFields: SQLQuery | undefined;
 
   constructor(
@@ -163,6 +168,9 @@ class SelectQueryImplementation<TRecord>
     }
     if (this.limitCount) {
       parts.push(sql`LIMIT ${this.limitCount}`);
+    }
+    if (this.offsetCount) {
+      parts.push(sql`OFFSET ${this.offsetCount}`);
     }
     return this._executeQuery(
       parts.length === 1 ? parts[0] : sql.join(parts, sql` `),
@@ -204,6 +212,18 @@ class SelectQueryImplementation<TRecord>
     }
     this.limitCount = count;
     return await this._getResults('limit');
+  }
+  public offset(offset: number) {
+    if (!this.orderByQueries.length) {
+      throw new Error(
+        'You cannot call "offset" until after you call "orderByAsc" or "orderByDesc".',
+      );
+    }
+    if (this.offsetCount !== undefined) {
+      throw new Error('You cannot call "offset" multiple times');
+    }
+    this.offsetCount = offset;
+    return this;
   }
   public async first() {
     if (!this.orderByQueries.length) {
