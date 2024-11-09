@@ -11,7 +11,6 @@
     "@databases/push-to-async-iterable": "^0.0.0",
     "@databases/shared": "^0.0.0",
     "@databases/sql": "^0.0.0",
-    "@types/mysql": "^3.0.0",
     "mysql2": "^3.11.4"
   },
   "scripts": {},
