@@ -239,7 +239,7 @@ function validateMySqlUrl(urlString: string) {
   }
 }
 
-function parseNullable<T, R>(value: T, parser: (value: T) => R): R | null {
+function parseNullable<T, R>(value: T, parser: (value: NonNullable<T>) => R): R | null {
   if (value == null) {
     return null;
   }
@@ -249,7 +249,7 @@ function parseNullable<T, R>(value: T, parser: (value: T) => R): R | null {
 
 function getTinyIntParser(
   mode: 'boolean' | 'number',
-): (f: {string(): string}) => any {
+): (f: {string(): string | null}) => any {
   switch (mode) {
     case 'number':
       return (f) => parseNullable(f.string(), (s) => parseInt(s, 10));
@@ -259,7 +259,7 @@ function getTinyIntParser(
 }
 function getBigIntParser(
   mode: 'string' | 'number' | 'bigint',
-): (f: {string(): string}) => any {
+): (f: {string(): string | null}) => any {
   switch (mode) {
     case 'number':
       return (f) => parseNullable(f.string(), (s) => parseInt(s, 10));
@@ -272,7 +272,7 @@ function getBigIntParser(
 function getDateParser(
   mode: 'string' | 'date-object',
   timeZone: 'local' | 'utc',
-): (f: {string(): string}) => any {
+): (f: {string(): string | null}) => any {
   switch (mode) {
     case 'string':
       return (f) => f.string();
@@ -313,7 +313,7 @@ function getDateParser(
 function getDateTimeParser(
   mode: 'string' | 'date-object',
   timeZone: 'local' | 'utc',
-): (f: {string(): string; buffer(): Buffer}) => any {
+): (f: {string(): string | null; buffer(): Buffer | null}) => any {
   switch (mode) {
     case 'string':
       return (f) => f.string();
