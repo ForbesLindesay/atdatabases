@@ -28,8 +28,8 @@ interface MySqlConnectionOptions {
       db: string;
       table: string;
       name: string;
-      string(): string;
-      buffer(): Buffer;
+      string(): string | null;
+      buffer(): Buffer | null;
       geometry(): unknown;
     },
     next: () => any,

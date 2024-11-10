@@ -11,8 +11,7 @@
     "@databases/push-to-async-iterable": "^0.0.0",
     "@databases/shared": "^0.0.0",
     "@databases/sql": "^0.0.0",
-    "@types/mysql": "^2.15.5",
-    "mysql2": "^2.2.5"
+    "mysql2": "^3.11.4"
   },
   "scripts": {},
   "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/mysql",
