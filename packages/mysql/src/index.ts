@@ -239,7 +239,10 @@ function validateMySqlUrl(urlString: string) {
   }
 }
 
-function parseNullable<T, R>(value: T, parser: (value: NonNullable<T>) => R): R | null {
+function parseNullable<T, R>(
+  value: T,
+  parser: (value: NonNullable<T>) => R,
+): R | null {
   if (value == null) {
     return null;
   }
