@@ -1,15 +1,20 @@
 import connect, {sql} from '@databases/pg';
 import {
-  bulkInsert,
-  bulkSelect,
-  bulkUpdate,
-  bulkDelete,
-  BulkOperationOptions,
+  bulkInsertStatement,
+  bulkWhereCondition,
+  bulkUpdateStatement,
+  bulkDeleteStatement,
 } from '..';
 
 const SCHEMA_NAME = `bulk_utils_test`;
 const TABLE_NAME = `users`;
 const table = sql.ident(SCHEMA_NAME, TABLE_NAME);
+const COLUMN_TYPES = {
+  id: sql`BIGINT`,
+  screen_name: sql`TEXT`,
+  bio: sql`TEXT`,
+  age: sql`INT`,
+};
 
 let queries: {readonly text: string; readonly values: readonly any[]}[] = [];
 const db = connect({
@@ -37,18 +42,6 @@ function expectQueries(fn: () => Promise<void>) {
     })(),
   ).resolves;
 }
-
-const options: BulkOperationOptions<'id' | 'screen_name' | 'bio' | 'age'> = {
-  database: db,
-  schemaName: SCHEMA_NAME,
-  tableName: TABLE_NAME,
-  columnTypes: {
-    id: sql`BIGINT`,
-    screen_name: sql`TEXT`,
-    bio: sql`TEXT`,
-    age: sql`INT`,
-  },
-};
 
 afterAll(async () => {
   await db.dispose();
@@ -94,19 +87,21 @@ test('create users in bulk', async () => {
     names.push(`bulk_insert_name_${i}`);
   }
   await expectQueries(async () => {
-    await bulkInsert({
-      ...options,
-      columnsToInsert: [`screen_name`, `age`, `bio`],
-      records: names.map((n) => ({
-        screen_name: n,
-        age: 42,
-        bio: `My name is ${n}`,
-      })),
-    });
+    await db.query(
+      bulkInsertStatement({
+        table,
+        operations: names,
+        columns: {
+          screen_name: {getValue: (n) => n, type: COLUMN_TYPES.screen_name},
+          age: {value: 42},
+          bio: {getValue: (n) => `My name is ${n}`, type: COLUMN_TYPES.bio},
+        },
+      }),
+    );
   }).toEqual([
     {
-      text: `INSERT INTO "users" ("screen_name","age","bio") SELECT * FROM UNNEST($1::TEXT[],$2::INT[],$3::TEXT[])`,
-      values: ['Array<string>', 'Array<number>', 'Array<string>'],
+      text: `INSERT INTO "users" ("age","screen_name","bio") SELECT $1,* FROM UNNEST($2::TEXT[],$3::TEXT[])`,
+      values: [42, 'Array<string>', 'Array<string>'],
     },
   ]);
   const records = await db.query(
@@ -119,17 +114,24 @@ test('create users in bulk', async () => {
 test('query users in bulk', async () => {
   await expectQueries(async () => {
     expect(
-      await bulkSelect({
-        ...options,
-        whereColumnNames: [`screen_name`, `age`],
-        whereConditions: [
-          {screen_name: `bulk_insert_name_5`, age: 42},
-          {screen_name: `bulk_insert_name_6`, age: 42},
-          {screen_name: `bulk_insert_name_7`, age: 32},
-        ],
-        selectColumnNames: [`screen_name`, `age`, `bio`],
-        orderBy: [{columnName: `screen_name`, direction: `ASC`}],
-      }),
+      await db.query(
+        sql`SELECT screen_name, age, bio FROM ${table} WHERE ${bulkWhereCondition(
+          {
+            operations: [
+              {screen_name: `bulk_insert_name_5`, age: 42},
+              {screen_name: `bulk_insert_name_6`, age: 42},
+              {screen_name: `bulk_insert_name_7`, age: 32},
+            ],
+            whereColumns: {
+              screen_name: {
+                getValue: (o) => o.screen_name,
+                type: COLUMN_TYPES.screen_name,
+              },
+              age: {getValue: (o) => o.age, type: COLUMN_TYPES.age},
+            },
+          },
+        )} ORDER BY screen_name ASC`,
+      ),
     ).toEqual([
       {
         screen_name: `bulk_insert_name_5`,
@@ -144,7 +146,7 @@ test('query users in bulk', async () => {
     ]);
   }).toEqual([
     {
-      text: `SELECT "screen_name","age","bio" FROM "users" WHERE ("screen_name","age") IN (SELECT * FROM UNNEST($1::TEXT[],$2::INT[])) ORDER BY "screen_name" ASC`,
+      text: `SELECT screen_name, age, bio FROM "users" WHERE ("screen_name","age") IN (SELECT * FROM UNNEST($1::TEXT[],$2::INT[])) ORDER BY screen_name ASC`,
       values: ['Array<string>', 'Array<number>'],
     },
   ]);
@@ -152,20 +154,28 @@ test('query users in bulk', async () => {
 
 test('update users in bulk', async () => {
   await expectQueries(async () => {
-    await bulkUpdate({
-      ...options,
-      whereColumnNames: [`screen_name`, `age`],
-      setColumnNames: [`age`],
-      updates: [
-        {where: {screen_name: `bulk_insert_name_10`, age: 42}, set: {age: 1}},
-        {where: {screen_name: `bulk_insert_name_11`, age: 42}, set: {age: 2}},
-        {where: {screen_name: `bulk_insert_name_12`, age: 32}, set: {age: 3}},
-      ],
-    });
+    await db.query(
+      bulkUpdateStatement({
+        table,
+        operations: [
+          {name: `bulk_insert_name_10`, age: 42, new_age: 1},
+          {name: `bulk_insert_name_11`, age: 42, new_age: 2},
+          {name: `bulk_insert_name_12`, age: 32, new_age: 3},
+        ],
+        whereColumns: {
+          screen_name: {
+            getValue: (o) => o.name,
+            type: COLUMN_TYPES.screen_name,
+          },
+          age: {getValue: (o) => o.age, type: COLUMN_TYPES.age},
+        },
+        setColumns: {age: {getValue: (o) => o.new_age, type: COLUMN_TYPES.age}},
+      }),
+    );
   }).toEqual([
     {
-      text: `UPDATE "users" SET "age" = "bulk_query"."updated_value_of_age" FROM (SELECT * FROM UNNEST($1::TEXT[],$2::INT[],$3::INT[]) AS bulk_query("screen_name","age","updated_value_of_age")) AS bulk_query WHERE "users"."screen_name" = "bulk_query"."screen_name" AND "users"."age" = "bulk_query"."age"`,
-      values: ['Array<string>', 'Array<number>', 'Array<number>'],
+      text: `UPDATE "users" SET "age" = bulk_query."set_0" FROM UNNEST($1::INT[],$2::TEXT[],$3::INT[]) AS bulk_query("set_0","where_0","where_1") WHERE "screen_name" = bulk_query."where_0" AND "age" = bulk_query."where_1"`,
+      values: ['Array<number>', 'Array<string>', 'Array<number>'],
     },
   ]);
   expect(
@@ -185,15 +195,23 @@ test('update users in bulk', async () => {
 
 test('delete users in bulk', async () => {
   await expectQueries(async () => {
-    await bulkDelete({
-      ...options,
-      whereColumnNames: [`screen_name`, `age`],
-      whereConditions: [
-        {screen_name: `bulk_insert_name_15`, age: 42},
-        {screen_name: `bulk_insert_name_16`, age: 42},
-        {screen_name: `bulk_insert_name_17`, age: 32},
-      ],
-    });
+    await db.query(
+      bulkDeleteStatement({
+        table,
+        operations: [
+          {name: `bulk_insert_name_15`, age: 42},
+          {name: `bulk_insert_name_16`, age: 42},
+          {name: `bulk_insert_name_17`, age: 32},
+        ],
+        whereColumns: {
+          screen_name: {
+            getValue: (o) => o.name,
+            type: COLUMN_TYPES.screen_name,
+          },
+          age: {getValue: (o) => o.age, type: COLUMN_TYPES.age},
+        },
+      }),
+    );
   }).toEqual([
     {
       text: `DELETE FROM "users" WHERE ("screen_name","age") IN (SELECT * FROM UNNEST($1::TEXT[],$2::INT[]))`,

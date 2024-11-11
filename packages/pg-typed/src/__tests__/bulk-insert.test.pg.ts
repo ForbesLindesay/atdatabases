@@ -135,8 +135,8 @@ test('create users in bulk', async () => {
     names.push(`bulk_insert_name_${i}`);
   }
   const inserted = await users(db).bulkInsert({
-    columnsToInsert: [`age`],
-    records: names.map((n) => ({screen_name: n, age: 42})),
+    columnsToInsert: {screen_name: (n) => n, age: 42},
+    records: names,
   });
 
   expect(inserted.map((i) => i.screen_name)).toEqual(names);
@@ -154,8 +154,8 @@ test('query users in bulk', async () => {
   expect(
     await users(db)
       .bulkFind({
-        whereColumnNames: [`screen_name`, `age`],
-        whereConditions: [
+        whereColumns: {screen_name: (c) => c.screen_name, age: (c) => c.age},
+        records: [
           {screen_name: `bulk_insert_name_5`, age: 42},
           {screen_name: `bulk_insert_name_6`, age: 42},
           {screen_name: `bulk_insert_name_7`, age: 32},
@@ -172,8 +172,8 @@ test('query users in bulk', async () => {
   expect(
     await users(db)
       .bulkFind({
-        whereColumnNames: [`screen_name`, `age`],
-        whereConditions: [
+        whereColumns: {screen_name: (c) => c.screen_name, age: (c) => c.age},
+        records: [
           {screen_name: `bulk_insert_name_3`, age: 42},
           {screen_name: `bulk_insert_name_4`, age: 42},
           {screen_name: `bulk_insert_name_5`, age: 42},
@@ -195,12 +195,12 @@ test('query users in bulk', async () => {
 
 test('update users in bulk', async () => {
   const updated = await users(db).bulkUpdate({
-    whereColumnNames: [`screen_name`, `age`],
-    setColumnNames: [`age`],
-    updates: [
-      {where: {screen_name: `bulk_insert_name_10`, age: 42}, set: {age: 1}},
-      {where: {screen_name: `bulk_insert_name_11`, age: 42}, set: {age: 2}},
-      {where: {screen_name: `bulk_insert_name_12`, age: 32}, set: {age: 3}},
+    whereColumns: {screen_name: (r) => r.screen_name, age: (r) => r.age},
+    setColumns: {age: (r) => r.new_age},
+    records: [
+      {screen_name: `bulk_insert_name_10`, age: 42, new_age: 1},
+      {screen_name: `bulk_insert_name_11`, age: 42, new_age: 2},
+      {screen_name: `bulk_insert_name_12`, age: 32, new_age: 3},
     ],
   });
   expect(updated.map(({screen_name, age}) => ({screen_name, age}))).toEqual([
@@ -228,8 +228,8 @@ test('update users in bulk', async () => {
 
 test('delete users in bulk', async () => {
   await users(db).bulkDelete({
-    whereColumnNames: [`screen_name`, `age`],
-    whereConditions: [
+    whereColumns: {screen_name: (c) => c.screen_name, age: (c) => c.age},
+    records: [
       {screen_name: `bulk_insert_name_15`, age: 42},
       {screen_name: `bulk_insert_name_16`, age: 42},
       {screen_name: `bulk_insert_name_17`, age: 32},
@@ -252,12 +252,12 @@ test('delete users in bulk', async () => {
 
 test('insertOrIgnore users in bulk', async () => {
   await users(db).bulkInsertOrIgnore({
-    columnsToInsert: [`age`],
+    columnsToInsert: {screen_name: (n) => n, age: 56},
     records: [
-      {screen_name: `bulk_insert_name_18`, age: 56},
-      {screen_name: `bulk_insert_name_19`, age: 56},
-      {screen_name: `bulk_insert_name_20`, age: 56},
-      {screen_name: `bulk_insert_or_ignore_name_1`, age: 56},
+      `bulk_insert_name_18`,
+      `bulk_insert_name_19`,
+      `bulk_insert_name_20`,
+      `bulk_insert_or_ignore_name_1`,
     ],
   });
   expect(
@@ -283,18 +283,14 @@ test('insertOrIgnore users in bulk', async () => {
 
 test('insertOrUpdate users in bulk', async () => {
   await users(db).bulkInsertOrUpdate({
-    columnsToInsert: [`screen_name`, `age`, `bio`],
+    columnsToInsert: {screen_name: (n) => n, age: 56, bio: 'Updated in bulk'},
     columnsThatConflict: [`screen_name`],
     columnsToUpdate: [`bio`],
     records: [
-      {screen_name: `bulk_insert_name_21`, age: 56, bio: `Updated in bulk`},
-      {screen_name: `bulk_insert_name_22`, age: 56, bio: `Updated in bulk`},
-      {screen_name: `bulk_insert_name_23`, age: 56, bio: `Updated in bulk`},
-      {
-        screen_name: `bulk_insert_or_update_name_1`,
-        age: 56,
-        bio: `Updated in bulk`,
-      },
+      `bulk_insert_name_21`,
+      `bulk_insert_name_22`,
+      `bulk_insert_name_23`,
+      `bulk_insert_or_update_name_1`,
     ],
   });
   expect(
