@@ -2,9 +2,20 @@
 
 exports[`apply - after already appying 1`] = `
 "stdout:
-  No migrations required
+  Applying 00001-init.ts
   
 stderr:
+  error: relation \\"users\\" already exists
+      at handleError (/Users/forbeslindesay/Documents/GitHub/atdatabases/packages/pg/lib/Driver.js:397:29)
+      at executeQueryInternal (/Users/forbeslindesay/Documents/GitHub/atdatabases/packages/pg/lib/Driver.js:369:9)
+      at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+      at async PgDriver._executeQuery (/Users/forbeslindesay/Documents/GitHub/atdatabases/packages/pg/lib/Driver.js:199:29)
+      at async PgDriver.executeAndReturnLast (/Users/forbeslindesay/Documents/GitHub/atdatabases/packages/pg/lib/Driver.js:224:13)
+      at async Transaction.query (/Users/forbeslindesay/Documents/GitHub/atdatabases/packages/shared/lib/BaseTransaction.js:59:24)
+      at async applyMigration (/Users/forbeslindesay/Documents/GitHub/atdatabases/packages/pg-migrations/src/__tests__/migrations/00001-init.ts:4:3)
+      at async Object.applyMigration (/Users/forbeslindesay/Documents/GitHub/atdatabases/packages/pg-migrations/lib/PostgresDatabaseEngine.js:137:21)
+      at async /Users/forbeslindesay/Documents/GitHub/atdatabases/packages/migrations-base/lib/methods/applyOperations.js:43:29
+      at async /Users/forbeslindesay/Documents/GitHub/atdatabases/packages/pg-migrations/lib/PostgresDatabaseEngine.js:54:20
   "
 `;
 
@@ -22,7 +33,13 @@ stderr:
 
 exports[`apply --dry-run - after already appying 1`] = `
 "stdout:
-  No migrations required
+  Applying 00001-init.ts (dry run only)
+  Applied 00001-init.ts (dry run only, not actually applied)
+  Applying 00002-update.ts (dry run only)
+  Applied 00002-update.ts (dry run only, not actually applied)
+  Applying 00003-update2.sql (dry run only)
+  Applied 00003-update2.sql (dry run only, not actually applied)
+  To apply 3 migrations, run again without --dry-run
   
 stderr:
   "
