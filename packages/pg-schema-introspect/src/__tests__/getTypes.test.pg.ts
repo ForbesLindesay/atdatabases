@@ -199,6 +199,11 @@ test('get built in types', async () => {
     const category = Object.keys(TypeCateogry).find(
       (c) => (TypeCateogry as any)[c] === ty.category,
     )!;
+    if (category === undefined) {
+      throw new Error(
+        `Unknown type category "${ty.category}" for "${ty.typeName}"`,
+      );
+    }
     result[category] = (result[category] || []).concat([ty]);
     return result;
   }, {});
