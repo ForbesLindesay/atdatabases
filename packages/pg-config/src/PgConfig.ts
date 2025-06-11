@@ -313,6 +313,17 @@ export interface TypesConfig {
    * @default []
    */
   ignoreTables: string[];
+
+  /**
+   * Enum values to exclude from generated types.
+   * This can be useful when you know you have no records
+   * that use an enum value anymore, but cannot remove it
+   * from the database type because the migration would be
+   * too costly.
+   *
+   * @default {}
+   */
+  ignoreEnumValues: Record<string, string[] | undefined>;
 }
 
 export const TypesConfigSchema: ft.Runtype<TypesConfig> = ft
@@ -380,6 +391,11 @@ export const TypesConfigSchema: ft.Runtype<TypesConfig> = ft
     ),
 
     ignoreTables: withDefault<string[]>(ft.Array(ft.String), []),
+
+    ignoreEnumValues: withDefault<Record<string, string[] | undefined>>(
+      ft.Record(ft.String, ft.Array(ft.String)),
+      {},
+    ),
   })
   .withConstraint((value) => true, {name: `TypesConfig`});
 

@@ -1,6 +1,6 @@
 import PgConfig from '@databases/pg-config';
 import PgDataTypeID from '@databases/pg-data-type-id';
-import type {Schema} from '@databases/pg-schema-introspect';
+import {TypeKind, type Schema} from '@databases/pg-schema-introspect';
 import {getIgnoreTest, writeFiles} from '@databases/shared-print-types';
 import PgPrintContext from './PgPrintContext';
 import getTypeScriptType from './getTypeScriptType';
@@ -21,6 +21,15 @@ function filterSchema(unfilteredSchema: Schema, options: Options): Schema {
   );
   return {
     ...unfilteredSchema,
+    types: unfilteredSchema.types.map((t) => {
+      if (t.kind !== TypeKind.Enum) return t;
+      const ignoredValues = options.ignoreEnumValues?.[t.typeName];
+      if (!ignoredValues?.length) return t;
+      return {
+        ...t,
+        values: t.values.filter((v) => !ignoredValues.includes(v)),
+      };
+    }),
     classes: unfilteredSchema.classes
       .filter((c) => !ignoredClassIds.has(c.classID))
       .map((c) => ({
