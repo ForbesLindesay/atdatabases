@@ -37,6 +37,9 @@ export default class PgPrintOptions implements PrintOptions<TypeID> {
   public get typeOverrides() {
     return this._v('typeOverrides');
   }
+  public get requireExplicitDefaults() {
+    return this._v('requireExplicitDefaults');
+  }
 
   getExportPriority(id: TypeID): number {
     switch (id.type) {

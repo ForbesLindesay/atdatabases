@@ -54,6 +54,7 @@ export default function printClassDetails(
           ...getAttributeComment(attribute),
           `  ${attribute.attributeName}${optionalOnInsert(
             attribute,
+            context,
           )}: ${getAttributeType(type, attribute, context, file)}`,
         ])
         .reduce((a, b) => [...a, ...b], []),
@@ -160,9 +161,14 @@ function getAttributeType(
   return context.getTypeScriptType(attribute.typeID, file);
 }
 
-function optionalOnInsert(attribute: Attribute): string {
+function optionalOnInsert(
+  attribute: Attribute,
+  context: PgPrintContext,
+): string {
   if (!attribute.notNull) return '?';
-  if (attribute.hasDefault) return '?';
+  if (attribute.hasDefault && !context.options.requireExplicitDefaults) {
+    return '?';
+  }
   return '';
 }
 

@@ -324,6 +324,15 @@ export interface TypesConfig {
    * @default {}
    */
   ignoreEnumValues: Record<string, string[] | undefined>;
+
+  /**
+   * If true, the types will require a value to be provided,
+   * even if a column has a default value specified in the
+   * database schema. This can improve type safety due to the
+   * way that undefined is treated as equivalent to null at
+   * runtime.
+   */
+  requireExplicitDefaults: boolean;
 }
 
 export const TypesConfigSchema: ft.Runtype<TypesConfig> = ft
@@ -396,6 +405,8 @@ export const TypesConfigSchema: ft.Runtype<TypesConfig> = ft
       ft.Record(ft.String, ft.Array(ft.String)),
       {},
     ),
+
+    requireExplicitDefaults: withDefault(ft.Boolean, false),
   })
   .withConstraint((value) => true, {name: `TypesConfig`});
 
