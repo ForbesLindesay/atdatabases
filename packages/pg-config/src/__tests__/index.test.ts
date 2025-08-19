@@ -40,6 +40,7 @@ test('get root config', () => {
       tableTypeName: '{{ TABLE_NAME | pascal-case }}',
       columnTypeOverrides: {},
       typeOverrides: {},
+      requireExplicitDefaults: false,
     },
   });
 });
@@ -84,6 +85,7 @@ test('valid config', () => {
       tableTypeName: '{{ TABLE_NAME | pascal-case }}',
       columnTypeOverrides: {},
       typeOverrides: {},
+      requireExplicitDefaults: false,
     },
   });
   expect(readPgConfigSync(__dirname + '/fixtures/override.json')).toEqual({
@@ -129,6 +131,7 @@ test('valid config', () => {
       typeOverrides: {
         '114': 'unknown',
       },
+      requireExplicitDefaults: false,
     },
   });
 });
