@@ -327,10 +327,19 @@ export interface TypesConfig {
 
   /**
    * If true, the types will require a value to be provided,
-   * even if a column has a default value specified in the
-   * database schema. This can improve type safety due to the
-   * way that undefined is treated as equivalent to null at
-   * runtime.
+   * even if a column has a constant default value specified
+   * in the database schema. This can improve type safety due
+   * to the way that undefined is treated as equivalent to null
+   * at runtime.
+   *
+   * This will still allow you to omit columns on insert if they
+   * use `nextval('something')` to generate a unique key, or if
+   * they use `CURRENT_TIMESTAMP` to set a column to the current db
+   * time, or if they use any function call like `now()` or
+   * `uuid_generate_v4()`. Only constant defaults will still require
+   * an explicit value to be provided.
+   *
+   * @default false
    */
   requireExplicitDefaults: boolean;
 }

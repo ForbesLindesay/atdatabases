@@ -166,10 +166,26 @@ function optionalOnInsert(
   context: PgPrintContext,
 ): string {
   if (!attribute.notNull) return '?';
-  if (attribute.hasDefault && !context.options.requireExplicitDefaults) {
+  if (
+    attribute.hasDefault &&
+    (!context.options.requireExplicitDefaults ||
+      isDynamicDefault(attribute.default.trim().toLowerCase()))
+  ) {
     return '?';
   }
   return '';
+}
+function isDynamicDefault(defaultValue: string): boolean {
+  let inString = false;
+  for (const character of defaultValue) {
+    if (character === '"' || character === "'") {
+      inString = !inString;
+    }
+    if (!inString && character === '(') {
+      return true;
+    }
+  }
+  return defaultValue === 'current_timestamp';
 }
 
 function handleBrand(
