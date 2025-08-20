@@ -34,6 +34,8 @@ export default createWorkflow(({setWorkflowName, addTrigger, addJob}) => {
     run(`npm install netlify-cli@17.10.1 -g`);
     const netlifyDeploy = [
       `netlify deploy`,
+      `--cwd .`,
+      `--filter @databases/website`,
       `--dir packages/website/out`,
       `--site ${secrets.NETLIFY_SITE_ID}`,
       `--auth ${secrets.NETLIFY_AUTH_TOKEN}`,
