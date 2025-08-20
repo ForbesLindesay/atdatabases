@@ -37,13 +37,11 @@ const Blog = ({recentPosts}: Props) => {
                   <Document document={post.body} />
 
                   <div tw="flex md:justify-center mt-12 mx-4 md:mx-0">
-                    <Link href={post.pathname}>
-                      <a
-                        tw="rounded-md px-6 py-4 border border-red-900 text-red-900 bg-white shadow-md hover:bg-red-900 hover:text-red-100"
-                        href={post.pathname}
-                      >
-                        Read More
-                      </a>
+                    <Link
+                      href={post.pathname}
+                      tw="rounded-md px-6 py-4 border border-red-900 text-red-900 bg-white shadow-md hover:bg-red-900 hover:text-red-100"
+                    >
+                      Read More
                     </Link>
                   </div>
                 </article>

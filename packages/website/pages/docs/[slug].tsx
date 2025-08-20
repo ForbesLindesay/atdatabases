@@ -165,24 +165,21 @@ const Post = ({nav, doc}: Props) => {
               </article>
               <div tw="flex flex-col md:flex-row mt-12 mx-4 md:mx-0">
                 {doc.previous && (
-                  <Link href={`/docs/${doc.previous.id}`} prefetch={false}>
-                    <a
-                      tw="rounded-md px-6 py-4 border border-red-900 text-red-900 bg-white shadow-md hover:bg-red-900 hover:text-red-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-gray-400"
-                      href={`/docs/${doc.previous.id}`}
-                    >
-                      ← {doc.previous.label}
-                    </a>
+                  <Link
+                    href={`/docs/${doc.previous.id}`}
+                    prefetch={false}
+                    tw="rounded-md px-6 py-4 border border-red-900 text-red-900 bg-white shadow-md hover:bg-red-900 hover:text-red-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-gray-400"
+                  >
+                    ← {doc.previous.label}
                   </Link>
                 )}
                 <div tw="flex-grow h-4" />
                 {doc.next && (
-                  <Link href={`/docs/${doc.next.id}`}>
-                    <a
-                      tw="text-right rounded-md px-6 py-4 border border-red-900 text-red-900 bg-white shadow-md hover:bg-red-900 hover:text-red-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-gray-400"
-                      href={`/docs/${doc.next.id}`}
-                    >
-                      {doc.next.label} →
-                    </a>
+                  <Link
+                    href={`/docs/${doc.next.id}`}
+                    tw="text-right rounded-md px-6 py-4 border border-red-900 text-red-900 bg-white shadow-md hover:bg-red-900 hover:text-red-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-gray-400"
+                  >
+                    {doc.next.label} →
                   </Link>
                 )}
               </div>
