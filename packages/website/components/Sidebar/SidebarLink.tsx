@@ -14,17 +14,15 @@ const SidebarLink = memo<SidebarLinkProps>(
   ({children, id, activeDoc}) => {
     return (
       <li>
-        <Link href={`/docs/${id}`}>
-          <a
-            tw="py-1 mt-1 -mb-1 block rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-gray-300"
-            css={[
-              activeDoc === id && tw`text-red-800 font-semibold`,
-              activeDoc !== id && tw`text-gray-500 hover:text-gray-700`,
-            ]}
-            href={`/docs/${id}`}
-          >
-            {children}
-          </a>
+        <Link
+          href={`/docs/${id}`}
+          tw="py-1 mt-1 -mb-1 block rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-gray-300"
+          css={[
+            activeDoc === id && tw`text-red-800 font-semibold`,
+            activeDoc !== id && tw`text-gray-500 hover:text-gray-700`,
+          ]}
+        >
+          {children}
         </Link>
       </li>
     );

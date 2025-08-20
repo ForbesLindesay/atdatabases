@@ -21,13 +21,11 @@ export default function HeroUnit() {
       </p>
       <div tw="mt-5 max-w-md mx-auto sm:flex sm:justify-center md:mt-8">
         <div tw="rounded-md shadow">
-          <Link href="/docs/sql">
-            <a
-              href="/docs/sql"
-              tw="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-red-800 hover:bg-red-700 md:py-4 md:text-lg md:px-10"
-            >
-              Get started
-            </a>
+          <Link
+            href="/docs/sql"
+            tw="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-red-800 hover:bg-red-700 md:py-4 md:text-lg md:px-10"
+          >
+            Get started
           </Link>
         </div>
       </div>
