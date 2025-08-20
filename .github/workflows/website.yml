@@ -157,8 +157,8 @@ jobs:
       - run: npm install netlify-cli@17.10.1 -g
       - if: ${{ github.event_name == 'push' }}
         run: netlify deploy --dir packages/website/out --site ${{
-          secrets.NETLIFY_SITE_ID }} --auth ${{ secrets.NETLIFY_API_TOKEN }}
+          secrets.NETLIFY_SITE_ID }} --auth ${{ secrets.NETLIFY_AUTH_TOKEN }}
           --prod
       - if: ${{ github.event_name != 'push' }}
         run: netlify deploy --dir packages/website/out --site ${{
-          secrets.NETLIFY_SITE_ID }} --auth ${{ secrets.NETLIFY_API_TOKEN }}
+          secrets.NETLIFY_SITE_ID }} --auth ${{ secrets.NETLIFY_AUTH_TOKEN }}

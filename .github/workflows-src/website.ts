@@ -36,7 +36,7 @@ export default createWorkflow(({setWorkflowName, addTrigger, addJob}) => {
       `netlify deploy`,
       `--dir packages/website/out`,
       `--site ${secrets.NETLIFY_SITE_ID}`,
-      `--auth ${secrets.NETLIFY_API_TOKEN}`,
+      `--auth ${secrets.NETLIFY_AUTH_TOKEN}`,
     ].join(' ');
     when(eq(github.event_name, `push`), () => {
       run(netlifyDeploy + ` --prod`);
