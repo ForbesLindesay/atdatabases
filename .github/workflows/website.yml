@@ -154,6 +154,7 @@ jobs:
           key: next-${{ hashFiles('yarn.lock') }}
           restore-keys: next-
       - run: yarn workspace @databases/website build
+      - run: npm install netlify-cli -g
       - if: ${{ github.event_name == 'push' }}
         run: netlify deploy --cwd . --filter @databases/website --prod
           --dir=packages/website/out

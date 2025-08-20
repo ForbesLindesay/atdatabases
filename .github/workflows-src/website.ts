@@ -31,6 +31,7 @@ export default createWorkflow(({setWorkflowName, addTrigger, addJob}) => {
 
     run('yarn workspace @databases/website build');
 
+    run(`npm install netlify-cli -g`);
     when(eq(github.event_name, `push`), () => {
       run(
         `netlify deploy --cwd . --filter @databases/website --prod --dir=packages/website/out`,
