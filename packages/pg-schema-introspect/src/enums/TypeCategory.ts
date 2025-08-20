@@ -14,6 +14,7 @@ enum TypeCateogry {
   UserDefined = 'U',
   BitString = 'V',
   Unknown = 'X',
+  Char = 'Z',
 }
 
 export default TypeCateogry;
