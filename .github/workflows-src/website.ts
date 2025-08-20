@@ -31,28 +31,18 @@ export default createWorkflow(({setWorkflowName, addTrigger, addJob}) => {
 
     run('yarn workspace @databases/website build');
 
-    run(`npm install netlify-cli -g`);
+    run(`npm install netlify-cli@17.10.1 -g`);
+    const netlifyDeploy = [
+      `netlify deploy`,
+      `--dir packages/website/out`,
+      `--site ${secrets.NETLIFY_SITE_ID}`,
+      `--auth ${secrets.NETLIFY_API_TOKEN}`,
+    ].join(' ');
     when(eq(github.event_name, `push`), () => {
-      run(
-        `netlify deploy --cwd . --filter @databases/website --prod --dir=packages/website/out`,
-        {
-          env: {
-            NETLIFY_SITE_ID: secrets.NETLIFY_SITE_ID,
-            NETLIFY_AUTH_TOKEN: secrets.NETLIFY_AUTH_TOKEN,
-          },
-        },
-      );
+      run(netlifyDeploy + ` --prod`);
     });
     when(neq(github.event_name, `push`), () => {
-      run(
-        `netlify deploy --cwd . --filter @databases/website --dir=packages/website/out`,
-        {
-          env: {
-            NETLIFY_SITE_ID: secrets.NETLIFY_SITE_ID,
-            NETLIFY_AUTH_TOKEN: secrets.NETLIFY_AUTH_TOKEN,
-          },
-        },
-      );
+      run(netlifyDeploy);
     });
   });
 });
