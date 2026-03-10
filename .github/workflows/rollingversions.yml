@@ -1,0 +1,67 @@
+# !!! This file is auto-generated, do not edit by hand !!!
+# To make changes, edit .github/workflows-src/rollingversions.ts and then run:
+#
+#   github-actions-workflow-builder --directory ".github/workflows-src"
+
+name: Release
+on:
+  repository_dispatch:
+    types:
+      - rollingversions_publish_approved
+  push:
+    branches:
+      - master
+jobs:
+  publish_canary:
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'push' }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 24.x
+          registry-url: https://registry.npmjs.org
+      - name: Get yarn cache directory path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+        id: step_3
+      - name: Enable Cache
+        uses: actions/cache@v4
+        with:
+          path: |-
+            ${{ steps.step_3.outputs.dir }}
+            node_modules
+            packages/*/node_modules
+          key: ${{ runner.os }}-24.x-${{ hashFiles('yarn.lock') }}-2
+      - run: yarn install --prefer-offline
+      - run: yarn build
+      - run: npx rollingversions publish --canary $GITHUB_RUN_NUMBER --allow-any-branch
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  publish:
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'repository_dispatch' }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 24.x
+          registry-url: https://registry.npmjs.org
+      - name: Get yarn cache directory path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+        id: step_3
+      - name: Enable Cache
+        uses: actions/cache@v4
+        with:
+          path: |-
+            ${{ steps.step_3.outputs.dir }}
+            node_modules
+            packages/*/node_modules
+          key: ${{ runner.os }}-24.x-${{ hashFiles('yarn.lock') }}-2
+      - run: yarn install --prefer-offline
+      - run: yarn build
+      - run: npx rollingversions publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+permissions:
+  id-token: write
+  contents: write
