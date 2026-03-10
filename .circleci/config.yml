@@ -62,64 +62,12 @@ jobs:
       - *build
       - *test
 
-  master:
-    <<: *container
-    steps:
-      - checkout
-      - *restore_cache
-      - *npm_auth
-      - *yarn_install
-      - *save_cache
-      - *prettier
-      - *build
-      - *test
-      - run:
-          name: Release
-          command: npx rollingversions publish --canary $CIRCLE_BUILD_NUM
-
-  publish:
-    <<: *container
-    steps:
-      - checkout
-      - *restore_cache
-      - *npm_auth
-      - *yarn_install
-      - *build
-      - run:
-          name: Release
-          command: npx rollingversions publish
-
 workflows:
   version: 2
   all:
     jobs:
-      - all:
-          filters:
-            branches:
-              ignore:
-                - master
-  master:
-    jobs:
-      - master:
-          context: common-env
-          filters:
-            branches:
-              only: master
-
-      - publish-approval:
-          type: approval
-          context: common-env
-          requires:
-            - master
-
-      - publish:
-          context: common-env
-          filters:
-            branches:
-              only: master
-          requires:
-            - publish-approval
-
+      - all
+ 
   nightly:
     triggers:
       - schedule:
