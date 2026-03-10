@@ -35,8 +35,8 @@ test('getAttributes', async () => {
       typeID: typeof c.typeID === 'number' ? '<oid>' : c.typeID,
     })),
   ).toMatchInlineSnapshot(`
-    Array [
-      Object {
+    [
+      {
         "attributeName": "id",
         "attributeNumber": 1,
         "classID": "<oid>",
@@ -50,7 +50,7 @@ test('getAttributes', async () => {
         "typeID": "<oid>",
         "typeLength": -1,
       },
-      Object {
+      {
         "attributeName": "kind",
         "attributeNumber": 4,
         "classID": "<oid>",
@@ -64,7 +64,7 @@ test('getAttributes', async () => {
         "typeID": "<oid>",
         "typeLength": -1,
       },
-      Object {
+      {
         "attributeName": "something",
         "attributeNumber": 3,
         "classID": "<oid>",
@@ -78,7 +78,7 @@ test('getAttributes', async () => {
         "typeID": "<oid>",
         "typeLength": -1,
       },
-      Object {
+      {
         "attributeName": "twenty_chars",
         "attributeNumber": 5,
         "classID": "<oid>",
@@ -92,7 +92,7 @@ test('getAttributes', async () => {
         "typeID": "<oid>",
         "typeLength": 24,
       },
-      Object {
+      {
         "attributeName": "value",
         "attributeNumber": 2,
         "classID": "<oid>",

@@ -22,10 +22,11 @@ afterAll(async () => {
       );
       CREATE TABLE print_types_photos (
         id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-        owner_user_id BIGINT NOT NULL REFERENCES print_types.users(id),
+        owner_user_id BIGINT NOT NULL,
         cdn_url TEXT(512) NOT NULL,
         caption TEXT(512) NULL,
-        metadata JSON NOT NULL
+        metadata JSON NOT NULL,
+        FOREIGN KEY (owner_user_id) REFERENCES print_types_users(id)
       );
     `,
   );
@@ -58,8 +59,8 @@ afterAll(async () => {
   // );
 
   expect(printContext.getFiles()).toMatchInlineSnapshot(`
-    Array [
-      Object {
+    [
+      {
         "content": "import PrintTypesPhoto, {PrintTypesPhotos_InsertParameters} from './print_types_photos'
     import PrintTypesUser, {PrintTypesUsers_InsertParameters} from './print_types_users'
 
@@ -76,7 +77,7 @@ afterAll(async () => {
      * in a JSON column.
      */
     function serializeValue(t: string, c: string, v: unknown): unknown {
-      if (t === \\"print_types_photos\\" && c === \\"metadata\\") {
+      if (t === "print_types_photos" && c === "metadata") {
         return JSON.stringify(v);
       }
       return v;
@@ -85,13 +86,15 @@ afterAll(async () => {
     ",
         "filename": "index.ts",
       },
-      Object {
-        "content": "interface PrintTypesPhoto {
+      {
+        "content": "import PrintTypesUser from './print_types_users'
+
+    interface PrintTypesPhoto {
       caption: (string) | null
       cdn_url: string
       id: number & {readonly __brand?: 'print_types_photos_id'}
       metadata: unknown
-      owner_user_id: number
+      owner_user_id: PrintTypesUser['id']
     }
     export default PrintTypesPhoto;
 
@@ -100,13 +103,13 @@ afterAll(async () => {
       cdn_url: string
       id: number & {readonly __brand?: 'print_types_photos_id'}
       metadata: unknown
-      owner_user_id: number
+      owner_user_id: PrintTypesUser['id']
     }
     export type {PrintTypesPhotos_InsertParameters}
     ",
         "filename": "print_types_photos.ts",
       },
-      Object {
+      {
         "content": "interface PrintTypesUser {
       age: (number) | null
       bio: (string) | null

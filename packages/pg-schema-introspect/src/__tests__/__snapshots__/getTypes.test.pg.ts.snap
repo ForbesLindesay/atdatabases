@@ -1,8 +1,8 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`get built in types 1`] = `
-Object {
-  "Array": Array [
+{
+  "Array": [
     "1023 = _abstime<abstime>",
     "1034 = _aclitem<aclitem>",
     "1561 = _bit<bit>",
@@ -80,14 +80,14 @@ Object {
     "22 = int2vector<int2>",
     "30 = oidvector<oid>",
   ],
-  "BitString": Array [
+  "BitString": [
     "1560 = bit",
     "1562 = varbit",
   ],
-  "Boolean": Array [
+  "Boolean": [
     "16 = bool",
   ],
-  "DateTime": Array [
+  "DateTime": [
     "702 = abstime",
     "1082 = date",
     "1083 = time",
@@ -95,7 +95,7 @@ Object {
     "1184 = timestamptz",
     "1266 = timetz",
   ],
-  "Geometric": Array [
+  "Geometric": [
     "603 = box<point>",
     "718 = circle",
     "628 = line<float8>",
@@ -104,11 +104,11 @@ Object {
     "600 = point<float8>",
     "604 = polygon",
   ],
-  "NetworkAddress": Array [
+  "NetworkAddress": [
     "650 = cidr",
     "869 = inet",
   ],
-  "Numeric": Array [
+  "Numeric": [
     "700 = float4",
     "701 = float8",
     "21 = int2",
@@ -129,7 +129,7 @@ Object {
     "4096 = regrole",
     "2206 = regtype",
   ],
-  "PseudoTypes": Array [
+  "PseudoTypes": [
     "2287 = _record",
     "2276 = any",
     "2277 = anyarray",
@@ -155,7 +155,7 @@ Object {
     "3310 = tsm_handler",
     "2278 = void",
   ],
-  "Range": Array [
+  "Range": [
     "3912 = daterange",
     "3904 = int4range",
     "3926 = int8range",
@@ -163,7 +163,7 @@ Object {
     "3908 = tsrange",
     "3910 = tstzrange",
   ],
-  "String": Array [
+  "String": [
     "1042 = bpchar",
     "18 = char",
     "19 = name<char>",
@@ -174,15 +174,15 @@ Object {
     "25 = text",
     "1043 = varchar",
   ],
-  "Timespan": Array [
+  "Timespan": [
     "1186 = interval",
     "703 = reltime",
     "704 = tinterval",
   ],
-  "Unknown": Array [
+  "Unknown": [
     "705 = unknown",
   ],
-  "UserDefined": Array [
+  "UserDefined": [
     "1033 = aclitem",
     "17 = bytea",
     "29 = cid",

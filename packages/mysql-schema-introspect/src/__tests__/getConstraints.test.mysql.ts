@@ -34,8 +34,8 @@ test('getConstraints', async () => {
       })
     ).filter((t) => t.tableName.startsWith(`get_constraints`)),
   ).toMatchInlineSnapshot(`
-    Array [
-      Object {
+    [
+      {
         "columnName": "id",
         "comment": "",
         "default": null,
@@ -44,11 +44,11 @@ test('getConstraints', async () => {
         "ordinalPosition": 1,
         "schemaName": "test-db",
         "tableName": "get_constraints_table_a",
-        "type": Object {
+        "type": {
           "kind": "bigint",
         },
       },
-      Object {
+      {
         "columnName": "id",
         "comment": "",
         "default": null,
@@ -57,11 +57,11 @@ test('getConstraints', async () => {
         "ordinalPosition": 1,
         "schemaName": "test-db",
         "tableName": "get_constraints_table_b",
-        "type": Object {
+        "type": {
           "kind": "bigint",
         },
       },
-      Object {
+      {
         "columnName": "parent_id",
         "comment": "",
         "default": null,
@@ -70,11 +70,11 @@ test('getConstraints', async () => {
         "ordinalPosition": 2,
         "schemaName": "test-db",
         "tableName": "get_constraints_table_b",
-        "type": Object {
+        "type": {
           "kind": "bigint",
         },
       },
-      Object {
+      {
         "columnName": "value",
         "comment": "",
         "default": null,
@@ -83,12 +83,12 @@ test('getConstraints', async () => {
         "ordinalPosition": 3,
         "schemaName": "test-db",
         "tableName": "get_constraints_table_b",
-        "type": Object {
+        "type": {
           "kind": "varchar",
           "length": 50,
         },
       },
-      Object {
+      {
         "columnName": "a",
         "comment": "",
         "default": null,
@@ -97,11 +97,11 @@ test('getConstraints', async () => {
         "ordinalPosition": 1,
         "schemaName": "test-db",
         "tableName": "get_constraints_table_c",
-        "type": Object {
+        "type": {
           "kind": "bigint",
         },
       },
-      Object {
+      {
         "columnName": "b",
         "comment": "",
         "default": null,
@@ -110,7 +110,7 @@ test('getConstraints', async () => {
         "ordinalPosition": 2,
         "schemaName": "test-db",
         "tableName": "get_constraints_table_c",
-        "type": Object {
+        "type": {
           "kind": "bigint",
         },
       },
@@ -123,10 +123,10 @@ test('getConstraints', async () => {
       })
     ).filter((t) => t.tableName.startsWith(`get_constraints`)),
   ).toMatchInlineSnapshot(`
-    Array [
-      Object {
-        "columns": Array [
-          Object {
+    [
+      {
+        "columns": [
+          {
             "columnName": "id",
             "referenced": null,
           },
@@ -135,9 +135,9 @@ test('getConstraints', async () => {
         "schemaName": "test-db",
         "tableName": "get_constraints_table_a",
       },
-      Object {
-        "columns": Array [
-          Object {
+      {
+        "columns": [
+          {
             "columnName": "id",
             "referenced": null,
           },
@@ -146,11 +146,11 @@ test('getConstraints', async () => {
         "schemaName": "test-db",
         "tableName": "get_constraints_table_b",
       },
-      Object {
-        "columns": Array [
-          Object {
+      {
+        "columns": [
+          {
             "columnName": "parent_id",
-            "referenced": Object {
+            "referenced": {
               "columnName": "id",
               "schemaName": "test-db",
               "tableName": "get_constraints_table_a",
@@ -161,13 +161,13 @@ test('getConstraints', async () => {
         "schemaName": "test-db",
         "tableName": "get_constraints_table_b",
       },
-      Object {
-        "columns": Array [
-          Object {
+      {
+        "columns": [
+          {
             "columnName": "parent_id",
             "referenced": null,
           },
-          Object {
+          {
             "columnName": "value",
             "referenced": null,
           },
@@ -176,13 +176,13 @@ test('getConstraints', async () => {
         "schemaName": "test-db",
         "tableName": "get_constraints_table_b",
       },
-      Object {
-        "columns": Array [
-          Object {
+      {
+        "columns": [
+          {
             "columnName": "a",
             "referenced": null,
           },
-          Object {
+          {
             "columnName": "b",
             "referenced": null,
           },
@@ -191,11 +191,11 @@ test('getConstraints', async () => {
         "schemaName": "test-db",
         "tableName": "get_constraints_table_c",
       },
-      Object {
-        "columns": Array [
-          Object {
+      {
+        "columns": [
+          {
             "columnName": "a",
-            "referenced": Object {
+            "referenced": {
               "columnName": "id",
               "schemaName": "test-db",
               "tableName": "get_constraints_table_a",
@@ -206,11 +206,11 @@ test('getConstraints', async () => {
         "schemaName": "test-db",
         "tableName": "get_constraints_table_c",
       },
-      Object {
-        "columns": Array [
-          Object {
+      {
+        "columns": [
+          {
             "columnName": "b",
-            "referenced": Object {
+            "referenced": {
               "columnName": "id",
               "schemaName": "test-db",
               "tableName": "get_constraints_table_b",

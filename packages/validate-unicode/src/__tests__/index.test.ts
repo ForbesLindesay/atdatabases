@@ -51,22 +51,18 @@ test('isValidUnicode', () => {
 
 test('assertValidUnicode', () => {
   expect(() => assertValidUnicode(pairUnescaped)).not.toThrow();
-  expect(() => assertValidUnicode(pairUnescaped[0])).toThrowError(
+  expect(() => assertValidUnicode(pairUnescaped[0])).toThrow(
     `This string contains unmatched surrogate pairs: "\\ud83d"`,
   );
-  expect(() => assertValidUnicode(pairUnescaped[1])).toThrowError(
+  expect(() => assertValidUnicode(pairUnescaped[1])).toThrow(
     `This string contains unmatched surrogate pairs: "\\ude00"`,
   );
 
   expect(() => assertValidUnicode(`hello😀world`)).not.toThrow();
-  expect(() =>
-    assertValidUnicode(`hello${pairUnescaped[0]}world`),
-  ).toThrowError(
+  expect(() => assertValidUnicode(`hello${pairUnescaped[0]}world`)).toThrow(
     `This string contains unmatched surrogate pairs: "hello\\ud83dworld"`,
   );
-  expect(() =>
-    assertValidUnicode(`hello${pairUnescaped[1]}world`),
-  ).toThrowError(
+  expect(() => assertValidUnicode(`hello${pairUnescaped[1]}world`)).toThrow(
     `This string contains unmatched surrogate pairs: "hello\\ude00world"`,
   );
 });

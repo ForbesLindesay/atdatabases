@@ -74,8 +74,8 @@ test('getClasses', async () => {
   });
 
   expect(printContext.printer.getFiles()).toMatchInlineSnapshot(`
-    Array [
-      Object {
+    [
+      {
         "content": "import Partitioned, {Partitioned_InsertParameters} from './partitioned'
     import PartitionedP0, {PartitionedP0_InsertParameters} from './partitioned_p0'
     import PartitionedP1, {PartitionedP1_InsertParameters} from './partitioned_p1'
@@ -98,7 +98,7 @@ test('getClasses', async () => {
      * in a JSON or JSONB column.
      */
     function serializeValue(t: string, c: string, v: unknown): unknown {
-      if (t === \\"photos\\" && c === \\"metadata\\") {
+      if (t === "photos" && c === "metadata") {
         return JSON.stringify(v);
       }
       return v;
@@ -107,7 +107,7 @@ test('getClasses', async () => {
     ",
         "filename": "index.ts",
       },
-      Object {
+      {
         "content": "interface Partitioned {
       create_date: Date
       id: number
@@ -122,7 +122,7 @@ test('getClasses', async () => {
     ",
         "filename": "partitioned.ts",
       },
-      Object {
+      {
         "content": "interface PartitionedP0 {
       create_date: Date
       id: number
@@ -137,7 +137,7 @@ test('getClasses', async () => {
     ",
         "filename": "partitioned_p0.ts",
       },
-      Object {
+      {
         "content": "interface PartitionedP1 {
       create_date: Date
       id: number
@@ -152,7 +152,7 @@ test('getClasses', async () => {
     ",
         "filename": "partitioned_p1.ts",
       },
-      Object {
+      {
         "content": "import User from './users'
 
     /**
@@ -160,7 +160,7 @@ test('getClasses', async () => {
      */
     interface Photo {
       caption: (string) | null
-      cdn_url: string & {__brand?: \\"url\\"}
+      cdn_url: string & {__brand?: "url"}
       created_at: (Date) | null
       /**
        * @default nextval('print_types.photos_id_seq'::regclass)
@@ -177,7 +177,7 @@ test('getClasses', async () => {
      */
     interface Photos_InsertParameters {
       caption?: (string) | null
-      cdn_url: string & {__brand?: \\"url\\"}
+      cdn_url: string & {__brand?: "url"}
       created_at?: (Date) | null
       /**
        * @default nextval('print_types.photos_id_seq'::regclass)
@@ -191,7 +191,7 @@ test('getClasses', async () => {
     ",
         "filename": "photos.ts",
       },
-      Object {
+      {
         "content": "interface User {
       age: (number) | null
       bio: (string) | null
@@ -220,163 +220,163 @@ test('getClasses', async () => {
     ",
         "filename": "users.ts",
       },
-      Object {
+      {
         "content": "[
       {
-        \\"name\\": \\"partitioned\\",
-        \\"columns\\": [
+        "name": "partitioned",
+        "columns": [
           {
-            \\"name\\": \\"create_date\\",
-            \\"isNullable\\": false,
-            \\"hasDefault\\": false,
-            \\"typeId\\": 1082,
-            \\"typeName\\": \\"DATE\\"
+            "name": "create_date",
+            "isNullable": false,
+            "hasDefault": false,
+            "typeId": 1082,
+            "typeName": "DATE"
           },
           {
-            \\"name\\": \\"id\\",
-            \\"isNullable\\": false,
-            \\"hasDefault\\": false,
-            \\"typeId\\": 23,
-            \\"typeName\\": \\"INTEGER\\"
+            "name": "id",
+            "isNullable": false,
+            "hasDefault": false,
+            "typeId": 23,
+            "typeName": "INTEGER"
           }
         ]
       },
       {
-        \\"name\\": \\"partitioned_p0\\",
-        \\"columns\\": [
+        "name": "partitioned_p0",
+        "columns": [
           {
-            \\"name\\": \\"create_date\\",
-            \\"isNullable\\": false,
-            \\"hasDefault\\": false,
-            \\"typeId\\": 1082,
-            \\"typeName\\": \\"DATE\\"
+            "name": "create_date",
+            "isNullable": false,
+            "hasDefault": false,
+            "typeId": 1082,
+            "typeName": "DATE"
           },
           {
-            \\"name\\": \\"id\\",
-            \\"isNullable\\": false,
-            \\"hasDefault\\": false,
-            \\"typeId\\": 23,
-            \\"typeName\\": \\"INTEGER\\"
+            "name": "id",
+            "isNullable": false,
+            "hasDefault": false,
+            "typeId": 23,
+            "typeName": "INTEGER"
           }
         ]
       },
       {
-        \\"name\\": \\"partitioned_p1\\",
-        \\"columns\\": [
+        "name": "partitioned_p1",
+        "columns": [
           {
-            \\"name\\": \\"create_date\\",
-            \\"isNullable\\": false,
-            \\"hasDefault\\": false,
-            \\"typeId\\": 1082,
-            \\"typeName\\": \\"DATE\\"
+            "name": "create_date",
+            "isNullable": false,
+            "hasDefault": false,
+            "typeId": 1082,
+            "typeName": "DATE"
           },
           {
-            \\"name\\": \\"id\\",
-            \\"isNullable\\": false,
-            \\"hasDefault\\": false,
-            \\"typeId\\": 23,
-            \\"typeName\\": \\"INTEGER\\"
+            "name": "id",
+            "isNullable": false,
+            "hasDefault": false,
+            "typeId": 23,
+            "typeName": "INTEGER"
           }
         ]
       },
       {
-        \\"name\\": \\"photos\\",
-        \\"columns\\": [
+        "name": "photos",
+        "columns": [
           {
-            \\"name\\": \\"caption\\",
-            \\"isNullable\\": true,
-            \\"hasDefault\\": false,
-            \\"typeId\\": 25,
-            \\"typeName\\": \\"TEXT\\"
+            "name": "caption",
+            "isNullable": true,
+            "hasDefault": false,
+            "typeId": 25,
+            "typeName": "TEXT"
           },
           {
-            \\"name\\": \\"cdn_url\\",
-            \\"isNullable\\": false,
-            \\"hasDefault\\": false,
-            \\"typeId\\": 25,
-            \\"typeName\\": \\"TEXT\\"
+            "name": "cdn_url",
+            "isNullable": false,
+            "hasDefault": false,
+            "typeId": 25,
+            "typeName": "TEXT"
           },
           {
-            \\"name\\": \\"created_at\\",
-            \\"isNullable\\": true,
-            \\"hasDefault\\": false,
-            \\"typeId\\": 1184,
-            \\"typeName\\": \\"TIMESTAMPTZ\\"
+            "name": "created_at",
+            "isNullable": true,
+            "hasDefault": false,
+            "typeId": 1184,
+            "typeName": "TIMESTAMPTZ"
           },
           {
-            \\"name\\": \\"id\\",
-            \\"isNullable\\": false,
-            \\"hasDefault\\": true,
-            \\"typeId\\": 20,
-            \\"typeName\\": \\"BIGINT\\"
+            "name": "id",
+            "isNullable": false,
+            "hasDefault": true,
+            "typeId": 20,
+            "typeName": "BIGINT"
           },
           {
-            \\"name\\": \\"metadata\\",
-            \\"isNullable\\": false,
-            \\"hasDefault\\": false,
-            \\"typeId\\": 3802,
-            \\"typeName\\": \\"JSONB\\"
+            "name": "metadata",
+            "isNullable": false,
+            "hasDefault": false,
+            "typeId": 3802,
+            "typeName": "JSONB"
           },
           {
-            \\"name\\": \\"owner_user_id\\",
-            \\"isNullable\\": false,
-            \\"hasDefault\\": false,
-            \\"typeId\\": 20,
-            \\"typeName\\": \\"BIGINT\\"
+            "name": "owner_user_id",
+            "isNullable": false,
+            "hasDefault": false,
+            "typeId": 20,
+            "typeName": "BIGINT"
           },
           {
-            \\"name\\": \\"updated_at\\",
-            \\"isNullable\\": true,
-            \\"hasDefault\\": false,
-            \\"typeId\\": 1184,
-            \\"typeName\\": \\"TIMESTAMPTZ\\"
+            "name": "updated_at",
+            "isNullable": true,
+            "hasDefault": false,
+            "typeId": 1184,
+            "typeName": "TIMESTAMPTZ"
           }
         ]
       },
       {
-        \\"name\\": \\"users\\",
-        \\"columns\\": [
+        "name": "users",
+        "columns": [
           {
-            \\"name\\": \\"age\\",
-            \\"isNullable\\": true,
-            \\"hasDefault\\": false,
-            \\"typeId\\": 23,
-            \\"typeName\\": \\"INTEGER\\"
+            "name": "age",
+            "isNullable": true,
+            "hasDefault": false,
+            "typeId": 23,
+            "typeName": "INTEGER"
           },
           {
-            \\"name\\": \\"bio\\",
-            \\"isNullable\\": true,
-            \\"hasDefault\\": false,
-            \\"typeId\\": 25,
-            \\"typeName\\": \\"TEXT\\"
+            "name": "bio",
+            "isNullable": true,
+            "hasDefault": false,
+            "typeId": 25,
+            "typeName": "TEXT"
           },
           {
-            \\"name\\": \\"created_at\\",
-            \\"isNullable\\": true,
-            \\"hasDefault\\": false,
-            \\"typeId\\": 1184,
-            \\"typeName\\": \\"TIMESTAMPTZ\\"
+            "name": "created_at",
+            "isNullable": true,
+            "hasDefault": false,
+            "typeId": 1184,
+            "typeName": "TIMESTAMPTZ"
           },
           {
-            \\"name\\": \\"id\\",
-            \\"isNullable\\": false,
-            \\"hasDefault\\": true,
-            \\"typeId\\": 20,
-            \\"typeName\\": \\"BIGINT\\"
+            "name": "id",
+            "isNullable": false,
+            "hasDefault": true,
+            "typeId": 20,
+            "typeName": "BIGINT"
           },
           {
-            \\"name\\": \\"screen_name\\",
-            \\"isNullable\\": false,
-            \\"hasDefault\\": false,
-            \\"typeId\\": 25,
-            \\"typeName\\": \\"TEXT\\"
+            "name": "screen_name",
+            "isNullable": false,
+            "hasDefault": false,
+            "typeId": 25,
+            "typeName": "TEXT"
           },
           {
-            \\"name\\": \\"updated_at\\",
-            \\"isNullable\\": true,
-            \\"hasDefault\\": false,
-            \\"typeId\\": 1184,
-            \\"typeName\\": \\"TIMESTAMPTZ\\"
+            "name": "updated_at",
+            "isNullable": true,
+            "hasDefault": false,
+            "typeId": 1184,
+            "typeName": "TIMESTAMPTZ"
           }
         ]
       }

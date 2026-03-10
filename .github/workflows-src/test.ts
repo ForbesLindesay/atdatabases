@@ -7,9 +7,9 @@ import {
   interpolate,
 } from 'github-actions-workflow-builder/expression';
 
-const DEFAULT_NODE_VERSION = '20.x';
-const ALL_NODE_VERSIONS = ['18.x', '20.x', '22.x'];
-const INTEGRATION_TEST_NODE_VERSIONS = ['18.x', '22.x'];
+const DEFAULT_NODE_VERSION = '24.x';
+const ALL_NODE_VERSIONS = ['20.x', '22.x', '24.x'];
+const INTEGRATION_TEST_NODE_VERSIONS = ['22.x', '24.x'];
 
 export function yarnInstallWithCache(nodeVersion: Expression<string>): Steps {
   return ({use, run}) => {
@@ -175,7 +175,7 @@ export default createWorkflow(({setWorkflowName, addTrigger, addJob}) => {
     const {node, mysql} = setBuildMatrix(
       {
         node: INTEGRATION_TEST_NODE_VERSIONS,
-        mysql: ['5.6.51', '5.7.33', '8.0.23'],
+        mysql: ['5.6.51', '5.7.33', '8.0.23', '9.6.0'],
       },
       {failFast: false},
     );

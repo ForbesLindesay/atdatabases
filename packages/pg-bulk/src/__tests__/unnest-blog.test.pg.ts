@@ -31,16 +31,16 @@ test('insert', async () => {
   `);
   expect(await db.query(sql`SELECT * FROM ${table} ORDER BY email ASC`))
     .toMatchInlineSnapshot(`
-    Array [
-      Object {
+    [
+      {
         "email": "ben@example.com",
         "favorite_color": "green",
       },
-      Object {
+      {
         "email": "joe@example.com",
         "favorite_color": "red",
       },
-      Object {
+      {
         "email": "mary@example.com",
         "favorite_color": "indigo",
       },
@@ -69,16 +69,16 @@ test('update', async () => {
   `);
   expect(await db.query(sql`SELECT * FROM ${table} ORDER BY email ASC`))
     .toMatchInlineSnapshot(`
-    Array [
-      Object {
+    [
+      {
         "email": "ben@example.com",
         "favorite_color": "violet",
       },
-      Object {
+      {
         "email": "joe@example.com",
         "favorite_color": "purple",
       },
-      Object {
+      {
         "email": "mary@example.com",
         "favorite_color": "orange",
       },
@@ -100,16 +100,16 @@ test('select', async () => {
       ) ORDER BY email ASC
     `),
   ).toMatchInlineSnapshot(`
-    Array [
-      Object {
+    [
+      {
         "email": "ben@example.com",
         "favorite_color": "violet",
       },
-      Object {
+      {
         "email": "joe@example.com",
         "favorite_color": "purple",
       },
-      Object {
+      {
         "email": "mary@example.com",
         "favorite_color": "orange",
       },
@@ -130,16 +130,16 @@ test('select', async () => {
       ) ORDER BY users.email ASC
     `),
   ).toMatchInlineSnapshot(`
-    Array [
-      Object {
+    [
+      {
         "email": "ben@example.com",
         "favorite_color": "violet",
       },
-      Object {
+      {
         "email": "joe@example.com",
         "favorite_color": "purple",
       },
-      Object {
+      {
         "email": "mary@example.com",
         "favorite_color": "orange",
       },
@@ -161,5 +161,5 @@ test('update', async () => {
   `);
   expect(
     await db.query(sql`SELECT * FROM ${table} ORDER BY email ASC`),
-  ).toMatchInlineSnapshot(`Array []`);
+  ).toMatchInlineSnapshot(`[]`);
 });

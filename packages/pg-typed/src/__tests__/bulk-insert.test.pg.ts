@@ -36,8 +36,8 @@ test('create multiple users per statement using non-bulk API', async () => {
     {screen_name: 'John', bio: 'Hello world'},
   );
   expect([forbes, ellie, john]).toMatchInlineSnapshot(`
-    Array [
-      Object {
+    [
+      {
         "age": 42,
         "bio": null,
         "created_at": null,
@@ -45,7 +45,7 @@ test('create multiple users per statement using non-bulk API', async () => {
         "screen_name": "Forbes",
         "updated_at": null,
       },
-      Object {
+      {
         "age": 10,
         "bio": null,
         "created_at": null,
@@ -53,7 +53,7 @@ test('create multiple users per statement using non-bulk API', async () => {
         "screen_name": "Ellie",
         "updated_at": null,
       },
-      Object {
+      {
         "age": 42,
         "bio": "Hello world",
         "created_at": null,
@@ -70,8 +70,8 @@ test('create multiple users per statement using non-bulk API', async () => {
     {screen_name: 'John', bio: 'Hello world'},
   );
   expect([forbes2, martin, ellie2, john2]).toMatchInlineSnapshot(`
-    Array [
-      Object {
+    [
+      {
         "age": 42,
         "bio": null,
         "created_at": null,
@@ -92,8 +92,8 @@ test('create multiple users per statement using non-bulk API', async () => {
     {screen_name: 'John', bio: 'Whatever world'},
   );
   expect([forbes3, martin2, ellie3, john3]).toMatchInlineSnapshot(`
-    Array [
-      Object {
+    [
+      {
         "age": 20,
         "bio": null,
         "created_at": null,
@@ -101,7 +101,7 @@ test('create multiple users per statement using non-bulk API', async () => {
         "screen_name": "Forbes",
         "updated_at": null,
       },
-      Object {
+      {
         "age": 42,
         "bio": null,
         "created_at": null,
@@ -109,7 +109,7 @@ test('create multiple users per statement using non-bulk API', async () => {
         "screen_name": "Martin",
         "updated_at": null,
       },
-      Object {
+      {
         "age": 5,
         "bio": null,
         "created_at": null,
@@ -117,7 +117,7 @@ test('create multiple users per statement using non-bulk API', async () => {
         "screen_name": "Ellie",
         "updated_at": null,
       },
-      Object {
+      {
         "age": 42,
         "bio": "Whatever world",
         "created_at": null,

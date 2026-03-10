@@ -24,15 +24,15 @@ test('Allows parallel read queries', async () => {
     }),
   ]);
   expect(results).toMatchInlineSnapshot(`
-Array [
-  "START R1",
-  "START R2",
-  "START R3",
-  "END R1",
-  "END R3",
-  "END R2",
-]
-`);
+    [
+      "START R1",
+      "START R2",
+      "START R3",
+      "END R1",
+      "END R3",
+      "END R2",
+    ]
+  `);
 });
 
 test('Only Allows One Write', async () => {
@@ -96,25 +96,25 @@ test('Only Allows One Write', async () => {
   ]);
 
   expect(results).toMatchInlineSnapshot(`
-Array [
-  "START R1",
-  "START R2",
-  "START R3",
-  "END R1",
-  "END R3",
-  "END R2",
-  "START W1",
-  "END W1",
-  "START W2",
-  "END W2",
-  "START W3",
-  "END W3",
-  "START R4",
-  "END R4",
-  "START W4",
-  "END W4",
-  "START R5",
-  "END R5",
-]
-`);
+    [
+      "START R1",
+      "START R2",
+      "START R3",
+      "END R1",
+      "END R3",
+      "END R2",
+      "START W1",
+      "END W1",
+      "START W2",
+      "END W2",
+      "START W3",
+      "END W3",
+      "START R4",
+      "END R4",
+      "START W4",
+      "END W4",
+      "START R5",
+      "END R5",
+    ]
+  `);
 });

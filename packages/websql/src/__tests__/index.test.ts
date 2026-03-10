@@ -16,7 +16,7 @@ test('error messages', async () => {
     `);
   } catch (ex) {
     expect((ex as Error).message).toMatchInlineSnapshot(`
-      "SQLITE_ERROR: near \\"FRM\\": syntax error
+      "SQLITE_ERROR: near "FRM": syntax error
 
       > 1 | SELECT * FRM 'baz;
           |          ^^^
@@ -58,14 +58,14 @@ test('transaction', async () => {
     return {a, b};
   });
   expect(result).toMatchInlineSnapshot(`
-    Object {
-      "a": Array [
-        Object {
+    {
+      "a": [
+        {
           "foo": 42,
         },
       ],
-      "b": Array [
-        Object {
+      "b": [
+        {
           "bar": 3,
         },
       ],

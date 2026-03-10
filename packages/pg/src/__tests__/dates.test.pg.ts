@@ -16,8 +16,8 @@ afterAll(async () => {
 test('dates', async () => {
   await db.task(async (db) => {
     expect(await db.query(sql`show timezone;`)).toMatchInlineSnapshot(`
-      Array [
-        Object {
+      [
+        {
           "TimeZone": "UTC",
         },
       ]

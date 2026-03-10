@@ -70,33 +70,33 @@ test('default isolation level', async () => {
     db.tx(async (tx) => await transaction(tx, {from: 2, to: 1, wait: waitB})),
   ]);
   await expect(results()).resolves.toMatchInlineSnapshot(`
-          Array [
-            Object {
-              "class": 1,
-              "value": 10,
-            },
-            Object {
-              "class": 1,
-              "value": 20,
-            },
-            Object {
-              "class": 2,
-              "value": 30,
-            },
-            Object {
-              "class": 2,
-              "value": 100,
-            },
-            Object {
-              "class": 2,
-              "value": 200,
-            },
-            Object {
-              "class": 1,
-              "value": 300,
-            },
-          ]
-        `);
+    [
+      {
+        "class": 1,
+        "value": 10,
+      },
+      {
+        "class": 1,
+        "value": 20,
+      },
+      {
+        "class": 2,
+        "value": 30,
+      },
+      {
+        "class": 2,
+        "value": 100,
+      },
+      {
+        "class": 2,
+        "value": 200,
+      },
+      {
+        "class": 1,
+        "value": 300,
+      },
+    ]
+  `);
 });
 
 test('serializable', async () => {

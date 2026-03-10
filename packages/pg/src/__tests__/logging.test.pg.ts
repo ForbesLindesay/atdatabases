@@ -88,7 +88,7 @@ test('logging', async () => {
     );
 
   expect(events).toMatchInlineSnapshot(`
-    Array [
+    [
       "onQueryStart(SQLQuery, {
         'text': 'CREATE SCHEMA logging',
         'values': []
@@ -98,15 +98,15 @@ test('logging', async () => {
         'values': []
       }, [])",
       "onQueryStart(SQLQuery, {
-        'text': 'CREATE TABLE logging.accounts (\\\\n  email TEXT NOT NULL PRIMARY KEY,\\\\n  balance BIGINT NOT NULL\\\\n);',
+        'text': 'CREATE TABLE logging.accounts (\\n  email TEXT NOT NULL PRIMARY KEY,\\n  balance BIGINT NOT NULL\\n);',
         'values': []
       })",
       "onQueryResults(SQLQuery, {
-        'text': 'CREATE TABLE logging.accounts (\\\\n  email TEXT NOT NULL PRIMARY KEY,\\\\n  balance BIGINT NOT NULL\\\\n);',
+        'text': 'CREATE TABLE logging.accounts (\\n  email TEXT NOT NULL PRIMARY KEY,\\n  balance BIGINT NOT NULL\\n);',
         'values': []
       }, [])",
       "onQueryStart(SQLQuery, {
-        'text': 'INSERT INTO logging.accounts (email, balance)\\\\nVALUES\\\\n  (\\\\n    $1,\\\\n    $2\\\\n  ),\\\\n  (\\\\n    $3,\\\\n    $4\\\\n  );',
+        'text': 'INSERT INTO logging.accounts (email, balance)\\nVALUES\\n  (\\n    $1,\\n    $2\\n  ),\\n  (\\n    $3,\\n    $4\\n  );',
         'values': [
           'forbes@lindesay.co.uk',
           100,
@@ -115,7 +115,7 @@ test('logging', async () => {
         ]
       })",
       "onQueryResults(SQLQuery, {
-        'text': 'INSERT INTO logging.accounts (email, balance)\\\\nVALUES\\\\n  (\\\\n    $1,\\\\n    $2\\\\n  ),\\\\n  (\\\\n    $3,\\\\n    $4\\\\n  );',
+        'text': 'INSERT INTO logging.accounts (email, balance)\\nVALUES\\n  (\\n    $1,\\n    $2\\n  ),\\n  (\\n    $3,\\n    $4\\n  );',
         'values': [
           'forbes@lindesay.co.uk',
           100,
@@ -270,7 +270,7 @@ test('docs examples - simple', async () => {
 
   await db.dispose();
 
-  expect(console.log).toBeCalledTimes(4);
+  expect(console.log.mock.calls.length).toBe(4);
   console.log.mockClear();
 });
 
@@ -309,5 +309,5 @@ test('docs examples - timing', async () => {
 
   await db.dispose();
 
-  expect(console.log).toBeCalledTimes(2);
+  expect(console.log.mock.calls.length).toBe(2);
 });

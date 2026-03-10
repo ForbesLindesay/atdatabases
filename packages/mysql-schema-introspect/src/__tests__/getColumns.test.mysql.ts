@@ -24,8 +24,8 @@ test('getColumns', async () => {
       })
     ).filter((c) => c.tableName.startsWith(`get_columns`)),
   ).toMatchInlineSnapshot(`
-    Array [
-      Object {
+    [
+      {
         "columnName": "id",
         "comment": "",
         "default": null,
@@ -34,11 +34,11 @@ test('getColumns', async () => {
         "ordinalPosition": 1,
         "schemaName": "test-db",
         "tableName": "get_columns_table",
-        "type": Object {
+        "type": {
           "kind": "bigint",
         },
       },
-      Object {
+      {
         "columnName": "int_with_default",
         "comment": "",
         "default": "42",
@@ -47,11 +47,11 @@ test('getColumns', async () => {
         "ordinalPosition": 5,
         "schemaName": "test-db",
         "tableName": "get_columns_table",
-        "type": Object {
+        "type": {
           "kind": "int",
         },
       },
-      Object {
+      {
         "columnName": "str",
         "comment": "",
         "default": "Hello World",
@@ -60,12 +60,12 @@ test('getColumns', async () => {
         "ordinalPosition": 2,
         "schemaName": "test-db",
         "tableName": "get_columns_table",
-        "type": Object {
+        "type": {
           "kind": "varchar",
           "length": 50,
         },
       },
-      Object {
+      {
         "columnName": "str2",
         "comment": "",
         "default": null,
@@ -74,12 +74,12 @@ test('getColumns', async () => {
         "ordinalPosition": 3,
         "schemaName": "test-db",
         "tableName": "get_columns_table",
-        "type": Object {
+        "type": {
           "kind": "varchar",
           "length": 50,
         },
       },
-      Object {
+      {
         "columnName": "str3",
         "comment": "",
         "default": null,
@@ -88,12 +88,12 @@ test('getColumns', async () => {
         "ordinalPosition": 4,
         "schemaName": "test-db",
         "tableName": "get_columns_table",
-        "type": Object {
+        "type": {
           "kind": "varchar",
           "length": 50,
         },
       },
-      Object {
+      {
         "columnName": "id",
         "comment": "",
         "default": "0",
@@ -102,11 +102,11 @@ test('getColumns', async () => {
         "ordinalPosition": 1,
         "schemaName": "test-db",
         "tableName": "get_columns_view",
-        "type": Object {
+        "type": {
           "kind": "bigint",
         },
       },
-      Object {
+      {
         "columnName": "int_with_default",
         "comment": "",
         "default": "42",
@@ -115,11 +115,11 @@ test('getColumns', async () => {
         "ordinalPosition": 5,
         "schemaName": "test-db",
         "tableName": "get_columns_view",
-        "type": Object {
+        "type": {
           "kind": "int",
         },
       },
-      Object {
+      {
         "columnName": "str",
         "comment": "",
         "default": "Hello World",
@@ -128,12 +128,12 @@ test('getColumns', async () => {
         "ordinalPosition": 2,
         "schemaName": "test-db",
         "tableName": "get_columns_view",
-        "type": Object {
+        "type": {
           "kind": "varchar",
           "length": 50,
         },
       },
-      Object {
+      {
         "columnName": "str2",
         "comment": "",
         "default": null,
@@ -142,12 +142,12 @@ test('getColumns', async () => {
         "ordinalPosition": 3,
         "schemaName": "test-db",
         "tableName": "get_columns_view",
-        "type": Object {
+        "type": {
           "kind": "varchar",
           "length": 50,
         },
       },
-      Object {
+      {
         "columnName": "str3",
         "comment": "",
         "default": null,
@@ -156,7 +156,7 @@ test('getColumns', async () => {
         "ordinalPosition": 4,
         "schemaName": "test-db",
         "tableName": "get_columns_view",
-        "type": Object {
+        "type": {
           "kind": "varchar",
           "length": 50,
         },

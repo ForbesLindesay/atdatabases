@@ -50,19 +50,19 @@ test('transaction', async () => {
     return {a, b};
   });
   expect(result).toMatchInlineSnapshot(`
-Object {
-  "a": Array [
-    Object {
-      "foo": 42,
-    },
-  ],
-  "b": Array [
-    Object {
-      "bar": 3,
-    },
-  ],
-}
-`);
+    {
+      "a": [
+        {
+          "foo": 42,
+        },
+      ],
+      "b": [
+        {
+          "bar": 3,
+        },
+      ],
+    }
+  `);
 });
 
 test('transaction with rollback', async () => {
