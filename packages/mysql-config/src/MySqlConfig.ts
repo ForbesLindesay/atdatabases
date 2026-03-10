@@ -107,7 +107,7 @@ export const TestConfigSchema: ft.Runtype<TestConfig> = ft
   .Object({
     debug: withDefault(ft.Boolean, false),
     migrationsScript: ft.Union(ft.String, ft.Array(ft.String), ft.Undefined),
-    image: withDefault(ft.String, `mysql:8.0.23`),
+    image: withDefault(ft.String, `mysql:9.6.0`),
     containerName: withDefault(ft.String, `mysql-test`),
     connectTimeoutSeconds: withDefault(integer({min: 0}), 20),
     port: withDefault(integer({min: 0, max: 65535}), undefined),

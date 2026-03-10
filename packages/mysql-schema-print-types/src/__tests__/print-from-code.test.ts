@@ -28,8 +28,8 @@ test('replace filter', async () => {
   const printContext = new PrintContext(options);
   printSchema(schema, printContext, options);
   expect(printContext.getFiles()).toMatchInlineSnapshot(`
-    Array [
-      Object {
+    [
+      {
         "content": "import TableName, {TableMyNameInsert} from './my_table_my_name'
 
     interface DatabaseSchema {
@@ -44,7 +44,7 @@ test('replace filter', async () => {
     ",
         "filename": "index.ts",
       },
-      Object {
+      {
         "content": "interface TableMyNameInsert {
     }
     export type {TableMyNameInsert}

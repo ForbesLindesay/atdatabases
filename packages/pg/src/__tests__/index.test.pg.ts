@@ -25,7 +25,7 @@ test('error messages', async function testErrorMessages() {
     expect(ex).toHaveProperty('routine');
 
     expect(ex.message).toMatchInlineSnapshot(`
-      "syntax error at or near \\"INER\\"
+      "syntax error at or near "INER"
 
         1 | SELECT * FROM foo
         2 | WHERE id = $1
@@ -80,7 +80,7 @@ test('error messages in a transaction', async function testErrorMessages() {
     expect(ex).toHaveProperty('routine');
 
     expect(ex.message).toMatchInlineSnapshot(`
-      "syntax error at or near \\"INER\\"
+      "syntax error at or near "INER"
 
         1 | SELECT * FROM foo
         2 | WHERE id = $1

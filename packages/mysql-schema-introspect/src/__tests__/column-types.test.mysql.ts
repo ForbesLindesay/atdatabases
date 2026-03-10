@@ -119,7 +119,7 @@ test('column-types', async () => {
   if (SUPPORTS_JSON_TYPE) {
     expect(columns.find((c) => c.columnName === `val_json`))
       .toMatchInlineSnapshot(`
-      Object {
+      {
         "columnName": "val_json",
         "comment": "",
         "default": null,
@@ -128,7 +128,7 @@ test('column-types', async () => {
         "ordinalPosition": 38,
         "schemaName": "test-db",
         "tableName": "column_types_test",
-        "type": Object {
+        "type": {
           "kind": "json",
         },
       }
@@ -138,7 +138,7 @@ test('column-types', async () => {
   if (SUPPORTS_MODERN_TIMESTAMP) {
     expect(columns.find((c) => c.columnName === `val_timestamp`))
       .toMatchInlineSnapshot(`
-      Object {
+      {
         "columnName": "val_timestamp",
         "comment": "",
         "default": null,
@@ -147,7 +147,7 @@ test('column-types', async () => {
         "ordinalPosition": 13,
         "schemaName": "test-db",
         "tableName": "column_types_test",
-        "type": Object {
+        "type": {
           "kind": "timestamp",
         },
       }
@@ -172,8 +172,8 @@ test('column-types', async () => {
   }
   columns = columns.filter((c) => c.columnName !== `val_timestamp`);
   expect(columns).toMatchInlineSnapshot(`
-    Array [
-      Object {
+    [
+      {
         "columnName": "val_bigint",
         "comment": "",
         "default": null,
@@ -182,11 +182,11 @@ test('column-types', async () => {
         "ordinalPosition": 5,
         "schemaName": "test-db",
         "tableName": "column_types_test",
-        "type": Object {
+        "type": {
           "kind": "bigint",
         },
       },
-      Object {
+      {
         "columnName": "val_binary",
         "comment": "",
         "default": null,
@@ -195,12 +195,12 @@ test('column-types', async () => {
         "ordinalPosition": 18,
         "schemaName": "test-db",
         "tableName": "column_types_test",
-        "type": Object {
+        "type": {
           "kind": "binary",
           "length": 1,
         },
       },
-      Object {
+      {
         "columnName": "val_bit",
         "comment": "",
         "default": null,
@@ -209,12 +209,12 @@ test('column-types', async () => {
         "ordinalPosition": 10,
         "schemaName": "test-db",
         "tableName": "column_types_test",
-        "type": Object {
+        "type": {
           "kind": "bit",
           "length": 1,
         },
       },
-      Object {
+      {
         "columnName": "val_blob",
         "comment": "",
         "default": null,
@@ -223,11 +223,11 @@ test('column-types', async () => {
         "ordinalPosition": 21,
         "schemaName": "test-db",
         "tableName": "column_types_test",
-        "type": Object {
+        "type": {
           "kind": "blob",
         },
       },
-      Object {
+      {
         "columnName": "val_char",
         "comment": "",
         "default": null,
@@ -236,12 +236,12 @@ test('column-types', async () => {
         "ordinalPosition": 16,
         "schemaName": "test-db",
         "tableName": "column_types_test",
-        "type": Object {
+        "type": {
           "kind": "char",
           "length": 1,
         },
       },
-      Object {
+      {
         "columnName": "val_date",
         "comment": "",
         "default": null,
@@ -250,11 +250,11 @@ test('column-types', async () => {
         "ordinalPosition": 11,
         "schemaName": "test-db",
         "tableName": "column_types_test",
-        "type": Object {
+        "type": {
           "kind": "date",
         },
       },
-      Object {
+      {
         "columnName": "val_datetime",
         "comment": "",
         "default": null,
@@ -263,11 +263,11 @@ test('column-types', async () => {
         "ordinalPosition": 12,
         "schemaName": "test-db",
         "tableName": "column_types_test",
-        "type": Object {
+        "type": {
           "kind": "datetime",
         },
       },
-      Object {
+      {
         "columnName": "val_decimal",
         "comment": "",
         "default": null,
@@ -276,13 +276,13 @@ test('column-types', async () => {
         "ordinalPosition": 6,
         "schemaName": "test-db",
         "tableName": "column_types_test",
-        "type": Object {
+        "type": {
           "decimals": 5,
           "digits": 10,
           "kind": "decimal",
         },
       },
-      Object {
+      {
         "columnName": "val_double",
         "comment": "",
         "default": null,
@@ -291,11 +291,11 @@ test('column-types', async () => {
         "ordinalPosition": 9,
         "schemaName": "test-db",
         "tableName": "column_types_test",
-        "type": Object {
+        "type": {
           "kind": "double",
         },
       },
-      Object {
+      {
         "columnName": "val_enum",
         "comment": "",
         "default": null,
@@ -304,9 +304,9 @@ test('column-types', async () => {
         "ordinalPosition": 28,
         "schemaName": "test-db",
         "tableName": "column_types_test",
-        "type": Object {
+        "type": {
           "kind": "enum",
-          "values": Array [
+          "values": [
             "small",
             "medium",
             "large",
@@ -314,7 +314,7 @@ test('column-types', async () => {
           ],
         },
       },
-      Object {
+      {
         "columnName": "val_float",
         "comment": "",
         "default": null,
@@ -323,11 +323,11 @@ test('column-types', async () => {
         "ordinalPosition": 8,
         "schemaName": "test-db",
         "tableName": "column_types_test",
-        "type": Object {
+        "type": {
           "kind": "float",
         },
       },
-      Object {
+      {
         "columnName": "val_geometry",
         "comment": "",
         "default": null,
@@ -336,11 +336,11 @@ test('column-types', async () => {
         "ordinalPosition": 30,
         "schemaName": "test-db",
         "tableName": "column_types_test",
-        "type": Object {
+        "type": {
           "kind": "geometry",
         },
       },
-      Object {
+      {
         "columnName": "val_geometrycollection",
         "comment": "",
         "default": null,
@@ -349,11 +349,11 @@ test('column-types', async () => {
         "ordinalPosition": 37,
         "schemaName": "test-db",
         "tableName": "column_types_test",
-        "type": Object {
+        "type": {
           "kind": "geomcollection",
         },
       },
-      Object {
+      {
         "columnName": "val_int",
         "comment": "",
         "default": null,
@@ -362,11 +362,11 @@ test('column-types', async () => {
         "ordinalPosition": 4,
         "schemaName": "test-db",
         "tableName": "column_types_test",
-        "type": Object {
+        "type": {
           "kind": "int",
         },
       },
-      Object {
+      {
         "columnName": "val_linestring",
         "comment": "",
         "default": null,
@@ -375,11 +375,11 @@ test('column-types', async () => {
         "ordinalPosition": 32,
         "schemaName": "test-db",
         "tableName": "column_types_test",
-        "type": Object {
+        "type": {
           "kind": "linestring",
         },
       },
-      Object {
+      {
         "columnName": "val_longblob",
         "comment": "",
         "default": null,
@@ -388,11 +388,11 @@ test('column-types', async () => {
         "ordinalPosition": 23,
         "schemaName": "test-db",
         "tableName": "column_types_test",
-        "type": Object {
+        "type": {
           "kind": "longblob",
         },
       },
-      Object {
+      {
         "columnName": "val_longtext",
         "comment": "",
         "default": null,
@@ -401,11 +401,11 @@ test('column-types', async () => {
         "ordinalPosition": 27,
         "schemaName": "test-db",
         "tableName": "column_types_test",
-        "type": Object {
+        "type": {
           "kind": "longtext",
         },
       },
-      Object {
+      {
         "columnName": "val_mediumblob",
         "comment": "",
         "default": null,
@@ -414,11 +414,11 @@ test('column-types', async () => {
         "ordinalPosition": 22,
         "schemaName": "test-db",
         "tableName": "column_types_test",
-        "type": Object {
+        "type": {
           "kind": "mediumblob",
         },
       },
-      Object {
+      {
         "columnName": "val_mediumint",
         "comment": "",
         "default": null,
@@ -427,11 +427,11 @@ test('column-types', async () => {
         "ordinalPosition": 3,
         "schemaName": "test-db",
         "tableName": "column_types_test",
-        "type": Object {
+        "type": {
           "kind": "mediumint",
         },
       },
-      Object {
+      {
         "columnName": "val_mediumtext",
         "comment": "",
         "default": null,
@@ -440,11 +440,11 @@ test('column-types', async () => {
         "ordinalPosition": 26,
         "schemaName": "test-db",
         "tableName": "column_types_test",
-        "type": Object {
+        "type": {
           "kind": "mediumtext",
         },
       },
-      Object {
+      {
         "columnName": "val_multilinestring",
         "comment": "",
         "default": null,
@@ -453,11 +453,11 @@ test('column-types', async () => {
         "ordinalPosition": 35,
         "schemaName": "test-db",
         "tableName": "column_types_test",
-        "type": Object {
+        "type": {
           "kind": "multilinestring",
         },
       },
-      Object {
+      {
         "columnName": "val_multipoint",
         "comment": "",
         "default": null,
@@ -466,11 +466,11 @@ test('column-types', async () => {
         "ordinalPosition": 34,
         "schemaName": "test-db",
         "tableName": "column_types_test",
-        "type": Object {
+        "type": {
           "kind": "multipoint",
         },
       },
-      Object {
+      {
         "columnName": "val_multipolygon",
         "comment": "",
         "default": null,
@@ -479,11 +479,11 @@ test('column-types', async () => {
         "ordinalPosition": 36,
         "schemaName": "test-db",
         "tableName": "column_types_test",
-        "type": Object {
+        "type": {
           "kind": "multipolygon",
         },
       },
-      Object {
+      {
         "columnName": "val_numeric",
         "comment": "",
         "default": null,
@@ -492,13 +492,13 @@ test('column-types', async () => {
         "ordinalPosition": 7,
         "schemaName": "test-db",
         "tableName": "column_types_test",
-        "type": Object {
+        "type": {
           "decimals": 5,
           "digits": 10,
           "kind": "decimal",
         },
       },
-      Object {
+      {
         "columnName": "val_point",
         "comment": "",
         "default": null,
@@ -507,11 +507,11 @@ test('column-types', async () => {
         "ordinalPosition": 31,
         "schemaName": "test-db",
         "tableName": "column_types_test",
-        "type": Object {
+        "type": {
           "kind": "point",
         },
       },
-      Object {
+      {
         "columnName": "val_polygon",
         "comment": "",
         "default": null,
@@ -520,11 +520,11 @@ test('column-types', async () => {
         "ordinalPosition": 33,
         "schemaName": "test-db",
         "tableName": "column_types_test",
-        "type": Object {
+        "type": {
           "kind": "polygon",
         },
       },
-      Object {
+      {
         "columnName": "val_set",
         "comment": "",
         "default": null,
@@ -533,9 +533,9 @@ test('column-types', async () => {
         "ordinalPosition": 29,
         "schemaName": "test-db",
         "tableName": "column_types_test",
-        "type": Object {
+        "type": {
           "kind": "set",
-          "values": Array [
+          "values": [
             "small",
             "medium",
             "large",
@@ -543,7 +543,7 @@ test('column-types', async () => {
           ],
         },
       },
-      Object {
+      {
         "columnName": "val_smallint",
         "comment": "",
         "default": null,
@@ -552,11 +552,11 @@ test('column-types', async () => {
         "ordinalPosition": 2,
         "schemaName": "test-db",
         "tableName": "column_types_test",
-        "type": Object {
+        "type": {
           "kind": "smallint",
         },
       },
-      Object {
+      {
         "columnName": "val_text",
         "comment": "",
         "default": null,
@@ -565,11 +565,11 @@ test('column-types', async () => {
         "ordinalPosition": 25,
         "schemaName": "test-db",
         "tableName": "column_types_test",
-        "type": Object {
+        "type": {
           "kind": "text",
         },
       },
-      Object {
+      {
         "columnName": "val_time",
         "comment": "",
         "default": null,
@@ -578,11 +578,11 @@ test('column-types', async () => {
         "ordinalPosition": 14,
         "schemaName": "test-db",
         "tableName": "column_types_test",
-        "type": Object {
+        "type": {
           "kind": "time",
         },
       },
-      Object {
+      {
         "columnName": "val_tinyblob",
         "comment": "",
         "default": null,
@@ -591,11 +591,11 @@ test('column-types', async () => {
         "ordinalPosition": 20,
         "schemaName": "test-db",
         "tableName": "column_types_test",
-        "type": Object {
+        "type": {
           "kind": "tinyblob",
         },
       },
-      Object {
+      {
         "columnName": "val_tinyint",
         "comment": "",
         "default": null,
@@ -604,11 +604,11 @@ test('column-types', async () => {
         "ordinalPosition": 1,
         "schemaName": "test-db",
         "tableName": "column_types_test",
-        "type": Object {
+        "type": {
           "kind": "tinyint",
         },
       },
-      Object {
+      {
         "columnName": "val_tinytext",
         "comment": "",
         "default": null,
@@ -617,11 +617,11 @@ test('column-types', async () => {
         "ordinalPosition": 24,
         "schemaName": "test-db",
         "tableName": "column_types_test",
-        "type": Object {
+        "type": {
           "kind": "tinytext",
         },
       },
-      Object {
+      {
         "columnName": "val_varbinary",
         "comment": "",
         "default": null,
@@ -630,12 +630,12 @@ test('column-types', async () => {
         "ordinalPosition": 19,
         "schemaName": "test-db",
         "tableName": "column_types_test",
-        "type": Object {
+        "type": {
           "kind": "varbinary",
           "length": 32,
         },
       },
-      Object {
+      {
         "columnName": "val_varchar",
         "comment": "",
         "default": null,
@@ -644,12 +644,12 @@ test('column-types', async () => {
         "ordinalPosition": 17,
         "schemaName": "test-db",
         "tableName": "column_types_test",
-        "type": Object {
+        "type": {
           "kind": "varchar",
           "length": 32,
         },
       },
-      Object {
+      {
         "columnName": "val_year",
         "comment": "",
         "default": null,
@@ -658,7 +658,7 @@ test('column-types', async () => {
         "ordinalPosition": 15,
         "schemaName": "test-db",
         "tableName": "column_types_test",
-        "type": Object {
+        "type": {
           "kind": "year",
         },
       },

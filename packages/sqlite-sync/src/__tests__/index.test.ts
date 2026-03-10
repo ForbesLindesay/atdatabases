@@ -12,7 +12,7 @@ test('error messages', async () => {
     db.query(s`
       SELECT * FRM 'baz;
     `);
-  }).toThrowErrorMatchingInlineSnapshot(`"near \\"FRM\\": syntax error"`);
+  }).toThrowErrorMatchingInlineSnapshot(`"near "FRM": syntax error"`);
 });
 
 test('query', () => {
@@ -46,14 +46,14 @@ test('transaction', () => {
     return {a, b};
   });
   expect(result).toMatchInlineSnapshot(`
-    Object {
-      "a": Array [
-        Object {
+    {
+      "a": [
+        {
           "foo": 42,
         },
       ],
-      "b": Array [
-        Object {
+      "b": [
+        {
           "bar": 3,
         },
       ],
@@ -72,8 +72,8 @@ test('multiple-statements', () => {
       SELECT * FROM multiple_statements_test;
     `),
   ).toMatchInlineSnapshot(`
-    Array [
-      Object {
+    [
+      {
         "id": 42,
         "message": "The answer to life, the universe and everything",
       },
@@ -85,15 +85,15 @@ test('multiple-statements', () => {
       sql`SELECT id, message AS aliased_message FROM multiple_statements_test`,
     ]),
   ).toMatchInlineSnapshot(`
-    Array [
-      Array [
-        Object {
+    [
+      [
+        {
           "id": 42,
           "message": "The answer to life, the universe and everything",
         },
       ],
-      Array [
-        Object {
+      [
+        {
           "aliased_message": "The answer to life, the universe and everything",
           "id": 42,
         },

@@ -18,21 +18,21 @@ test('get custom types', async () => {
       typeID: typeof v.typeID === 'number' ? '<oid>' : v.typeID,
     })),
   ).toMatchInlineSnapshot(`
-Array [
-  Object {
-    "schemaID": "<oid>",
-    "schemaName": "getenumvalues",
-    "typeID": "<oid>",
-    "typeName": "kind",
-    "value": "FirstKind",
-  },
-  Object {
-    "schemaID": "<oid>",
-    "schemaName": "getenumvalues",
-    "typeID": "<oid>",
-    "typeName": "kind",
-    "value": "SecondKind",
-  },
-]
-`);
+    [
+      {
+        "schemaID": "<oid>",
+        "schemaName": "getenumvalues",
+        "typeID": "<oid>",
+        "typeName": "kind",
+        "value": "FirstKind",
+      },
+      {
+        "schemaID": "<oid>",
+        "schemaName": "getenumvalues",
+        "typeID": "<oid>",
+        "typeName": "kind",
+        "value": "SecondKind",
+      },
+    ]
+  `);
 });

@@ -175,7 +175,7 @@ export default createWorkflow(({setWorkflowName, addTrigger, addJob}) => {
     const {node, mysql} = setBuildMatrix(
       {
         node: INTEGRATION_TEST_NODE_VERSIONS,
-        mysql: ['5.6.51', '5.7.33', '8.0.23'],
+        mysql: ['5.6.51', '5.7.33', '8.0.23', '9.6.0'],
       },
       {failFast: false},
     );

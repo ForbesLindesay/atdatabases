@@ -19,44 +19,44 @@ test('pushToAsyncIterable', async () => {
     };
   });
   onData(1);
-  expect(pause).not.toBeCalled();
-  expect(resume).not.toBeCalled();
+  expect(pause.mock.calls.length).toBe(0);
+  expect(resume.mock.calls.length).toBe(0);
 
   expect(await result.next()).toEqual({done: false, value: 1});
-  expect(pause).not.toBeCalled();
-  expect(resume).not.toBeCalled();
+  expect(pause.mock.calls.length).toBe(0);
+  expect(resume.mock.calls.length).toBe(0);
 
   onData(2);
-  expect(pause).not.toBeCalled();
-  expect(resume).not.toBeCalled();
+  expect(pause.mock.calls.length).toBe(0);
+  expect(resume.mock.calls.length).toBe(0);
 
   onData(3);
-  expect(pause).toBeCalledTimes(1);
-  expect(resume).not.toBeCalled();
+  expect(pause.mock.calls.length).toBe(1);
+  expect(resume.mock.calls.length).toBe(0);
 
   onData(4);
-  expect(pause).toBeCalledTimes(1);
-  expect(resume).not.toBeCalled();
+  expect(pause.mock.calls.length).toBe(1);
+  expect(resume.mock.calls.length).toBe(0);
 
   expect(await result.next()).toEqual({done: false, value: 2});
-  expect(pause).toBeCalledTimes(1);
-  expect(resume).not.toBeCalled();
+  expect(pause.mock.calls.length).toBe(1);
+  expect(resume.mock.calls.length).toBe(0);
 
   expect(await result.next()).toEqual({done: false, value: 3});
-  expect(pause).toBeCalledTimes(1);
-  expect(resume).toBeCalledTimes(1);
+  expect(pause.mock.calls.length).toBe(1);
+  expect(resume.mock.calls.length).toBe(1);
 
   expect(await result.next()).toEqual({done: false, value: 4});
-  expect(pause).toBeCalledTimes(1);
-  expect(resume).toBeCalledTimes(1);
+  expect(pause.mock.calls.length).toBe(1);
+  expect(resume.mock.calls.length).toBe(1);
 
   onEnd();
-  expect(pause).toBeCalledTimes(1);
-  expect(resume).toBeCalledTimes(1);
+  expect(pause.mock.calls.length).toBe(1);
+  expect(resume.mock.calls.length).toBe(1);
 
   expect(await result.next()).toEqual({done: true});
-  expect(pause).toBeCalledTimes(1);
-  expect(resume).toBeCalledTimes(1);
+  expect(pause.mock.calls.length).toBe(1);
+  expect(resume.mock.calls.length).toBe(1);
 
   expect(typeof onError).toBe('function');
 });
@@ -80,18 +80,18 @@ test('pushToAsyncIterable Error', async () => {
     };
   });
   onData(1);
-  expect(pause).not.toBeCalled();
-  expect(resume).not.toBeCalled();
+  expect(pause.mock.calls.length).toBe(0);
+  expect(resume.mock.calls.length).toBe(0);
 
   expect(await result.next()).toEqual({done: false, value: 1});
-  expect(pause).not.toBeCalled();
-  expect(resume).not.toBeCalled();
+  expect(pause.mock.calls.length).toBe(0);
+  expect(resume.mock.calls.length).toBe(0);
 
   const TEST_ERROR = {};
   onError(TEST_ERROR);
   await expect(result.next()).rejects.toBe(TEST_ERROR);
-  expect(pause).not.toBeCalled();
-  expect(resume).not.toBeCalled();
+  expect(pause.mock.calls.length).toBe(0);
+  expect(resume.mock.calls.length).toBe(0);
 
   expect(typeof onEnd).toBe('function');
 });

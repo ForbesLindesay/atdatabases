@@ -82,7 +82,7 @@ test('create users', async () => {
     .orderByAsc('cdn_url')
     .limit(2);
   expect(photoRecords.map((p) => p.cdn_url)).toMatchInlineSnapshot(`
-    Array [
+    [
       "http://example.com/1",
       "http://example.com/2",
     ]
@@ -93,7 +93,7 @@ test('create users', async () => {
     .orderByDesc('cdn_url')
     .limit(2);
   expect(photoRecordsDesc.map((p) => p.cdn_url)).toMatchInlineSnapshot(`
-    Array [
+    [
       "http://example.com/3",
       "http://example.com/2",
     ]
@@ -107,10 +107,10 @@ test('create users', async () => {
     },
   );
   expect(updated.map((u) => [u.cdn_url, u.metadata])).toMatchInlineSnapshot(`
-    Array [
-      Array [
+    [
+      [
         "http://example.com/1",
-        Object {
+        {
           "rating": 5,
         },
       ],
@@ -124,7 +124,7 @@ test('create users', async () => {
   );
   expect(forbes2.id).toBe(forbes.id);
   expect([forbes2.bio, john.bio]).toMatchInlineSnapshot(`
-    Array [
+    [
       "Author of @databases",
       "Just a random name",
     ]
@@ -135,7 +135,7 @@ test('create users', async () => {
   expect(
     (await photos(db).find().orderByAsc('cdn_url').all()).map((u) => u.cdn_url),
   ).toMatchInlineSnapshot(`
-    Array [
+    [
       "http://example.com/1",
       "http://example.com/3",
       "http://example.com/4",
@@ -164,20 +164,20 @@ test('create users', async () => {
       u.bio,
     ]),
   ).toMatchInlineSnapshot(`
-    Array [
-      Array [
+    [
+      [
         "Ellie",
         null,
       ],
-      Array [
+      [
         "Forbes",
         "Author of @databases",
       ],
-      Array [
+      [
         "John",
         "Just a random name",
       ],
-      Array [
+      [
         "Martin",
         "Updated bio",
       ],
@@ -201,12 +201,12 @@ test('create users', async () => {
       }),
     ),
   ).toMatchInlineSnapshot(`
-    Array [
-      Object {
+    [
+      {
         "caption": null,
         "cdn_url": "http://example.com/1",
       },
-      Object {
+      {
         "caption": null,
         "cdn_url": "http://example.com/4",
       },
@@ -248,15 +248,15 @@ test('use a default connection', async () => {
     } as any,
   });
   await mockUsers().findOne({id: 10});
-  expect(defaultConnectionQuery).toBeCalledTimes(1);
-  expect(transactionQuery).toBeCalledTimes(0);
+  expect(defaultConnectionQuery.mock.calls.length).toBe(1);
+  expect(transactionQuery.mock.calls.length).toBe(0);
 
   await mockUsers({
     query: transactionQuery,
     sql,
   } as any).findOne({id: 10});
-  expect(defaultConnectionQuery).toBeCalledTimes(1);
-  expect(transactionQuery).toBeCalledTimes(1);
+  expect(defaultConnectionQuery.mock.calls.length).toBe(1);
+  expect(transactionQuery.mock.calls.length).toBe(1);
 
   const {users: unconnectedUsers} = defineTables<Schema>({
     schemaName: 'typed_queries_tests',
@@ -265,7 +265,7 @@ test('use a default connection', async () => {
   expect(() =>
     unconnectedUsers(undefined as any),
   ).toThrowErrorMatchingInlineSnapshot(
-    `"You must either provide a \\"defaultConnection\\" to pg-typed, or specify a connection when accessing the table."`,
+    `"You must either provide a "defaultConnection" to pg-typed, or specify a connection when accessing the table."`,
   );
 });
 

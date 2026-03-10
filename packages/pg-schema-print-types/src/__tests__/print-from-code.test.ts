@@ -32,8 +32,8 @@ test('replace filter', async () => {
   );
   printSchema(schema, printContext);
   expect(printContext.printer.getFiles()).toMatchInlineSnapshot(`
-    Array [
-      Object {
+    [
+      {
         "content": "import TableName, {TableMyNameInsert} from './my_table_my_name'
 
     interface DatabaseSchema {
@@ -53,7 +53,7 @@ test('replace filter', async () => {
     ",
         "filename": "index.ts",
       },
-      Object {
+      {
         "content": "interface TableMyNameInsert {
     }
     export type {TableMyNameInsert}
@@ -64,11 +64,11 @@ test('replace filter', async () => {
     ",
         "filename": "my_table_my_name.ts",
       },
-      Object {
+      {
         "content": "[
       {
-        \\"name\\": \\"my_table_my_name\\",
-        \\"columns\\": []
+        "name": "my_table_my_name",
+        "columns": []
       }
     ]
     ",

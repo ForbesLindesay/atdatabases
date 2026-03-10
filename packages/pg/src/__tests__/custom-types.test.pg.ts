@@ -110,7 +110,7 @@ test('custom types', async () => {
       formatValue: (value, index) => ({placeholder: `$${index + 1}`, value}),
     }),
   ).toMatchInlineSnapshot(`
-    Object {
+    {
       "text": "INSERT INTO custom_types.accounts (email, balance)
     VALUES
       (
@@ -121,11 +121,11 @@ test('custom types', async () => {
         $5,
         ROW ($6, $7, $8)
       );",
-      "values": Array [
+      "values": [
         "forbes@lindesay.co.uk",
         "10.20",
         "USD",
-        "This is a wonderful \\"description\\"!",
+        "This is a wonderful "description"!",
         "dee@lindesay.co.uk",
         "100.01",
         "GBP",
@@ -149,16 +149,16 @@ test('custom types', async () => {
       `,
     ),
   ).toMatchInlineSnapshot(`
-    Array [
-      Object {
+    [
+      {
         "balance": MoneyWithCurrency {
           "currency": "USD",
-          "description": "This is a wonderful \\"description\\"!",
+          "description": "This is a wonderful "description"!",
           "value": "10.20",
         },
         "email": "forbes@lindesay.co.uk",
       },
-      Object {
+      {
         "balance": MoneyWithCurrency {
           "currency": "GBP",
           "description": "Descriptions can contain one thing, and another, and another.",
@@ -175,8 +175,8 @@ test('custom types', async () => {
       `,
     ),
   ).toMatchInlineSnapshot(`
-    Array [
-      Object {
+    [
+      {
         "balance": BalancePair {
           "expenditure": MoneyWithCurrency {
             "currency": "USD",

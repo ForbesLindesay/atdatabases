@@ -336,8 +336,8 @@ test('get custom types', async () => {
   );
   expect(await db.query(sql`SELECT * FROM gettypes.tab`))
     .toMatchInlineSnapshot(`
-    Array [
-      Object {
+    [
+      {
         "email": "forbes@lindesay.co.uk",
         "money": "($10.00,USD)",
       },
@@ -376,8 +376,8 @@ test('get custom types', async () => {
         return t.typeName !== '_email';
       }),
   ).toMatchInlineSnapshot(`
-    Array [
-      Object {
+    [
+      {
         "category": "A",
         "comment": null,
         "kind": "array",
@@ -388,7 +388,7 @@ test('get custom types', async () => {
         "typeID": "<oid>",
         "typeName": "_currency",
       },
-      Object {
+      {
         "category": "A",
         "comment": null,
         "kind": "array",
@@ -399,7 +399,7 @@ test('get custom types', async () => {
         "typeID": "<oid>",
         "typeName": "_money_with_currency",
       },
-      Object {
+      {
         "category": "A",
         "comment": null,
         "kind": "array",
@@ -410,7 +410,7 @@ test('get custom types', async () => {
         "typeID": "<oid>",
         "typeName": "_tab",
       },
-      Object {
+      {
         "category": "E",
         "comment": "Three character currency code",
         "kind": "e",
@@ -418,12 +418,12 @@ test('get custom types', async () => {
         "schemaName": "gettypes",
         "typeID": "<oid>",
         "typeName": "currency",
-        "values": Array [
+        "values": [
           "GBP",
           "USD",
         ],
       },
-      Object {
+      {
         "basetypeID": "<oid>",
         "basetypeName": "text",
         "category": "S",
@@ -434,9 +434,9 @@ test('get custom types', async () => {
         "typeID": "<oid>",
         "typeName": "email",
       },
-      Object {
-        "attributes": Array [
-          Object {
+      {
+        "attributes": [
+          {
             "attributeName": "currency",
             "attributeNumber": 2,
             "classID": "<oid>",
@@ -450,7 +450,7 @@ test('get custom types', async () => {
             "typeID": "<oid>",
             "typeLength": -1,
           },
-          Object {
+          {
             "attributeName": "value",
             "attributeNumber": 1,
             "classID": "<oid>",
@@ -474,9 +474,9 @@ test('get custom types', async () => {
         "typeID": "<oid>",
         "typeName": "money_with_currency",
       },
-      Object {
-        "attributes": Array [
-          Object {
+      {
+        "attributes": [
+          {
             "attributeName": "email",
             "attributeNumber": 1,
             "classID": "<oid>",
@@ -490,7 +490,7 @@ test('get custom types', async () => {
             "typeID": "<oid>",
             "typeLength": -1,
           },
-          Object {
+          {
             "attributeName": "money",
             "attributeNumber": 2,
             "classID": "<oid>",

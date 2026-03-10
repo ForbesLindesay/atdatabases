@@ -36,8 +36,8 @@ test('getConstraints', async () => {
         typeof t.referencedClassID === 'number' ? '<oid>' : t.referencedClassID,
     })),
   ).toMatchInlineSnapshot(`
-    Array [
-      Object {
+    [
+      {
         "classID": "<oid>",
         "constraintDescription": "PRIMARY KEY (id)",
         "constraintName": "table_a_pkey",
@@ -47,11 +47,11 @@ test('getConstraints', async () => {
         "foreignKeyUpdateAction": " ",
         "referencedAttributeNumbers": null,
         "referencedClassID": "<oid>",
-        "tableAttributeNumbers": Array [
+        "tableAttributeNumbers": [
           1,
         ],
       },
-      Object {
+      {
         "classID": "<oid>",
         "constraintDescription": "FOREIGN KEY (a_id) REFERENCES getconstraints.table_a(id)",
         "constraintName": "table_b_a_id_fkey",
@@ -59,15 +59,15 @@ test('getConstraints', async () => {
         "foreignKeyDeletionAction": "a",
         "foreignKeyMatchType": "s",
         "foreignKeyUpdateAction": "a",
-        "referencedAttributeNumbers": Array [
+        "referencedAttributeNumbers": [
           1,
         ],
         "referencedClassID": "<oid>",
-        "tableAttributeNumbers": Array [
+        "tableAttributeNumbers": [
           2,
         ],
       },
-      Object {
+      {
         "classID": "<oid>",
         "constraintDescription": "PRIMARY KEY (id)",
         "constraintName": "table_b_pkey",
@@ -77,11 +77,11 @@ test('getConstraints', async () => {
         "foreignKeyUpdateAction": " ",
         "referencedAttributeNumbers": null,
         "referencedClassID": "<oid>",
-        "tableAttributeNumbers": Array [
+        "tableAttributeNumbers": [
           1,
         ],
       },
-      Object {
+      {
         "classID": "<oid>",
         "constraintDescription": "PRIMARY KEY (a, b)",
         "constraintName": "table_c_pkey",
@@ -91,7 +91,7 @@ test('getConstraints', async () => {
         "foreignKeyUpdateAction": " ",
         "referencedAttributeNumbers": null,
         "referencedClassID": "<oid>",
-        "tableAttributeNumbers": Array [
+        "tableAttributeNumbers": [
           1,
           2,
         ],

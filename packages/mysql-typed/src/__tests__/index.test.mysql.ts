@@ -70,7 +70,7 @@ t('create schema', async () => {
       );
       CREATE TABLE typed_queries_tests_photos (
         id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-        owner_user_id BIGINT NOT NULL REFERENCES typed_queries_tests.users(id),
+        owner_user_id BIGINT NOT NULL REFERENCES typed_queries_tests_users(id),
         cdn_url TEXT(512) NOT NULL,
         caption TEXT(512) NULL,
         metadata JSON NOT NULL
@@ -109,7 +109,7 @@ t('create users', async () => {
     .orderByAsc('cdn_url')
     .limit(2);
   expect(photoRecords.map((p) => p.cdn_url)).toMatchInlineSnapshot(`
-    Array [
+    [
       "http://example.com/1",
       "http://example.com/2",
     ]
@@ -120,7 +120,7 @@ t('create users', async () => {
     .orderByDesc('cdn_url')
     .limit(2);
   expect(photoRecordsDesc.map((p) => p.cdn_url)).toMatchInlineSnapshot(`
-    Array [
+    [
       "http://example.com/3",
       "http://example.com/2",
     ]
@@ -144,7 +144,7 @@ t('create users', async () => {
   expect(
     (await photos(db).find().orderByAsc('cdn_url').all()).map((u) => u.cdn_url),
   ).toMatchInlineSnapshot(`
-    Array [
+    [
       "http://example.com/1",
       "http://example.com/3",
       "http://example.com/4",
@@ -164,12 +164,12 @@ t('create users', async () => {
       u.bio,
     ]),
   ).toMatchInlineSnapshot(`
-    Array [
-      Array [
+    [
+      [
         "Ellie",
         null,
       ],
-      Array [
+      [
         "Forbes",
         null,
       ],
@@ -193,12 +193,12 @@ t('create users', async () => {
       }),
     ),
   ).toMatchInlineSnapshot(`
-    Array [
-      Object {
+    [
+      {
         "caption": null,
         "cdn_url": "http://example.com/1",
       },
-      Object {
+      {
         "caption": null,
         "cdn_url": "http://example.com/4",
       },

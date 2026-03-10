@@ -23,20 +23,20 @@ test('getTables', async () => {
       })
     ).filter((t) => t.tableName.startsWith(`get_tables`)),
   ).toMatchInlineSnapshot(`
-    Array [
-      Object {
+    [
+      {
         "comment": "",
         "schemaName": "test-db",
         "tableName": "get_tables_table_a",
         "tableType": "BASE TABLE",
       },
-      Object {
+      {
         "comment": "This is a great table",
         "schemaName": "test-db",
         "tableName": "get_tables_table_b",
         "tableType": "BASE TABLE",
       },
-      Object {
+      {
         "comment": "",
         "schemaName": "test-db",
         "tableName": "get_tables_view_b",

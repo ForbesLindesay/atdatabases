@@ -59,7 +59,7 @@
   "dependencies": {
     "@babel/core": "^7.12.3",
     "@babel/preset-env": "^7.12.1",
-    "@types/jest": "^26.0.15",
+    "@types/jest": "^30.0.0",
     "@types/node": "^14.14.25",
     "cross-spawn": "^7.0.2",
     "github-actions-workflow-builder": "^4.0.1",
