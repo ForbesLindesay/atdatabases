@@ -7,9 +7,9 @@ import {
   interpolate,
 } from 'github-actions-workflow-builder/expression';
 
-const DEFAULT_NODE_VERSION = '20.x';
-const ALL_NODE_VERSIONS = ['18.x', '20.x', '22.x'];
-const INTEGRATION_TEST_NODE_VERSIONS = ['18.x', '22.x'];
+const DEFAULT_NODE_VERSION = '24.x';
+const ALL_NODE_VERSIONS = ['20.x', '22.x', '24.x'];
+const INTEGRATION_TEST_NODE_VERSIONS = ['22.x', '24.x'];
 
 export function yarnInstallWithCache(nodeVersion: Expression<string>): Steps {
   return ({use, run}) => {
