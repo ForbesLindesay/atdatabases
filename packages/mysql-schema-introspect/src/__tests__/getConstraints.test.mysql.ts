@@ -18,9 +18,11 @@ test('getConstraints', async () => {
         UNIQUE (parent_id, value)
       );
       CREATE TABLE get_constraints_table_c (
-        a BIGINT NOT NULL REFERENCES get_constraints_table_a(id),
-        b BIGINT NOT NULL REFERENCES get_constraints_table_b(id),
-        PRIMARY KEY (a, b)
+        a BIGINT NOT NULL,
+        b BIGINT NOT NULL,
+        PRIMARY KEY (a, b),
+        FOREIGN KEY (a) REFERENCES get_constraints_table_a(id),
+        FOREIGN KEY (b) REFERENCES get_constraints_table_b(id)
       );
     `,
   );

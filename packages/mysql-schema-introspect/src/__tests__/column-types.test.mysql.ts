@@ -155,7 +155,7 @@ test('column-types', async () => {
   } else {
     expect(columns.find((c) => c.columnName === `val_timestamp`))
       .toMatchInlineSnapshot(`
-      Object {
+      {
         "columnName": "val_timestamp",
         "comment": "",
         "default": "CURRENT_TIMESTAMP",
@@ -164,7 +164,7 @@ test('column-types', async () => {
         "ordinalPosition": 13,
         "schemaName": "test-db",
         "tableName": "column_types_test",
-        "type": Object {
+        "type": {
           "kind": "timestamp",
         },
       }

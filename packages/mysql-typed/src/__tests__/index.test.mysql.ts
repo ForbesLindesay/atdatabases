@@ -70,10 +70,11 @@ t('create schema', async () => {
       );
       CREATE TABLE typed_queries_tests_photos (
         id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-        owner_user_id BIGINT NOT NULL REFERENCES typed_queries_tests_users(id),
+        owner_user_id BIGINT NOT NULL,
         cdn_url TEXT(512) NOT NULL,
         caption TEXT(512) NULL,
-        metadata JSON NOT NULL
+        metadata JSON NOT NULL,
+        FOREIGN KEY (owner_user_id) REFERENCES typed_queries_tests_users(id)
       );
     `,
   );

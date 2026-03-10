@@ -22,10 +22,11 @@ afterAll(async () => {
       );
       CREATE TABLE print_types_photos (
         id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-        owner_user_id BIGINT NOT NULL REFERENCES print_types_users(id),
+        owner_user_id BIGINT NOT NULL,
         cdn_url TEXT(512) NOT NULL,
         caption TEXT(512) NULL,
-        metadata JSON NOT NULL
+        metadata JSON NOT NULL,
+        FOREIGN KEY (owner_user_id) REFERENCES print_types_users(id)
       );
     `,
   );
