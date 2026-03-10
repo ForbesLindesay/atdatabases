@@ -12,7 +12,7 @@
     "@google-cloud/bigquery": "^8.1.1",
     "@types/big.js": "^6.1.1",
     "assert-never": "^1.2.1",
-    "big.js": "^6.0.0"
+    "big.js": "^6.2.2"
   },
   "scripts": {},
   "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/bigquery",

@@ -209,8 +209,8 @@ test(`simple query`, async () => {
       the_timestamp: r.the_timestamp.value,
     })),
   ).toMatchInlineSnapshot(`
-    Array [
-      Object {
+    [
+      {
         "decimal_number": "3.14",
         "id": "1",
         "the_date": "2000-06-03",
@@ -218,7 +218,7 @@ test(`simple query`, async () => {
         "the_time": "04:41:00",
         "the_timestamp": "2000-06-03T00:00:00.000Z",
       },
-      Object {
+      {
         "decimal_number": "3.14",
         "id": "2",
         "the_date": "2000-06-03",
@@ -226,7 +226,7 @@ test(`simple query`, async () => {
         "the_time": "04:41:00",
         "the_timestamp": "2000-06-03T00:00:00.000Z",
       },
-      Object {
+      {
         "decimal_number": "3.14",
         "id": "3",
         "the_date": "2000-06-03",
@@ -279,8 +279,8 @@ test(`simple query on dataset`, async () => {
       the_timestamp: r.the_timestamp.value,
     })),
   ).toMatchInlineSnapshot(`
-    Array [
-      Object {
+    [
+      {
         "decimal_number": "3.14",
         "id": "1",
         "the_date": "2000-06-03",
@@ -288,7 +288,7 @@ test(`simple query on dataset`, async () => {
         "the_time": "04:41:00",
         "the_timestamp": "2000-06-03T00:00:00.000Z",
       },
-      Object {
+      {
         "decimal_number": "3.14",
         "id": "2",
         "the_date": "2000-06-03",
@@ -296,7 +296,7 @@ test(`simple query on dataset`, async () => {
         "the_time": "04:41:00",
         "the_timestamp": "2000-06-03T00:00:00.000Z",
       },
-      Object {
+      {
         "decimal_number": "3.14",
         "id": "3",
         "the_date": "2000-06-03",
@@ -326,8 +326,8 @@ test(`query with parameter`, async () => {
       the_timestamp: r.the_timestamp.value,
     })),
   ).toMatchInlineSnapshot(`
-    Array [
-      Object {
+    [
+      {
         "decimal_number": "3.14",
         "id": "2",
         "the_date": "2000-06-03",
