@@ -9,7 +9,7 @@ export default createWorkflow(
     addTrigger('repository_dispatch', {
       types: ['rollingversions_publish_approved'],
     });
-    addTrigger('push'); // , {branches: ['master']});
+    addTrigger('push', {branches: ['master']});
 
     setPermissions({
       'id-token': 'write', // Required for OIDC to publish to NPM

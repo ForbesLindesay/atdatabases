@@ -8,7 +8,9 @@ on:
   repository_dispatch:
     types:
       - rollingversions_publish_approved
-  push: null
+  push:
+    branches:
+      - master
 jobs:
   publish_canary:
     runs-on: ubuntu-latest
