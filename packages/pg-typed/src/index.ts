@@ -1,11 +1,11 @@
 import assertNever from 'assert-never';
-import {SQLQuery, Queryable} from '@databases/pg';
+import {sql, SQLQuery, Queryable} from '@databases/pg';
 import {
-  bulkUpdate,
-  bulkDelete,
-  BulkOperationOptions,
-  bulkCondition,
+  bulkUpdateStatement,
+  bulkDeleteStatement,
+  bulkWhereCondition,
   bulkInsertStatement,
+  BulkOperationValue,
 } from '@databases/pg-bulk';
 
 const NO_RESULT_FOUND = `NO_RESULT_FOUND`;
@@ -698,93 +698,28 @@ class SelectQueryImplementation<TRecord>
   }
 }
 
-type BulkRecord<TParameters, TKey extends keyof TParameters> = {
-  readonly [key in TKey]-?: Exclude<TParameters[key], undefined>;
-} & {
-  readonly [key in Exclude<keyof TParameters, TKey>]?: undefined;
+export type BulkColumns<TRecord, TOperation> = {
+  [TColumn in keyof TRecord]:
+    | TRecord[TColumn]
+    | ((
+        operation: TOperation,
+        index: number,
+        operations: readonly TOperation[],
+      ) => TRecord[TColumn]);
 };
 
-type BulkInsertFields<
-  TInsertParameters,
-  TKey extends keyof TInsertParameters,
-> =
-  | TKey
-  | {
-      readonly [K in keyof TInsertParameters]: undefined extends TInsertParameters[K]
-        ? never
-        : K;
-    }[keyof TInsertParameters];
-
-type BulkInsertRecord<
-  TInsertParameters,
-  TKey extends keyof TInsertParameters,
-> = BulkRecord<TInsertParameters, BulkInsertFields<TInsertParameters, TKey>>;
-
-type BulkOperationOptionsBase<
-  TColumnName extends string | number | symbol,
-  TInsertColumnName extends string | number | symbol,
-> = Omit<BulkOperationOptions<TColumnName>, 'database'> & {
-  requiredInsertColumnNames: readonly TInsertColumnName[];
-};
-function getBulkOperationOptionsBase<
-  TColumnName extends string | number | symbol,
-  TInsertColumnName extends string | number | symbol,
->(
-  table: DatabaseSchemaTable,
-  {
-    sql,
-    schemaName,
-    serializeValue,
-  }: {
-    sql: Queryable['sql'];
-    schemaName?: string;
-    serializeValue: (column: string, value: unknown) => unknown;
-  },
-): BulkOperationOptionsBase<TColumnName, TInsertColumnName> {
-  return {
-    tableName: table.name,
-    columnTypes: Object.fromEntries(
-      table.columns.map((c) => [
-        c.name,
-        sql.__dangerous__rawValue(`${c.typeName}`),
-      ]),
-    ) as any,
-    schemaName,
-    serializeValue,
-    requiredInsertColumnNames: table.columns
-      .filter((c) => !c.isNullable && !c.hasDefault)
-      .map((c) => c.name as TInsertColumnName),
-  };
-}
 class Table<TRecord, TInsertParameters> {
   private readonly _value: (columnName: string, value: any) => unknown;
-  private readonly _bulkOperationOptions:
-    | (BulkOperationOptions<keyof TRecord | keyof TInsertParameters> & {
-        requiredInsertColumnNames: readonly (keyof TInsertParameters)[];
-      })
-    | undefined;
+  private readonly _columnTypes: {[columnName: string]: SQLQuery} | undefined;
   constructor(
     private readonly _underlyingDb: Queryable,
     public readonly tableId: SQLQuery,
     public readonly tableName: string,
     serializeValue: (columnName: string, value: unknown) => unknown,
-    bulkOperationOptions:
-      | (BulkOperationOptions<keyof TRecord | keyof TInsertParameters> & {
-          requiredInsertColumnNames: readonly (keyof TInsertParameters)[];
-        })
-      | undefined,
+    columnTypes: {[columnName: string]: SQLQuery} | undefined,
   ) {
     this._value = (c, v) => serializeValue(c, v);
-    this._bulkOperationOptions = bulkOperationOptions;
-  }
-
-  private _getBulkOperationOptions() {
-    if (!this._bulkOperationOptions) {
-      throw new Error(
-        `You must provide a "databaseSchema" when constructing pg-typed to use bulk operations.`,
-      );
-    }
-    return this._bulkOperationOptions;
+    this._columnTypes = columnTypes;
   }
 
   conditionToSql(
@@ -804,108 +739,94 @@ class Table<TRecord, TInsertParameters> {
       : query;
   }
 
-  async bulkInsert<
-    TColumnsToInsert extends readonly [
-      ...(readonly (keyof TInsertParameters)[]),
-    ],
-  >({
+  private _getColumnTypes() {
+    if (!this._columnTypes) {
+      throw new Error(
+        `You must provide a "databaseSchema" when constructing pg-typed to use bulk operations.`,
+      );
+    }
+    return this._columnTypes;
+  }
+  private _prepareBulkColumns<TParams, TOperation>(
+    columns: Partial<BulkColumns<TParams, TOperation>>,
+  ): Record<string, BulkOperationValue<TOperation>> {
+    const columnTypes = this._getColumnTypes();
+    return Object.fromEntries(
+      Object.entries(columns).map(
+        ([columnName, value]): [string, BulkOperationValue<TOperation>] => {
+          if (typeof value === 'function') {
+            return [
+              columnName,
+              {
+                // @ts-expect-error
+                getValue: value,
+                type: columnTypes[columnName],
+              },
+            ];
+          }
+          return [columnName, {value}];
+        },
+      ),
+    );
+  }
+  async bulkInsert<TOperation>({
     columnsToInsert,
     records,
   }: {
-    readonly columnsToInsert: TColumnsToInsert;
-    readonly records: readonly BulkInsertRecord<
-      TInsertParameters,
-      TColumnsToInsert[number]
-    >[];
+    readonly columnsToInsert: BulkColumns<TInsertParameters, TOperation>;
+    readonly records: readonly TOperation[];
   }): Promise<TRecord[]> {
-    if (records.length === 0) {
-      return [];
-    }
+    const columns = this._prepareBulkColumns(columnsToInsert);
+    if (records.length === 0) return [];
     const {sql} = this._underlyingDb;
     return await this._underlyingDb.query(
-      sql`${bulkInsertStatement<keyof TInsertParameters>({
-        ...this._getBulkOperationOptions(),
-        columnsToInsert: [
-          ...new Set([
-            ...columnsToInsert,
-            ...this._getBulkOperationOptions().requiredInsertColumnNames,
-          ]),
-        ].sort(),
-        records,
+      sql`${bulkInsertStatement<TOperation>({
+        table: this.tableId,
+        columns,
+        operations: records,
       })} RETURNING ${this.tableId}.*`,
     );
   }
 
-  async bulkInsertOrIgnore<
-    TColumnsToInsert extends readonly [
-      ...(readonly (keyof TInsertParameters)[]),
-    ],
-  >({
+  async bulkInsertOrIgnore<TOperation>({
     columnsToInsert,
     records,
   }: {
-    readonly columnsToInsert: TColumnsToInsert;
-    readonly records: readonly BulkInsertRecord<
-      TInsertParameters,
-      TColumnsToInsert[number]
-    >[];
+    readonly columnsToInsert: BulkColumns<TInsertParameters, TOperation>;
+    readonly records: readonly TOperation[];
   }): Promise<TRecord[]> {
-    if (records.length === 0) {
-      return [];
-    }
+    const columns = this._prepareBulkColumns(columnsToInsert);
+    if (records.length === 0) return [];
     const {sql} = this._underlyingDb;
     return await this._underlyingDb.query(
-      sql`${bulkInsertStatement<keyof TInsertParameters>({
-        ...this._getBulkOperationOptions(),
-        columnsToInsert: [
-          ...new Set([
-            ...columnsToInsert,
-            ...this._getBulkOperationOptions().requiredInsertColumnNames,
-          ]),
-        ].sort(),
-        records,
+      sql`${bulkInsertStatement<TOperation>({
+        table: this.tableId,
+        columns,
+        operations: records,
       })} ON CONFLICT DO NOTHING RETURNING ${this.tableId}.*`,
     );
   }
 
-  async bulkInsertOrUpdate<
-    TColumnsToInsert extends readonly [
-      ...(readonly (keyof TInsertParameters)[]),
-    ],
-  >({
+  async bulkInsertOrUpdate<TOperation>({
     columnsToInsert,
     columnsThatConflict,
     columnsToUpdate,
     records,
   }: {
-    readonly columnsToInsert: TColumnsToInsert;
-    readonly columnsThatConflict: readonly [
-      TColumnsToInsert[number],
-      ...TColumnsToInsert[number][],
-    ];
-    readonly columnsToUpdate: readonly [
-      TColumnsToInsert[number],
-      ...TColumnsToInsert[number][],
-    ];
-    readonly records: readonly BulkInsertRecord<
-      TInsertParameters,
-      TColumnsToInsert[number]
-    >[];
+    readonly columnsToInsert: BulkColumns<TInsertParameters, TOperation>;
+    readonly columnsThatConflict: readonly (keyof TRecord)[];
+    // TODO: allow more complex update expressions
+    readonly columnsToUpdate: readonly (keyof TRecord)[];
+    readonly records: readonly TOperation[];
   }): Promise<TRecord[]> {
-    if (records.length === 0) {
-      return [];
-    }
+    const columns = this._prepareBulkColumns(columnsToInsert);
+    if (records.length === 0) return [];
     const {sql} = this._underlyingDb;
     return await this._underlyingDb.query(
-      sql`${bulkInsertStatement<keyof TInsertParameters>({
-        ...this._getBulkOperationOptions(),
-        columnsToInsert: [
-          ...new Set([
-            ...columnsToInsert,
-            ...this._getBulkOperationOptions().requiredInsertColumnNames,
-          ]),
-        ].sort(),
-        records,
+      sql`${bulkInsertStatement<TOperation>({
+        table: this.tableId,
+        columns,
+        operations: records,
       })} ON CONFLICT (${sql.join(
         columnsThatConflict.map((k) => sql.ident(k)),
         sql`, `,
@@ -918,76 +839,60 @@ class Table<TRecord, TInsertParameters> {
     );
   }
 
-  bulkFind<TWhereColumns extends readonly [...(readonly (keyof TRecord)[])]>({
-    whereColumnNames,
-    whereConditions,
-  }: {
-    readonly whereColumnNames: TWhereColumns;
-    readonly whereConditions: readonly BulkRecord<
-      TRecord,
-      TWhereColumns[number]
-    >[];
+  bulkFind<TOperation>(options: {
+    readonly whereColumns: Partial<BulkColumns<TRecord, TOperation>>;
+    readonly records: TOperation[];
   }): UnorderedSelectQuery<TRecord> {
-    const bulkOperationOptions = this._getBulkOperationOptions();
+    const whereColumns = this._prepareBulkColumns(options.whereColumns);
+    const records = options.records;
+
     return this._findUntyped(
-      whereConditions.length
-        ? bulkCondition({
-            ...bulkOperationOptions,
-            whereColumnNames,
-            whereConditions,
+      records.length
+        ? bulkWhereCondition({
+            whereColumns,
+            operations: records,
           })
         : 'FALSE',
     );
   }
 
-  async bulkUpdate<
-    TWhereColumns extends readonly [...(readonly (keyof TRecord)[])],
-    TSetColumns extends readonly [...(readonly (keyof TRecord)[])],
-  >({
-    whereColumnNames,
-    setColumnNames,
-    updates,
-  }: {
-    readonly whereColumnNames: TWhereColumns;
-    readonly setColumnNames: TSetColumns;
-    readonly updates: readonly {
-      readonly where: BulkRecord<TRecord, TWhereColumns[number]>;
-      readonly set: BulkRecord<TRecord, TSetColumns[number]>;
-    }[];
+  async bulkUpdate<TOperation>(options: {
+    readonly whereColumns: Partial<BulkColumns<TRecord, TOperation>>;
+    // TODO: allow more complex update expressions
+    readonly setColumns: Partial<BulkColumns<TRecord, TOperation>>;
+    readonly records: TOperation[];
   }): Promise<TRecord[]> {
-    if (updates.length === 0) {
-      return [];
-    }
+    const whereColumns = this._prepareBulkColumns(options.whereColumns);
+    const setColumns = this._prepareBulkColumns(options.setColumns);
+    const records = options.records;
+    if (records.length === 0) return [];
     const {sql} = this._underlyingDb;
-    return await bulkUpdate<TWhereColumns[number], TSetColumns[number]>({
-      ...this._getBulkOperationOptions(),
-      whereColumnNames,
-      setColumnNames,
-      updates,
-      returning: sql`${this.tableId}.*`,
-    });
+    return await this._underlyingDb.query(
+      sql`${bulkUpdateStatement<TOperation>({
+        table: this.tableId,
+        whereColumns,
+        setColumns,
+        operations: records,
+      })} RETURNING ${this.tableId}.*`,
+    );
   }
 
-  async bulkDelete<
-    TWhereColumns extends readonly [...(readonly (keyof TRecord)[])],
-  >({
-    whereColumnNames,
-    whereConditions,
-  }: {
-    readonly whereColumnNames: TWhereColumns;
-    readonly whereConditions: readonly BulkRecord<
-      TRecord,
-      TWhereColumns[number]
-    >[];
+  async bulkDelete<TOperation>(options: {
+    readonly whereColumns: Partial<BulkColumns<TRecord, TOperation>>;
+    readonly records: TOperation[];
   }) {
-    if (whereConditions.length === 0) {
-      return;
-    }
-    await bulkDelete<TWhereColumns[number]>({
-      ...this._getBulkOperationOptions(),
-      whereColumnNames,
-      whereConditions,
-    });
+    const whereColumns = this._prepareBulkColumns(options.whereColumns);
+    const records = options.records;
+    if (records.length === 0) return;
+
+    const {sql} = this._underlyingDb;
+    await this._underlyingDb.query(
+      sql`${bulkDeleteStatement<TOperation>({
+        table: this.tableId,
+        whereColumns,
+        operations: records,
+      })}`,
+    );
   }
 
   private async _insert<TRecordsToInsert extends readonly TInsertParameters[]>(
@@ -1263,13 +1168,21 @@ function getTable<TRecord, TInsertParameters>(
   tableSchema?: DatabaseSchemaTable,
 ): TableHelper<TRecord, TInsertParameters> {
   const cache = new WeakMap<Queryable, Table<TRecord, TInsertParameters>>();
-  const bulkOperationOptionsCache = new Map<
-    Queryable['sql'],
-    BulkOperationOptionsBase<
-      keyof TRecord | keyof TInsertParameters,
-      keyof TInsertParameters
-    >
-  >();
+
+  let columnTypes: {[columnName: string]: SQLQuery} | undefined;
+  if (tableSchema) {
+    columnTypes = Object.fromEntries(
+      tableSchema.columns.map((c) => {
+        if (!c.typeName) {
+          throw new Error(
+            `Missing typeName for column ${c.name} in table ${tableName}`,
+          );
+        }
+        return [c.name, sql.__dangerous__rawValue(c.typeName)];
+      }),
+    );
+  }
+
   return Object.assign(
     (
       queryable: Queryable | undefined = defaultConnection,
@@ -1282,20 +1195,6 @@ function getTable<TRecord, TInsertParameters>(
       const cached = cache.get(queryable);
       if (cached) return cached;
 
-      let bulkOperationsBase = bulkOperationOptionsCache.get(queryable.sql);
-      if (tableSchema && !bulkOperationsBase) {
-        bulkOperationsBase =
-          tableSchema &&
-          getBulkOperationOptionsBase<
-            keyof TRecord | keyof TInsertParameters,
-            keyof TInsertParameters
-          >(tableSchema, {
-            sql: queryable.sql,
-            schemaName,
-            serializeValue,
-          });
-        bulkOperationOptionsCache.set(queryable.sql, bulkOperationsBase);
-      }
       const fresh = new Table<TRecord, TInsertParameters>(
         queryable,
         schemaName
@@ -1303,9 +1202,7 @@ function getTable<TRecord, TInsertParameters>(
           : queryable.sql.ident(tableName),
         tableName,
         serializeValue,
-        bulkOperationsBase
-          ? {...bulkOperationsBase, database: queryable}
-          : undefined,
+        columnTypes,
       );
       cache.set(queryable, fresh);
 
