@@ -2,8 +2,15 @@
   "name": "@databases/mock-db-typed",
   "version": "0.0.0",
   "description": "",
-  "main": "./lib/index.js",
-  "types": "./lib/index.d.ts",
+  "type": "module",
+  "files": [
+    "dist/"
+  ],
+  "exports": {
+    ".": "./dist/index.js",
+    "./package.json": "./package.json"
+  },
+  "types": "./dist/index.d.ts",
   "dependencies": {},
   "devDependencies": {
     "@databases/mock-db": "^0.0.0"
@@ -11,15 +18,19 @@
   "peerDependencies": {
     "@databases/mock-db": "*"
   },
+  "engines": {
+    "node": ">= 20.20.1"
+  },
   "scripts": {},
-  "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/mock-db-typed",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ForbesLindesay/atdatabases.git",
+    "directory": "packages/mock-db-typed"
+  },
   "bugs": "https://github.com/ForbesLindesay/atdatabases/issues",
-  "license": "MIT",
+  "homepage": "https://www.atdatabases.org/docs/pg-typed",
   "publishConfig": {
     "access": "public"
   },
-  "files": [
-    "lib/"
-  ],
-  "homepage": "https://www.atdatabases.org/docs/pg-typed"
+  "license": "MIT"
 }

@@ -3,7 +3,11 @@ import startContainer, {
   killOldContainers,
 } from '@databases/with-container';
 import {getPgConfigSync} from '@databases/pg-config';
-import spawn = require('cross-spawn');
+import spawn from 'cross-spawn';
+import cli from './cli';
+import {ChildProcess} from 'child_process';
+
+export {cli};
 
 const config = getPgConfigSync();
 const DEFAULT_PG_DEBUG = !!process.env.PG_TEST_DEBUG || config.test.debug;
@@ -35,7 +39,9 @@ export interface Options
   pgDb: string;
 }
 
-export async function killDatabase(options: Partial<Options> = {}) {
+export async function killDatabase(
+  options: Partial<Options> = {},
+): Promise<void> {
   await killOldContainers({
     debug: DEFAULT_PG_DEBUG,
     containerName: DEFAULT_CONTAINER_NAME,
@@ -43,7 +49,13 @@ export async function killDatabase(options: Partial<Options> = {}) {
   });
 }
 
-export default async function getDatabase(options: Partial<Options> = {}) {
+export default async function getDatabase(
+  options: Partial<Options> = {},
+): Promise<{
+  proc: ChildProcess;
+  databaseURL: `postgres://${string}`;
+  kill: () => Promise<void>;
+}> {
   const {pgUser, pgDb, environment, ...rawOptions}: Options = {
     debug: DEFAULT_PG_DEBUG,
     image: DEFAULT_IMAGE,
@@ -93,7 +105,8 @@ export default async function getDatabase(options: Partial<Options> = {}) {
     },
   });
 
-  const databaseURL = `postgres://${pgUser}@localhost:${externalPort}/${pgDb}`;
+  const databaseURL =
+    `postgres://${pgUser}@localhost:${externalPort}/${pgDb}` as const;
 
   return {
     proc,

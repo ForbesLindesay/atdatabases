@@ -8,7 +8,7 @@ export default function printSchema(
   schema: Schema,
   context: PrintContext<TypeID>,
   options: MySqlPrintOptions,
-) {
+): void {
   context.pushTypeDeclaration({type: 'schema'}, (identifier, {getImport}) => [
     `interface ${identifier} {`,
     ...schema.tables

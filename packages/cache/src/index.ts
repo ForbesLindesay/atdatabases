@@ -596,7 +596,3 @@ export default function createCacheRealm(
 
   return {createCache, writeReplicationEvent};
 }
-
-module.exports = Object.assign(createCacheRealm, {
-  default: createCacheRealm,
-});

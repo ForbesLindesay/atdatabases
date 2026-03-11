@@ -1,5 +1,5 @@
 import assertNever from 'assert-never';
-import deepEqual = require('deep-equal');
+import deepEqual from 'deep-equal';
 import MigrationsContext, {sortMigrations} from '../MigrationContext';
 import DatabaseEngine from '../types/DatabaseEngine';
 import Result from '../types/Result';

@@ -2,15 +2,20 @@
  * This file handles 33.1.1.1 from https://www.postgresql.org/docs/13/libpq-connect.html
  */
 
-import {ConfigurationBuilder, ConfigurationOptions} from './Configuration';
+import Configuration, {
+  ConfigurationBuilder,
+  ConfigurationOptions,
+} from './Configuration';
 
-export function isKeywordValueConnectionString(str: string) {
+export type {Configuration, ConfigurationOptions};
+
+export function isKeywordValueConnectionString(str: string): boolean {
   return /^\s*[a-z_]+\s*\=/.test(str);
 }
 export default function parseKeywordValueConnectionString(
   str: string,
   options: ConfigurationOptions,
-) {
+): Configuration {
   const config = new ConfigurationBuilder(options);
   let isKey = true;
   let key = '';

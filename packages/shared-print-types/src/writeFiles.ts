@@ -12,7 +12,7 @@ export default async function writeFiles<TypeID>({
   context: PrintContext<TypeID>;
   directory: string;
   generatedStatement: string;
-}) {
+}): Promise<void> {
   const files = context.getFiles();
   const filenames = new Set(files.map((f) => f.filename));
   mkdirp(directory);

@@ -7,7 +7,7 @@ export default class BigQueryTableImplementation implements BigQueryTable {
   constructor(client: Table) {
     this._client = client;
   }
-  async insert(rows: any[], options?: InsertOptions) {
+  async insert(rows: any[], options?: InsertOptions): Promise<void> {
     try {
       await this._client.insert(rows, options);
     } catch (ex) {

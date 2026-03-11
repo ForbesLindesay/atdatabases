@@ -1,10 +1,14 @@
-import {MySqlTypesPrimaryKeyTypeMode} from '@databases/mysql-config/lib/MySqlConfig';
+import {MySqlTypesPrimaryKeyTypeMode} from '@databases/mysql-config';
 import {
   Column,
   TableDetails,
   TableType,
 } from '@databases/mysql-schema-introspect';
-import {FileContext, PrintContext} from '@databases/shared-print-types';
+import {
+  FileContext,
+  FileExport,
+  PrintContext,
+} from '@databases/shared-print-types';
 import assertNever from 'assert-never';
 import MySqlPrintOptions from '../MySqlPrintOptions';
 import TypeID from '../TypeID';
@@ -14,7 +18,10 @@ export default function printTableDetails(
   type: TableDetails,
   context: PrintContext<TypeID>,
   options: MySqlPrintOptions,
-) {
+): {
+  DatabaseRecord: FileExport;
+  InsertParameters: FileExport;
+} {
   if (type.tableType !== TableType.BaseTable) {
     throw new Error(
       'printTableDetails only supports base tables at the moment.',

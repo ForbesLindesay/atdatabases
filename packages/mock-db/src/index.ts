@@ -1,5 +1,5 @@
 import {QueryableType} from '@databases/shared';
-import sql, {SQLQuery, isSqlQuery} from '@databases/sql/web';
+import sql, {SQL, type SQLQuery, isSqlQuery} from '@databases/sql/web';
 import ConnectionPoolImplementation from './ConnectionPool';
 import IsolationLevel from './types/IsolationLevel';
 import Queryable, {
@@ -13,6 +13,7 @@ import Queryable, {
 import MockDbOptions from './types/MockDbOptions';
 
 export type {
+  SQL,
   SQLQuery,
   Queryable,
   Transaction,
@@ -48,14 +49,3 @@ export default function createConnectionPool(
         };
   return new ConnectionPoolImplementation(options);
 }
-
-module.exports = Object.assign(createConnectionPool, {
-  default: createConnectionPool,
-  sql,
-  isSqlQuery,
-  QueryableType,
-  IsolationLevel,
-  isTransaction,
-  isConnection,
-  isConnectionPool,
-});

@@ -1,7 +1,5 @@
-import {Readable} from 'stream';
 import {QueryableType} from '@databases/shared';
-import {SQL, SQLQuery} from '@databases/sql';
-import AbortSignal from './AbortSignal';
+import type {SQL, SQLQuery} from '@databases/sql';
 import TransactionOptions from './TransactionOptions';
 
 export default interface Queryable {
@@ -9,17 +7,6 @@ export default interface Queryable {
   readonly sql: SQL;
   query(query: SQLQuery): Promise<any[]>;
   query(query: SQLQuery[]): Promise<any[][]>;
-  queryStream(
-    query: SQLQuery,
-    {batchSize, signal}: {batchSize?: number; signal?: AbortSignal},
-  ): AsyncIterable<any>;
-  queryNodeStream(
-    query: SQLQuery,
-    options?: {
-      highWaterMark?: number;
-      batchSize?: number;
-    },
-  ): Readable;
   task<T>(fn: (connection: Connection | Transaction) => Promise<T>): Promise<T>;
   tx<T>(
     fn: (connection: Transaction) => Promise<T>,
@@ -64,6 +51,10 @@ export interface Connection extends Queryable {
 export interface ConnectionPool extends Queryable {
   readonly type: QueryableType.ConnectionPool;
   task<T>(fn: (connection: Connection) => Promise<T>): Promise<T>;
+  queryStream(
+    query: SQLQuery,
+    options?: {batchSize?: number},
+  ): ReadableStream<any>;
 
   dispose(): Promise<void>;
   registerTypeParser<T>(

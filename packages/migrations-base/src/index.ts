@@ -12,14 +12,18 @@ export {default as Result} from './types/Result';
 
 export {
   default as DirectoryContext,
-  IDirectoryContext,
+  type IDirectoryContext,
 } from './DirectoryContext';
 export {
   default as MigrationContext,
-  MigrationCommandParameters,
+  type MigrationCommandParameters,
 } from './MigrationContext';
 
-export {default as runCommand, Command} from './runCommand';
+export {
+  default as runCommand,
+  type Command,
+  type RunCommandOptions,
+} from './runCommand';
 
 export {default as applyMigrations} from './commands/applyMigrations';
 export {default as ignoreError} from './commands/ignoreError';
@@ -27,11 +31,11 @@ export {default as markMigrationAsApplied} from './commands/markMigrationAsAppli
 export {default as markMigrationAsUnapplied} from './commands/markMigrationAsUnapplied';
 export {default as restoreMigrationFromDatabase} from './commands/restoreMigrationFromDatabase';
 
-export {default as getPublicApi} from './getPublicApi';
+export {default as getPublicApi, type PublicAPI} from './getPublicApi';
 export {
   default as getCommandLineInterface,
   commands,
-  CommandLineInterfaceConfig,
+  type CommandLineInterfaceConfig,
 } from './getCommandLineInterface';
 
 export {default as printError} from './methods/printError';

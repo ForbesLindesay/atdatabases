@@ -339,29 +339,15 @@ test(`query with parameter`, async () => {
   `);
 });
 
-test(`modern stream`, async () => {
+test(`stream`, async () => {
   let i = 0;
-  for await (const row of db.queryStream(
+  const results: ReadableStream<unknown> = db.queryStream(
     sql`SELECT * FROM ${sql.ident(`atdatabases_test`, streamTableName)}`,
-  )) {
+  );
+  // @ts-expect-error - ReadableStream is iterable, but TypeScript doesn't always know that.
+  for await (const row of results) {
     i++;
     expect(row.value).toBe(`The value is ${row.id.value}`);
   }
-  expect(i).toBe(STREAM_ROW_COUNT);
-});
-
-test(`node.js stream`, async () => {
-  let i = 0;
-  await new Promise<void>((resolve, reject) => {
-    db.queryNodeStream(
-      sql`SELECT * FROM ${sql.ident(`atdatabases_test`, streamTableName)}`,
-    )
-      .on(`data`, (row) => {
-        i++;
-        expect(row.value).toBe(`The value is ${row.id.value}`);
-      })
-      .on(`error`, (err) => reject(err))
-      .on(`end`, () => resolve());
-  });
   expect(i).toBe(STREAM_ROW_COUNT);
 });

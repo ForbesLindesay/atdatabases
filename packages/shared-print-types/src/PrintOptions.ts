@@ -1,5 +1,5 @@
-import camelcase = require('camelcase');
-import pascalcase = require('uppercamelcase');
+import camelcase from 'camelcase';
+import pascalcase from 'uppercamelcase';
 import {plural, singular} from 'pluralize';
 import FileName from './FileName';
 import IdentifierName from './IdentifierName';

@@ -1,6 +1,11 @@
 import {cosmiconfig, cosmiconfigSync} from 'cosmiconfig';
-import MySqlConfig, {MySqlConfigSchema} from './MySqlConfig';
+import {
+  type MySqlConfig,
+  MySqlConfigSchema,
+  MySqlTypesPrimaryKeyTypeMode,
+} from './MySqlConfig';
 
+export {MySqlTypesPrimaryKeyTypeMode};
 const asyncExplorer = cosmiconfig('mysql');
 const syncExplorer = cosmiconfigSync('mysql');
 
@@ -22,4 +27,4 @@ function parseResult(result: null | {config: unknown}): MySqlConfig {
 }
 
 export default MySqlConfig;
-export const DEFAULT_CONFIG = MySqlConfigSchema.parse({});
+export const DEFAULT_CONFIG: MySqlConfig = MySqlConfigSchema.parse({});

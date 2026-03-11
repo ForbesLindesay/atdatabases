@@ -912,5 +912,3 @@ enum PgDataTypeID {
 }
 
 export default PgDataTypeID;
-module.exports = PgDataTypeID;
-module.exports.default = PgDataTypeID;

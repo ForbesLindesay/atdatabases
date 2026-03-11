@@ -15,7 +15,9 @@ export interface IgnoreOptions {
    */
   ignoreTables: string[];
 }
-export default function getIgnoreTest(options: Partial<IgnoreOptions>) {
+export default function getIgnoreTest(
+  options: Partial<IgnoreOptions>,
+): (tableName: string) => boolean {
   const includeTables = options.includeTables
     ? new Set(options.includeTables)
     : null;

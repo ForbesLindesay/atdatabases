@@ -35,7 +35,7 @@ export default class PgPrintContext {
     this._types = new Map(schema.types.map((t) => [t.typeID, t]));
   }
 
-  public getClass(id: number) {
+  public getClass(id: number): ClassDetails | undefined {
     return this._classes.get(id);
   }
 

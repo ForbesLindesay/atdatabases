@@ -1,12 +1,12 @@
 import assertNever from 'assert-never';
-import chalk = require('chalk');
+import chalk from 'chalk';
 import MigrationError from '../types/MigrationError';
 import {DatabaseEngineBase} from '../types/DatabaseEngine';
 
 export default function printError(
   error: MigrationError,
   {databaseName, packageName, cliName}: DatabaseEngineBase,
-) {
+): void {
   switch (error.code) {
     case 'database_version':
       console.error(

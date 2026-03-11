@@ -1,4 +1,0 @@
-{
-  "main": "../../lib/jest/globalSetup.js",
-  "types": "../../lib/jest/globalSetup.d.ts"
-}

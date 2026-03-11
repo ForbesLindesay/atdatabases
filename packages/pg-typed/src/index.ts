@@ -9,10 +9,9 @@ import {
 } from '@databases/pg-bulk';
 
 const NO_RESULT_FOUND = `NO_RESULT_FOUND`;
-const MULTIPLE_RESULTS_FOUND = `MULTIPLE_RESULTS_FOUND`;
 export function isNoResultFoundError(
   err: unknown,
-): err is Error & {code: typeof NO_RESULT_FOUND} {
+): err is Error & {code: 'NO_RESULT_FOUND'} {
   return (
     typeof err === 'object' &&
     err !== null &&
@@ -21,9 +20,10 @@ export function isNoResultFoundError(
   );
 }
 
+const MULTIPLE_RESULTS_FOUND = `MULTIPLE_RESULTS_FOUND`;
 export function isMultipleResultsFoundError(
   err: unknown,
-): err is Error & {code: typeof MULTIPLE_RESULTS_FOUND} {
+): err is Error & {code: 'MULTIPLE_RESULTS_FOUND'} {
   return (
     typeof err === 'object' &&
     err !== null &&
@@ -182,7 +182,7 @@ class FieldQuery<T> {
 
     return sql`${columnName} = ${toValue(q)}`;
   }
-  static getSpecial<T>(q: T | FieldQuery<T>) {
+  static getSpecial<T>(q: T | FieldQuery<T>): SpecialFieldQuery<T> | undefined {
     if (q && q instanceof FieldQuery) {
       return q.__special;
     } else {
@@ -979,7 +979,7 @@ class Table<TRecord, TInsertParameters> {
       TRecord,
       TWhereColumns[number]
     >[];
-  }) {
+  }): Promise<void> {
     if (whereConditions.length === 0) {
       return;
     }
@@ -1174,15 +1174,6 @@ class Table<TRecord, TInsertParameters> {
     }
   }
 
-  /**
-   * @deprecated use .find instead of .select
-   */
-  select(
-    whereValues: WhereCondition<TRecord> = {},
-  ): UnorderedSelectQuery<TRecord> {
-    return this.find(whereValues);
-  }
-
   private _findUntyped(
     whereCondition: SQLQuery | 'TRUE' | 'FALSE',
   ): UnorderedSelectQuery<TRecord> {
@@ -1208,14 +1199,6 @@ class Table<TRecord, TInsertParameters> {
     );
   }
 
-  /**
-   * @deprecated use .findOne instead of .selectOne
-   */
-  async selectOne(
-    whereValues: WhereCondition<TRecord>,
-  ): Promise<TRecord | null> {
-    return this.findOne(whereValues);
-  }
   // throws if > 1 row matches
   async findOne(whereValues: WhereCondition<TRecord>): Promise<TRecord | null> {
     return await this.find(whereValues).one();
@@ -1491,19 +1474,3 @@ function getTableSerializeValue(
       }
     : (_, value) => value;
 }
-
-module.exports = Object.assign(defineTables, {
-  default: defineTables,
-  anyOf,
-  allOf,
-  not,
-  inQueryResults,
-  lessThan,
-  jsonPath,
-  caseInsensitive,
-  greaterThan,
-  and,
-  or,
-  isNoResultFoundError,
-  isMultipleResultsFoundError,
-});

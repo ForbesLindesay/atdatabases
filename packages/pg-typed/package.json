@@ -2,29 +2,40 @@
   "name": "@databases/pg-typed",
   "version": "0.0.0",
   "description": "",
-  "main": "./lib/index.js",
-  "types": "./lib/index.d.ts",
+  "type": "module",
+  "files": [
+    "dist/"
+  ],
+  "exports": {
+    ".": "./dist/index.js",
+    "./package.json": "./package.json"
+  },
+  "types": "./dist/index.d.ts",
   "dependencies": {
-    "@databases/pg-bulk": "^0.0.0"
+    "@databases/pg-bulk": "^0.0.0",
+    "assert-never": "^1.2.1"
   },
   "devDependencies": {
     "@databases/pg": "^0.0.0",
     "@databases/pg-cluster": "^0.0.0",
-    "@databases/pg-schema-print-types": "^0.0.0",
-    "assert-never": "^1.2.1"
+    "@databases/pg-schema-print-types": "^0.0.0"
   },
   "peerDependencies": {
     "@databases/pg": "*"
   },
+  "engines": {
+    "node": ">= 20.20.1"
+  },
   "scripts": {},
-  "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/pg-typed",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ForbesLindesay/atdatabases.git",
+    "directory": "packages/pg-typed"
+  },
   "bugs": "https://github.com/ForbesLindesay/atdatabases/issues",
-  "license": "MIT",
+  "homepage": "https://www.atdatabases.org/docs/pg-typed",
   "publishConfig": {
     "access": "public"
   },
-  "files": [
-    "lib/"
-  ],
-  "homepage": "https://www.atdatabases.org/docs/pg-typed"
+  "license": "MIT"
 }

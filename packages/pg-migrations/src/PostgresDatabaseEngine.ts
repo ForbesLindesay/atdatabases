@@ -63,7 +63,7 @@ export default class PostgresDatabaseEngine
   readonly databaseName = 'Postgres';
   readonly packageName = '@databases/pg-migrations';
   readonly cliName = 'pg-migrations';
-  readonly packageVersion = require('../package.json').version;
+  readonly packageVersion: string = require('../package.json').version;
 
   async checkDatabaseVersion(): Promise<Result<void, DatabaseVersionError>> {
     const [major, minor] = await getPgVersion(this._connection);
@@ -224,7 +224,7 @@ export default class PostgresDatabaseEngine
         );
     }
   }
-  async dispose() {
+  async dispose(): Promise<void> {
     await this._connection.dispose();
   }
 }

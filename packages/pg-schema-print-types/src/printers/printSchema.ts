@@ -3,7 +3,10 @@ import PgDataTypeID from '@databases/pg-data-type-id';
 import PgPrintContext from '../PgPrintContext';
 import printClassDetails from './printClassDetails';
 
-export default function printSchema(schema: Schema, context: PgPrintContext) {
+export default function printSchema(
+  schema: Schema,
+  context: PgPrintContext,
+): void {
   context.printer.pushTypeDeclaration(
     {type: 'schema'},
     (identifier, {getImport}) => [

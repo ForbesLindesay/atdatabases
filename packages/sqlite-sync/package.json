@@ -2,8 +2,15 @@
   "name": "@databases/sqlite-sync",
   "version": "0.0.0",
   "description": "",
-  "main": "./lib/index.js",
-  "types": "./lib/index.d.ts",
+  "type": "module",
+  "files": [
+    "dist/"
+  ],
+  "exports": {
+    ".": "./dist/index.js",
+    "./package.json": "./package.json"
+  },
+  "types": "./dist/index.d.ts",
   "dependencies": {
     "@databases/escape-identifier": "^0.0.0",
     "@databases/sql": "^0.0.0",
@@ -11,15 +18,19 @@
     "@types/better-sqlite3": "^7.6.9",
     "better-sqlite3": "^11.3.0"
   },
+  "engines": {
+    "node": ">= 20.20.1"
+  },
   "scripts": {},
-  "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/sqlite-sync",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ForbesLindesay/atdatabases.git",
+    "directory": "packages/sqlite-sync"
+  },
   "bugs": "https://github.com/ForbesLindesay/atdatabases/issues",
-  "license": "MIT",
+  "homepage": "https://www.atdatabases.org/docs/sqlite-sync",
   "publishConfig": {
     "access": "public"
   },
-  "homepage": "https://www.atdatabases.org/docs/sqlite-sync",
-  "files": [
-    "lib/"
-  ]
+  "license": "MIT"
 }

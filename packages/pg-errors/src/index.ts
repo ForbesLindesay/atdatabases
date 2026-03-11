@@ -1,7 +1,7 @@
-import SQLError from './SQLError';
+import type SQLError from './SQLError';
 import SQLErrorCode, {SQLErrorCodes} from './SQLErrorCode';
 
-export {SQLError, SQLErrorCode};
+export {type SQLError, SQLErrorCode};
 
 export function isSQLError(error: any): error is SQLError {
   return (

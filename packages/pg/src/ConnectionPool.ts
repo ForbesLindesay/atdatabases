@@ -1,9 +1,8 @@
 import {BaseConnectionPool, Factory, PoolOptions} from '@databases/shared';
-import sql, {SQLQuery} from '@databases/sql';
+import sql, {SQL} from '@databases/sql';
 import {escapePostgresIdentifier} from '@databases/escape-identifier';
 import Connection from './Connection';
 import Transaction from './Transaction';
-import {PassThrough, Readable} from 'stream';
 import PgClient from './types/PgClient';
 import {ConnectionPool as IConnectionPool} from './types/Queryable';
 import TypeOverrides, {
@@ -113,7 +112,7 @@ export default class ConnectionPool
   extends BaseConnectionPool<Connection, Transaction, PgDriver>
   implements IConnectionPool
 {
-  public readonly sql = sql;
+  public readonly sql: SQL = sql;
   private readonly _types: TypeOverrides;
   constructor(
     options: PgOptions,
@@ -188,45 +187,7 @@ export default class ConnectionPool
       }
     }
   }
-  public readonly parseComposite = parseComposite;
-  public readonly parseArray = parseArray;
-
-  queryNodeStream(
-    query: SQLQuery,
-    options: {highWaterMark?: number} = {},
-  ): Readable {
-    this._throwIfDisposed();
-    const stream = new PassThrough({
-      objectMode: true,
-    });
-    this._pool
-      .getConnection()
-      .then(async (driver) => {
-        let released = false;
-        const connectionStream = driver.connection.queryNodeStream(
-          query,
-          options,
-        );
-        connectionStream.pipe(stream);
-        connectionStream.on('error', () => {
-          if (!released) {
-            released = true;
-            driver.dispose();
-          }
-          stream.emit('error', stream);
-        });
-        connectionStream.on('close', () => {
-          if (!released) {
-            released = true;
-            driver.release();
-          }
-          stream.emit('close');
-        });
-        stream.on('close', () => {
-          connectionStream.destroy();
-        });
-      })
-      .catch((ex) => stream.emit('error', ex));
-    return stream;
-  }
+  public readonly parseComposite: IConnectionPool['parseComposite'] =
+    parseComposite;
+  public readonly parseArray: IConnectionPool['parseArray'] = parseArray;
 }

@@ -1,10 +1,10 @@
 import {readFileSync} from 'fs';
 import sqlBase, {
-  SQL as SQLBase,
-  SQLQuery,
-  SQLItem,
+  type SQL as SQLBase,
+  type SQLQuery,
+  type SQLItem,
   SQLItemType,
-  FormatConfig,
+  type FormatConfig,
   isSqlQuery,
 } from './web';
 
@@ -21,8 +21,3 @@ const sql: SQL = Object.assign(sqlBase, {
 });
 
 export default sql;
-
-module.exports = sql;
-module.exports.default = sql;
-module.exports.isSqlQuery = isSqlQuery;
-module.exports.SQLItemType = SQLItemType;

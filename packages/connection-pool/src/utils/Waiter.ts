@@ -5,7 +5,7 @@ import {Timeout, timeout} from './timeout';
  * to become available.
  */
 export default class Waiter<T> {
-  static waiterTimeout<T>(waiter: Waiter<T>) {
+  static waiterTimeout<T>(waiter: Waiter<T>): void {
     if (waiter._resolve) {
       waiter._resolve(timeout);
       waiter._resolve = null;
@@ -27,10 +27,10 @@ export default class Waiter<T> {
       );
     }
   }
-  public isTimedOut() {
+  public isTimedOut(): boolean {
     return this._resolve === null;
   }
-  public resolve(connection: T | Promise<T>) {
+  public resolve(connection: T | Promise<T>): void {
     clearTimeout(this._timeout);
     this._resolve!(connection);
   }

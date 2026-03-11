@@ -6,7 +6,7 @@ import {
   ParameterReducer,
   param,
 } from 'parameter-reducers';
-import chalk = require('chalk');
+import chalk from 'chalk';
 import runCommand, {Command} from './runCommand';
 import applyMigrations from './commands/applyMigrations';
 import ignoreError from './commands/ignoreError';
@@ -63,6 +63,16 @@ function printParameters(
   }
 }
 
+interface PreparedCommand {
+  description: string;
+  printHelp: <TMigration, TParameters>(
+    config: CommandLineInterfaceConfig<TMigration, TParameters>,
+  ) => void;
+  run: <TMigration, TParameters>(
+    config: CommandLineInterfaceConfig<TMigration, TParameters>,
+    args: string[],
+  ) => Promise<void>;
+}
 function prepareCommand(
   description: string,
   printHelp: <TMigration, TParameters>(
@@ -70,14 +80,14 @@ function prepareCommand(
   ) => void,
   parameterParser: ParameterReducer<MigrationCommandParameters>,
   command: Command<void, MigrationError>,
-) {
+): PreparedCommand {
   return {
     description,
     printHelp,
     run: async <TMigration, TParameters>(
       config: CommandLineInterfaceConfig<TMigration, TParameters>,
       args: string[],
-    ) => {
+    ): Promise<void> => {
       const parsedArgs = parse(
         startChain()
           .addParam(parameterParser)
@@ -152,7 +162,14 @@ function prepareCommand(
   };
 }
 
-export const commands = {
+export interface Commands {
+  apply: PreparedCommand;
+  'ignore-error': PreparedCommand;
+  'mark-applied': PreparedCommand;
+  'mark-unapplied': PreparedCommand;
+  'restore-from-db': PreparedCommand;
+}
+export const commands: Commands = {
   apply: prepareCommand(
     'Apply any pending migration',
     (config) => {
@@ -350,7 +367,7 @@ function printAllHelp<TMigration, TParameters>(
 export default function getCommandLineInterface<TMigration, TParameters>(
   config: CommandLineInterfaceConfig<TMigration, TParameters>,
 ) {
-  return (argv: readonly string[]) => {
+  return (argv: readonly string[]): void => {
     const [commandName, ...params] = argv;
     const commandMethod =
       commandName in commands

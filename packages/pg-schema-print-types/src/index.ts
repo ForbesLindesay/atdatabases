@@ -1,7 +1,11 @@
 import PgConfig from '@databases/pg-config';
 import PgDataTypeID from '@databases/pg-data-type-id';
 import {TypeKind, type Schema} from '@databases/pg-schema-introspect';
-import {getIgnoreTest, writeFiles} from '@databases/shared-print-types';
+import {
+  FileWithContent,
+  getIgnoreTest,
+  writeFiles,
+} from '@databases/shared-print-types';
 import PgPrintContext from './PgPrintContext';
 import getTypeScriptType from './getTypeScriptType';
 import PrintOptions from './PgPrintOptions';
@@ -55,7 +59,10 @@ function getPrinter(unfilteredSchema: Schema, options: Options) {
   return context.printer;
 }
 
-export function printSchema(schema: Schema, options: Options = {}) {
+export function printSchema(
+  schema: Schema,
+  options: Options = {},
+): FileWithContent[] {
   return getPrinter(schema, options).getFiles();
 }
 
@@ -63,7 +70,7 @@ export async function writeSchema(
   schema: Schema,
   directory: string,
   options: Options = {},
-) {
+): Promise<void> {
   await writeFiles({
     context: getPrinter(schema, options),
     directory,

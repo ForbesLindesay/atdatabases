@@ -1,6 +1,7 @@
 import MySqlConfig from '@databases/mysql-config';
 import type {Schema} from '@databases/mysql-schema-introspect';
 import {
+  FileWithContent,
   getIgnoreTest,
   PrintContext,
   writeFiles,
@@ -40,7 +41,10 @@ function getPrinter(unfilteredSchema: Schema, options: Options) {
   return context;
 }
 
-export function printSchema(schema: Schema, options: Options = {}) {
+export function printSchema(
+  schema: Schema,
+  options: Options = {},
+): FileWithContent[] {
   return getPrinter(schema, options).getFiles();
 }
 
@@ -48,7 +52,7 @@ export async function writeSchema(
   schema: Schema,
   directory: string,
   options: Options = {},
-) {
+): Promise<void> {
   await writeFiles({
     context: getPrinter(schema, options),
     directory,

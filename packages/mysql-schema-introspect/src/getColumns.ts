@@ -1,25 +1,40 @@
 import * as t from 'funtypes';
 import {Queryable, sql} from '@databases/mysql';
-import getColumnType, {ColumnTypeSchema} from './getColumnType';
+import getColumnType, {ColumnType, ColumnTypeSchema} from './getColumnType';
 import {TableQuery, tableQuery} from './getTables';
 
 export interface ColumnQuery extends Omit<TableQuery, 'type'> {
   columnName?: string;
 }
-const ColumnSchema = t.Object({
-  schemaName: t.String,
-  tableName: t.String,
-  columnName: t.String,
-  ordinalPosition: t.Number,
+export interface Column {
+  schemaName: string;
+  tableName: string;
+  columnName: string;
+  ordinalPosition: number;
 
-  isPrimaryKey: t.Boolean,
-  isNullable: t.Boolean,
-  default: t.Union(t.Null, t.String),
-  type: ColumnTypeSchema,
+  isPrimaryKey: boolean;
+  isNullable: boolean;
+  default: string | null;
+  type: ColumnType;
 
-  comment: t.String,
-});
-export type Column = t.Static<typeof ColumnSchema>;
+  comment: string;
+}
+const ColumnSchema: t.Codec<Column> = t.Named(
+  'Column',
+  t.Object({
+    schemaName: t.String,
+    tableName: t.String,
+    columnName: t.String,
+    ordinalPosition: t.Number,
+
+    isPrimaryKey: t.Boolean,
+    isNullable: t.Boolean,
+    default: t.Union(t.Null, t.String),
+    type: ColumnTypeSchema,
+
+    comment: t.String,
+  }),
+);
 export default async function getColumns(
   connection: Queryable,
   query: ColumnQuery,

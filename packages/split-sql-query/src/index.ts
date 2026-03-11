@@ -198,9 +198,3 @@ export default function splitSqlQuery(query: SQLQuery): SQLQuery[] {
     return split;
   }
 }
-
-module.exports = Object.assign(splitSqlQuery, {
-  default: splitSqlQuery,
-  hasValues,
-  hasSemicolonBeforeEnd,
-});

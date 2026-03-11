@@ -1,6 +1,5 @@
-import {Readable} from 'stream';
 import assertNever from 'assert-never';
-import sql, {SQLQuery} from '@databases/sql';
+import sql, {type SQL, type SQLQuery} from '@databases/sql';
 import {Dataset, TableMetadata} from '@google-cloud/bigquery';
 import BigQueryDriver from './BigQueryDriver';
 import BigQueryDataset from '../types/BigQueryDataset';
@@ -113,7 +112,7 @@ function getTableMetadata(options: CreateTableOptions): TableMetadata {
 }
 
 export default class BigQueryDatasetImplementation implements BigQueryDataset {
-  public readonly sql = sql;
+  public readonly sql: SQL = sql;
   private readonly _client: Dataset;
   private readonly _driver: BigQueryDriver;
   constructor(client: Dataset, driver: BigQueryDriver) {
@@ -135,15 +134,8 @@ export default class BigQueryDatasetImplementation implements BigQueryDataset {
   queryStream(
     query: SQLQuery,
     options: BigQueryStreamOptions = {},
-  ): AsyncGenerator<any, void, unknown> {
+  ): ReadableStream<any> {
     return this._driver.queryStream(query, options, this._createQueryJob);
-  }
-
-  queryNodeStream(
-    query: SQLQuery,
-    options: BigQueryStreamOptions = {},
-  ): Readable {
-    return this._driver.queryNodeStream(query, options, this._createQueryJob);
   }
 
   async createTable(

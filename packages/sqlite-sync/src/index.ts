@@ -2,7 +2,7 @@ import {escapeSQLiteIdentifier} from '@databases/escape-identifier';
 import sql, {SQLQuery, isSqlQuery, FormatConfig} from '@databases/sql';
 import splitSqlQuery from '@databases/split-sql-query';
 import {Statement, Options as DatabaseOptions, Database} from 'better-sqlite3';
-import DatabaseConstructor = require('better-sqlite3');
+import DatabaseConstructor from 'better-sqlite3';
 
 export type {SQLQuery};
 export {sql, isSqlQuery};
@@ -30,10 +30,6 @@ class DatabaseTransactionImplementation implements DatabaseTransaction {
   query(query: SQLQuery | SQLQuery[]) {
     return runQuery(query, this._database);
   }
-
-  /**
-   * @deprecated use queryStream
-   */
   queryStream(query: SQLQuery): IterableIterator<any> {
     return runQueryStream(query, this._database);
   }
@@ -82,12 +78,6 @@ export default function connect(
 ): DatabaseConnection {
   return new DatabaseConnectionImplementation(filename, options);
 }
-module.exports = Object.assign(connect, {
-  default: connect,
-  IN_MEMORY,
-  sql,
-  isSqlQuery,
-});
 
 function runQuery(query: SQLQuery | SQLQuery[], database: Database) {
   if (Array.isArray(query)) {

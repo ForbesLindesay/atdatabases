@@ -2,10 +2,17 @@
   "name": "@databases/bigquery",
   "version": "0.0.0",
   "description": "",
-  "main": "./lib/index.js",
-  "types": "./lib/index.d.ts",
+  "type": "module",
+  "files": [
+    "dist/"
+  ],
+  "exports": {
+    ".": "./dist/index.js",
+    "./package.json": "./package.json"
+  },
+  "types": "./dist/index.d.ts",
   "dependencies": {
-    "@babel/code-frame": "^7.0.0",
+    "@babel/code-frame": "^7.29.0",
     "@databases/escape-identifier": "^0.0.0",
     "@databases/split-sql-query": "^0.0.0",
     "@databases/sql": "^0.0.0",
@@ -14,12 +21,22 @@
     "assert-never": "^1.2.1",
     "big.js": "^6.2.2"
   },
+  "devDependencies": {
+    "@types/babel__code-frame": "^7.27.0"
+  },
+  "engines": {
+    "node": ">= 20.20.1"
+  },
   "scripts": {},
-  "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/bigquery",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ForbesLindesay/atdatabases.git",
+    "directory": "packages/bigquery"
+  },
   "bugs": "https://github.com/ForbesLindesay/atdatabases/issues",
-  "license": "MIT",
+  "homepage": "https://www.atdatabases.org/docs/bigquery",
   "publishConfig": {
     "access": "public"
   },
-  "homepage": "https://www.atdatabases.org/docs/bigquery"
+  "license": "MIT"
 }

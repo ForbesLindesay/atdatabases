@@ -30,27 +30,13 @@ beforeAll(async () => {
   }
 });
 
-test('node streaming', async () => {
-  const results = await new Promise<any[]>((resolve, reject) => {
-    const results: number[] = [];
-    db.queryNodeStream(sql`SELECT * FROM streaming_test_values`, {
-      highWaterMark: 1,
-    })
-      .on('data', (data) => results.push(data.id))
-      .on('error', reject)
-      .on('end', () => resolve(results));
-  });
-  expect(results).toEqual(allValues);
-});
-
 test('await streaming', async () => {
   const results: number[] = [];
-  for await (const {id} of db.queryStream(
+  const stream: ReadableStream<any> = db.queryStream(
     sql`SELECT * FROM streaming_test_values`,
-    {
-      highWaterMark: 1,
-    },
-  )) {
+  );
+  // @ts-expect-error - ReadableStream is iterable, but TypeScript doesn't always know that.
+  for await (const {id} of stream) {
     results.push(id);
   }
   expect(results).toEqual(allValues);

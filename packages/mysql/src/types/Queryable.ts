@@ -1,19 +1,12 @@
-import {Readable} from 'stream';
 import {QueryableType} from '@databases/shared';
-import {SQL, SQLQuery} from '@databases/sql';
+import {type SQL, type SQLQuery} from '@databases/sql';
 import TransactionOptions from './TransactionOptions';
-import QueryStreamOptions from './QueryStreamOptions';
 
 export default interface Queryable {
   readonly type: QueryableType;
   readonly sql: SQL;
   query(query: SQLQuery): Promise<any[]>;
   query(query: SQLQuery[]): Promise<any[][]>;
-  queryStream(
-    query: SQLQuery,
-    options?: QueryStreamOptions,
-  ): AsyncIterable<any>;
-  queryNodeStream(query: SQLQuery, options?: QueryStreamOptions): Readable;
   task<T>(fn: (connection: Connection | Transaction) => Promise<T>): Promise<T>;
   tx<T>(
     fn: (connection: Transaction) => Promise<T>,
@@ -58,6 +51,7 @@ export interface Connection extends Queryable {
 export interface ConnectionPool extends Queryable {
   readonly type: QueryableType.ConnectionPool;
   task<T>(fn: (connection: Connection) => Promise<T>): Promise<T>;
+  queryStream(query: SQLQuery): ReadableStream<any>;
 
   dispose(): Promise<void>;
 }

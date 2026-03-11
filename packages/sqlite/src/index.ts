@@ -13,13 +13,30 @@ const sqliteFormat: FormatConfig = {
 };
 
 export enum DatabaseConnectionMode {
-  ReadOnly = sqlite.OPEN_READONLY,
-  ReadWrite = sqlite.OPEN_READWRITE,
-  // tslint:disable-next-line:no-bitwise
-  ReadWriteCreate = sqlite.OPEN_READWRITE | sqlite.OPEN_CREATE,
-  // tslint:disable-next-line:no-bitwise
-  ReadCreate = sqlite.OPEN_READONLY | sqlite.OPEN_CREATE,
-  Create = sqlite.OPEN_CREATE,
+  ReadOnly = 'READ',
+  ReadWrite = 'READ_WRITE',
+  ReadWriteCreate = 'READ_WRITE_CREATE',
+  ReadCreate = 'READ_CREATE',
+  Create = 'CREATE',
+}
+function modeToSqLite(mode: DatabaseConnectionMode): number {
+  switch (mode) {
+    case DatabaseConnectionMode.ReadOnly:
+      return sqlite.OPEN_READONLY;
+    case DatabaseConnectionMode.ReadWrite:
+      return sqlite.OPEN_READWRITE;
+    case DatabaseConnectionMode.ReadWriteCreate:
+      // tslint:disable-next-line:no-bitwise
+      return sqlite.OPEN_READWRITE | sqlite.OPEN_CREATE;
+    case DatabaseConnectionMode.ReadCreate:
+      // tslint:disable-next-line:no-bitwise
+      return sqlite.OPEN_READONLY | sqlite.OPEN_CREATE;
+    case DatabaseConnectionMode.Create:
+      return sqlite.OPEN_CREATE;
+    default:
+      mode satisfies never;
+      throw new Error(`Invalid mode ${mode}`);
+  }
 }
 
 export interface DatabaseConnectionOptions {
@@ -42,11 +59,6 @@ export interface DatabaseConnectionOptions {
 
 export interface DatabaseTransaction {
   query(query: SQLQuery): Promise<any[]>;
-
-  /**
-   * @deprecated use queryStream
-   */
-  stream(query: SQLQuery): AsyncIterableIterator<any>;
   queryStream(query: SQLQuery): AsyncIterableIterator<any>;
 }
 export interface DatabaseConnection extends DatabaseTransaction {
@@ -64,13 +76,6 @@ class DatabaseTransactionImplementation implements DatabaseTransaction {
     }
     return runQuery(query, this._database, async (fn) => fn());
   }
-
-  /**
-   * @deprecated use queryStream
-   */
-  stream(query: SQLQuery): AsyncIterableIterator<any> {
-    return this.queryStream(query);
-  }
   queryStream(query: SQLQuery): AsyncIterableIterator<any> {
     if (!isSqlQuery(query)) {
       throw new Error('Expected query to be an SQLQuery');
@@ -84,7 +89,10 @@ class DatabaseConnectionImplementation implements DatabaseConnection {
   private readonly _database: sqlite.Database;
   private readonly _mutex = new Mutex();
   constructor(filename: string, options: DatabaseConnectionOptions = {}) {
-    this._database = new sqlite.Database(filename, options.mode);
+    this._database = new sqlite.Database(
+      filename,
+      options.mode ? modeToSqLite(options.mode) : undefined,
+    );
     if (options.verbose) {
       sqlite.verbose();
     }
@@ -99,13 +107,6 @@ class DatabaseConnectionImplementation implements DatabaseConnection {
     return runQuery(query, this._database, async (fn) =>
       this._mutex.readLock(fn),
     );
-  }
-
-  /**
-   * @deprecated use queryStream
-   */
-  stream(query: SQLQuery): AsyncIterableIterator<any> {
-    return this.queryStream(query);
   }
   queryStream(query: SQLQuery): AsyncIterableIterator<any> {
     if (!isSqlQuery(query)) {
@@ -163,13 +164,6 @@ export default function connect(
 ): DatabaseConnection {
   return new DatabaseConnectionImplementation(filename, options);
 }
-module.exports = Object.assign(connect, {
-  default: connect,
-  DatabaseConnectionMode,
-  IN_MEMORY,
-  sql,
-  isSqlQuery,
-});
 
 async function runQuery(
   query: SQLQuery,

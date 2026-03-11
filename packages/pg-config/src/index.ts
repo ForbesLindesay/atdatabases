@@ -1,5 +1,5 @@
 import {cosmiconfig, cosmiconfigSync} from 'cosmiconfig';
-import PgConfig, {PgConfigSchema} from './PgConfig';
+import {type PgConfig, PgConfigSchema} from './PgConfig';
 
 const asyncExplorer = cosmiconfig('pg');
 const syncExplorer = cosmiconfigSync('pg');
@@ -18,7 +18,7 @@ function parseResult(result: null | {config: unknown}): PgConfig {
   return PgConfigSchema.parse(result ? result.config : {});
 }
 
-export const DEFAULT_CONFIG = PgConfigSchema.parse({});
+export const DEFAULT_CONFIG: PgConfig = PgConfigSchema.parse({});
 export default PgConfig;
 
 export {

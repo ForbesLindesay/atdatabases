@@ -1,5 +1,3 @@
-import assertNever from 'assert-never';
-
 /**
  * The default level is "READ_COMMITTED". "READ_COMMITTED" and "READ_UNCOMMITTED"
  * are equivalent in postgres.
@@ -14,7 +12,7 @@ enum IsolationLevel {
 }
 export default IsolationLevel;
 
-export function isolationLevelToString(level: IsolationLevel) {
+export function isolationLevelToString(level: IsolationLevel): string {
   switch (level) {
     case IsolationLevel.READ_UNCOMMITTED:
       return 'ISOLATION LEVEL READ UNCOMMITTED';
@@ -25,7 +23,7 @@ export function isolationLevelToString(level: IsolationLevel) {
     case IsolationLevel.SERIALIZABLE:
       return 'ISOLATION LEVEL SERIALIZABLE';
     default:
-      void assertNever(level, true);
+      level satisfies never;
       throw new Error(`${level} is not a valid isolation level`);
   }
 }

@@ -1,25 +1,20 @@
 /* tslint:disable:no-void-expression */
 
-import {Readable} from 'stream';
 import {escapeMySqlIdentifier} from '@databases/escape-identifier';
-import {SQLQuery, FormatConfig, isSqlQuery} from '@databases/sql';
+import {type SQLQuery, FormatConfig} from '@databases/sql';
 import {Driver} from '@databases/shared';
 import {Connection as MySqlClient} from 'mysql2/promise';
-import pushToAsyncIterable from '@databases/push-to-async-iterable';
 import TransactionOptions from './types/TransactionOptions';
 import EventHandlers from './types/EventHandlers';
 import {CoreConnection} from './raw';
-import QueryStreamOptions from './types/QueryStreamOptions';
-const {codeFrameColumns} = require('@babel/code-frame');
+import {codeFrameColumns} from '@babel/code-frame';
 
 const mysqlFormat: FormatConfig = {
   escapeIdentifier: (str) => escapeMySqlIdentifier(str),
   formatValue: (value) => ({placeholder: '?', value}),
 };
 
-export default class MySqlDriver
-  implements Driver<TransactionOptions, QueryStreamOptions>
-{
+export default class MySqlDriver implements Driver<TransactionOptions> {
   public readonly acquireLockTimeoutMilliseconds: number;
   public readonly client: MySqlClient;
   private readonly _handlers: EventHandlers;
@@ -50,14 +45,14 @@ export default class MySqlDriver
   onAddingToPool(
     removeFromPool: undefined | (() => void),
     idleErrorEventHandler: undefined | ((err: Error) => void),
-  ) {
+  ): void {
     this._removeFromPool = removeFromPool;
     this._idleErrorEventHandler = idleErrorEventHandler;
   }
-  onActive() {
+  onActive(): void {
     this.client.removeListener('error', this._onIdleError);
   }
-  onIdle() {
+  onIdle(): void {
     this.client.on('error', this._onIdleError);
   }
 
@@ -69,7 +64,7 @@ export default class MySqlDriver
     }
   }
 
-  async canRecycleConnectionAfterError(_err: Error) {
+  async canRecycleConnectionAfterError(_err: Error): Promise<boolean> {
     try {
       let timeout: any | undefined;
       const result: undefined | {1?: {rows?: {0?: {result?: number}}}} =
@@ -90,7 +85,7 @@ export default class MySqlDriver
     }
   }
 
-  async beginTransaction(options?: TransactionOptions) {
+  async beginTransaction(options?: TransactionOptions): Promise<void> {
     const parameters = [];
     if (options) {
       if (options.readOnly) {
@@ -108,27 +103,27 @@ export default class MySqlDriver
       await execute(this.client, `BEGIN`);
     }
   }
-  async commitTransaction() {
+  async commitTransaction(): Promise<void> {
     await execute(this.client, `COMMIT`);
   }
-  async rollbackTransaction() {
+  async rollbackTransaction(): Promise<void> {
     await execute(this.client, `ROLLBACK`);
   }
   async shouldRetryTransactionFailure(
     _transactionOptions: TransactionOptions | undefined,
     _ex: Error,
     _failureCount: number,
-  ) {
+  ): Promise<boolean> {
     return false;
   }
 
-  async createSavepoint(savepointName: string) {
+  async createSavepoint(savepointName: string): Promise<void> {
     await execute(this.client, `SAVEPOINT ${savepointName}`);
   }
-  async releaseSavepoint(savepointName: string) {
+  async releaseSavepoint(savepointName: string): Promise<void> {
     await execute(this.client, `RELEASE SAVEPOINT ${savepointName}`);
   }
-  async rollbackToSavepoint(savepointName: string) {
+  async rollbackToSavepoint(savepointName: string): Promise<void> {
     await execute(this.client, `ROLLBACK TO SAVEPOINT ${savepointName}`);
   }
 
@@ -167,61 +162,18 @@ export default class MySqlDriver
     return await this._executeQuery(queries[queries.length - 1]);
   }
 
-  queryStream(query: SQLQuery, options?: QueryStreamOptions) {
-    if (!isSqlQuery(query)) {
-      throw new Error(
-        'Invalid query, you must use @databases/sql to create your queries.',
-      );
-    }
-    const {text, values} = query.format(mysqlFormat);
-    const highWaterMark = (options && options.highWaterMark) || 5;
-
-    const connection: CoreConnection = (this.client as any).connection;
-    return pushToAsyncIterable<any>((handlers) => {
-      const stream = connection.query(text, values);
-      stream.on('result', handlers.onData);
-      stream.on('error', handlers.onError);
-      stream.on('end', handlers.onEnd);
-      return {
-        dispose: () => {
-          connection.resume();
-        },
-        pause: () => {
-          connection.pause();
-        },
-        resume: () => {
-          connection.resume();
-        },
-        highWaterMark,
-      };
-    });
-  }
-
-  queryNodeStream(query: SQLQuery, options?: QueryStreamOptions): Readable {
-    if (!isSqlQuery(query)) {
-      throw new Error(
-        'Invalid query, you must use @databases/sql to create your queries.',
-      );
-    }
+  queryStream(query: SQLQuery): ReadableStream<any> {
+    // TODO: handle backpressure via a high-water-mark
     const {text, values} = query.format(mysqlFormat);
     const connection: CoreConnection = (this.client as any).connection;
-    const result = connection.query(text, values).stream(options);
-    // tslint:disable-next-line:no-unbound-method
-    const on = result.on;
-    const handlers = this._handlers;
-    return Object.assign(result, {
-      on(event: string, cb: (...args: any[]) => void) {
-        if (event !== 'error') return on.call(this, event, cb);
-        return on.call(this, event, (ex) => {
-          // TODO: consider using https://github.com/Vincit/db-errors
-          try {
-            handleError(ex, query, {text, values}, handlers);
-          } catch (ex) {
-            cb(ex);
-          }
-        });
+    return new ReadableStream({
+      start(controller) {
+        const stream = connection.query(text, values);
+        stream.on('result', (data) => controller.enqueue(data));
+        stream.on('error', (err) => controller.error(err));
+        stream.on('end', () => controller.close());
       },
-    }) as any;
+    });
   }
 }
 

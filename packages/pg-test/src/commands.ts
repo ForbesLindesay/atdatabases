@@ -1,4 +1,4 @@
-import ms = require('ms');
+import ms from 'ms';
 import {parse, startChain, param} from 'parameter-reducers';
 import * as ta from 'type-assertions';
 import {getPgConfigSync} from '@databases/pg-config';
@@ -61,7 +61,7 @@ async function runMigrationsAndAddToEnv(databaseURL: string, debug?: boolean) {
   }
 }
 
-export async function start(args: string[]) {
+export async function start(args: string[]): Promise<number> {
   const parseResult = parse(params, args);
   if (!parseResult.valid) {
     console.error(parseResult.reason);
@@ -98,7 +98,7 @@ export async function start(args: string[]) {
   return 0;
 }
 
-export async function run(args: string[]) {
+export async function run(args: string[]): Promise<number> {
   const parseResult = parse(params, args);
   if (!parseResult.valid) {
     console.error(parseResult.reason);
@@ -133,7 +133,7 @@ export async function run(args: string[]) {
 const stopParams = startChain()
   .addParam(param.flag(['-d', '--debug'], 'debug'))
   .addParam(param.string(['--containerName'], 'containerName'));
-export async function stop(args: string[]) {
+export async function stop(args: string[]): Promise<number> {
   const parseResult = parse(stopParams, args);
   if (!parseResult.valid) {
     console.error(parseResult.reason);
@@ -157,7 +157,7 @@ export async function stop(args: string[]) {
 }
 
 // prettier-ignore
-export function help(command?: string) {
+export function help(command?: string): 0 {
   switch (command) {
     case 'start':
       console.info(`usage: pg-test start [-h] ...`);
@@ -221,4 +221,5 @@ export function help(command?: string) {
       console.info(`For detailed help about a specific command, use: pg-test help <command>`);
       break;
   }
+  return 0
 }

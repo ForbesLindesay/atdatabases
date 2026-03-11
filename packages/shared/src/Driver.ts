@@ -1,6 +1,9 @@
 import type {SQLQuery} from '@databases/sql';
 
-export default interface Driver<TTransactionOptions, TQueryStreamOptions> {
+export default interface Driver<
+  TTransactionOptions,
+  TQueryStreamOptions = undefined,
+> {
   /**
    * How long to wait when aquiring a lock on a connection or transaction.
    * This can help catch cases where you attempt to query using a connection
@@ -21,7 +24,7 @@ export default interface Driver<TTransactionOptions, TQueryStreamOptions> {
   queryStream(
     query: SQLQuery,
     options: TQueryStreamOptions | undefined,
-  ): AsyncGenerator<any, void, unknown>;
+  ): ReadableStream<any>;
 
   shouldRetryTransactionFailure(
     options: TTransactionOptions | undefined,

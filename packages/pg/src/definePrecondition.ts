@@ -1,6 +1,10 @@
 export default function definePrecondition<TArgs extends any[], TResult>(
   fn: (...args: TArgs) => Promise<TResult>,
-) {
+): {
+  hasDonePrecondition: () => boolean;
+  callPrecondition: (...args: TArgs) => Promise<TResult | undefined>;
+  resetPrecondition: () => void;
+} {
   let done = false;
   let doing = false;
   let queue: {

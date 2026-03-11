@@ -1,4 +1,4 @@
-import {SQLQuery} from '@databases/sql/web';
+import {type SQLQuery} from '@databases/sql/web';
 
 export default interface EventHandlers {
   onConnectionOpened?: () => void;

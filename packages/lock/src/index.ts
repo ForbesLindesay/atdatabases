@@ -202,10 +202,6 @@ export function createLock(timeoutMilliseconds?: number): Lock {
     return new LockImpl(timeoutMilliseconds, undefined, undefined);
   }
 }
-/**
- * @deprecated use createLock
- */
-export const getLock = createLock;
 
 function createLockForKey<TKey>(
   timeoutMilliseconds: number | undefined,
@@ -321,8 +317,3 @@ export function createLocksByKey<TKey = string>(
 ): LocksByKey<TKey> {
   return new LocksByKeyImpl<TKey>(options);
 }
-
-/**
- * @deprecated use createLocksByKey
- */
-export const getLocksByKey = createLocksByKey;

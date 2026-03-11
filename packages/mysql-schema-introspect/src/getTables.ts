@@ -1,5 +1,5 @@
 import * as t from 'funtypes';
-import {Queryable, sql} from '@databases/mysql';
+import {Queryable, sql, SQLQuery} from '@databases/mysql';
 import TableType from './enums/TableType';
 
 export interface TableQuery {
@@ -16,7 +16,12 @@ const TableSchema = t.Named(
     comment: t.String,
   }),
 );
-export type Table = t.Static<typeof TableSchema>;
+export interface Table {
+  schemaName: string;
+  tableName: string;
+  tableType: TableType;
+  comment: string;
+}
 export default async function getTables(
   connection: Queryable,
   query: TableQuery,
@@ -50,8 +55,8 @@ export default async function getTables(
     .map((t) => TableSchema.parse(t));
 }
 
-export function tableQuery(query: TableQuery) {
-  const conditions = [];
+export function tableQuery(query: TableQuery): SQLQuery[] {
+  const conditions: SQLQuery[] = [];
   if (query.type) {
     if (Array.isArray(query.type)) {
       conditions.push(

@@ -1,13 +1,17 @@
 import {
   websql,
   Database,
+  Transaction,
   sql,
   SQLQuery,
   isSqlQuery,
 } from '@databases/websql-core';
-const openDatabase: websql.OpenDatabase = require('websql');
+// @ts-expect-error
+import openDatabaseUntyped from 'websql';
 
-export type {SQLQuery};
+const openDatabase: websql.OpenDatabase = openDatabaseUntyped;
+
+export type {SQLQuery, Database, Transaction};
 export {sql, isSqlQuery};
 export const IN_MEMORY = ':memory:';
 export interface Options {
@@ -18,7 +22,7 @@ export interface Options {
 export default function connect(
   name: string = IN_MEMORY,
   options: Options = {},
-) {
+): Database {
   return new Database(
     new Promise((resolve) => {
       openDatabase(

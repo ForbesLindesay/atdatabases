@@ -30,8 +30,8 @@ export type TypeOverridesFunction = (ctx: {
     parseFn: ParseFnBinary,
   ): Promise<void>;
 
-  parseComposite: typeof parseComposite;
-  parseArray: typeof parseArray;
+  parseComposite: (value: string) => string[];
+  parseArray: ParseArrayFunctionType;
 }) =>
   | undefined
   | TypeOverridesMap
@@ -87,7 +87,9 @@ export default class TypeOverrides {
     this._complexOverrides = config.overrides;
   }
 
-  async prepareOverrides(resolveTypeID: (typeName: string) => Promise<number>) {
+  async prepareOverrides(
+    resolveTypeID: (typeName: string) => Promise<number>,
+  ): Promise<void> {
     let overrides: TypeOverridesMap | TypeOverridesObject | undefined;
     if (typeof this._complexOverrides === 'function') {
       overrides = await this._complexOverrides({
@@ -207,6 +209,11 @@ export function parseComposite(value: string): string[] {
 const parseStringArray: (value: string) => (string | null)[] =
   types.getTypeParser(PgDataTypeID._text);
 
+type ParseArrayFunctionType = (<T>(
+  value: string,
+  entryParser: (entry: string | null) => T,
+) => T[]) &
+  (<T>(value: string) => (string | null)[]);
 export function parseArray<T>(
   value: string,
   entryParser: (entry: string | null) => T,

@@ -1,6 +1,5 @@
-import {PassThrough, Readable} from 'stream';
 import {BaseConnectionPool, Factory, PoolOptions} from '@databases/shared';
-import sql, {SQLQuery} from '@databases/sql';
+import sql, {type SQL} from '@databases/sql';
 import {createConnection} from 'mysql2/promise';
 import Connection from './Connection';
 import Transaction from './Transaction';
@@ -97,7 +96,7 @@ export default class ConnectionPool
   extends BaseConnectionPool<Connection, Transaction, MySqlDriver>
   implements IConnectionPool
 {
-  public readonly sql = sql;
+  public readonly sql: SQL = sql;
   constructor(
     srcConfig: MySqlConnectionOptions,
     poolOptions: Omit<
@@ -120,45 +119,5 @@ export default class ConnectionPool
       ),
       factories,
     );
-  }
-
-  queryNodeStream(
-    query: SQLQuery,
-    options: {highWaterMark?: number} = {},
-  ): Readable {
-    this._throwIfDisposed();
-    const stream = new PassThrough({
-      objectMode: true,
-    });
-    this._pool
-      .getConnection()
-      .then(async (driver) => {
-        let released = false;
-        const connectionStream = driver.connection.queryNodeStream(
-          query,
-          options,
-        );
-        return connectionStream
-          .on('fields', (fields) => {
-            stream.emit('fields', fields);
-          })
-          .on('error', (err) => {
-            if (!released) {
-              released = true;
-              driver.dispose();
-            }
-            stream.emit('error', err);
-          })
-          .on('end', () => {
-            if (!released) {
-              released = true;
-              driver.release();
-            }
-            stream.emit('end');
-          })
-          .pipe(stream);
-      })
-      .catch((ex) => stream.emit('error', ex));
-    return stream;
   }
 }

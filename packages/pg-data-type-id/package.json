@@ -2,18 +2,29 @@
   "name": "@databases/pg-data-type-id",
   "version": "0.0.0",
   "description": "",
-  "main": "./lib/index.js",
-  "types": "./lib/index.d.ts",
+  "type": "module",
+  "files": [
+    "dist/"
+  ],
+  "exports": {
+    ".": "./dist/index.js",
+    "./package.json": "./package.json"
+  },
+  "types": "./dist/index.d.ts",
   "dependencies": {},
   "devDependencies": {},
+  "engines": {
+    "node": ">= 20.20.1"
+  },
   "scripts": {},
-  "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/pg-data-type-id",
-  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ForbesLindesay/atdatabases.git",
+    "directory": "packages/pg-data-type-id"
+  },
+  "bugs": "https://github.com/ForbesLindesay/atdatabases/issues",
   "publishConfig": {
     "access": "public"
   },
-  "bugs": "https://github.com/ForbesLindesay/atdatabases/issues",
-  "files": [
-    "lib/"
-  ]
+  "license": "MIT"
 }

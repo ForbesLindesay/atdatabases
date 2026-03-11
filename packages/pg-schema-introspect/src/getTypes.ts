@@ -1,4 +1,4 @@
-import {Queryable, sql} from '@databases/pg';
+import {Queryable, sql, SQLQuery} from '@databases/pg';
 import TypeCateogry from './enums/TypeCategory';
 import TypeKind from './enums/TypeKind';
 import getAttributes, {Attribute} from './getAttributes';
@@ -180,8 +180,8 @@ export default async function getTypes(
   );
 }
 
-export function typeQuery(query: TypeQuery) {
-  const conditions = [];
+export function typeQuery(query: TypeQuery): SQLQuery[] {
+  const conditions: SQLQuery[] = [];
   if (query.schemaID) {
     conditions.push(sql`ns.oid = ${query.schemaID}`);
   }

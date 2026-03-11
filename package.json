@@ -9,12 +9,12 @@
     "update-workflows": "github-actions-workflow-builder --cleanup --directory .github/workflows-src",
     "postinstall": "node scripts/postinstall",
     "prebuild": "wsrun --stages --exclude-missing -x @databases/website build",
-    "build": "tsc --build scripts",
-    "build:watch": "yarn build --watch",
-    "prerelease": "yarn build:all",
+    "build": "node scripts/build.mjs",
+    "typecheck": "tsc --build --noEmit scripts",
+    "typecheck:watch": "node --run build --watch",
     "prettier:check": "prettier --list-different \"packages/*/src/**/*.{ts,tsx}\"",
     "prettier:write": "prettier --write \"packages/*/src/**/*.{ts,tsx}\"",
-    "pretest": "yarn build",
+    "pretest": "node --run build",
     "test": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" TZ=Australia/Adelaide jest --selectProjects node --selectProjects pg --selectProjects mysql",
     "test:node": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" TZ=Australia/Adelaide jest --selectProjects node",
     "test:pg": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" TZ=Australia/Adelaide jest --selectProjects pg",
@@ -57,6 +57,7 @@
     ]
   },
   "dependencies": {
+    "@arethetypeswrong/core": "^0.18.2",
     "@babel/core": "^7.12.3",
     "@babel/preset-env": "^7.12.1",
     "@types/jest": "^30.0.0",
@@ -67,13 +68,15 @@
     "lsr": "^2.0.0",
     "mkdirp": "^1.0.4",
     "prettier": "^2.0.5",
+    "publint": "^0.3.18",
     "ts-jest": "^29.4.6",
+    "tsdown": "^0.21.1",
     "tslint": "^6.1.1",
-    "typescript": "^4.1.2",
+    "typescript": "^5.9.3",
     "wsrun": "^5.2.0"
   },
   "resolutions": {
-    "@types/node": "^14.14.25"
+    "@types/node": "^22.19.11"
   },
-  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
+  "packageManager": "npm@11.11.0+sha512.f36811c4aae1fde639527368ae44c571d050006a608d67a191f195a801a52637a312d259186254aa3a3799b05335b7390539cf28656d18f0591a1125ba35f973"
 }

@@ -4,13 +4,13 @@ import {
   ConstraintType,
   ClassKind,
 } from '@databases/pg-schema-introspect';
-import {FileContext} from '@databases/shared-print-types';
+import {FileContext, FileExport} from '@databases/shared-print-types';
 import PgPrintContext from '../PgPrintContext';
 
 export default function printClassDetails(
   type: ClassDetails,
   context: PgPrintContext,
-) {
+): {DatabaseRecord: FileExport; InsertParameters: FileExport} {
   if (
     type.kind !== ClassKind.OrdinaryTable &&
     type.kind !== ClassKind.PartitionedTable

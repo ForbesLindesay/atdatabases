@@ -1,4 +1,0 @@
-{
-  "main": "../lib/web.js",
-  "types": "../lib/web.d.ts"
-}

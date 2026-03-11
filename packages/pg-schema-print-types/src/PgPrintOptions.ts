@@ -1,6 +1,9 @@
 import assertNever from 'assert-never';
 import {PrintOptions} from '@databases/shared-print-types';
-import PgConfig, {DEFAULT_CONFIG} from '@databases/pg-config';
+import PgConfig, {
+  DEFAULT_CONFIG,
+  PgTypesDomainTypeMode,
+} from '@databases/pg-config';
 import TypeID from './TypeID';
 
 export default class PgPrintOptions implements PrintOptions<TypeID> {
@@ -14,30 +17,30 @@ export default class PgPrintOptions implements PrintOptions<TypeID> {
   ): PgConfig['types'][Literal<TKey>] {
     return (this._config as any)[key] ?? DEFAULT_CONFIG.types[key];
   }
-  public getSchemaJsonFileName() {
+  public getSchemaJsonFileName(): string | null {
     if (this._config.schemaJsonFileName !== undefined) {
       return this._config.schemaJsonFileName;
     } else {
       return DEFAULT_CONFIG.types.schemaJsonFileName;
     }
   }
-  public get domainTypeMode() {
+  public get domainTypeMode(): PgTypesDomainTypeMode {
     return this._v('domainTypeMode');
   }
-  public get enumTypeMode() {
+  public get enumTypeMode(): PgConfig['types']['enumTypeMode'] {
     return this._v('enumTypeMode');
   }
-  public get primaryKeyTypeMode() {
+  public get primaryKeyTypeMode(): PgConfig['types']['primaryKeyTypeMode'] {
     return this._v('primaryKeyTypeMode');
   }
 
-  public get columnTypeOverrides() {
+  public get columnTypeOverrides(): Record<string, string | undefined> {
     return this._v('columnTypeOverrides');
   }
-  public get typeOverrides() {
+  public get typeOverrides(): Record<string, string | undefined> {
     return this._v('typeOverrides');
   }
-  public get requireExplicitDefaults() {
+  public get requireExplicitDefaults(): boolean {
     return this._v('requireExplicitDefaults');
   }
 

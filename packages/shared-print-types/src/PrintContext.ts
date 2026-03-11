@@ -7,6 +7,10 @@ import PrintOptions, {
 import FileName from './FileName';
 import IdentifierName from './IdentifierName';
 
+export interface FileWithContent {
+  filename: FileName;
+  content: string;
+}
 export interface FileContext {
   // asExport: (declaration: string[]) => string[];
   // asNamedExport: (declaration: string[]) => string[];
@@ -248,13 +252,13 @@ export default class PrintContext<TypeID> {
     return this._pushDeclaration(id, 'value', declaration);
   }
 
-  public writeFile(filename: FileName, content: string) {
+  public writeFile(filename: FileName, content: string): void {
     if (this._rawFiles.has(filename)) {
       throw new Error(`Cannot write the same file multiple times: ${filename}`);
     }
     this._rawFiles.set(filename, content);
   }
-  public getFiles() {
+  public getFiles(): FileWithContent[] {
     return [
       ...[...this._files.values()].map((file) => ({
         filename: file.file,
@@ -274,7 +278,7 @@ function mapSetAndReturn<TKey, TValue>(
   },
   key: TKey,
   value: TValue,
-) {
+): TValue {
   map.set(key, value);
   return value;
 }
@@ -286,7 +290,7 @@ function mapGetOrSet<TKey, TValue>(
   },
   key: TKey,
   value: () => TValue,
-) {
+): TValue {
   const cached = map.get(key);
   if (cached !== undefined) return cached;
   return mapSetAndReturn(map, key, value());

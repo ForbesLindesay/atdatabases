@@ -1,8 +1,8 @@
 import {resolve} from 'path';
 import {parse, startChain, param} from 'parameter-reducers';
-import isInteractive = require('is-interactive');
+import isInteractive from 'is-interactive';
 import * as interrogator from 'interrogator';
-import chalk = require('chalk');
+import chalk from 'chalk';
 import getSchema, {connect} from '@databases/pg-schema-introspect';
 import {readPgConfigSync, getPgConfigSync} from '@databases/pg-config';
 import {writeSchema} from '@databases/pg-schema-print-types';

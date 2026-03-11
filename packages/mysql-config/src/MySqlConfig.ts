@@ -283,7 +283,7 @@ export const TypesConfigSchema: ft.Runtype<TypesConfig> = ft
   })
   .withConstraint((value) => true, {name: `TypesConfig`});
 
-interface MySqlConfig {
+export interface MySqlConfig {
   /**
    * The environment variable containing the
    * connection string to the mysql database
@@ -312,5 +312,3 @@ export const MySqlConfigSchema: ft.Runtype<MySqlConfig> = ft.Object({
   test: withDefault(TestConfigSchema, TestConfigSchema.parse({})),
   types: withDefault(TypesConfigSchema, TypesConfigSchema.parse({})),
 });
-
-export default MySqlConfig;

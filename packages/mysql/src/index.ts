@@ -1,6 +1,6 @@
 import {URL} from 'url';
 import {getMySqlConfigSync} from '@databases/mysql-config';
-import sql, {SQLQuery, isSqlQuery} from '@databases/sql';
+import sql, {type SQL, type SQLQuery, isSqlQuery} from '@databases/sql';
 import Queryable, {
   Connection,
   ConnectionPool,
@@ -9,7 +9,7 @@ import Queryable, {
 import ConnectionPoolImplemenation from './ConnectionPool';
 import EventHandlers from './types/EventHandlers';
 
-export type {SQLQuery};
+export type {SQL, SQLQuery};
 export {sql, isSqlQuery};
 
 export type {Queryable, Transaction, Connection, ConnectionPool};
@@ -368,9 +368,3 @@ function getDateTimeParser(
       };
   }
 }
-
-module.exports = Object.assign(createConnectionPool, {
-  default: createConnectionPool,
-  sql,
-  isSqlQuery,
-});

@@ -13,7 +13,7 @@ export default async function setup(
     environmentVariable?: string;
     migrationsScript?: string[];
   } = {},
-) {
+): Promise<void> {
   const envVar: string = opts.environmentVariable || DEFAULT_ENV_VAR;
   const migrationsScript =
     opts.migrationsScript ||
@@ -50,7 +50,3 @@ export default async function setup(
     await kill();
   });
 }
-
-module.exports = setup;
-module.exports.default = setup;
-module.exports.killers = killers;

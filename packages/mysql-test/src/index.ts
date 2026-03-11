@@ -3,7 +3,11 @@ import startContainer, {
   killOldContainers,
 } from '@databases/with-container';
 import {getMySqlConfigSync} from '@databases/mysql-config';
-const {createConnection} = require('mysql2');
+import cli from './cli';
+import {ChildProcess} from 'child_process';
+import {createConnection} from 'mysql2';
+
+export {cli};
 
 const config = getMySqlConfigSync();
 const DEFAULT_MYSQL_DEBUG = !!process.env.MYSQL_TEST_DEBUG || config.test.debug;
@@ -41,7 +45,7 @@ export interface Options
 export async function waitForConnection(
   databaseURL: string,
   timeoutSeconds: number,
-) {
+): Promise<void> {
   const start = Date.now();
   const timeoutMilliseconds = timeoutSeconds * 1000;
   let lastAttempt = false;
@@ -101,7 +105,9 @@ export async function waitForConnection(
   }
 }
 
-export async function killDatabase(options: Partial<Options> = {}) {
+export async function killDatabase(
+  options: Partial<Options> = {},
+): Promise<void> {
   await killOldContainers({
     debug: DEFAULT_MYSQL_DEBUG,
     containerName: DEFAULT_CONTAINER_NAME,
@@ -109,7 +115,13 @@ export async function killDatabase(options: Partial<Options> = {}) {
   });
 }
 
-export default async function getDatabase(options: Partial<Options> = {}) {
+export default async function getDatabase(
+  options: Partial<Options> = {},
+): Promise<{
+  proc: ChildProcess;
+  databaseURL: `mysql://${string}`;
+  kill: () => Promise<void>;
+}> {
   const {
     mysqlUser,
     mysqlPassword,
@@ -144,7 +156,8 @@ export default async function getDatabase(options: Partial<Options> = {}) {
     enableDebugInstructions: `To view logs, run with MYSQL_TEST_DEBUG=true environment variable.`,
   });
 
-  const databaseURL = `mysql://${mysqlUser}:${mysqlPassword}@localhost:${externalPort}/${mysqlDb}`;
+  const databaseURL =
+    `mysql://${mysqlUser}:${mysqlPassword}@localhost:${externalPort}/${mysqlDb}` as const;
 
   await waitForConnection(databaseURL, rawOptions.connectTimeoutSeconds);
 

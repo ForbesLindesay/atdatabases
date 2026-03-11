@@ -1,6 +1,6 @@
 import isPromise from 'is-promise';
 
-export const timeout = Symbol('TIMEOUT');
+export const timeout: unique symbol = Symbol('TIMEOUT');
 export type Timeout = typeof timeout;
 
 export function isTimeout<T>(value: T | Timeout): value is Timeout {

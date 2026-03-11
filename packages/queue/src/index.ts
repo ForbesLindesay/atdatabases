@@ -6,7 +6,7 @@ export default class Queue<T> {
   /**
    * Push an item onto the end of the queue
    */
-  push(value: T) {
+  push(value: T): void {
     this._tail.push(value);
   }
   /**
@@ -40,13 +40,13 @@ export default class Queue<T> {
   /**
    * Get the total number of items in the queue
    */
-  getLength() {
+  getLength(): number {
     return this._head.length + this._tail.length;
   }
   /**
    * Remove (and return) all items from the queue
    */
-  clear() {
+  clear(): T[] {
     const removed = this._head.reverse().concat(this._tail);
     this._head = [];
     this._tail = [];
@@ -60,7 +60,7 @@ export class AsyncQueue<T> {
   /**
    * Push an item onto the end of the queue
    */
-  push(value: T) {
+  push(value: T): void {
     const waiting = this._waiting.shift();
     if (waiting) {
       waiting(value);
@@ -87,12 +87,7 @@ export class AsyncQueue<T> {
    *
    * N.B. this can be negative if `.shift()` has been called more times than `.push()`
    */
-  getLength() {
+  getLength(): number {
     return this._items.getLength() - this._waiting.getLength();
   }
 }
-
-module.exports = Object.assign(Queue, {
-  default: Queue,
-  AsyncQueue: AsyncQueue,
-});

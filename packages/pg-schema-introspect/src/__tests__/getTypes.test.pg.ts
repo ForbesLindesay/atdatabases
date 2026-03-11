@@ -252,8 +252,6 @@ test('get built in types', async () => {
   PgDataTypeIDsEnum.push(`}`);
   PgDataTypeIDsEnum.push(``);
   PgDataTypeIDsEnum.push(`export default PgDataTypeID;`);
-  PgDataTypeIDsEnum.push(`module.exports = PgDataTypeID;`);
-  PgDataTypeIDsEnum.push(`module.exports.default = PgDataTypeID;`);
   PgDataTypeIDsEnum.push(``);
   await writeIfDifferent(PG_DATA_TYPE_FILENAME, PgDataTypeIDsEnum.join('\n'));
 

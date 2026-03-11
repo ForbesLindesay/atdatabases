@@ -2,25 +2,33 @@
   "name": "@databases/pg-errors",
   "version": "0.0.0",
   "description": "",
-  "main": "./lib/index.js",
-  "types": "./lib/index.d.ts",
-  "scripts": {
-    "build": "node build"
+  "type": "module",
+  "files": [
+    "dist/"
+  ],
+  "exports": {
+    ".": "./dist/index.js",
+    "./package.json": "./package.json"
   },
-  "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/pg-errors",
-  "license": "MIT",
-  "publishConfig": {
-    "access": "public"
-  },
+  "types": "./dist/index.d.ts",
+  "dependencies": {},
   "devDependencies": {
     "pg-error-constants": "^1.0.0"
   },
-  "dependency-check-entries": [
-    "build.js"
-  ],
+  "engines": {
+    "node": ">= 20.20.1"
+  },
+  "scripts": {
+    "build": "node build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ForbesLindesay/atdatabases.git",
+    "directory": "packages/pg-errors"
+  },
   "bugs": "https://github.com/ForbesLindesay/atdatabases/issues",
-  "dependencies": {},
-  "files": [
-    "lib/"
-  ]
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "MIT"
 }
