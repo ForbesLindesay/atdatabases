@@ -11,7 +11,7 @@ export interface IDirectoryContext<TMigration = unknown> {
   delete(filename: string): Promise<void>;
   loadMigration(
     filename: string,
-  ): Result<TMigration, MigrationWithNoValidExport>;
+  ): Promise<Result<TMigration, MigrationWithNoValidExport>>;
 }
 
 export default class DirectoryContext<TMigration>
@@ -20,12 +20,12 @@ export default class DirectoryContext<TMigration>
   private readonly _directory: string;
   private readonly _loadMigration: (
     filename: string,
-  ) => Result<TMigration, MigrationWithNoValidExport>;
+  ) => Promise<Result<TMigration, MigrationWithNoValidExport>>;
   constructor(
     directory: string,
     loadMigration: (
       filename: string,
-    ) => Result<TMigration, MigrationWithNoValidExport>,
+    ) => Promise<Result<TMigration, MigrationWithNoValidExport>>,
   ) {
     this._directory = directory;
     this._loadMigration = loadMigration;
@@ -64,7 +64,7 @@ export default class DirectoryContext<TMigration>
 
   loadMigration(
     filename: string,
-  ): Result<TMigration, MigrationWithNoValidExport> {
+  ): Promise<Result<TMigration, MigrationWithNoValidExport>> {
     return this._loadMigration(this._resolve(filename));
   }
 }

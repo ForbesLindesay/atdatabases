@@ -1,8 +1,6 @@
 import connect, {sql} from '..';
 
-const mysql: {
-  createConnection: (opts: any) => any;
-} = require('mysql2/promise');
+import * as mysql from 'mysql2/promise';
 
 jest.setTimeout(30000);
 
@@ -22,7 +20,9 @@ beforeAll(async () => {
 });
 afterAll(async () => {
   await db.dispose();
+  // @ts-expect-error
   (await rawConnection).close();
+  // @ts-expect-error
   (await rawConnection2).close();
 });
 

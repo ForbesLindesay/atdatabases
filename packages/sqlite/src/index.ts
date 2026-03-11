@@ -2,7 +2,8 @@ import * as sqlite from 'sqlite3';
 import {escapeSQLiteIdentifier} from '@databases/escape-identifier';
 import sql, {SQLQuery, isSqlQuery, FormatConfig} from '@databases/sql';
 import Mutex from './Mutex';
-const Queue = require('then-queue');
+// @ts-expect-error
+import Queue from 'then-queue';
 
 export type {SQLQuery};
 export {sql, isSqlQuery};

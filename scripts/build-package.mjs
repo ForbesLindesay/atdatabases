@@ -138,9 +138,13 @@ async function fixup(path) {
                 throw new Error(
                   `Unexpectedly found a reference to ${path.node.name} in ${filename}`,
                 );
-              } else if (path.node.name === 'require') {
+              } else if (
+                path.node.name === 'require' ||
+                path.node.name === '__dirname' ||
+                path.node.name === '__filename'
+              ) {
                 throw new Error(
-                  `Unexpectedly found a reference to require in ${filename}`,
+                  `Unexpectedly found a reference to ${path.node.name} in ${filename}`,
                 );
               }
             },

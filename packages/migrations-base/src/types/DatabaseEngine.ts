@@ -38,7 +38,7 @@ export default interface DatabaseEngine<TMigration> extends DatabaseEngineBase {
 
   loadMigration(
     migrationFileName: string,
-  ): Result<TMigration, MigrationWithNoValidExport>;
+  ): Promise<Result<TMigration, MigrationWithNoValidExport>>;
 
   directory: IDirectoryContext<TMigration>;
 

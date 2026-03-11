@@ -53,7 +53,7 @@ export default async function applyOperations<TMigration>(
           }
           switch (op.kind) {
             case 'apply':
-              const migrationLoadResult = engine.directory.loadMigration(
+              const migrationLoadResult = await engine.directory.loadMigration(
                 op.value.name,
               );
 

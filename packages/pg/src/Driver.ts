@@ -9,8 +9,9 @@ import TransactionOptions from './types/TransactionOptions';
 import EventHandlers from './types/EventHandlers';
 import QueryStreamOptions from './types/QueryStreamOptions';
 import pgFormat from './format';
-const {codeFrameColumns} = require('@babel/code-frame');
-const Cursor = require('pg-cursor');
+import {codeFrameColumns} from '@babel/code-frame';
+// @ts-expect-error
+import Cursor from 'pg-cursor';
 
 type QueryResult = {rows: any[]};
 

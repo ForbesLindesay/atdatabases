@@ -1,4 +1,6 @@
 import {extname} from 'path';
+import {fileURLToPath} from 'url';
+import {readFileSync} from 'fs';
 import {
   DatabaseEngine,
   DatabaseEngineTransaction,
@@ -10,6 +12,10 @@ import {
   IDirectoryContext,
 } from '@databases/migrations-base';
 import {ConnectionPool, Queryable, Transaction} from '@databases/pg';
+
+const packageVersion: string = JSON.parse(
+  readFileSync(fileURLToPath(import.meta.resolve('../package.json')), 'utf8'),
+).version;
 
 export interface MigrationsConfig {
   migrationsDirectory: string;
@@ -36,9 +42,9 @@ export default class PostgresDatabaseEngine
     this.directory = new DirectoryContext(
       config.migrationsDirectory,
       // load migration:
-      (
+      async (
         migrationFileName: string,
-      ): Result<Migration, MigrationWithNoValidExport> => {
+      ): Promise<Result<Migration, MigrationWithNoValidExport>> => {
         switch (extname(migrationFileName)) {
           case '.sql':
             return Result.ok(async (db: Transaction) => {
@@ -47,10 +53,16 @@ export default class PostgresDatabaseEngine
           case '.js':
           case '.mjs':
           case '.jsx':
-            return getExport(require(migrationFileName), migrationFileName);
+            return getExport(
+              await import(migrationFileName),
+              migrationFileName,
+            );
           case '.ts':
           case '.tsx':
-            return getExport(require(migrationFileName), migrationFileName);
+            return getExport(
+              await import(migrationFileName),
+              migrationFileName,
+            );
           default:
             throw new Error(
               `Unsupported extension "${extname(migrationFileName)}"`,
@@ -63,7 +75,7 @@ export default class PostgresDatabaseEngine
   readonly databaseName = 'Postgres';
   readonly packageName = '@databases/pg-migrations';
   readonly cliName = 'pg-migrations';
-  readonly packageVersion: string = require('../package.json').version;
+  readonly packageVersion: string = packageVersion;
 
   async checkDatabaseVersion(): Promise<Result<void, DatabaseVersionError>> {
     const [major, minor] = await getPgVersion(this._connection);
@@ -203,9 +215,9 @@ export default class PostgresDatabaseEngine
     });
   }
 
-  loadMigration(
+  async loadMigration(
     migrationFileName: string,
-  ): Result<Migration, MigrationWithNoValidExport> {
+  ): Promise<Result<Migration, MigrationWithNoValidExport>> {
     switch (extname(migrationFileName)) {
       case '.sql':
         return Result.ok(async (db: Transaction) => {
@@ -214,10 +226,10 @@ export default class PostgresDatabaseEngine
       case '.js':
       case '.mjs':
       case '.jsx':
-        return getExport(require(migrationFileName), migrationFileName);
+        return getExport(await import(migrationFileName), migrationFileName);
       case '.ts':
       case '.tsx':
-        return getExport(require(migrationFileName), migrationFileName);
+        return getExport(await import(migrationFileName), migrationFileName);
       default:
         throw new Error(
           `Unsupported extension "${extname(migrationFileName)}"`,
