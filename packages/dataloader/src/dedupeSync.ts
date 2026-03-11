@@ -1,5 +1,6 @@
 import {createCacheMap} from './CacheMapImplementation';
 import {CacheMap, CacheMapInput} from './types';
+import {identityFn, trueFn} from './utils';
 
 export interface DedupedSyncFunction<TKey, TResult> {
   (key: TKey): TResult;
@@ -58,8 +59,6 @@ interface NormalizedDedupeSyncOptions<TKey, TResult, TMappedKey> {
     cache: CacheMapInput<TMappedKey, TResult>,
   ) => void;
 }
-const identityFn = <T>(arg: T): T => arg;
-const trueFn = (): true => true;
 const noop = () => {
   // noop
 };

@@ -1,7 +1,7 @@
 import getSchema, {connect, sql} from '@databases/mysql-schema-introspect';
 import {PrintContext} from '@databases/shared-print-types';
 import MySqlPrintOptions from '../MySqlPrintOptions';
-import printSchema from '../printers/printSchema';
+import printSchemaWithContext from '../printers/printSchema';
 
 // JSON added in 5.7
 const SUPPORTS_JSON_TYPE = !process.env.MYSQL_TEST_IMAGE?.includes(`:5.6`);
@@ -51,7 +51,7 @@ afterAll(async () => {
     schema,
   );
   const printContext = new PrintContext(opts);
-  printSchema(schema, printContext, opts);
+  printSchemaWithContext(schema, printContext, opts);
 
   // await writeFiles(
   //   printContext,

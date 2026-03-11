@@ -16,8 +16,8 @@ export type OpenDatabase = (
   version: string,
   displayName: string,
   estimatedSize: number,
-  creationCallback?: (database: Database) => void,
-) => Database;
+  creationCallback?: (database: WebSqlDatabase) => void,
+) => WebSqlDatabase;
 
 /** 4.3 Asynchronous database API - The transaction() and readTransaction() methods takes
  * one to three arguments. When called, these methods must immediately return and then
@@ -26,7 +26,7 @@ export type OpenDatabase = (
  * callback being the third argument, if any, and with no preflight operation or
  * postflight operation
  */
-export interface Database {
+export interface WebSqlDatabase {
   readonly version: string;
 
   transaction(

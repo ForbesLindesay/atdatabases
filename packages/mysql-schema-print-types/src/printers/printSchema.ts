@@ -4,7 +4,7 @@ import MySqlPrintOptions from '../MySqlPrintOptions';
 import TypeID from '../TypeID';
 import printTableDetails from './printTableDetails';
 
-export default function printSchema(
+export default function printSchemaWithContext(
   schema: Schema,
   context: PrintContext<TypeID>,
   options: MySqlPrintOptions,

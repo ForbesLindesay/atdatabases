@@ -3,10 +3,6 @@ import {join} from 'path';
 import Result from './types/Result';
 import {MigrationWithNoValidExport} from './types/MigrationError';
 
-function notNull<T>(value: T): value is Exclude<T, null | undefined> {
-  return value != null;
-}
-
 export interface IDirectoryContext<TMigration = unknown> {
   listFiles(): Promise<string[]>;
   read(filename: string): Promise<string>;
@@ -48,7 +44,7 @@ export default class DirectoryContext<TMigration>
             : null;
         }),
       )
-    ).filter(notNull);
+    ).filter((v) => v !== null);
   }
   async read(filename: string): Promise<string> {
     return await promises.readFile(this._resolve(filename), 'utf8');

@@ -1,5 +1,5 @@
 import {getMySqlConfigSync} from '@databases/mysql-config';
-import getDatabase, {Options} from '../';
+import getDatabase, {MySqlTestOptions} from '../';
 import {spawnBuffered, execBuffered} from 'modern-spawn';
 
 const config = getMySqlConfigSync();
@@ -9,7 +9,7 @@ const DEFAULT_ENV_VAR =
 export const killers: Array<() => Promise<void>> = [];
 
 export default async function setup(
-  opts: Partial<Options> & {
+  opts: Partial<MySqlTestOptions> & {
     environmentVariable?: string;
     migrationsScript?: string[];
   } = {},

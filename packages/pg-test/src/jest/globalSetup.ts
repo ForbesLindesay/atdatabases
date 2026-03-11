@@ -1,4 +1,4 @@
-import getDatabase, {Options} from '../';
+import getDatabase, {PgTestOptions} from '../';
 import {getPgConfigSync} from '@databases/pg-config';
 import {spawnBuffered, execBuffered} from 'modern-spawn';
 
@@ -9,7 +9,7 @@ const DEFAULT_ENV_VAR =
 
 export const killers: Array<() => Promise<void>> = [];
 export default async function setup(
-  opts: Partial<Options> & {
+  opts: Partial<PgTestOptions> & {
     environmentVariable?: string;
     migrationsScript?: string[];
   } = {},

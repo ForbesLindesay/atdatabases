@@ -3,7 +3,7 @@ import getSchema, {connect, sql} from '@databases/pg-schema-introspect';
 import PgPrintContext from '../PgPrintContext';
 import getTypeScriptType from '../getTypeScriptType';
 import PrintOptions from '../PgPrintOptions';
-import printSchema from '../printers/printSchema';
+import printSchemaWithContext from '../printers/printSchema';
 import {writeFiles} from '@databases/shared-print-types';
 
 const db = connect({bigIntMode: 'number'});
@@ -66,7 +66,7 @@ test('getClasses', async () => {
       tableInsertParametersReExportFileName: null,
     }),
   );
-  printSchema(schema, printContext);
+  printSchemaWithContext(schema, printContext);
   await writeFiles({
     context: printContext.printer,
     directory: `${__dirname}/../../../pg-typed/src/__tests__/__generated__`,

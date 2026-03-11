@@ -6,7 +6,7 @@ import detectPort from 'detect-port';
 
 export {detectPort};
 
-export interface Options {
+export interface WithContainerOptions {
   debug: boolean;
   image: string;
   containerName: string;
@@ -30,13 +30,16 @@ export interface Options {
 }
 
 export interface NormalizedOptions
-  extends Pick<Options, Exclude<keyof Options, 'defaultExternalPort'>> {
+  extends Pick<
+    WithContainerOptions,
+    Exclude<keyof WithContainerOptions, 'defaultExternalPort'>
+  > {
   detached: boolean;
   externalPort: number;
 }
 
 export async function imageExists(
-  options: NormalizedOptions | Options,
+  options: NormalizedOptions | WithContainerOptions,
 ): Promise<boolean> {
   const stdout = await spawnBuffered(
     'docker',
@@ -63,7 +66,7 @@ export async function imageExists(
   );
 }
 export async function pullDockerImage(
-  options: NormalizedOptions | Options,
+  options: NormalizedOptions | WithContainerOptions,
 ): Promise<void> {
   if (
     !options.refreshImage &&
@@ -184,7 +187,9 @@ export async function killOldContainers(
   }); // do not check exit code as there may not be a container to remove
 }
 
-export default async function startContainer(options: Options): Promise<{
+export default async function startContainer(
+  options: WithContainerOptions,
+): Promise<{
   proc: ChildProcess;
   externalPort: number;
   kill: () => Promise<void>;

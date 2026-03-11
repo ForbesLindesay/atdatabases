@@ -20,7 +20,7 @@ export default function connect(name: string): Database {
         undefined as any,
         undefined as any,
         (database) => {
-          resolve(database as any as websql.Database);
+          resolve(database as any as websql.WebSqlDatabase);
         },
       );
     }),

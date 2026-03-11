@@ -3,10 +3,6 @@ import Result from '../types/Result';
 import {MigrationFilenamesError} from '../types/MigrationError';
 import {IDirectoryContext} from '../DirectoryContext';
 
-function notNull<T>(value: T): value is Exclude<T, null | undefined> {
-  return value != null;
-}
-
 const IGNORED_EXTENSIONS = ['.d.ts'];
 const INCLUDED_EXTENSIONS = ['.sql', '.js', '.mjs', '.jsx', '.ts', '.tsx'];
 
@@ -43,7 +39,7 @@ export default async function readMigrationsDir(
         };
       }),
     )
-  ).filter(notNull);
+  ).filter((v) => v !== null);
 
   if (invalidFilenames.length) {
     return Result.fail<MigrationFilenamesError>({

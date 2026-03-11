@@ -2,7 +2,7 @@ import ms from 'ms';
 import {parse, startChain, param} from 'parameter-reducers';
 import * as ta from 'type-assertions';
 import {getMySqlConfigSync} from '@databases/mysql-config';
-import getDatabase, {Options, killDatabase} from '.';
+import getDatabase, {MySqlTestOptions, killDatabase} from '.';
 import {execBuffered, spawnBuffered} from 'modern-spawn';
 
 const seconds = <TName extends string>(keys: string[], name: TName) => {
@@ -75,7 +75,7 @@ export async function start(args: string[]): Promise<number> {
   ta.assert<
     ta.Equal<
       Pick<
-        Partial<Options>,
+        Partial<MySqlTestOptions>,
         | 'debug'
         | 'image'
         | 'containerName'
@@ -147,7 +147,7 @@ export async function stop(args: string[]): Promise<number> {
   }
   ta.assert<
     ta.Equal<
-      Pick<Partial<Options>, 'debug' | 'containerName'>,
+      Pick<Partial<MySqlTestOptions>, 'debug' | 'containerName'>,
       typeof parseResult.parsed
     >
   >();

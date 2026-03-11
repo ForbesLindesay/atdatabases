@@ -29,7 +29,7 @@ export interface Constraint {
     };
   }[];
 }
-export default async function getTables(
+export default async function getConstraints(
   connection: Queryable,
   query: ConstraintQuery,
 ): Promise<Constraint[]> {

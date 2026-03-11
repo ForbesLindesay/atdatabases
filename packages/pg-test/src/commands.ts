@@ -2,7 +2,7 @@ import ms from 'ms';
 import {parse, startChain, param} from 'parameter-reducers';
 import * as ta from 'type-assertions';
 import {getPgConfigSync} from '@databases/pg-config';
-import getDatabase, {Options, killDatabase} from '.';
+import getDatabase, {PgTestOptions, killDatabase} from '.';
 import {execBuffered, spawnBuffered} from 'modern-spawn';
 
 const seconds = <TName extends string>(keys: string[], name: TName) => {
@@ -74,7 +74,7 @@ export async function start(args: string[]): Promise<number> {
   ta.assert<
     ta.Equal<
       Pick<
-        Partial<Options>,
+        Partial<PgTestOptions>,
         | 'debug'
         | 'image'
         | 'containerName'
@@ -145,7 +145,7 @@ export async function stop(args: string[]): Promise<number> {
   }
   ta.assert<
     ta.Equal<
-      Pick<Partial<Options>, 'debug' | 'containerName'>,
+      Pick<Partial<PgTestOptions>, 'debug' | 'containerName'>,
       typeof parseResult.parsed
     >
   >();

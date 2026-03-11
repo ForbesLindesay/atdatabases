@@ -8,14 +8,10 @@ import {
   executeAndReturnAll,
   executeAndReturnLast,
   queryInternal,
+  TransactionOptions,
   txInternal,
 } from './utils';
 import {Lock, createLock} from '@databases/lock';
-
-type TransactionOptions<TDriver extends Driver<any, any>> =
-  TDriver extends Driver<infer TTransactionOptions, any>
-    ? TTransactionOptions
-    : unknown;
 
 export default class BaseConnection<
   TTransaction extends Disposable,

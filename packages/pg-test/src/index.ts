@@ -1,5 +1,5 @@
 import startContainer, {
-  Options as WithContainerOptions,
+  WithContainerOptions,
   killOldContainers,
 } from '@databases/with-container';
 import {getPgConfigSync} from '@databases/pg-config';
@@ -30,7 +30,7 @@ const DEFAULT_PG_PORT = 5432;
 const DEFAULT_PG_USER = process.env.PG_TEST_USER || config.test.pgUser;
 const DEFAULT_PG_DB = process.env.PG_TEST_DB || config.test.pgDb;
 
-export interface Options
+export interface PgTestOptions
   extends Omit<
     WithContainerOptions,
     'internalPort' | 'enableDebugInstructions' | 'testConnection'
@@ -40,7 +40,7 @@ export interface Options
 }
 
 export async function killDatabase(
-  options: Partial<Options> = {},
+  options: Partial<PgTestOptions> = {},
 ): Promise<void> {
   await killOldContainers({
     debug: DEFAULT_PG_DEBUG,
@@ -50,13 +50,13 @@ export async function killDatabase(
 }
 
 export default async function getDatabase(
-  options: Partial<Options> = {},
+  options: Partial<PgTestOptions> = {},
 ): Promise<{
   proc: ChildProcess;
   databaseURL: `postgres://${string}`;
   kill: () => Promise<void>;
 }> {
-  const {pgUser, pgDb, environment, ...rawOptions}: Options = {
+  const {pgUser, pgDb, environment, ...rawOptions}: PgTestOptions = {
     debug: DEFAULT_PG_DEBUG,
     image: DEFAULT_IMAGE,
     containerName: DEFAULT_CONTAINER_NAME,

@@ -1,5 +1,5 @@
 import startContainer, {
-  Options as WithContainerOptions,
+  WithContainerOptions,
   killOldContainers,
 } from '@databases/with-container';
 import {getMySqlConfigSync} from '@databases/mysql-config';
@@ -32,7 +32,7 @@ const DEFAULT_MYSQL_PASSWORD =
   process.env.MYSQL_TEST_PASSWORD || config.test.mySqlPassword;
 const DEFAULT_MYSQL_DB = process.env.MYSQL_TEST_DB || config.test.mySqlDb;
 
-export interface Options
+export interface MySqlTestOptions
   extends Omit<
     WithContainerOptions,
     'internalPort' | 'enableDebugInstructions' | 'testConnection'
@@ -106,7 +106,7 @@ export async function waitForConnection(
 }
 
 export async function killDatabase(
-  options: Partial<Options> = {},
+  options: Partial<MySqlTestOptions> = {},
 ): Promise<void> {
   await killOldContainers({
     debug: DEFAULT_MYSQL_DEBUG,
@@ -116,7 +116,7 @@ export async function killDatabase(
 }
 
 export default async function getDatabase(
-  options: Partial<Options> = {},
+  options: Partial<MySqlTestOptions> = {},
 ): Promise<{
   proc: ChildProcess;
   databaseURL: `mysql://${string}`;
@@ -128,7 +128,7 @@ export default async function getDatabase(
     mysqlDb,
     environment,
     ...rawOptions
-  }: Options = {
+  }: MySqlTestOptions = {
     debug: DEFAULT_MYSQL_DEBUG,
     image: DEFAULT_IMAGE,
     containerName: DEFAULT_CONTAINER_NAME,

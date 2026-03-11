@@ -13,18 +13,11 @@ import {
   executeAndReturnAll,
   executeAndReturnLast,
   queryInternal,
+  QueryStreamOptions,
   taskInternal,
+  TransactionOptions,
   txInternal,
 } from './utils';
-
-type TransactionOptions<TDriver extends Driver<any, any>> =
-  TDriver extends Driver<infer TTransactionOptions, any>
-    ? TTransactionOptions
-    : unknown;
-type QueryStreamOptions<TDriver extends Driver<any, any>> =
-  TDriver extends Driver<any, infer TQueryStreamOptions>
-    ? TQueryStreamOptions
-    : unknown;
 
 const returnFalse = () => false;
 

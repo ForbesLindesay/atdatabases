@@ -3,7 +3,7 @@ import PgDataTypeID from '@databases/pg-data-type-id';
 import PgPrintContext from '../PgPrintContext';
 import printClassDetails from './printClassDetails';
 
-export default function printSchema(
+export default function printSchemaWithContext(
   schema: Schema,
   context: PgPrintContext,
 ): void {

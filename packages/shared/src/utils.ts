@@ -99,3 +99,12 @@ export async function txInternal<
     return result;
   }
 }
+
+export type TransactionOptions<TDriver extends Driver<any, any>> =
+  TDriver extends Driver<infer TTransactionOptions, any>
+    ? TTransactionOptions
+    : unknown;
+export type QueryStreamOptions<TDriver extends Driver<any, any>> =
+  TDriver extends Driver<any, infer TQueryStreamOptions>
+    ? TQueryStreamOptions
+    : unknown;

@@ -208,14 +208,14 @@ function handleBrand(
             `type ${identifierName} = ${context.getTypeScriptType(
               attribute.typeID,
               file,
-            )}${getBrand(context, className, attribute)}`,
+            )}${getIdBrand(context, className, attribute)}`,
           ],
         ),
       );
     case 'inline_loose_brand':
     case 'inline_strict_brand':
     case 'inline_no_brand':
-      return `${context.getTypeScriptType(attribute.typeID, file)}${getBrand(
+      return `${context.getTypeScriptType(attribute.typeID, file)}${getIdBrand(
         context,
         className,
         attribute,
@@ -223,7 +223,7 @@ function handleBrand(
   }
 }
 
-function getBrand(
+function getIdBrand(
   context: PgPrintContext,
   className: string,
   attribute: Attribute,

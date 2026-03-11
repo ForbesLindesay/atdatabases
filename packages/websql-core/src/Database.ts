@@ -62,8 +62,8 @@ function convertError(err: any, query: string) {
   return e;
 }
 export default class Database {
-  private readonly _db: Promise<ws.Database>;
-  constructor(db: Promise<ws.Database>) {
+  private readonly _db: Promise<ws.WebSqlDatabase>;
+  constructor(db: Promise<ws.WebSqlDatabase>) {
     this._db = db;
   }
   async tx<TResult>(
