@@ -1,3 +1,4 @@
+import {expect, test} from '@jest/globals';
 import createMultiKeyMap from '../MultiKeyMap';
 import batch, {batchGroups} from '../batch';
 import dedupeAsync from '../dedupeAsync';

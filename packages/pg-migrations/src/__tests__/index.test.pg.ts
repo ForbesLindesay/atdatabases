@@ -1,5 +1,10 @@
+import {expect, jest, test, afterAll} from '@jest/globals';
 import {spawnSync, SpawnSyncOptions} from 'child_process';
 import connect, {sql} from '@databases/pg';
+
+// @ts-expect-error
+const __dirname: string = import.meta.dirname;
+if (typeof __dirname !== 'string') throw new Error('Missing __dirname');
 
 // We are using sucrase to compile TypeScript on the fly, and each of these tests
 // is starting a fresh node process and creating, then destroying a fresh database
@@ -24,7 +29,7 @@ function run(params: string[], options: Partial<SpawnSyncOptions> = {}) {
   //   ['--require', 'sucrase/register', 'cli', ...params],
   //   {cwd: `${__dirname}/..`, env, timeout: 2000, ...options},
   // );
-  const proc = spawnSync('node', ['../lib/cli', ...params], {
+  const proc = spawnSync('node', ['../cli', ...params], {
     cwd: `${__dirname}/..`,
     env,
     timeout: 5_000,

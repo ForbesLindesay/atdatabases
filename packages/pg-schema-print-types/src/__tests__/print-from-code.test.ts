@@ -1,4 +1,5 @@
 import {ClassKind, Schema} from '@databases/pg-schema-introspect';
+import {expect, test} from '@jest/globals';
 import PgPrintContext from '../PgPrintContext';
 import getTypeScriptType from '../getTypeScriptType';
 import PrintOptions from '../PgPrintOptions';

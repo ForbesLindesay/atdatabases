@@ -1,9 +1,9 @@
 import {getPublicApi, type PublicAPI} from '@databases/migrations-base';
 import connect, {
-  ConnectionPool,
-  Connection,
-  Transaction,
-  Queryable,
+  type ConnectionPool,
+  type Connection,
+  type Transaction,
+  type Queryable,
   sql,
 } from '@databases/pg';
 import PostgresDatabaseEngine, {

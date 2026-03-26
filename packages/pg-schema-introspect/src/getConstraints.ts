@@ -1,4 +1,4 @@
-import {Queryable, sql} from '@databases/pg';
+import {type Queryable, sql} from '@databases/pg';
 import {classQuery, ClassQuery} from './getClasses';
 import ConstraintType from './enums/ConstraintType';
 import ForeignKeyAction from './enums/ForeginKeyAction';

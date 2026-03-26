@@ -1,4 +1,9 @@
+import {expect, test} from '@jest/globals';
 import sql from '../';
+
+// @ts-expect-error
+const __dirname: string = import.meta.dirname;
+if (typeof __dirname !== 'string') throw new Error('Missing __dirname');
 
 test('correctly renders sql', () => {
   const query = sql`

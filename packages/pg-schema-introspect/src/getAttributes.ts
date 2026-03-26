@@ -1,4 +1,4 @@
-import {Queryable, sql} from '@databases/pg';
+import {type Queryable, sql} from '@databases/pg';
 import {ClassQuery, classQuery} from './getClasses';
 
 export interface AttributeQuery extends ClassQuery {

@@ -2,7 +2,8 @@ import PgDataTypeID from '@databases/pg-data-type-id';
 import PgClient from './types/PgClient';
 
 // @ts-expect-error
-import {types} from 'pg';
+import pg from 'pg';
+const types = pg.types;
 
 export type ParseFnText = (value: string) => any;
 export type ParseFnBinary = (value: Buffer) => any;

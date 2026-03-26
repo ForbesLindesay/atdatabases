@@ -1,11 +1,11 @@
 import {
-  Connection,
+  type Connection,
   pgFormat,
-  Queryable,
+  type Queryable,
   QueryableType,
-  Transaction,
+  type Transaction,
   sql,
-  SQLQuery,
+  type SQLQuery,
   type SQL,
   type TransactionOptions,
 } from '@databases/pg';

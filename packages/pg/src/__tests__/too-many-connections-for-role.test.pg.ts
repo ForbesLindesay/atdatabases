@@ -1,3 +1,4 @@
+import {expect, jest, test, beforeAll} from '@jest/globals';
 import connect, {sql, SQLErrorCode} from '..';
 
 jest.setTimeout(30_000);

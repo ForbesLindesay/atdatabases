@@ -1,9 +1,14 @@
+import {expect, jest, test, afterAll} from '@jest/globals';
 import connect, {sql, DataTypeID} from '@databases/pg';
 import getTypes from '../getTypes';
 import TypeCateogry from '../enums/TypeCategory';
 import {readFileSync, writeFileSync} from 'fs';
 import TypeKind from '../enums/TypeKind';
 const prettier = require('prettier');
+
+// @ts-expect-error
+const __dirname: string = import.meta.dirname;
+if (typeof __dirname !== 'string') throw new Error('Missing __dirname');
 
 jest.setTimeout(30_000);
 

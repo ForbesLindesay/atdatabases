@@ -19,7 +19,7 @@ function parseResult(result: null | {config: unknown}): PgConfig {
 }
 
 export const DEFAULT_CONFIG: PgConfig = PgConfigSchema.parse({});
-export default PgConfig;
+export type {PgConfig as default};
 
 export {
   PgTypesDomainTypeMode,

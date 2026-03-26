@@ -1,4 +1,4 @@
-import {Queryable} from '@databases/pg';
+import type {Queryable} from '@databases/pg';
 import Cluster from './Cluster';
 
 export type {Cluster};

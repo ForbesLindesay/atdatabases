@@ -1,3 +1,4 @@
+import {expect, test} from '@jest/globals';
 import {Schema, TableType} from '@databases/mysql-schema-introspect';
 import printSchemaWithContext from '../printers/printSchema';
 import MySqlPrintOptions from '../MySqlPrintOptions';

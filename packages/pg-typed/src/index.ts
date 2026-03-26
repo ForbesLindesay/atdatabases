@@ -1,5 +1,5 @@
 import assertNever from 'assert-never';
-import {SQLQuery, Queryable} from '@databases/pg';
+import type {SQLQuery, Queryable} from '@databases/pg';
 import {
   bulkUpdate,
   bulkDelete,

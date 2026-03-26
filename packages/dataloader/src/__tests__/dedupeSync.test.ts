@@ -1,3 +1,4 @@
+import {expect, test} from '@jest/globals';
 import dedupeSync from '../dedupeSync';
 import requestsTester from './requestsTester';
 

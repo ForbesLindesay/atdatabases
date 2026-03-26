@@ -17,5 +17,11 @@ export type {
   PseudoType,
 } from './getTypes';
 
-export type {SchemaQuery, ClassDetails, Schema} from './getSchema';
-export {default, connect, Queryable, ConnectionPool, sql} from './getSchema';
+export type {
+  Queryable,
+  ConnectionPool,
+  SchemaQuery,
+  ClassDetails,
+  Schema,
+} from './getSchema';
+export {default, connect, sql} from './getSchema';

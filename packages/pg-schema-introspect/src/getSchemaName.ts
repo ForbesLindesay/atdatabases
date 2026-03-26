@@ -1,4 +1,4 @@
-import {Queryable, sql} from '@databases/pg';
+import {type Queryable, sql} from '@databases/pg';
 
 export default async function getSchemaName(
   connection: Queryable,

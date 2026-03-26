@@ -1,7 +1,12 @@
+import {expect, test} from '@jest/globals';
 import connect, {sql} from '@databases/mysql';
 import {readFileSync, writeFileSync} from 'fs';
 import {DataType} from '..';
 import getColumns from '../getColumns';
+
+// @ts-expect-error
+const __dirname: string = import.meta.dirname;
+if (typeof __dirname !== 'string') throw new Error('Missing __dirname');
 
 const db = connect({bigIntMode: 'number'});
 

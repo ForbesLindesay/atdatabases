@@ -1,4 +1,4 @@
-import {Queryable, sql} from '@databases/pg';
+import {type Queryable, sql} from '@databases/pg';
 
 interface Options {
   includeNonExistantSchemas?: boolean;

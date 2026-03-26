@@ -1,3 +1,4 @@
+import {expect, test} from '@jest/globals';
 import Mutex from '../Mutex';
 
 async function delay(ms: number) {

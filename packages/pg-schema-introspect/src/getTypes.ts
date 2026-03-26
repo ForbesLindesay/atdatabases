@@ -1,4 +1,4 @@
-import {Queryable, sql, SQLQuery} from '@databases/pg';
+import {type Queryable, sql, type SQLQuery} from '@databases/pg';
 import TypeCateogry from './enums/TypeCategory';
 import TypeKind from './enums/TypeKind';
 import getAttributes, {Attribute} from './getAttributes';

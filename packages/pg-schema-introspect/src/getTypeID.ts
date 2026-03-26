@@ -1,4 +1,4 @@
-import {Queryable} from '@databases/pg';
+import type {Queryable} from '@databases/pg';
 import getTypes from './getTypes';
 import getSearchPath from './getSearchPath';
 

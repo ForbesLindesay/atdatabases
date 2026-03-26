@@ -1,4 +1,4 @@
-import {Queryable, sql} from '@databases/pg';
+import {type Queryable, sql} from '@databases/pg';
 import {typeQuery, TypeQuery} from './getTypes';
 
 export interface EnumValue {

@@ -13,12 +13,10 @@
   "types": "./dist/index.d.ts",
   "dependencies": {
     "camelcase": "^9.0.0",
-    "mkdirp": "^1.0.4",
     "pluralize": "^8.0.0",
     "uppercamelcase": "^3.0.0"
   },
   "devDependencies": {
-    "@types/mkdirp": "^1.0.1",
     "@types/pluralize": "^0.0.29",
     "@types/uppercamelcase": "^3.0.0"
   },

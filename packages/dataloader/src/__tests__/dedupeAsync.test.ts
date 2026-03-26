@@ -1,3 +1,4 @@
+import {expect, test} from '@jest/globals';
 import createMultiKeyMap from '../MultiKeyMap';
 import dedupeAsync from '../dedupeAsync';
 import requestsTester from './requestsTester';

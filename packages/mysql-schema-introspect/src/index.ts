@@ -5,5 +5,11 @@ export type {ColumnType} from './getColumnType';
 export type {Column} from './getColumns';
 export type {Constraint} from './getConstraints';
 
-export type {SchemaQuery, TableDetails, Schema} from './getSchema';
-export {default, connect, Queryable, ConnectionPool, sql} from './getSchema';
+export type {
+  Queryable,
+  ConnectionPool,
+  SchemaQuery,
+  TableDetails,
+  Schema,
+} from './getSchema';
+export {default, connect, sql} from './getSchema';

@@ -1,3 +1,4 @@
+import {expect, test, afterAll} from '@jest/globals';
 import getSchema, {connect, sql} from '@databases/mysql-schema-introspect';
 import {PrintContext} from '@databases/shared-print-types';
 import MySqlPrintOptions from '../MySqlPrintOptions';

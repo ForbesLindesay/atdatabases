@@ -4,7 +4,9 @@ import definePrecondition from './definePrecondition';
 import TypeOverrides from './TypeOverrides';
 import EventHandlers from './types/EventHandlers';
 // @ts-expect-error
-import {Client} from 'pg';
+import pg from 'pg';
+
+const Client = pg.Client;
 
 type SSLConfig = null | {
   allowFallback: boolean;

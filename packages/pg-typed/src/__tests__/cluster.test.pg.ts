@@ -1,3 +1,4 @@
+import {expect, test, beforeEach, afterAll} from '@jest/globals';
 import connect, {sql} from '@databases/pg';
 import createCluster from '@databases/pg-cluster';
 import Schema from './__generated__';

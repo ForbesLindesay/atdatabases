@@ -11,7 +11,7 @@ import {
   DirectoryContext,
   IDirectoryContext,
 } from '@databases/migrations-base';
-import {ConnectionPool, Queryable, Transaction} from '@databases/pg';
+import type {ConnectionPool, Queryable, Transaction} from '@databases/pg';
 
 const packageVersion: string = JSON.parse(
   readFileSync(fileURLToPath(import.meta.resolve('../package.json')), 'utf8'),

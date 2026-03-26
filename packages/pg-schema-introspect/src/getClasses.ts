@@ -1,4 +1,4 @@
-import {Queryable, sql, SQLQuery} from '@databases/pg';
+import {type Queryable, sql, SQLQuery} from '@databases/pg';
 import ClassKind from './enums/ClassKind';
 
 export interface ClassQuery {

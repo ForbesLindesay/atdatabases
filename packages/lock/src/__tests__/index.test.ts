@@ -1,3 +1,4 @@
+import {expect, test} from '@jest/globals';
 import {createLock, createLocksByKey} from '..';
 
 type PromiseState<T> = ['pending'] | ['fulfilled', T] | ['rejected', string];

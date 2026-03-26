@@ -1,4 +1,4 @@
-import {SQLQuery, Queryable} from '@databases/pg';
+import type {SQLQuery, Queryable} from '@databases/pg';
 
 type ColumnName = string | number | symbol;
 export interface BulkOperationOptions<TColumnName extends ColumnName> {

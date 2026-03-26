@@ -1,3 +1,4 @@
+import {expect, jest, test, beforeAll, describe} from '@jest/globals';
 import connect, {sql, Queryable} from '..';
 
 jest.setTimeout(30_000);

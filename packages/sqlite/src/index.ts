@@ -1,4 +1,4 @@
-import * as sqlite from 'sqlite3';
+import sqlite from 'sqlite3';
 import {escapeSQLiteIdentifier} from '@databases/escape-identifier';
 import sql, {SQLQuery, isSqlQuery, FormatConfig} from '@databases/sql';
 import Mutex from './Mutex';

@@ -1,3 +1,4 @@
+import {expect, test} from '@jest/globals';
 import createCacheRealm from '../';
 
 test(`Can create multiple separate caches`, () => {

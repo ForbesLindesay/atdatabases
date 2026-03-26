@@ -1,3 +1,4 @@
+import {afterAll, expect, test} from '@jest/globals';
 import connect, {sql} from '@databases/mysql';
 import declareTables from '..';
 
@@ -56,9 +57,8 @@ afterAll(async () => {
   await db.dispose();
 });
 
-let t = test;
+const t = SUPPORTS_JSON_TYPE ? test : test.skip;
 
-if (!SUPPORTS_JSON_TYPE) t = test.skip;
 t('create schema', async () => {
   await db.query(
     sql`

@@ -1,3 +1,4 @@
+import {expect, jest, test, afterAll} from '@jest/globals';
 import connect, {pgFormat, sql} from '@databases/pg';
 import Schema from './__generated__';
 import defineTables from '..';
@@ -238,7 +239,9 @@ test('use a default connection', async () => {
     screen_name: 'Inserted with default connection',
   });
   expect(inserted.screen_name).toBe('Inserted with default connection');
+  // @ts-expect-error
   const defaultConnectionQuery = jest.fn().mockResolvedValue([]);
+  // @ts-expect-error
   const transactionQuery = jest.fn().mockResolvedValue([]);
   const {users: mockUsers} = defineTables<Schema>({
     schemaName: 'typed_queries_tests',

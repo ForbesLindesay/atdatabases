@@ -21,7 +21,7 @@ import {
 
 const returnFalse = () => false;
 
-export {PoolOptions};
+export type {PoolOptions};
 export default class BaseConnectionPool<
   TConnection extends Disposable,
   TTransaction extends Disposable,

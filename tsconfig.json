@@ -5,6 +5,7 @@
     "moduleResolution": "bundler",
     "declaration": true,
     "isolatedDeclarations": true,
+    "isolatedModules": true,
     "sourceMap": true,
     "strict": true,
     "noUnusedLocals": true,
@@ -14,6 +15,7 @@
     "skipLibCheck": true,
     "jsx": "preserve",
     "lib": ["es2020", "dom"],
-    "pretty": true
+    "pretty": true,
+    "types": ["node"],
   }
 }

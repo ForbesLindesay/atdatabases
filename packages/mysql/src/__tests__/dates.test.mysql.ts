@@ -1,3 +1,4 @@
+import {expect, jest, test, beforeAll, afterAll} from '@jest/globals';
 import connect, {sql} from '..';
 
 import * as mysql from 'mysql2/promise';

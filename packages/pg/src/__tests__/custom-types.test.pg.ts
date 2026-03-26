@@ -1,3 +1,4 @@
+import {expect, jest, test} from '@jest/globals';
 import connect from '..';
 import sql from '@databases/sql';
 import {escapePostgresIdentifier} from '@databases/escape-identifier';

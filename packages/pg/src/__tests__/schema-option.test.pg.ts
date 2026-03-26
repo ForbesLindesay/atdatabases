@@ -1,3 +1,4 @@
+import {expect, jest, test, afterAll} from '@jest/globals';
 import connect from '..';
 import sql from '@databases/sql';
 

@@ -27,35 +27,6 @@
     "clean": "rimraf packages/*/lib && rimraf packages/*/.last_build && rimraf packages/*/.cache && rimraf packages/*/build && rimraf packages/*/node_modules && rimraf node_modules",
     "tslint": "tslint './packages/*/src/**/*.{js,jsx,ts,tsx}' -t verbose -p ."
   },
-  "jest": {
-    "projects": [
-      {
-        "displayName": "node",
-        "testRegex": "/__tests__/.+\\.test\\.(tsx?)$",
-        "preset": "ts-jest"
-      },
-      {
-        "displayName": "pg",
-        "testRegex": "/__tests__/.+\\.test\\.pg\\.(tsx?)$",
-        "globalSetup": "./packages/pg-test/dist/jest/globalSetup.js",
-        "globalTeardown": "./packages/pg-test/dist/jest/globalTeardown.js",
-        "preset": "ts-jest"
-      },
-      {
-        "displayName": "mysql",
-        "testRegex": "/__tests__/.+\\.test\\.mysql\\.(tsx?)$",
-        "globalSetup": "./packages/mysql-test/dist/jest/globalSetup.js",
-        "globalTeardown": "./packages/mysql-test/dist/jest/globalTeardown.js",
-        "preset": "ts-jest"
-      },
-      {
-        "displayName": "bigquery",
-        "testEnvironment": "node",
-        "testRegex": "/__tests__/.+\\.test\\.bigquery\\.(tsx?)$",
-        "preset": "ts-jest"
-      }
-    ]
-  },
   "dependencies": {
     "@arethetypeswrong/core": "^0.18.2",
     "@babel/core": "^7.12.3",
@@ -66,7 +37,6 @@
     "github-actions-workflow-builder": "^4.0.1",
     "jest": "^30.3.0",
     "lsr": "^2.0.0",
-    "mkdirp": "^1.0.4",
     "prettier": "^2.0.5",
     "publint": "^0.3.18",
     "ts-jest": "^29.4.6",

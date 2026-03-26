@@ -26,5 +26,5 @@ function parseResult(result: null | {config: unknown}): MySqlConfig {
   return MySqlConfigSchema.parse(result ? result.config : {});
 }
 
-export default MySqlConfig;
+export type {MySqlConfig as default};
 export const DEFAULT_CONFIG: MySqlConfig = MySqlConfigSchema.parse({});

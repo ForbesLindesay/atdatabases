@@ -1,4 +1,4 @@
-import connect, {Queryable, ConnectionPool, sql} from '@databases/pg';
+import connect, {type Queryable, type ConnectionPool, sql} from '@databases/pg';
 import ClassKind from './enums/ClassKind';
 import getAttributes, {Attribute} from './getAttributes';
 import getClasses, {Class} from './getClasses';

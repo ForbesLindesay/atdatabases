@@ -1,3 +1,4 @@
+import {expect, test, afterAll} from '@jest/globals';
 import connect, {sql} from '../';
 
 const db = connect();

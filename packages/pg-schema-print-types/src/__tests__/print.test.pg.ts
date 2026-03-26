@@ -1,3 +1,4 @@
+import {expect, test, afterAll} from '@jest/globals';
 import PgDataTypeID from '@databases/pg-data-type-id';
 import getSchema, {connect, sql} from '@databases/pg-schema-introspect';
 import PgPrintContext from '../PgPrintContext';
@@ -5,6 +6,10 @@ import getTypeScriptType from '../getTypeScriptType';
 import PrintOptions from '../PgPrintOptions';
 import printSchemaWithContext from '../printers/printSchema';
 import {writeFiles} from '@databases/shared-print-types';
+
+// @ts-expect-error
+const __dirname: string = import.meta.dirname;
+if (typeof __dirname !== 'string') throw new Error('Missing __dirname');
 
 const db = connect({bigIntMode: 'number'});
 

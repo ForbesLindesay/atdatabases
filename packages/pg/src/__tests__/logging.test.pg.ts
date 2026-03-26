@@ -1,5 +1,5 @@
 /* tslint:disable:no-console */
-
+import {expect, jest, test} from '@jest/globals';
 import connect from '..';
 import sql, {isSqlQuery, SQLQuery} from '@databases/sql';
 

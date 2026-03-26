@@ -1,3 +1,4 @@
+import {expect, test} from '@jest/globals';
 import assertValidUnicode, {removeInvalidUnicode, isValidUnicode} from '..';
 
 const pairEscaped = '\ud83d\ude00';
