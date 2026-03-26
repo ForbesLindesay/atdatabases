@@ -21,33 +21,33 @@ refs:
   - &restore_cache
     restore_cache:
       keys:
-        - v1-dependencies-{{ checksum "yarn.lock" }}
+        - v1-dependencies-{{ checksum "package-lock.json" }}
         - v1-dependencies-
   - &save_cache
     save_cache:
       paths:
         - node_modules
-      key: v1-dependencies-{{ checksum "yarn.lock" }}
+      key: v1-dependencies-{{ checksum "package-lock.json" }}
   - &npm_auth
     run:
       name: NPM Auth
       command: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
-  - &yarn_install
+  - &npm_install
     run:
       name: Install Dependencies
-      command: yarn install --frozen-lockfile
+      command: npm install
   - &build
     run:
       name: Build
-      command: yarn build
+      command: node --run build
   - &test
     run:
       name: Test
-      command: yarn test --maxWorkers 2
+      command: node --run test -- --maxWorkers 2
   - &prettier
     run:
-      name: Prettier (check yarn prettier:write has been run)
-      command: yarn prettier:check
+      name: Prettier (check prettier:write has been run)
+      command: node --run prettier:check
 
 jobs:
   all:
@@ -56,7 +56,7 @@ jobs:
       - checkout
       - *restore_cache
       - *npm_auth
-      - *yarn_install
+      - *npm_install
       - *save_cache
       - *prettier
       - *build

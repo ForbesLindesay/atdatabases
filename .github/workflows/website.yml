@@ -20,18 +20,7 @@ jobs:
         with:
           node-version: 24.x
           registry-url: https://registry.npmjs.org
-      - name: Get yarn cache directory path
-        run: echo "::set-output name=dir::$(yarn cache dir)"
-        id: step_3
-      - name: Enable Cache
-        uses: actions/cache@v4
-        with:
-          path: |-
-            ${{ steps.step_3.outputs.dir }}
-            node_modules
-            packages/*/node_modules
-          key: ${{ runner.os }}-24.x-${{ hashFiles('yarn.lock') }}-2
-      - run: yarn install --prefer-offline
+      - run: npm install
       - name: Enable Cache
         uses: actions/cache@v4
         with:
@@ -67,7 +56,6 @@ jobs:
             packages/pg-schema-print-types/lib
             packages/pg-test/lib
             packages/pg-typed/lib
-            packages/push-to-async-iterable/lib
             packages/queue/lib
             packages/shared/lib
             packages/shared-print-types/lib
@@ -110,7 +98,6 @@ jobs:
             packages/pg-schema-print-types/.last_build
             packages/pg-test/.last_build
             packages/pg-typed/.last_build
-            packages/push-to-async-iterable/.last_build
             packages/queue/.last_build
             packages/shared/.last_build
             packages/shared-print-types/.last_build
@@ -122,7 +109,7 @@ jobs:
             packages/websql/.last_build
             packages/websql-core/.last_build
             packages/with-container/.last_build
-          key: v2-build-output-${{ hashFiles('yarn.lock', 'packages/bigquery/src',
+          key: v2-build-output-${{ hashFiles('package-lock.json', 'packages/bigquery/src',
             'packages/cache/src', 'packages/connection-pool/src',
             'packages/dataloader/src', 'packages/escape-identifier/src',
             'packages/expo/src', 'packages/lock/src',
@@ -138,22 +125,21 @@ jobs:
             'packages/pg-errors/src', 'packages/pg-migrations/src',
             'packages/pg-schema-cli/src', 'packages/pg-schema-introspect/src',
             'packages/pg-schema-print-types/src', 'packages/pg-test/src',
-            'packages/pg-typed/src', 'packages/push-to-async-iterable/src',
-            'packages/queue/src', 'packages/shared/src',
-            'packages/shared-print-types/src', 'packages/split-sql-query/src',
-            'packages/sql/src', 'packages/sqlite/src',
-            'packages/sqlite-sync/src', 'packages/validate-unicode/src',
-            'packages/websql/src', 'packages/websql-core/src',
-            'packages/with-container/src') }}
+            'packages/pg-typed/src', 'packages/queue/src',
+            'packages/shared/src', 'packages/shared-print-types/src',
+            'packages/split-sql-query/src', 'packages/sql/src',
+            'packages/sqlite/src', 'packages/sqlite-sync/src',
+            'packages/validate-unicode/src', 'packages/websql/src',
+            'packages/websql-core/src', 'packages/with-container/src') }}
           restore-keys: v2-build-output-
-      - run: yarn build
+      - run: node --run build
       - name: Enable NextJS Cache
         uses: actions/cache@v4
         with:
           path: packages/website/.next/cache
-          key: next-${{ hashFiles('yarn.lock') }}
+          key: next-${{ hashFiles('package-lock.json') }}
           restore-keys: next-
-      - run: yarn workspace @databases/website build
+      - run: cd packages/website && node --run build
       - run: npm install netlify-cli@17.10.1 -g
       - if: ${{ github.event_name == 'push' }}
         run: netlify deploy --cwd . --filter @databases/website --dir
