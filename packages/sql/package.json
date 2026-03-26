@@ -8,6 +8,7 @@
   ],
   "exports": {
     ".": "./dist/index.js",
+    "./web": "./dist/web.js",
     "./package.json": "./package.json"
   },
   "types": "./dist/index.d.ts",

@@ -8,6 +8,8 @@
   ],
   "exports": {
     ".": "./dist/index.js",
+    "./jest/globalSetup": "./dist/jest/globalSetup.js",
+    "./jest/globalTeardown": "./dist/jest/globalTeardown.js",
     "./package.json": "./package.json"
   },
   "bin": {
