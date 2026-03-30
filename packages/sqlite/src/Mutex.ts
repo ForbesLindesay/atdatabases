@@ -11,11 +11,11 @@ export default class Mutex {
   constructor(maxWaitTimeout: number = 100) {
     this.maxWaitTimeout = maxWaitTimeout;
   }
-  _taskStart = (runningWrite: boolean) => {
+  _taskStart = (runningWrite: boolean): void => {
     this.running++;
     this.runningWrite = runningWrite;
   };
-  _taskEnd = () => {
+  _taskEnd = (): void => {
     this.running--;
     this.runningWrite = false;
     while (this.tasks.length && !this.tasks[0].write) {

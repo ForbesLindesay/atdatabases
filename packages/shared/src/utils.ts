@@ -3,21 +3,11 @@ import {isSqlQuery} from '@databases/sql/web';
 import type Driver from './Driver';
 import {ConnectionFactory, Disposable, TransactionFactory} from './Factory';
 
-export function assertSql(query: SQLQuery | SQLQuery[]) {
-  if (Array.isArray(query)) {
-    for (const q of query) {
-      if (!isSqlQuery(q)) {
-        throw new Error(
-          'Invalid query, you must use @databases/sql to create your queries.',
-        );
-      }
-    }
-  } else {
-    if (!isSqlQuery(query)) {
-      throw new Error(
-        'Invalid query, you must use @databases/sql to create your queries.',
-      );
-    }
+export function assertSql(query: SQLQuery): void {
+  if (!isSqlQuery(query)) {
+    throw new Error(
+      'Invalid query, you must use @databases/sql to create your queries.',
+    );
   }
 }
 export async function executeAndReturnAll<TTransactionOptions>(
@@ -109,3 +99,12 @@ export async function txInternal<
     return result;
   }
 }
+
+export type TransactionOptions<TDriver extends Driver<any, any>> =
+  TDriver extends Driver<infer TTransactionOptions, any>
+    ? TTransactionOptions
+    : unknown;
+export type QueryStreamOptions<TDriver extends Driver<any, any>> =
+  TDriver extends Driver<any, infer TQueryStreamOptions>
+    ? TQueryStreamOptions
+    : unknown;

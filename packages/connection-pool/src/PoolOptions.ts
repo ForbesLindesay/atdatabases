@@ -122,7 +122,7 @@ export default interface PoolOptions<T> {
   onTimeoutClosingConnection?: () => void;
   onErrorClosingConnection?: (err: Error) => void;
 
-  isConnectionLimitError?: (err: Error) => void;
+  isConnectionLimitError?: (err: Error) => boolean;
   /**
    * How long to wait before retrying on a connection limit error.
    *
@@ -267,15 +267,15 @@ export class PoolOptionsObject<T> {
       .catch(globalError);
   }
 
-  public onActive(connection: T) {
+  public onActive(connection: T): Error | undefined {
     return attemptHook(this._options.onActive, connection);
   }
 
-  public onIdle(connection: T) {
+  public onIdle(connection: T): Error | undefined {
     return attemptHook(this._options.onIdle, connection);
   }
 
-  public onReleaseTimeout(connection: T) {
+  public onReleaseTimeout(connection: T): void {
     void withTimeout(
       this._options.onReleaseTimeout!,
       {timeoutMilliseconds: this._closeConnectionTimeoutMilliseconds},
@@ -285,7 +285,7 @@ export class PoolOptionsObject<T> {
       .catch(globalError);
   }
 
-  public isConnectionLimitError(err: Error) {
+  public isConnectionLimitError(err: Error): boolean {
     try {
       return this._options.isConnectionLimitError
         ? this._options.isConnectionLimitError(err)

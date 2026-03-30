@@ -1,8 +1,10 @@
-import camelcase = require('camelcase');
-import pascalcase = require('uppercamelcase');
-import {plural, singular} from 'pluralize';
+import camelcase from 'camelcase';
+import pascalcase from 'uppercamelcase';
+import pluralize from 'pluralize';
 import FileName from './FileName';
 import IdentifierName from './IdentifierName';
+
+const {plural, singular} = pluralize;
 
 function parseTemplate(str: string) {
   const variables = [];

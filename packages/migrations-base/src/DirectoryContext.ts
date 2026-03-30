@@ -3,10 +3,6 @@ import {join} from 'path';
 import Result from './types/Result';
 import {MigrationWithNoValidExport} from './types/MigrationError';
 
-function notNull<T>(value: T): value is Exclude<T, null | undefined> {
-  return value != null;
-}
-
 export interface IDirectoryContext<TMigration = unknown> {
   listFiles(): Promise<string[]>;
   read(filename: string): Promise<string>;
@@ -15,21 +11,21 @@ export interface IDirectoryContext<TMigration = unknown> {
   delete(filename: string): Promise<void>;
   loadMigration(
     filename: string,
-  ): Result<TMigration, MigrationWithNoValidExport>;
+  ): Promise<Result<TMigration, MigrationWithNoValidExport>>;
 }
 
-export default class DirectoryContext<TMigration>
-  implements IDirectoryContext<TMigration>
-{
+export default class DirectoryContext<
+  TMigration,
+> implements IDirectoryContext<TMigration> {
   private readonly _directory: string;
   private readonly _loadMigration: (
     filename: string,
-  ) => Result<TMigration, MigrationWithNoValidExport>;
+  ) => Promise<Result<TMigration, MigrationWithNoValidExport>>;
   constructor(
     directory: string,
     loadMigration: (
       filename: string,
-    ) => Result<TMigration, MigrationWithNoValidExport>,
+    ) => Promise<Result<TMigration, MigrationWithNoValidExport>>,
   ) {
     this._directory = directory;
     this._loadMigration = loadMigration;
@@ -40,15 +36,13 @@ export default class DirectoryContext<TMigration>
   async listFiles(): Promise<string[]> {
     return (
       await Promise.all(
-        (
-          await promises.readdir(this._directory)
-        ).map(async (file) => {
+        (await promises.readdir(this._directory)).map(async (file) => {
           return (await promises.stat(this._resolve(file))).isFile()
             ? file
             : null;
         }),
       )
-    ).filter(notNull);
+    ).filter((v) => v !== null);
   }
   async read(filename: string): Promise<string> {
     return await promises.readFile(this._resolve(filename), 'utf8');
@@ -68,7 +62,7 @@ export default class DirectoryContext<TMigration>
 
   loadMigration(
     filename: string,
-  ): Result<TMigration, MigrationWithNoValidExport> {
+  ): Promise<Result<TMigration, MigrationWithNoValidExport>> {
     return this._loadMigration(this._resolve(filename));
   }
 }

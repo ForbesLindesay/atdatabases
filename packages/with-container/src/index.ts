@@ -1,12 +1,12 @@
 import {connect} from 'net';
-import spawn = require('cross-spawn');
+import spawn from 'cross-spawn';
 import {spawnBuffered} from 'modern-spawn';
+import {ChildProcess} from 'child_process';
+import detectPort from 'detect-port';
 
-export const detectPort: (
-  defaultPort: number,
-) => Promise<number> = require('detect-port');
+export {detectPort};
 
-export interface Options {
+export interface WithContainerOptions {
   debug: boolean;
   image: string;
   containerName: string;
@@ -29,14 +29,16 @@ export interface Options {
   ) => Promise<boolean>;
 }
 
-export interface NormalizedOptions
-  extends Pick<Options, Exclude<keyof Options, 'defaultExternalPort'>> {
+export interface NormalizedOptions extends Pick<
+  WithContainerOptions,
+  Exclude<keyof WithContainerOptions, 'defaultExternalPort'>
+> {
   detached: boolean;
   externalPort: number;
 }
 
 export async function imageExists(
-  options: NormalizedOptions | Options,
+  options: NormalizedOptions | WithContainerOptions,
 ): Promise<boolean> {
   const stdout = await spawnBuffered(
     'docker',
@@ -62,7 +64,9 @@ export async function imageExists(
     (i) => i.Repository === Repository && (!Tag || i.Tag === Tag),
   );
 }
-export async function pullDockerImage(options: NormalizedOptions | Options) {
+export async function pullDockerImage(
+  options: NormalizedOptions | WithContainerOptions,
+): Promise<void> {
   if (
     !options.refreshImage &&
     /.+\:.+/.test(options.image) &&
@@ -80,7 +84,7 @@ export async function pullDockerImage(options: NormalizedOptions | Options) {
   }).getResult();
 }
 
-export function startDockerContainer(options: NormalizedOptions) {
+export function startDockerContainer(options: NormalizedOptions): ChildProcess {
   const env = options.environment || {};
   const envArgs: string[] = [];
   Object.keys(env).forEach((key) => {
@@ -110,7 +114,9 @@ export function startDockerContainer(options: NormalizedOptions) {
   );
 }
 
-export async function waitForDatabaseToStart(options: NormalizedOptions) {
+export async function waitForDatabaseToStart(
+  options: NormalizedOptions,
+): Promise<void> {
   await new Promise<void>((resolve, reject) => {
     let finished = false;
     const timeout = setTimeout(() => {
@@ -171,7 +177,7 @@ async function testConnection(options: NormalizedOptions): Promise<boolean> {
 
 export async function killOldContainers(
   options: Pick<NormalizedOptions, 'debug' | 'containerName'>,
-) {
+): Promise<void> {
   await spawnBuffered('docker', ['kill', options.containerName], {
     debug: options.debug,
   }); // do not check exit code as there may not be a container to kill
@@ -180,7 +186,13 @@ export async function killOldContainers(
   }); // do not check exit code as there may not be a container to remove
 }
 
-export default async function startContainer(options: Options) {
+export default async function startContainer(
+  options: WithContainerOptions,
+): Promise<{
+  proc: ChildProcess;
+  externalPort: number;
+  kill: () => Promise<void>;
+}> {
   if (isNaN(options.connectTimeoutSeconds)) {
     throw new Error('connectTimeoutSeconds must be a valid integer.');
   }

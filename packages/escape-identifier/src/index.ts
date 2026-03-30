@@ -66,7 +66,7 @@ export function escapeMySqlIdentifier(
  *
  * https://sqlite.org/lang_keywords.html
  */
-export function escapeSQLiteIdentifier(str: string) {
+export function escapeSQLiteIdentifier(str: string): string {
   assertValidUnicode(str);
   minLength(str, 'SQLite');
   if (str.length > 63) {

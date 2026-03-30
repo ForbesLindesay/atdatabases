@@ -1,4 +1,4 @@
-import {Queryable, sql} from '@databases/pg';
+import {type Queryable, sql, SQLQuery} from '@databases/pg';
 import ClassKind from './enums/ClassKind';
 
 export interface ClassQuery {
@@ -42,8 +42,8 @@ export default async function getClasses(
   return tables;
 }
 
-export function classQuery(query: ClassQuery) {
-  const conditions = [];
+export function classQuery(query: ClassQuery): SQLQuery[] {
+  const conditions: SQLQuery[] = [];
   if (query.kind) {
     if (Array.isArray(query.kind)) {
       conditions.push(

@@ -40,3 +40,6 @@ export function parametersArrayToSpread<TParameters extends unknown[], TResult>(
 ): (args: TParameters) => TResult {
   return (args) => fn(...args);
 }
+
+export const identityFn = <T>(arg: T): T => arg;
+export const trueFn = (): true => true;

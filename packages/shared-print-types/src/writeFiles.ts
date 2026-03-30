@@ -1,7 +1,6 @@
-import {promises} from 'fs';
+import {mkdirSync, promises} from 'fs';
 import {join} from 'path';
 import {createHash} from 'crypto';
-import {sync as mkdirp} from 'mkdirp';
 import PrintContext from './PrintContext';
 
 export default async function writeFiles<TypeID>({
@@ -12,16 +11,14 @@ export default async function writeFiles<TypeID>({
   context: PrintContext<TypeID>;
   directory: string;
   generatedStatement: string;
-}) {
+}): Promise<void> {
   const files = context.getFiles();
   const filenames = new Set(files.map((f) => f.filename));
-  mkdirp(directory);
+  mkdirSync(directory, {recursive: true});
 
   // delete files that would no longer be output
   await Promise.all(
-    (
-      await promises.readdir(directory)
-    )
+    (await promises.readdir(directory))
       .filter((fileName) => !filenames.has(fileName))
       .map(async (fileName) => {
         const filePath = join(directory, fileName);

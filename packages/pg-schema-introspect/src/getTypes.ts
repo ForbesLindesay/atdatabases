@@ -1,5 +1,5 @@
-import {Queryable, sql} from '@databases/pg';
-import TypeCateogry from './enums/TypeCategory';
+import {type Queryable, sql, type SQLQuery} from '@databases/pg';
+import TypeCategory from './enums/TypeCategory';
 import TypeKind from './enums/TypeKind';
 import getAttributes, {Attribute} from './getAttributes';
 import getEnumValues from './getEnumValues';
@@ -9,7 +9,7 @@ export interface TypeQuery {
   schemaName?: string;
   typeID?: number;
   typeName?: string;
-  category?: TypeCateogry;
+  category?: TypeCategory;
 }
 export interface TypeRecord {
   schemaID: number;
@@ -17,7 +17,7 @@ export interface TypeRecord {
   typeID: number;
   typeName: string;
   kind: TypeKind;
-  category: TypeCateogry;
+  category: TypeCategory;
   /**
    * classID if composite type
    */
@@ -35,7 +35,7 @@ export interface TypeBase {
   typeID: number;
   typeName: string;
   kind: TypeKind;
-  category: TypeCateogry;
+  category: TypeCategory;
   comment: string | null;
 }
 
@@ -123,7 +123,7 @@ export default async function getTypes(
       switch (base.kind) {
         case TypeKind.Array:
         case TypeKind.Base:
-          if (tr.category === TypeCateogry.Array) {
+          if (tr.category === TypeCategory.Array) {
             return {
               ...base,
               kind: TypeKind.Array,
@@ -180,8 +180,8 @@ export default async function getTypes(
   );
 }
 
-export function typeQuery(query: TypeQuery) {
-  const conditions = [];
+export function typeQuery(query: TypeQuery): SQLQuery[] {
+  const conditions: SQLQuery[] = [];
   if (query.schemaID) {
     conditions.push(sql`ns.oid = ${query.schemaID}`);
   }

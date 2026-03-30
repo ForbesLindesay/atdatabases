@@ -1,4 +1,9 @@
+import {expect, test} from '@jest/globals';
 import {getPgConfigSync, readPgConfigSync} from '..';
+
+// @ts-expect-error
+const __dirname: string = import.meta.dirname;
+if (typeof __dirname !== 'string') throw new Error('Missing __dirname');
 
 test('get root config', () => {
   expect(getPgConfigSync()).toEqual({

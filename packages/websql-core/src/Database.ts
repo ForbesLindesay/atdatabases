@@ -1,7 +1,7 @@
 import {escapeSQLiteIdentifier} from '@databases/escape-identifier';
 import sql, {SQLQuery, isSqlQuery, FormatConfig} from '@databases/sql/web';
 import * as ws from './websql-types';
-const {codeFrameColumns} = require('@babel/code-frame');
+import {codeFrameColumns} from '@babel/code-frame';
 
 const sqliteFormat: FormatConfig = {
   escapeIdentifier: (str) => escapeSQLiteIdentifier(str),
@@ -62,8 +62,8 @@ function convertError(err: any, query: string) {
   return e;
 }
 export default class Database {
-  private readonly _db: Promise<ws.Database>;
-  constructor(db: Promise<ws.Database>) {
+  private readonly _db: Promise<ws.WebSqlDatabase>;
+  constructor(db: Promise<ws.WebSqlDatabase>) {
     this._db = db;
   }
   async tx<TResult>(
@@ -168,7 +168,10 @@ export default class Database {
       );
     });
   }
-  async query(query: SQLQuery, options: {readOnly: boolean} = DEFAULT_OPTIONS) {
+  async query(
+    query: SQLQuery,
+    options: {readOnly: boolean} = DEFAULT_OPTIONS,
+  ): Promise<any[]> {
     const db = await this._db;
     if (!isSqlQuery(query)) {
       throw new Error(

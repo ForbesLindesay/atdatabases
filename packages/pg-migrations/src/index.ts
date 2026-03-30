@@ -1,9 +1,9 @@
-import {getPublicApi} from '@databases/migrations-base';
+import {getPublicApi, type PublicAPI} from '@databases/migrations-base';
 import connect, {
-  ConnectionPool,
-  Connection,
-  Transaction,
-  Queryable,
+  type ConnectionPool,
+  type Connection,
+  type Transaction,
+  type Queryable,
   sql,
 } from '@databases/pg';
 import PostgresDatabaseEngine, {
@@ -11,22 +11,19 @@ import PostgresDatabaseEngine, {
   MigrationsConfig,
 } from './PostgresDatabaseEngine';
 import assertIsDirectory from './assertIsDirectory';
+import cli from './cli';
 
 export type {Migration};
 export type {ConnectionPool, Connection, Transaction, Queryable};
 export {connect, sql};
 
+export {cli};
+
 export interface Parameters extends Partial<MigrationsConfig> {
   connection: ConnectionPool;
   migrationsDirectory: string;
 }
-const {
-  applyMigrations,
-  ignoreError,
-  markMigrationAsApplied,
-  markMigrationAsUnapplied,
-  restoreMigrationFromDatabase,
-} = getPublicApi<Migration, Parameters>(
+const api = getPublicApi<Migration, Parameters>(
   ({
     connection,
     migrationsDirectory,
@@ -40,10 +37,13 @@ const {
     }),
 );
 
-export {
-  applyMigrations,
-  ignoreError,
-  markMigrationAsApplied,
-  markMigrationAsUnapplied,
-  restoreMigrationFromDatabase,
-};
+export const applyMigrations: PublicAPI<Parameters>['applyMigrations'] =
+  api.applyMigrations;
+export const ignoreError: PublicAPI<Parameters>['ignoreError'] =
+  api.ignoreError;
+export const markMigrationAsApplied: PublicAPI<Parameters>['markMigrationAsApplied'] =
+  api.markMigrationAsApplied;
+export const markMigrationAsUnapplied: PublicAPI<Parameters>['markMigrationAsUnapplied'] =
+  api.markMigrationAsUnapplied;
+export const restoreMigrationFromDatabase: PublicAPI<Parameters>['restoreMigrationFromDatabase'] =
+  api.restoreMigrationFromDatabase;

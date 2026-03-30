@@ -1,5 +1,8 @@
 import {PrintOptions} from '@databases/shared-print-types';
-import MySqlConfig, {DEFAULT_CONFIG} from '@databases/mysql-config';
+import MySqlConfig, {
+  DEFAULT_CONFIG,
+  MySqlTypesPrimaryKeyTypeMode,
+} from '@databases/mysql-config';
 import TypeID from './TypeID';
 import {Schema, TableDetails} from '@databases/mysql-schema-introspect';
 
@@ -22,14 +25,14 @@ export default class MySqlPrintOptions implements PrintOptions<TypeID> {
     return this._tables.get(`${key.schemaName}.${key.tableName}`) ?? null;
   }
 
-  public get primaryKeyTypeMode() {
+  public get primaryKeyTypeMode(): MySqlTypesPrimaryKeyTypeMode {
     return this._v('primaryKeyTypeMode');
   }
 
-  public get columnTypeOverrides() {
+  public get columnTypeOverrides(): Record<string, string | undefined> {
     return this._v('columnTypeOverrides');
   }
-  public get typeOverrides() {
+  public get typeOverrides(): Record<string, string | undefined> {
     return this._v('typeOverrides');
   }
 
@@ -74,7 +77,7 @@ export default class MySqlPrintOptions implements PrintOptions<TypeID> {
         return this._v('serializeValueFileName');
     }
   }
-  getTemplateValues(id: TypeID) {
+  getTemplateValues(id: TypeID): {TABLE_NAME?: string; COLUMN_NAME?: string} {
     switch (id.type) {
       case 'schema':
       case 'serializeValue':

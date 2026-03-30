@@ -1,4 +1,4 @@
-import type {sql, SQLQuery, Queryable} from '@databases/mock-db';
+import type {SQL, SQLQuery, Queryable} from '@databases/mock-db';
 
 export interface SelectQuery<TRecord> {
   all(): Promise<TRecord[]>;
@@ -61,7 +61,7 @@ export type WhereCondition<TRecord> = Partial<{
 
 export function anyOf<T>(values: {
   [Symbol.iterator](): IterableIterator<T | FieldQuery<T>>;
-}) {
+}): FieldQuery<T> {
   const valuesArray: any[] = [];
   const parts: FieldQuery<T>[] = [];
   for (const value of values) {
@@ -102,42 +102,42 @@ export function anyOf<T>(values: {
   );
 }
 
-export function not<T>(value: T | FieldQuery<T>) {
+export function not<T>(value: T | FieldQuery<T>): FieldQuery<T> {
   return new FieldQuery<T>(
     (columnName, sql, toValue) =>
       sql`NOT (${FieldQuery.query(columnName, value, sql, toValue)})`,
   );
 }
 
-export function inQueryResults(query: SQLQuery) {
+export function inQueryResults(query: SQLQuery): FieldQuery<any> {
   return new FieldQuery<any>(
     (columnName, sql) => sql`${sql.ident(columnName)} IN (${query})`,
   );
 }
 
-export function lessThan<T>(value: T) {
+export function lessThan<T>(value: T): FieldQuery<T> {
   return new FieldQuery<T>(
     (columnName, sql, toValue) =>
       sql`${sql.ident(columnName)} < ${toValue(columnName, value)}`,
   );
 }
 
-export function greaterThan<T>(value: T) {
+export function greaterThan<T>(value: T): FieldQuery<T> {
   return new FieldQuery<T>(
     (columnName, sql, toValue) =>
       sql`${sql.ident(columnName)} > ${toValue(columnName, value)}`,
   );
 }
 
-class SelectQueryImplementation<TRecord>
-  implements OrderedSelectQuery<TRecord>
-{
+class SelectQueryImplementation<
+  TRecord,
+> implements OrderedSelectQuery<TRecord> {
   public readonly orderByQueries: SQLQuery[] = [];
   public limitCount: number | undefined;
   private _selectFields: SQLQuery | undefined;
 
   constructor(
-    private readonly _sql: typeof sql,
+    private readonly _sql: SQL,
     private readonly _tableID: SQLQuery,
     private readonly _where: SQLQuery,
     public readonly _executeQuery: (query: SQLQuery) => Promise<TRecord[]>,
@@ -345,12 +345,6 @@ class Table<TRecord, TInsertParameters> {
     await this.untypedQuery(sql`DELETE FROM ${this._tableID} ${where}`);
   }
 
-  /**
-   * @deprecated use .find instead of .select
-   */
-  select(whereValues: WhereCondition<TRecord> = {}): SelectQuery<TRecord> {
-    return this.find(whereValues);
-  }
   find(whereValues: WhereCondition<TRecord> = {}): SelectQuery<TRecord> {
     const {sql} = this._underlyingDb;
     const where = this._rowToWhere(whereValues);
@@ -362,14 +356,6 @@ class Table<TRecord, TInsertParameters> {
     );
   }
 
-  /**
-   * @deprecated use .findOne instead of .selectOne
-   */
-  async selectOne(
-    whereValues: WhereCondition<TRecord>,
-  ): Promise<TRecord | null> {
-    return this.findOne(whereValues);
-  }
   // throws if > 1 row matches
   async findOne(whereValues: WhereCondition<TRecord>): Promise<TRecord | null> {
     const rows = await this.find(whereValues).all();
@@ -502,12 +488,3 @@ function getTableSerializeValue(
     ? (columnName, value) => serializeValue(tableName, columnName, value)
     : (_, value) => value;
 }
-
-module.exports = Object.assign(tables, {
-  default: tables,
-  anyOf,
-  not,
-  inQueryResults,
-  lessThan,
-  greaterThan,
-});

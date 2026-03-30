@@ -104,9 +104,11 @@ export default function createMultiKeyMap<
   );
 }
 
-class MultiKeyMapImplementation<TKeys extends Path, TValue, TMappedKey>
-  implements MultiKeyMap<TKeys, TValue>
-{
+class MultiKeyMapImplementation<
+  TKeys extends Path,
+  TValue,
+  TMappedKey,
+> implements MultiKeyMap<TKeys, TValue> {
   private _root: BranchNode<TKeys, TValue, TMappedKey>;
   private readonly _options: NormalizedMultiKeyMapOptions<
     TKeys,
@@ -159,9 +161,11 @@ interface MultiKeyMapNode<TKeys extends Path, TValue> {
   delete: (keys: TKeys | SubPath<TKeys>) => DeleteResult;
 }
 
-class BranchNode<TKeys extends Path, TValue, TMappedKey>
-  implements MultiKeyMapNode<TKeys, TValue>
-{
+class BranchNode<
+  TKeys extends Path,
+  TValue,
+  TMappedKey,
+> implements MultiKeyMapNode<TKeys, TValue> {
   private readonly _keyIndex: number;
   private readonly _children: CacheMapInput<
     TMappedKey,
@@ -241,9 +245,10 @@ class BranchNode<TKeys extends Path, TValue, TMappedKey>
   }
 }
 
-class LeafNode<TKeys extends Path, TValue>
-  implements MultiKeyMapNode<TKeys, TValue>
-{
+class LeafNode<TKeys extends Path, TValue> implements MultiKeyMapNode<
+  TKeys,
+  TValue
+> {
   private _value: TValue;
   constructor(value: any) {
     this._value = value;

@@ -1,9 +1,8 @@
 import {existsSync} from 'fs';
 import {sync as rimraf} from 'rimraf';
 import connect, {sql} from '@databases/pg';
-import chalk = require('chalk');
-import {spawn as nodeSpawn} from 'child_process';
-const spawn: typeof nodeSpawn = require('cross-spawn');
+import chalk from 'chalk';
+import spawn from 'cross-spawn';
 
 async function runCommand(
   command: string,
@@ -11,16 +10,19 @@ async function runCommand(
   allowFailure: boolean = false,
 ) {
   return await new Promise<string>((resolve, reject) => {
-    const output: {kind: 'stdout' | 'stderr'; chunk: string | Buffer}[] = [];
+    const output: {
+      kind: 'stdout' | 'stderr';
+      chunk: string | (Uint8Array & {toString: (f: 'utf8') => string});
+    }[] = [];
     let result = '';
     const proc = spawn(command, args, {
       stdio: 'pipe',
     });
-    proc.stdout.on('data', (chunk) => {
+    proc.stdout?.on('data', (chunk) => {
       output.push({kind: 'stdout', chunk});
       result += typeof chunk === 'string' ? chunk : chunk.toString('utf8');
     });
-    proc.stderr.on('data', (chunk) => {
+    proc.stderr?.on('data', (chunk) => {
       output.push({kind: 'stderr', chunk});
     });
     proc.on('error', reject);
@@ -78,7 +80,7 @@ async function whenStarted<T>(fn: () => Promise<T>): Promise<T> {
 
 export default async function run(
   dbConnection: string | undefined = process.env.DATABASE_URL,
-) {
+): Promise<void> {
   if (!dbConnection) {
     console.warn(
       'You must set the DATABASE_URL envrionemnt variable in .env for databases to create the database.',
@@ -190,6 +192,3 @@ export default async function run(
   }
   console.warn('Failed to create the database ' + chalk.cyan(dbConnection));
 }
-
-module.exports = run;
-module.exports.default = run;

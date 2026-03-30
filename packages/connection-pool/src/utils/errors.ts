@@ -1,9 +1,9 @@
-export function openTimeout() {
+export function openTimeout(): Error {
   return Object.assign(new Error(`Timed out waiting for open connection.`), {
     code: `CONNECTION_POOL:OPEN_TIMEOUT`,
   });
 }
-export function queueTimeoutError() {
+export function queueTimeoutError(): Error {
   return Object.assign(
     new Error('Timed out waiting for connection from pool.'),
     {
@@ -12,7 +12,7 @@ export function queueTimeoutError() {
   );
 }
 
-export function doubleReleaseError() {
+export function doubleReleaseError(): Error {
   return Object.assign(
     new Error(
       'Release called on client which has already been released to the pool.',
@@ -21,7 +21,7 @@ export function doubleReleaseError() {
   );
 }
 
-export function globalError(err: Error) {
+export function globalError(err: Error): void {
   setTimeout(() => {
     throw err;
   }, 0);
@@ -41,7 +41,9 @@ export function attemptHook<TArgs extends any[]>(
   }
 }
 
-export const connectionLimitExceeded = Symbol('CONNECTION_LIMIT_EXCEEDED');
+export const connectionLimitExceeded: unique symbol = Symbol(
+  'CONNECTION_LIMIT_EXCEEDED',
+);
 export type ConnectionLimitExceeded = typeof connectionLimitExceeded;
 
 export function isConnectionLimitExceeded<T>(

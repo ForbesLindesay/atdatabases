@@ -1,5 +1,6 @@
 import createConnectionPool, {
   ConnectionPool,
+  PoolConnection,
   PoolOptions,
 } from '@databases/connection-pool';
 import splitSqlQuery from '@databases/split-sql-query';
@@ -12,28 +13,22 @@ import {
   executeAndReturnAll,
   executeAndReturnLast,
   queryInternal,
+  QueryStreamOptions,
   taskInternal,
+  TransactionOptions,
   txInternal,
 } from './utils';
 
-type TransactionOptions<TDriver extends Driver<any, any>> =
-  TDriver extends Driver<infer TTransactionOptions, any>
-    ? TTransactionOptions
-    : unknown;
-type QueryStreamOptions<TDriver extends Driver<any, any>> =
-  TDriver extends Driver<any, infer TQueryStreamOptions>
-    ? TQueryStreamOptions
-    : unknown;
-
 const returnFalse = () => false;
 
-export {PoolOptions};
+export type {PoolOptions};
 export default class BaseConnectionPool<
   TConnection extends Disposable,
   TTransaction extends Disposable,
   TDriver extends Driver<any, any>,
 > {
-  public readonly type = QueryableType.ConnectionPool;
+  public readonly type: QueryableType.ConnectionPool =
+    QueryableType.ConnectionPool;
 
   protected readonly _pool: ConnectionPool<TDriver>;
   private readonly _factories: Factory<TDriver, TConnection, TTransaction>;
@@ -49,7 +44,7 @@ export default class BaseConnectionPool<
   protected async _withDriverFromPool<TArgs extends any[], TResult>(
     fn: (driver: TDriver, ...args: TArgs) => Promise<TResult>,
     ...args: TArgs
-  ) {
+  ): Promise<TResult> {
     let releasing = false;
     const driver = await this._pool.getConnection();
     try {
@@ -76,7 +71,7 @@ export default class BaseConnectionPool<
     }
   }
 
-  protected _throwIfDisposed() {
+  protected _throwIfDisposed(): void {
     if (this._disposed) {
       throw new Error(
         'You cannot run any operations on a ConnectionPool after it has been disposed.',
@@ -115,16 +110,17 @@ export default class BaseConnectionPool<
   async query(query: SQLQuery): Promise<any[]>;
   async query(query: SQLQuery[]): Promise<any[][]>;
   async query(query: SQLQuery | SQLQuery[]): Promise<any[]> {
-    assertSql(query);
     this._throwIfDisposed();
     if (Array.isArray(query)) {
       if (query.length === 0) return [];
+      for (const q of query) assertSql(q);
       return this._withDriverFromPool(
         queryInternal,
         query,
         executeAndReturnAll,
       );
     } else {
+      assertSql(query);
       return this._withDriverFromPool(
         queryInternal,
         splitSqlQuery(query),
@@ -137,26 +133,60 @@ export default class BaseConnectionPool<
     await fn();
   }
 
-  async *queryStream(
+  queryStream(
     query: SQLQuery,
     options?: QueryStreamOptions<TDriver>,
-  ): AsyncGenerator<any, void, unknown> {
+  ): ReadableStream<any> {
     assertSql(query);
     this._throwIfDisposed();
-    const poolRecord = await this._pool.getConnection();
-    try {
-      for await (const record of poolRecord.connection.queryStream(
-        query,
-        options,
-      )) {
-        yield record;
-      }
-    } finally {
-      poolRecord.dispose();
-    }
+
+    let poolRecord: PoolConnection<TDriver> | undefined;
+    let stream: ReadableStreamDefaultReader<any> | undefined;
+    let cancelled = false;
+    return new ReadableStream<any>({
+      start: async () => {
+        this._throwIfDisposed();
+        poolRecord = await this._pool.getConnection();
+        stream = poolRecord.connection.queryStream(query, options).getReader();
+      },
+      pull: async (controller) => {
+        try {
+          if (!poolRecord || !stream) {
+            controller.error(
+              new Error(
+                'Connection pool was disposed before stream could start.',
+              ),
+            );
+            return;
+          }
+          const result = await stream.read();
+          if (cancelled) return;
+          if (result.done) {
+            // We reached the end of the stream of results, without any errors, so we can
+            // release the connection back to the pool and close the stream.
+            poolRecord.release();
+            controller.close();
+          } else {
+            controller.enqueue(result.value);
+          }
+        } catch (ex) {
+          if (cancelled) return;
+          cancelled = true;
+
+          // An error happened while reading from the stream, so we need to dispose of the connection
+          // without returning it to the pool, and then forward the error to the stream.
+          if (poolRecord) poolRecord.dispose();
+          controller.error(ex);
+        }
+      },
+      cancel: () => {
+        cancelled = true;
+        poolRecord?.dispose();
+      },
+    });
   }
 
-  async dispose() {
+  async dispose(): Promise<void> {
     this._disposed = true;
     await this._pool.drain();
   }

@@ -228,7 +228,7 @@ export enum SQLErrorCode {
   INDEX_CORRUPTED = 'XX002',
 }
 export default SQLErrorCode;
-export const SQLErrorCodes = new Set([
+export const SQLErrorCodes: Set<SQLErrorCode> = new Set([
   SQLErrorCode.SUCCESSFUL_COMPLETION,
   SQLErrorCode.WARNING,
   SQLErrorCode.DYNAMIC_RESULT_SETS_RETURNED,

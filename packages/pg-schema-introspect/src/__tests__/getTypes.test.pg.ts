@@ -1,9 +1,16 @@
+import {expect, jest, test, afterAll} from '@jest/globals';
 import connect, {sql, DataTypeID} from '@databases/pg';
+import prettier from 'prettier';
+// @ts-expect-error
+import pgTypes from 'pg-types/lib/textParsers';
 import getTypes from '../getTypes';
-import TypeCateogry from '../enums/TypeCategory';
+import TypeCategory from '../enums/TypeCategory';
 import {readFileSync, writeFileSync} from 'fs';
 import TypeKind from '../enums/TypeKind';
-const prettier = require('prettier');
+
+// @ts-expect-error
+const __dirname: string = import.meta.dirname;
+if (typeof __dirname !== 'string') throw new Error('Missing __dirname');
 
 jest.setTimeout(30_000);
 
@@ -49,7 +56,7 @@ const typeMappings: {[key in DataTypeID]?: string} = {
 async function writeIfDifferent(filename: string, content: string) {
   const prettierOptions = (await prettier.resolveConfig(filename)) || {};
   prettierOptions.parser = 'typescript';
-  const formatted = prettier.format(content, prettierOptions);
+  const formatted = await prettier.format(content, prettierOptions);
   let currentContent = '';
   try {
     currentContent = readFileSync(filename, 'utf8');
@@ -72,7 +79,7 @@ interface BuiltinTypesState {
     kind: TypeKind;
     typeID: number;
     typeName: string;
-    category: TypeCateogry;
+    category: TypeCategory;
     comment: string | null;
   }[];
   ambiguousTypes: {
@@ -82,7 +89,7 @@ interface BuiltinTypesState {
       kind: TypeKind;
       typeID: number;
       typeName: string;
-      category: TypeCateogry;
+      category: TypeCategory;
       comment: string | null;
     }[];
   };
@@ -196,8 +203,8 @@ test('get built in types', async () => {
   const groupedTypes = builtInTypesFromFile.reduce<{
     [key: string]: (typeof builtInTypesFromFile)[number][];
   }>((result, ty) => {
-    const category = Object.keys(TypeCateogry).find(
-      (c) => (TypeCateogry as any)[c] === ty.category,
+    const category = Object.keys(TypeCategory).find(
+      (c) => (TypeCategory as any)[c] === ty.category,
     )!;
     result[category] = (result[category] || []).concat([ty]);
     return result;
@@ -252,12 +259,9 @@ test('get built in types', async () => {
   PgDataTypeIDsEnum.push(`}`);
   PgDataTypeIDsEnum.push(``);
   PgDataTypeIDsEnum.push(`export default PgDataTypeID;`);
-  PgDataTypeIDsEnum.push(`module.exports = PgDataTypeID;`);
-  PgDataTypeIDsEnum.push(`module.exports.default = PgDataTypeID;`);
   PgDataTypeIDsEnum.push(``);
   await writeIfDifferent(PG_DATA_TYPE_FILENAME, PgDataTypeIDsEnum.join('\n'));
 
-  const pgTypes = require('pg-types/lib/textParsers');
   const mapping = new Map<number, unknown>();
   const reverseMapping = new Map<unknown, number[]>();
   pgTypes.init((id: number, parser: unknown) => {
@@ -292,7 +296,7 @@ test('get built in types', async () => {
     ``,
     `import DataTypeID from '@databases/pg-data-type-id';`,
     ``,
-    `const DefaultTypeScriptMapping = new Map([`,
+    `const DefaultTypeScriptMapping: ReadonlyMap<DataTypeID, string> = new Map([`,
     ...typeMappingLines.sort(),
     `]);`,
     ``,

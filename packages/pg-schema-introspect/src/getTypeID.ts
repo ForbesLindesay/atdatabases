@@ -1,4 +1,4 @@
-import {Queryable} from '@databases/pg';
+import type {Queryable} from '@databases/pg';
 import getTypes from './getTypes';
 import getSearchPath from './getSearchPath';
 
@@ -11,7 +11,7 @@ export interface TypeIdQuery {
 export default async function getTypeID(
   connection: Queryable,
   query: TypeIdQuery,
-) {
+): Promise<number> {
   const types = await getTypes(connection, query);
   const fullTypeName = query.schemaName
     ? `${query.schemaName}.${query.typeName}`

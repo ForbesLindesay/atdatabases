@@ -25,19 +25,19 @@ export default function printDomainType(
             `type ${identifierName} = ${context.getTypeScriptType(
               type.basetypeID,
               file,
-            )}${getBrand(type.typeName, context)};`,
+            )}${getDomainTypeBrand(type.typeName, context)};`,
           ],
         ),
       );
     case PgTypesDomainTypeMode.inline:
-      return `${context.getTypeScriptType(type.basetypeID, file)}${getBrand(
-        type.typeName,
-        context,
-      )};`;
+      return `${context.getTypeScriptType(
+        type.basetypeID,
+        file,
+      )}${getDomainTypeBrand(type.typeName, context)};`;
   }
 }
 
-function getBrand(typeName: string, context: PgPrintContext): string {
+function getDomainTypeBrand(typeName: string, context: PgPrintContext): string {
   switch (context.options.domainTypeMode) {
     case PgTypesDomainTypeMode.strict_brand:
       return ` & {readonly __brand: '${typeName}'}`;

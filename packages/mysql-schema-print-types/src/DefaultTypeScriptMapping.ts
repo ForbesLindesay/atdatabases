@@ -1,6 +1,9 @@
 import {DataType} from '@databases/mysql-schema-introspect';
 
-const DefaultTypeScriptMapping = new Map<DataType, string>([
+const DefaultTypeScriptMapping: ReadonlyMap<DataType, string> = new Map<
+  DataType,
+  string
+>([
   [DataType.bigint, `(string | number | BigInt)`],
   // [DataType.binary, `unknown`],
   // [DataType.bit, `unknown`],

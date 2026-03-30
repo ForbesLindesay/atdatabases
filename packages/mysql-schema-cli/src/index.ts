@@ -1,8 +1,8 @@
 import {resolve} from 'path';
 import {parse, startChain, param} from 'parameter-reducers';
-import isInteractive = require('is-interactive');
+import isInteractive from 'is-interactive';
 import * as interrogator from 'interrogator';
-import chalk = require('chalk');
+import chalk from 'chalk';
 import getSchema, {connect} from '@databases/mysql-schema-introspect';
 import {readMySqlConfigSync, getMySqlConfigSync} from '@databases/mysql-config';
 import {writeSchema} from '@databases/mysql-schema-print-types';

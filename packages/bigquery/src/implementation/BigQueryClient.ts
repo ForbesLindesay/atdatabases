@@ -1,5 +1,4 @@
-import {Readable} from 'stream';
-import sql, {SQLQuery} from '@databases/sql';
+import sql, {type SQL, type SQLQuery} from '@databases/sql';
 import {BigQuery} from '@google-cloud/bigquery';
 import BigQueryClient from '../types/BigQueryClient';
 import BigQueryDriver from './BigQueryDriver';
@@ -8,7 +7,7 @@ import BigQueryDataset from '../types/BigQueryDataset';
 import BigQueryStreamOptions from '../types/BigQueryStreamOptions';
 
 export default class BigQueryClientImplementation implements BigQueryClient {
-  public readonly sql = sql;
+  public readonly sql: SQL = sql;
   private readonly _client: BigQuery;
   private readonly _driver: BigQueryDriver;
   constructor(client: BigQuery, driver: BigQueryDriver) {
@@ -30,15 +29,8 @@ export default class BigQueryClientImplementation implements BigQueryClient {
   queryStream(
     query: SQLQuery,
     options: BigQueryStreamOptions = {},
-  ): AsyncGenerator<any, void, unknown> {
+  ): ReadableStream<any> {
     return this._driver.queryStream(query, options, this._createQueryJob);
-  }
-
-  queryNodeStream(
-    query: SQLQuery,
-    options: BigQueryStreamOptions = {},
-  ): Readable {
-    return this._driver.queryNodeStream(query, options, this._createQueryJob);
   }
 
   dataset(name: string): BigQueryDataset {

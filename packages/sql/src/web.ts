@@ -9,8 +9,8 @@ export enum SQLItemType {
  */
 export type SQLItem =
   | {type: SQLItemType.RAW; text: string}
-  | {type: SQLItemType.VALUE; value: any}
-  | {type: SQLItemType.IDENTIFIER; names: Array<any>};
+  | {type: SQLItemType.VALUE; value: unknown}
+  | {type: SQLItemType.IDENTIFIER; names: readonly unknown[]};
 
 export interface FormatConfig {
   escapeIdentifier: (str: string) => string;
@@ -22,7 +22,16 @@ export interface FormatConfig {
 
 const formatter = Symbol('SQL Query Formatter');
 
-const literalSeparators = new Set([
+type LiteralSeparator =
+  | ''
+  | ','
+  | ', '
+  | ' AND '
+  | ' OR '
+  | ') AND ('
+  | ') OR ('
+  | ';';
+const literalSeparators = new Set<LiteralSeparator>([
   '',
   ',',
   ', ',
@@ -32,9 +41,6 @@ const literalSeparators = new Set([
   ') OR (',
   ';',
 ] as const);
-type LiteralSeparator = typeof literalSeparators extends Set<infer T>
-  ? T
-  : never;
 /**
  * The representation of a SQL query. Call `compile` to turn it into a SQL
  * string with value placeholders.
@@ -57,7 +63,7 @@ class SQLQuery {
    */
   public static query(
     strings: TemplateStringsArray,
-    ...values: Array<any>
+    ...values: readonly unknown[]
   ): SQLQuery {
     const items: Array<SQLItem> = [];
 
@@ -75,6 +81,7 @@ class SQLQuery {
           for (const item of value._items) items.push(item);
         } else {
           if (value && typeof value === 'object' && formatter in value) {
+            // @ts-expect-error
             const formatted = value[formatter](value);
             if (!(formatted instanceof SQLQuery)) {
               throw new Error(
@@ -168,7 +175,7 @@ class SQLQuery {
    * Creates a new query with the value. This value will be turned into a
    * placeholder when the query gets compiled.
    */
-  public static value(value: any): SQLQuery {
+  public static value(value: unknown): SQLQuery {
     return new SQLQuery([{type: SQLItemType.VALUE, value}]);
   }
 
@@ -176,7 +183,7 @@ class SQLQuery {
    * Creates an identifier query. Each name will be escaped, and the
    * names will be concatenated with a period (`.`).
    */
-  public static ident(...names: Array<any>): SQLQuery {
+  public static ident(...names: readonly unknown[]): SQLQuery {
     return new SQLQuery([{type: SQLItemType.IDENTIFIER, names}]);
   }
 
@@ -184,7 +191,10 @@ class SQLQuery {
    * The internal array of SQL items. This array is never mutated, only cloned.
    */
   private readonly _items: readonly SQLItem[];
-  private readonly _cache = new Map<any, any>();
+  private readonly _cache = new Map<
+    FormatConfig | ((items: readonly SQLItem[]) => unknown),
+    unknown
+  >();
 
   // The constructor is private. Users should use the static `create` method to
   // make a new `SQLQuery`.
@@ -198,7 +208,10 @@ class SQLQuery {
     formatter: FormatConfig | ((items: readonly SQLItem[]) => T),
   ): T | {text: string; values: unknown[]} {
     const cached = this._cache.get(formatter);
-    if (cached) return cached;
+    if (cached) {
+      // @ts-expect-error
+      return cached;
+    }
     const fresh =
       typeof formatter === 'function'
         ? formatter(this._items)
@@ -220,7 +233,7 @@ function formatStandard(
   let text = '';
   const values = [];
 
-  const localIdentifiers = new Map<any, string>();
+  const localIdentifiers = new Map<unknown, string>();
 
   for (const item of items) {
     switch (item.type) {
@@ -274,13 +287,24 @@ function formatStandard(
 /**
  * The interface we actually expect people to use.
  */
-export type SQL = typeof SQLQuery.query & {
-  readonly join: typeof SQLQuery.join;
-  readonly __dangerous__rawValue: typeof SQLQuery.__dangerous__rawValue;
-  readonly __dangerous__constructFromParts: typeof SQLQuery.__dangerous__constructFromParts;
-  readonly value: typeof SQLQuery.value;
-  readonly ident: typeof SQLQuery.ident;
-  readonly registerFormatter: typeof SQLQuery.registerFormatter;
+export type SQL = ((
+  strings: TemplateStringsArray,
+  ...values: readonly unknown[]
+) => SQLQuery) & {
+  readonly join: (
+    queries: Array<SQLQuery>,
+    separator?: LiteralSeparator | SQLQuery,
+  ) => SQLQuery;
+  readonly __dangerous__rawValue: (text: string) => SQLQuery;
+  readonly __dangerous__constructFromParts: (
+    items: readonly SQLItem[],
+  ) => SQLQuery;
+  readonly value: (value: unknown) => SQLQuery;
+  readonly ident: (...names: readonly unknown[]) => SQLQuery;
+  readonly registerFormatter: <T>(
+    constructor: new (...args: any[]) => T,
+    format: (value: T) => SQLQuery,
+  ) => void;
   readonly isSqlQuery: (query: unknown) => query is SQLQuery;
 };
 
@@ -301,8 +325,3 @@ export default sql;
 export function isSqlQuery(query: unknown): query is SQLQuery {
   return query instanceof SQLQuery;
 }
-
-module.exports = sql;
-module.exports.default = sql;
-module.exports.isSqlQuery = isSqlQuery;
-module.exports.SQLItemType = SQLItemType;

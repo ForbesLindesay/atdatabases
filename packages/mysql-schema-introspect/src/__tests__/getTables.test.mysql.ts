@@ -1,3 +1,4 @@
+import {expect, test} from '@jest/globals';
 import connect, {sql} from '@databases/mysql';
 import TableType from '../enums/TableType';
 import getTables from '../getTables';

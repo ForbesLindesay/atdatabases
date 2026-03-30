@@ -1,3 +1,4 @@
+import {expect, test} from '@jest/globals';
 import sql, {SQLQuery, FormatConfig} from '@databases/sql';
 import splitSqlQuery, {hasValues, hasSemicolonBeforeEnd} from '..';
 

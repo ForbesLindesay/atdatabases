@@ -1,6 +1,6 @@
-#!/usr/bin/env node
+#! /usr/bin/env node
 
-import createDb from './';
+import createDb from '.';
 
 createDb().catch((ex) => {
   console.error(ex);

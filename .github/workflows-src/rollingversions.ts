@@ -19,7 +19,7 @@ export default createWorkflow(
     whenTrigger('push', () => {
       addJob('publish_canary', ({add, run}) => {
         add(setup());
-        run('yarn build');
+        run('node --run build');
         run(
           'npx rollingversions publish --canary $GITHUB_RUN_NUMBER --allow-any-branch',
           {
@@ -33,7 +33,7 @@ export default createWorkflow(
     whenTrigger('repository_dispatch', () => {
       addJob('publish', ({add, run}) => {
         add(setup());
-        run('yarn build');
+        run('node --run build');
         run('npx rollingversions publish', {
           env: {
             GITHUB_TOKEN: secrets.GITHUB_TOKEN,

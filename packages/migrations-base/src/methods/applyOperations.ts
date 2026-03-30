@@ -1,5 +1,5 @@
 import assertNever from 'assert-never';
-import deepEqual = require('deep-equal');
+import deepEqual from 'deep-equal';
 import MigrationsContext, {sortMigrations} from '../MigrationContext';
 import DatabaseEngine from '../types/DatabaseEngine';
 import Result from '../types/Result';
@@ -53,7 +53,7 @@ export default async function applyOperations<TMigration>(
           }
           switch (op.kind) {
             case 'apply':
-              const migrationLoadResult = engine.directory.loadMigration(
+              const migrationLoadResult = await engine.directory.loadMigration(
                 op.value.name,
               );
 

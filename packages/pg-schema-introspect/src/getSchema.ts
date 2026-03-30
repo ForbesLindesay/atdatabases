@@ -1,4 +1,4 @@
-import connect, {Queryable, ConnectionPool, sql} from '@databases/pg';
+import connect, {type Queryable, type ConnectionPool, sql} from '@databases/pg';
 import ClassKind from './enums/ClassKind';
 import getAttributes, {Attribute} from './getAttributes';
 import getClasses, {Class} from './getClasses';
@@ -29,8 +29,8 @@ export default async function getSchema(
   const schemaName = query.schemaName
     ? query.schemaName
     : query.schemaID
-    ? await getSchemaName(connection, query.schemaID)
-    : (await getSearchPath(connection))[0];
+      ? await getSchemaName(connection, query.schemaID)
+      : (await getSearchPath(connection))[0];
   if (!schemaName) {
     throw new Error('No schema found');
   }

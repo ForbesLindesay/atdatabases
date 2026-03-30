@@ -1,4 +1,0 @@
-{
-  "main": "../../lib/jest/globalTeardown.js",
-  "types": "../../lib/jest/globalTeardown.d.ts"
-}

@@ -1,6 +1,6 @@
 import {BaseConnectionPool, Factory, PoolOptions} from '@databases/shared';
 import * as alasql from 'alasql';
-import sql from '@databases/sql/web';
+import sql, {type SQL} from '@databases/sql/web';
 import Connection from './Connection';
 import Transaction from './Transaction';
 import {ConnectionPool as IConnectionPool} from './types/Queryable';
@@ -48,7 +48,7 @@ export default class ConnectionPool
   extends BaseConnectionPool<Connection, Transaction, MockDbDriver>
   implements IConnectionPool
 {
-  public readonly sql = sql;
+  public readonly sql: SQL = sql;
   constructor(options: MockDbOptions) {
     super(getConnectionPoolOptions(options), factories);
   }

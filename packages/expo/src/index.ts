@@ -1,17 +1,17 @@
 import {
   websql,
   Database,
+  Transaction,
   sql,
-  SQLQuery,
+  type SQLQuery,
   isSqlQuery,
 } from '@databases/websql-core';
+import {openDatabase} from 'expo-sqlite';
 
-const openDatabase: websql.OpenDatabase = require('expo-sqlite').openDatabase;
-
-export type {SQLQuery};
+export type {SQLQuery, Database, Transaction};
 export {sql, isSqlQuery};
 
-export default function connect(name: string) {
+export default function connect(name: string): Database {
   return new Database(
     new Promise((resolve) => {
       openDatabase(
@@ -20,7 +20,7 @@ export default function connect(name: string) {
         undefined as any,
         undefined as any,
         (database) => {
-          resolve(database);
+          resolve(database as any as websql.WebSqlDatabase);
         },
       );
     }),

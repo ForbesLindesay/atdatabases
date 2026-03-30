@@ -1,5 +1,5 @@
 import {QueryableType} from '@databases/shared';
-import {SQL, SQLQuery} from '@databases/sql/web';
+import {SQL, type SQLQuery} from '@databases/sql/web';
 import TransactionOptions from './TransactionOptions';
 
 export default interface Queryable {

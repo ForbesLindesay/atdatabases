@@ -1,5 +1,6 @@
+import {expect, test} from '@jest/globals';
 import {Schema, TableType} from '@databases/mysql-schema-introspect';
-import printSchema from '../printers/printSchema';
+import printSchemaWithContext from '../printers/printSchema';
 import MySqlPrintOptions from '../MySqlPrintOptions';
 import {PrintContext} from '@databases/shared-print-types';
 
@@ -26,7 +27,7 @@ test('replace filter', async () => {
     schema,
   );
   const printContext = new PrintContext(options);
-  printSchema(schema, printContext, options);
+  printSchemaWithContext(schema, printContext, options);
   expect(printContext.getFiles()).toMatchInlineSnapshot(`
     [
       {

@@ -3,7 +3,10 @@ import PgDataTypeID from '@databases/pg-data-type-id';
 import PgPrintContext from '../PgPrintContext';
 import printClassDetails from './printClassDetails';
 
-export default function printSchema(schema: Schema, context: PgPrintContext) {
+export default function printSchemaWithContext(
+  schema: Schema,
+  context: PgPrintContext,
+): void {
   context.printer.pushTypeDeclaration(
     {type: 'schema'},
     (identifier, {getImport}) => [
@@ -61,10 +64,10 @@ export default function printSchema(schema: Schema, context: PgPrintContext) {
         columns.length === 0
           ? `false`
           : columns.length === 1
-          ? `c === ${JSON.stringify(columns[0])}`
-          : `(${columns
-              .map((columnName) => `c === ${JSON.stringify(columnName)}`)
-              .join(' || ')})`;
+            ? `c === ${JSON.stringify(columns[0])}`
+            : `(${columns
+                .map((columnName) => `c === ${JSON.stringify(columnName)}`)
+                .join(' || ')})`;
       const tableConditions = tables.map(
         ({tableName, jsonAttributes}) =>
           `t === ${JSON.stringify(tableName)} && ${columnCondition(
@@ -120,7 +123,7 @@ export default function printSchema(schema: Schema, context: PgPrintContext) {
                 typeName.substring(0, typeName.length - `[]`.length),
               ) ?? typeName.substring(0, typeName.length - `[]`.length)
             }[]`
-          : typeAliases.get(typeName) ?? typeName,
+          : (typeAliases.get(typeName) ?? typeName),
       ]),
   );
 

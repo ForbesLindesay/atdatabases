@@ -2,20 +2,31 @@
   "name": "@databases/sql",
   "version": "0.0.0",
   "description": "",
-  "main": "./lib/index.js",
-  "types": "./lib/index.d.ts",
+  "type": "module",
+  "files": [
+    "dist/"
+  ],
+  "exports": {
+    ".": "./dist/index.js",
+    "./web": "./dist/web.js",
+    "./package.json": "./package.json"
+  },
+  "types": "./dist/index.d.ts",
   "dependencies": {},
   "devDependencies": {},
+  "engines": {
+    "node": ">= 20.20.1"
+  },
   "scripts": {},
-  "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/sql",
-  "license": "MIT",
-  "publishConfig": {
-    "access": "public"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ForbesLindesay/atdatabases.git",
+    "directory": "packages/sql"
   },
   "bugs": "https://github.com/ForbesLindesay/atdatabases/issues",
   "homepage": "https://www.atdatabases.org/docs/sql",
-  "files": [
-    "lib/",
-    "web/"
-  ]
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "MIT"
 }

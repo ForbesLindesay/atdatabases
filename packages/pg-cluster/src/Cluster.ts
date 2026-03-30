@@ -1,19 +1,18 @@
-import {Readable} from 'stream';
 import {
-  Connection,
+  type Connection,
   pgFormat,
-  Queryable,
+  type Queryable,
   QueryableType,
-  Transaction,
+  type Transaction,
   sql,
-  SQLQuery,
+  type SQLQuery,
+  type SQL,
+  type TransactionOptions,
 } from '@databases/pg';
-import AbortSignal from '@databases/pg/lib/types/AbortSignal';
-import TransactionOptions from '@databases/pg/lib/types/TransactionOptions';
 
 export default class Cluster implements Queryable {
   public readonly type: QueryableType = QueryableType.Cluster;
-  public readonly sql = sql;
+  public readonly sql: SQL = sql;
 
   private readonly _primary: Queryable;
   private readonly _replicas: Queryable[];
@@ -51,31 +50,6 @@ export default class Cluster implements Queryable {
       } else {
         return this._getReplica().query(query);
       }
-    }
-  }
-
-  queryStream(
-    query: SQLQuery,
-    options: {batchSize?: number | undefined; signal?: AbortSignal | undefined},
-  ): AsyncIterable<any> {
-    if (isQueryWriteable(query)) {
-      return this._primary.queryStream(query, options);
-    } else {
-      return this._getReplica().queryStream(query, options);
-    }
-  }
-
-  queryNodeStream(
-    query: SQLQuery,
-    options?: {
-      highWaterMark?: number | undefined;
-      batchSize?: number | undefined;
-    },
-  ): Readable {
-    if (isQueryWriteable(query)) {
-      return this._primary.queryNodeStream(query, options);
-    } else {
-      return this._getReplica().queryNodeStream(query, options);
     }
   }
 

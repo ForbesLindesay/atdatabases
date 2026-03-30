@@ -26,9 +26,10 @@ function supportsDeleteSpread<TKey, TValue>(
   return freshValue;
 }
 
-class CacheMapImplementation<TKey, TResult, TMappedKey>
-  implements CacheMap<TKey, TResult>
-{
+class CacheMapImplementation<TKey, TResult, TMappedKey> implements CacheMap<
+  TKey,
+  TResult
+> {
   private readonly _map: CacheMapInput<TMappedKey, TResult>;
   private readonly _mapKey: (key: TKey) => TMappedKey;
   private readonly _supportsDeleteSpread: boolean;

@@ -1,3 +1,4 @@
+import {expect, test} from '@jest/globals';
 import connect, {sql} from '@databases/pg';
 import getClasses from '../getClasses';
 import ClassKind from '../enums/ClassKind';

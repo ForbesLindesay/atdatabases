@@ -1,10 +1,15 @@
+import {expect, test, afterAll} from '@jest/globals';
 import PgDataTypeID from '@databases/pg-data-type-id';
 import getSchema, {connect, sql} from '@databases/pg-schema-introspect';
 import PgPrintContext from '../PgPrintContext';
 import getTypeScriptType from '../getTypeScriptType';
 import PrintOptions from '../PgPrintOptions';
-import printSchema from '../printers/printSchema';
+import printSchemaWithContext from '../printers/printSchema';
 import {writeFiles} from '@databases/shared-print-types';
+
+// @ts-expect-error
+const __dirname: string = import.meta.dirname;
+if (typeof __dirname !== 'string') throw new Error('Missing __dirname');
 
 const db = connect({bigIntMode: 'number'});
 
@@ -66,7 +71,7 @@ test('getClasses', async () => {
       tableInsertParametersReExportFileName: null,
     }),
   );
-  printSchema(schema, printContext);
+  printSchemaWithContext(schema, printContext);
   await writeFiles({
     context: printContext.printer,
     directory: `${__dirname}/../../../pg-typed/src/__tests__/__generated__`,

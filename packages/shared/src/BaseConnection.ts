@@ -8,29 +8,21 @@ import {
   executeAndReturnAll,
   executeAndReturnLast,
   queryInternal,
+  TransactionOptions,
   txInternal,
 } from './utils';
 import {Lock, createLock} from '@databases/lock';
-
-type TransactionOptions<TDriver extends Driver<any, any>> =
-  TDriver extends Driver<infer TTransactionOptions, any>
-    ? TTransactionOptions
-    : unknown;
-type QueryStreamOptions<TDriver extends Driver<any, any>> =
-  TDriver extends Driver<any, infer TQueryStreamOptions>
-    ? TQueryStreamOptions
-    : unknown;
 
 export default class BaseConnection<
   TTransaction extends Disposable,
   TDriver extends Driver<any, any>,
 > {
-  public readonly type = QueryableType.Connection;
+  public readonly type: QueryableType.Connection = QueryableType.Connection;
 
   protected readonly _lock: Lock;
 
   private _disposed: undefined | Promise<void>;
-  protected _throwIfDisposed() {
+  protected _throwIfDisposed(): void {
     if (this._disposed) {
       throw new Error(
         'You cannot run any operations on a Connection after it has been returned to the pool.',
@@ -84,10 +76,10 @@ export default class BaseConnection<
   async query(query: SQLQuery): Promise<any[]>;
   async query(query: SQLQuery[]): Promise<any[][]>;
   async query(query: SQLQuery | SQLQuery[]): Promise<any[]> {
-    assertSql(query);
     this._throwIfDisposed();
     if (Array.isArray(query)) {
       if (query.length === 0) return [];
+      for (const q of query) assertSql(q);
       await this._lock.acquireLock();
       try {
         return await queryInternal(this._driver, query, executeAndReturnAll);
@@ -95,6 +87,7 @@ export default class BaseConnection<
         this._lock.releaseLock();
       }
     } else {
+      assertSql(query);
       await this._lock.acquireLock();
       try {
         return await queryInternal(
@@ -112,23 +105,7 @@ export default class BaseConnection<
     await fn();
   }
 
-  async *queryStream(
-    query: SQLQuery,
-    options?: QueryStreamOptions<TDriver>,
-  ): AsyncGenerator<any, void, unknown> {
-    assertSql(query);
-    this._throwIfDisposed();
-    await this._lock.acquireLock();
-    try {
-      for await (const record of this._driver.queryStream(query, options)) {
-        yield record;
-      }
-    } finally {
-      this._lock.releaseLock();
-    }
-  }
-
-  async dispose() {
+  async dispose(): Promise<void> {
     return this._disposed || (this._disposed = this._lock.pool());
   }
 }

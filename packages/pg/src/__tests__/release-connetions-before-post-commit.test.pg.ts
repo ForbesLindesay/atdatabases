@@ -1,3 +1,4 @@
+import {jest, test, afterAll} from '@jest/globals';
 import connect, {sql} from '..';
 
 jest.setTimeout(10_000);

@@ -145,14 +145,17 @@ function normalizeBatchOptions(options?: BatchOptions): NormalizedBatchOptions {
   };
 }
 
-export interface BatchGroupsOptionsWithMapGroupKey<TGroupKey, TMappedGroupKey>
-  extends BatchOptions {
+export interface BatchGroupsOptionsWithMapGroupKey<
+  TGroupKey,
+  TMappedGroupKey,
+> extends BatchOptions {
   readonly groupMap?: CacheMapInput<TMappedGroupKey, unknown>;
   readonly mapGroupKey: (key: TGroupKey) => TMappedGroupKey;
 }
 
-export interface BatchGroupsOptionsWithoutMapGroupKey<TGroupKey>
-  extends BatchOptions {
+export interface BatchGroupsOptionsWithoutMapGroupKey<
+  TGroupKey,
+> extends BatchOptions {
   readonly groupMap?: CacheMapInput<TGroupKey, unknown>;
   readonly mapGroupKey?: undefined;
 }
@@ -215,8 +218,12 @@ export function batchGroups<
   return batchedFunction;
 }
 
-interface NormalizedBatchGroupOptions<TGroupKey, TKey, TResult, TMappedGroupKey>
-  extends NormalizedBatchOptions {
+interface NormalizedBatchGroupOptions<
+  TGroupKey,
+  TKey,
+  TResult,
+  TMappedGroupKey,
+> extends NormalizedBatchOptions {
   mapGroupKey: (key: TGroupKey) => TMappedGroupKey;
   groupMap: Map<TMappedGroupKey, Batch<TKey, TResult>>;
 }

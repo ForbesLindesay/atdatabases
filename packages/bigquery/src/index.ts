@@ -1,4 +1,4 @@
-import sql, {SQLQuery, isSqlQuery} from '@databases/sql';
+import sql, {type SQLQuery, isSqlQuery} from '@databases/sql';
 import {
   BigQuery,
   BigQueryDate,
@@ -105,18 +105,3 @@ export default function connect({
     }),
   );
 }
-
-module.exports = Object.assign(connect, {
-  default: connect,
-  sql,
-  isSqlQuery,
-  BigQueryTableType,
-  BigQueryPartitionType,
-  BigQueryInt,
-  Big,
-  BigQueryDate,
-  BigQueryDatetime,
-  BigQueryTime,
-  BigQueryTimestamp,
-  Geography,
-});

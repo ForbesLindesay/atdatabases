@@ -1,3 +1,4 @@
+import {expect, jest, test, afterAll} from '@jest/globals';
 import connect, {IsolationLevel, Transaction, sql} from '..';
 
 jest.setTimeout(30000);

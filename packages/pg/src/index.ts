@@ -6,7 +6,7 @@ import parseConnectionString, {
 } from '@databases/pg-connection-string';
 import DataTypeID from '@databases/pg-data-type-id';
 import {isSQLError, SQLError, SQLErrorCode} from '@databases/pg-errors';
-import sql, {SQLQuery, isSqlQuery} from '@databases/sql';
+import sql, {SQL, type SQLQuery, isSqlQuery} from '@databases/sql';
 import {getPgConfigSync} from '@databases/pg-config';
 import ConnectionPoolImplementation from './ConnectionPool';
 import IsolationLevel from './types/IsolationLevel';
@@ -22,16 +22,19 @@ import TypeOverrides, {TypeOverridesConfig} from './TypeOverrides';
 import EventHandlers from './types/EventHandlers';
 import {PgOptions} from './ConnectionSource';
 import pgFormat from './format';
+import TransactionOptions from './types/TransactionOptions';
 
 const {connectionStringEnvironmentVariable} = getPgConfigSync();
 
 export type {
+  SQL,
   SQLQuery,
   SQLError,
   Queryable,
   Transaction,
   Connection,
   ConnectionPool,
+  TransactionOptions,
 };
 export {
   pgFormat,
@@ -54,10 +57,6 @@ export interface ClientConfig {
    * If you choose `number` you may get inexact values for numbers greater than Number.MAX_SAFE_INTEGER
    */
   bigIntMode?: 'string' | 'number' | 'bigint';
-  /**
-   * @deprecated use bigIntMode
-   */
-  bigIntAsString?: boolean;
 
   types?: TypeOverridesConfig['overrides'];
 
@@ -232,10 +231,10 @@ export default function createConnectionPool(
         (Array.isArray(host)
           ? host.length
           : host === undefined
-          ? 1
-          : parsedConnectionString.host.length
-          ? parsedConnectionString.host.length
-          : 1) *
+            ? 1
+            : parsedConnectionString.host.length
+              ? parsedConnectionString.host.length
+              : 1) *
         2,
     ),
     acquireLockTimeoutMilliseconds = 60_000,
@@ -243,9 +242,7 @@ export default function createConnectionPool(
     keepAlive = false,
     keepAliveInitialDelayMilliseconds = 0,
     maxUses = Infinity,
-    bigIntMode = null,
-    // tslint:disable-next-line:deprecation
-    bigIntAsString = false,
+    bigIntMode = 'bigint',
     schema,
     types: typeOverrides,
     onError = (err: Error) => {
@@ -278,17 +275,8 @@ export default function createConnectionPool(
     );
   }
 
-  if (bigIntAsString) {
-    console.warn(
-      'bigIntAsString is deprecated and will be removed in the next major version of @databases/pg, use `bigIntMode: "string"` instead',
-    );
-  } else if (bigIntMode === null) {
-    console.warn(
-      'bigIntMode currently defaults to "number" but will default to "bigint" in the next major version of @databases/pg. Set it explicitly to disable this warning.',
-    );
-  }
   const types = new TypeOverrides({
-    bigIntMode: bigIntMode ?? (bigIntAsString ? 'string' : 'number'),
+    bigIntMode,
     overrides: typeOverrides,
   });
   const sslConfig = getSSLConfig(
@@ -336,8 +324,8 @@ export default function createConnectionPool(
         portList.length === 0
           ? undefined
           : portList.length === 1
-          ? portList[0]
-          : portList[i];
+            ? portList[0]
+            : portList[i];
       return {
         host,
         port: port ?? undefined,
@@ -415,18 +403,3 @@ function getSSLConfig(
     return {allowFallback: false, connectionOptions: ssl};
   }
 }
-
-module.exports = Object.assign(createConnectionPool, {
-  default: createConnectionPool,
-  pgFormat,
-  sql,
-  isSqlQuery,
-  isSQLError,
-  SQLErrorCode,
-  DataTypeID,
-  IsolationLevel,
-  QueryableType,
-  isTransaction,
-  isConnection,
-  isConnectionPool,
-});

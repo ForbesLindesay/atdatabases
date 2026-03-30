@@ -1,3 +1,4 @@
+import {expect, test, beforeEach, afterAll} from '@jest/globals';
 import connect, {sql} from '@databases/pg';
 import createCluster from '@databases/pg-cluster';
 import Schema from './__generated__';
@@ -65,6 +66,8 @@ test('create schema', async () => {
 });
 
 test('insert query', async () => {
+  // type T = typeof users extends (db: infer T) => any ? T : never;
+  // const x: T['sql'] = cluster.sql;
   await users(cluster).insert({screen_name: 'John'}, {screen_name: 'Jane'});
 
   expect(primaryQueries).toHaveLength(1);

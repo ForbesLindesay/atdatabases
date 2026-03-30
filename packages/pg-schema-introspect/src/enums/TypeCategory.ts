@@ -1,4 +1,4 @@
-enum TypeCateogry {
+enum TypeCategory {
   Array = 'A',
   Boolean = 'B',
   Composite = 'C',
@@ -16,4 +16,4 @@ enum TypeCateogry {
   Unknown = 'X',
 }
 
-export default TypeCateogry;
+export default TypeCategory;

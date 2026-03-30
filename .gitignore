@@ -21,6 +21,7 @@ node_modules
 
 # build output
 
+packages/*/dist
 packages/*/build
 packages/*/lib
 packages/*/LICENSE.md

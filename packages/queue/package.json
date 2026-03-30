@@ -2,18 +2,29 @@
   "name": "@databases/queue",
   "version": "0.0.0",
   "description": "",
-  "main": "./lib/index.js",
-  "types": "./lib/index.d.ts",
+  "type": "module",
+  "files": [
+    "dist/"
+  ],
+  "exports": {
+    ".": "./dist/index.js",
+    "./package.json": "./package.json"
+  },
+  "types": "./dist/index.d.ts",
   "dependencies": {},
+  "engines": {
+    "node": ">= 20.20.1"
+  },
   "scripts": {},
-  "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/queue",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ForbesLindesay/atdatabases.git",
+    "directory": "packages/queue"
+  },
   "bugs": "https://github.com/ForbesLindesay/atdatabases/issues",
-  "license": "MIT",
+  "homepage": "https://www.atdatabases.org/docs/queue",
   "publishConfig": {
     "access": "public"
   },
-  "files": [
-    "lib/"
-  ],
-  "homepage": "https://www.atdatabases.org/docs/queue"
+  "license": "MIT"
 }

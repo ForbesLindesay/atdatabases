@@ -1,4 +1,4 @@
-import {sql, SQLQuery, Queryable} from '@databases/mysql';
+import type {SQL, SQLQuery, Queryable} from '@databases/mysql';
 
 export interface SelectQuery<TRecord> {
   all(): Promise<TRecord[]>;
@@ -61,7 +61,7 @@ export type WhereCondition<TRecord> = Partial<{
 
 export function anyOf<T>(values: {
   [Symbol.iterator](): IterableIterator<T | FieldQuery<T>>;
-}) {
+}): FieldQuery<T> {
   const valuesArray: any[] = [];
   const parts: FieldQuery<T>[] = [];
   for (const value of values) {
@@ -102,42 +102,42 @@ export function anyOf<T>(values: {
   );
 }
 
-export function not<T>(value: T | FieldQuery<T>) {
+export function not<T>(value: T | FieldQuery<T>): FieldQuery<T> {
   return new FieldQuery<T>(
     (columnName, sql, toValue) =>
       sql`NOT (${FieldQuery.query(columnName, value, sql, toValue)})`,
   );
 }
 
-export function inQueryResults(query: SQLQuery) {
+export function inQueryResults(query: SQLQuery): FieldQuery<any> {
   return new FieldQuery<any>(
     (columnName, sql) => sql`${sql.ident(columnName)} IN (${query})`,
   );
 }
 
-export function lessThan<T>(value: T) {
+export function lessThan<T>(value: T): FieldQuery<T> {
   return new FieldQuery<T>(
     (columnName, sql, toValue) =>
       sql`${sql.ident(columnName)} < ${toValue(columnName, value)}`,
   );
 }
 
-export function greaterThan<T>(value: T) {
+export function greaterThan<T>(value: T): FieldQuery<T> {
   return new FieldQuery<T>(
     (columnName, sql, toValue) =>
       sql`${sql.ident(columnName)} > ${toValue(columnName, value)}`,
   );
 }
 
-class SelectQueryImplementation<TRecord>
-  implements OrderedSelectQuery<TRecord>
-{
+class SelectQueryImplementation<
+  TRecord,
+> implements OrderedSelectQuery<TRecord> {
   public readonly orderByQueries: SQLQuery[] = [];
   public limitCount: number | undefined;
   private _selectFields: SQLQuery | undefined;
 
   constructor(
-    private readonly _sql: typeof sql,
+    private readonly _sql: SQL,
     private readonly _tableID: SQLQuery,
     private readonly _where: SQLQuery,
     public readonly _executeQuery: (query: SQLQuery) => Promise<TRecord[]>,
@@ -383,8 +383,7 @@ export interface MySqlTypedOptions {
 
   // TODO: easy aliasing of fields and easy parsing of fields using a similar API to the serializeValue?
 }
-export interface MySqlTypedOptionsWithDefaultConnection
-  extends MySqlTypedOptions {
+export interface MySqlTypedOptionsWithDefaultConnection extends MySqlTypedOptions {
   defaultConnection: Queryable;
 }
 
@@ -452,12 +451,3 @@ function getTableSerializeValue(
     ? (columnName, value) => serializeValue(tableName, columnName, value)
     : (_, value) => value;
 }
-
-module.exports = Object.assign(tables, {
-  default: tables,
-  anyOf,
-  not,
-  inQueryResults,
-  lessThan,
-  greaterThan,
-});

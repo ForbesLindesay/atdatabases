@@ -1,8 +1,9 @@
 import {ClassKind, Schema} from '@databases/pg-schema-introspect';
+import {expect, test} from '@jest/globals';
 import PgPrintContext from '../PgPrintContext';
 import getTypeScriptType from '../getTypeScriptType';
 import PrintOptions from '../PgPrintOptions';
-import printSchema from '../printers/printSchema';
+import printSchemaWithContext from '../printers/printSchema';
 
 test('replace filter', async () => {
   const schema: Schema = {
@@ -30,7 +31,7 @@ test('replace filter', async () => {
         '{{ TABLE_NAME | replace "^my_" "" | singular | pascal-case }}Insert',
     }),
   );
-  printSchema(schema, printContext);
+  printSchemaWithContext(schema, printContext);
   expect(printContext.printer.getFiles()).toMatchInlineSnapshot(`
     [
       {

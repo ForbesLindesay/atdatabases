@@ -1,5 +1,6 @@
 import {createAsyncCacheMap} from './CacheMapImplementation';
 import {AsyncCacheMap, CacheMapInput} from './types';
+import {identityFn, trueFn} from './utils';
 
 export interface DedupedAsyncFunction<TKey, TResult> {
   (key: TKey): Promise<TResult>;
@@ -66,8 +67,6 @@ interface NormalizedDedupeAsyncOptions<TKey, TResult, TMappedKey> {
   mapKey: (key: TKey) => TMappedKey;
   shouldCache: (value: TResult, key: TKey) => boolean;
 }
-const identityFn = <T>(arg: T): T => arg;
-const trueFn = (): true => true;
 function normalizeDedupeAsyncOptions<TKey, TResult, TMappedKey>(
   options?: DedupeAsyncOptions<TKey, TResult, TMappedKey>,
 ): NormalizedDedupeAsyncOptions<TKey, TResult, TMappedKey> {

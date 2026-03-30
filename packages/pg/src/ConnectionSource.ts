@@ -3,7 +3,10 @@ import PgDriver from './Driver';
 import definePrecondition from './definePrecondition';
 import TypeOverrides from './TypeOverrides';
 import EventHandlers from './types/EventHandlers';
-const {Client} = require('pg');
+// @ts-expect-error
+import pg from 'pg';
+
+const Client = pg.Client;
 
 type SSLConfig = null | {
   allowFallback: boolean;
@@ -30,7 +33,7 @@ export default function createConnectionSource(
   {hosts, ssl, ...partialOptions}: PgOptions,
   handlers: EventHandlers,
   acquireLockTimeoutMilliseconds: number,
-) {
+): () => Promise<PgDriver> {
   const options = {
     ...partialOptions,
     ...hosts[0],
@@ -85,7 +88,7 @@ export default function createConnectionSource(
         }
       }
 
-      // If you try to connect very quickly after postgres boots (e.g. intesting environments)
+      // If you try to connect very quickly after postgres boots (e.g. in testing environments)
       // you can get an error of "Connection terminated unexpectedly". For this reason, we retry
       // all possible connections for up to 2 seconds
     } while (Date.now() - start < 2000);

@@ -11,33 +11,10 @@ const DEFAULT_NODE_VERSION = '24.x';
 const ALL_NODE_VERSIONS = ['20.x', '22.x', '24.x'];
 const INTEGRATION_TEST_NODE_VERSIONS = ['22.x', '24.x'];
 
-export function yarnInstallWithCache(nodeVersion: Expression<string>): Steps {
-  return ({use, run}) => {
-    const {
-      outputs: {dir: yarnCacheDir},
-    } = run<{dir: string}>(
-      `Get yarn cache directory path`,
-      `echo "::set-output name=dir::$(yarn cache dir)"`,
-    );
-    use('Enable Cache', 'actions/cache@v4', {
-      with: {
-        path: [
-          interpolate`${yarnCacheDir}`,
-          'node_modules',
-          'packages/*/node_modules',
-        ].join('\n'),
-        key: interpolate`${runner.os}-${nodeVersion}-${hashFiles(
-          'yarn.lock',
-        )}-2`,
-      },
-    });
-    run('yarn install --prefer-offline');
-  };
-}
 export function setup(
   nodeVersion: Expression<string> = DEFAULT_NODE_VERSION,
 ): Steps {
-  return ({use, add}) => {
+  return ({use, run}) => {
     use('actions/checkout@v2');
     use('actions/setup-node@v1', {
       with: {
@@ -46,7 +23,7 @@ export function setup(
       },
     });
 
-    add(yarnInstallWithCache(nodeVersion));
+    run('npm install');
   };
 }
 
@@ -66,13 +43,10 @@ export function buildCache(): Steps {
     use(`Enable Cache`, 'actions/cache@v4', {
       with: {
         path: [
-          ...packageNames.map((packageName) => `packages/${packageName}/lib`),
-          ...packageNames.map(
-            (packageName) => `packages/${packageName}/.last_build`,
-          ),
+          ...packageNames.map((packageName) => `packages/${packageName}/dist`),
         ].join('\n'),
         key: interpolate`v2-build-output-${hashFiles(
-          `yarn.lock`,
+          `package-lock.json`,
           ...packageNames.map((packageName) => `packages/${packageName}/src`),
         )}`,
         'restore-keys': [`v2-build-output-`].join('\n'),
@@ -103,11 +77,9 @@ export function buildJob(): Job<{output: string}> {
 
     add(buildCache());
 
-    run('yarn build');
+    run('node --run build');
 
-    const output = add(
-      saveOutput('build', ['packages/*/lib', 'packages/*/.last_build']),
-    );
+    const output = add(saveOutput('build', ['packages/*/dist']));
     return {output};
   };
 }
@@ -136,7 +108,7 @@ export default createWorkflow(({setWorkflowName, addTrigger, addJob}) => {
 
     add(loadOutput(buildOutput, 'packages/'));
 
-    run('yarn test:node');
+    run('node --run test:node');
   });
 
   addJob('test_pg', ({setBuildMatrix, addDependencies, add, run}) => {
@@ -162,7 +134,7 @@ export default createWorkflow(({setWorkflowName, addTrigger, addJob}) => {
 
     add(loadOutput(buildOutput, 'packages/'));
 
-    run('yarn test:pg', {
+    run('node --run test:pg', {
       env: {PG_TEST_IMAGE: interpolate`postgres:${pg}`, PG_TEST_DEBUG: 'TRUE'},
     });
   });
@@ -184,7 +156,7 @@ export default createWorkflow(({setWorkflowName, addTrigger, addJob}) => {
 
     add(loadOutput(buildOutput, 'packages/'));
 
-    run('yarn test:mysql', {
+    run('node --run test:mysql', {
       env: {MYSQL_TEST_IMAGE: interpolate`mysql:${mysql}`},
     });
   });
@@ -192,7 +164,7 @@ export default createWorkflow(({setWorkflowName, addTrigger, addJob}) => {
   addJob('prettier', ({addDependencies, add, run}) => {
     add(setup());
 
-    run('yarn prettier:check');
+    run('node --run prettier:check');
   });
 
   addJob('lint', ({addDependencies, add, run}) => {
@@ -204,6 +176,6 @@ export default createWorkflow(({setWorkflowName, addTrigger, addJob}) => {
 
     add(loadOutput(buildOutput, 'packages/'));
 
-    run('yarn tslint');
+    run('node --run tslint');
   });
 });

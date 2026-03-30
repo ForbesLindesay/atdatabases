@@ -5,29 +5,25 @@
 //   fn: (value: TSuccess) => Result<TNewSuccess, TNewError>,
 // ) => Result<TNewSuccess, TError | TNewError>;
 
-type Result<TSuccess, TError> =
-  | {readonly ok: true; readonly value: TSuccess}
-  | {readonly ok: false; readonly reason: TError};
+type ResultOk<TSuccess> = {readonly ok: true; readonly value: TSuccess};
+type ResultFail<TError> = {readonly ok: false; readonly reason: TError};
+type Result<TSuccess, TError> = ResultOk<TSuccess> | ResultFail<TError>;
 
-export function ok(): {readonly ok: true; readonly value: void};
-export function ok<TSuccess>(value: TSuccess): {
-  readonly ok: true;
-  readonly value: TSuccess;
-};
-export function ok<TSuccess>(value?: TSuccess): {
-  readonly ok: true;
-  readonly value?: TSuccess;
-} {
+export function ok(): ResultOk<void>;
+export function ok<TSuccess>(value: TSuccess): ResultOk<TSuccess>;
+export function ok<TSuccess>(value?: TSuccess): ResultOk<TSuccess | void> {
   return {ok: true, value};
 }
 
-export function fail<TError>(reason: TError): {
-  readonly ok: false;
-  readonly reason: TError;
-} {
+export function fail<TError>(reason: TError): ResultFail<TError> {
   return {ok: false, reason};
 }
 
-const Result = {ok, fail};
+interface ResultApi {
+  ok(): ResultOk<void>;
+  ok<TSuccess>(value: TSuccess): ResultOk<TSuccess>;
+  fail<TError>(reason: TError): ResultFail<TError>;
+}
+const Result: ResultApi = {ok, fail};
 
 export default Result;

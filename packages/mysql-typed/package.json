@@ -2,8 +2,15 @@
   "name": "@databases/mysql-typed",
   "version": "0.0.0",
   "description": "",
-  "main": "./lib/index.js",
-  "types": "./lib/index.d.ts",
+  "type": "module",
+  "files": [
+    "dist/"
+  ],
+  "exports": {
+    ".": "./dist/index.js",
+    "./package.json": "./package.json"
+  },
+  "types": "./dist/index.d.ts",
   "dependencies": {},
   "devDependencies": {
     "@databases/mysql": "^0.0.0",
@@ -12,15 +19,19 @@
   "peerDependencies": {
     "@databases/mysql": "*"
   },
+  "engines": {
+    "node": ">= 20.20.1"
+  },
   "scripts": {},
-  "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/mysql-typed",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ForbesLindesay/atdatabases.git",
+    "directory": "packages/mysql-typed"
+  },
   "bugs": "https://github.com/ForbesLindesay/atdatabases/issues",
-  "license": "MIT",
+  "homepage": "https://www.atdatabases.org/docs/mysql-typed",
   "publishConfig": {
     "access": "public"
   },
-  "files": [
-    "lib/"
-  ],
-  "homepage": "https://www.atdatabases.org/docs/mysql-typed"
+  "license": "MIT"
 }

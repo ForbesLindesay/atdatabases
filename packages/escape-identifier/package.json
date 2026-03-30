@@ -2,20 +2,31 @@
   "name": "@databases/escape-identifier",
   "version": "0.0.0",
   "description": "",
-  "main": "./lib/index.js",
-  "types": "./lib/index.d.ts",
+  "type": "module",
+  "files": [
+    "dist/"
+  ],
+  "exports": {
+    ".": "./dist/index.js",
+    "./package.json": "./package.json"
+  },
+  "types": "./dist/index.d.ts",
   "dependencies": {
     "@databases/validate-unicode": "^0.0.0"
   },
+  "engines": {
+    "node": ">= 20.20.1"
+  },
   "scripts": {},
-  "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/escape-identifier",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ForbesLindesay/atdatabases.git",
+    "directory": "packages/escape-identifier"
+  },
   "bugs": "https://github.com/ForbesLindesay/atdatabases/issues",
-  "license": "MIT",
+  "homepage": "https://www.atdatabases.org/docs/escape-identifier",
   "publishConfig": {
     "access": "public"
   },
-  "files": [
-    "lib/"
-  ],
-  "homepage": "https://www.atdatabases.org/docs/escape-identifier"
+  "license": "MIT"
 }

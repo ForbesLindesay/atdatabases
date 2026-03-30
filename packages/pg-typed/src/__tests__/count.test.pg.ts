@@ -1,3 +1,4 @@
+import {expect, test, afterAll} from '@jest/globals';
 import connect, {sql} from '@databases/pg';
 import Schema from './__generated__';
 import defineTables from '..';

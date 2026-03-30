@@ -1,7 +1,6 @@
 /* tslint:disable:no-void-expression */
 
-import {Readable} from 'stream';
-import {SQLQuery, FormatConfig} from '@databases/sql/web';
+import {type SQLQuery, FormatConfig} from '@databases/sql/web';
 import {Driver} from '@databases/shared';
 import TransactionOptions from './types/TransactionOptions';
 import EventHandlers from './types/EventHandlers';
@@ -23,9 +22,10 @@ interface MockDatabase {
   exec(str: string, params: any[]): any[];
 }
 
-export default class MockDbDriver
-  implements Driver<TransactionOptions, QueryStreamOptions>
-{
+export default class MockDbDriver implements Driver<
+  TransactionOptions,
+  QueryStreamOptions
+> {
   public readonly acquireLockTimeoutMilliseconds: number;
   public readonly client: MockDatabase;
   private readonly _handlers: EventHandlers;
@@ -43,34 +43,34 @@ export default class MockDbDriver
     // no-op
   }
 
-  async canRecycleConnectionAfterError(_err: Error) {
+  async canRecycleConnectionAfterError(_err: Error): Promise<boolean> {
     return true;
   }
 
-  async beginTransaction(_options?: TransactionOptions) {
+  async beginTransaction(_options?: TransactionOptions): Promise<void> {
     await execute(this.client, `BEGIN TRANSACTION`);
   }
-  async commitTransaction() {
+  async commitTransaction(): Promise<void> {
     await execute(this.client, `COMMIT TRANSACTION`);
   }
-  async rollbackTransaction() {
+  async rollbackTransaction(): Promise<void> {
     await execute(this.client, `ROLLBACK TRANSACTION`);
   }
   async shouldRetryTransactionFailure(
     _transactionOptions: TransactionOptions | undefined,
     _ex: Error,
     _failureCount: number,
-  ) {
+  ): Promise<boolean> {
     return false;
   }
 
-  async createSavepoint(_savepointName: string) {
+  async createSavepoint(_savepointName: string): Promise<void> {
     throw new Error(`Savepoints are not supported by mock-db`);
   }
-  async releaseSavepoint(_savepointName: string) {
+  async releaseSavepoint(_savepointName: string): Promise<void> {
     throw new Error(`Savepoints are not supported by mock-db`);
   }
-  async rollbackToSavepoint(_savepointName: string) {
+  async rollbackToSavepoint(_savepointName: string): Promise<void> {
     throw new Error(`Savepoints are not supported by mock-db`);
   }
 
@@ -109,17 +109,10 @@ export default class MockDbDriver
     return await this._executeQuery(queries[queries.length - 1]);
   }
 
-  queryNodeStream(
-    _query: SQLQuery,
-    _options: {highWaterMark?: number},
-  ): Readable {
-    throw new Error(`Not implemented by mock-db`);
-  }
-
-  async *queryStream(
+  queryStream(
     _query: SQLQuery,
     _options: QueryStreamOptions = {},
-  ): AsyncGenerator<any, void, unknown> {
+  ): ReadableStream<any> {
     throw new Error(`Not implemented by mock-db`);
   }
 }

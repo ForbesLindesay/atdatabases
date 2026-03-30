@@ -53,19 +53,19 @@
 // next macrotask. For browser environments, a macrotask is used (via
 // setImmediate or setTimeout) at a potential performance penalty.
 const resolvedPromise = Promise.resolve();
-const enqueuePostPromiseJob =
+const enqueuePostPromiseJob: () => Promise<void> =
   typeof process === 'object' && typeof process.nextTick === 'function'
     ? () =>
         resolvedPromise.then(
           () => new Promise<void>((resolve) => process.nextTick(resolve)),
         )
     : setImmediate
-    ? () =>
-        resolvedPromise.then(
-          () => new Promise<void>((resolve) => setImmediate(resolve)),
-        )
-    : () =>
-        resolvedPromise.then(
-          () => new Promise<void>((resolve) => setTimeout(resolve, 0)),
-        );
+      ? () =>
+          resolvedPromise.then(
+            () => new Promise<void>((resolve) => setImmediate(resolve)),
+          )
+      : () =>
+          resolvedPromise.then(
+            () => new Promise<void>((resolve) => setTimeout(resolve, 0)),
+          );
 export default enqueuePostPromiseJob;

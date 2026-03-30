@@ -1,3 +1,4 @@
+import {expect, test} from '@jest/globals';
 // import {BigQueryInt} from '@google-cloud/bigquery';
 import connect, {
   sql,
@@ -157,8 +158,8 @@ test(`insert record with error via SQL`, async () => {
         tableName,
       )} (id, decimal_number, the_date, the_date_time, the_time, the_timestamp)
       VALUES (${42}, ${new Big(
-      `3.14`,
-    )}, ${`not a valid date`}, ${`2000-06-03T06:14:00`}, ${`04:41:00`}, ${testDate})
+        `3.14`,
+      )}, ${`not a valid date`}, ${`2000-06-03T06:14:00`}, ${`04:41:00`}, ${testDate})
     `),
   ).rejects.toMatchObject({
     message: expect.stringMatching(/Invalid date/),
@@ -339,29 +340,15 @@ test(`query with parameter`, async () => {
   `);
 });
 
-test(`modern stream`, async () => {
+test(`stream`, async () => {
   let i = 0;
-  for await (const row of db.queryStream(
+  const results: ReadableStream<unknown> = db.queryStream(
     sql`SELECT * FROM ${sql.ident(`atdatabases_test`, streamTableName)}`,
-  )) {
+  );
+  // @ts-expect-error - ReadableStream is iterable, but TypeScript doesn't always know that.
+  for await (const row of results) {
     i++;
     expect(row.value).toBe(`The value is ${row.id.value}`);
   }
-  expect(i).toBe(STREAM_ROW_COUNT);
-});
-
-test(`node.js stream`, async () => {
-  let i = 0;
-  await new Promise<void>((resolve, reject) => {
-    db.queryNodeStream(
-      sql`SELECT * FROM ${sql.ident(`atdatabases_test`, streamTableName)}`,
-    )
-      .on(`data`, (row) => {
-        i++;
-        expect(row.value).toBe(`The value is ${row.id.value}`);
-      })
-      .on(`error`, (err) => reject(err))
-      .on(`end`, () => resolve());
-  });
   expect(i).toBe(STREAM_ROW_COUNT);
 });

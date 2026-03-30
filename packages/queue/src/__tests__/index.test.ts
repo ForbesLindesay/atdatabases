@@ -1,3 +1,4 @@
+import {expect, test} from '@jest/globals';
 import Queue, {AsyncQueue} from '..';
 
 test('Queue', () => {

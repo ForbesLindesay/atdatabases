@@ -2,36 +2,47 @@
   "name": "@databases/pg-migrations",
   "version": "2.0.0",
   "description": "",
-  "main": "./lib/index.js",
-  "types": "./lib/index.d.ts",
-  "bin": {
-    "pg-migrations": "./lib/cli.js"
+  "type": "module",
+  "files": [
+    "dist/"
+  ],
+  "exports": {
+    ".": "./dist/index.js",
+    "./package.json": "./package.json"
   },
+  "bin": {
+    "pg-migrations": "./cli.js"
+  },
+  "types": "./dist/index.d.ts",
   "dependencies": {
     "@databases/migrations-base": "^0.0.0",
     "@databases/pg": "^0.0.0",
     "@databases/pg-config": "^0.0.0",
     "assert-never": "^1.2.1",
-    "chalk": "^4.1.0",
+    "chalk": "^5.6.2",
     "interrogator": "^2.0.0",
-    "is-interactive": "^1.0.0",
+    "is-interactive": "^2.0.0",
+    "jiti": "^2.6.1",
     "parameter-reducers": "^2.0.0",
-    "semver": "^7.3.2",
-    "sucrase": "^3.16.0"
-  },
-  "scripts": {},
-  "repository": "https://github.com/ForbesLindesay/atdatabases/tree/master/packages/pg-migrations",
-  "license": "MIT",
-  "publishConfig": {
-    "access": "public"
+    "semver": "^7.3.2"
   },
   "devDependencies": {
     "@types/semver": "^7.3.4",
     "lsr": "^2.0.0"
   },
+  "engines": {
+    "node": ">= 20.20.1"
+  },
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ForbesLindesay/atdatabases.git",
+    "directory": "packages/pg-migrations"
+  },
   "bugs": "https://github.com/ForbesLindesay/atdatabases/issues",
-  "files": [
-    "lib/"
-  ],
-  "homepage": "https://www.atdatabases.org/docs/pg-migrations"
+  "homepage": "https://www.atdatabases.org/docs/pg-migrations",
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "MIT"
 }

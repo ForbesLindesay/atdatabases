@@ -4,11 +4,11 @@ import MySqlPrintOptions from '../MySqlPrintOptions';
 import TypeID from '../TypeID';
 import printTableDetails from './printTableDetails';
 
-export default function printSchema(
+export default function printSchemaWithContext(
   schema: Schema,
   context: PrintContext<TypeID>,
   options: MySqlPrintOptions,
-) {
+): void {
   context.pushTypeDeclaration({type: 'schema'}, (identifier, {getImport}) => [
     `interface ${identifier} {`,
     ...schema.tables
@@ -49,10 +49,10 @@ export default function printSchema(
       columns.length === 0
         ? `false`
         : columns.length === 1
-        ? `c === ${JSON.stringify(columns[0])}`
-        : `(${columns
-            .map((columnName) => `c === ${JSON.stringify(columnName)}`)
-            .join(' || ')})`;
+          ? `c === ${JSON.stringify(columns[0])}`
+          : `(${columns
+              .map((columnName) => `c === ${JSON.stringify(columnName)}`)
+              .join(' || ')})`;
     const tableConditions = tables.map(
       ({tableName, jsonAttributes}) =>
         `t === ${JSON.stringify(tableName)} && ${columnCondition(

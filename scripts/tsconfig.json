@@ -32,7 +32,6 @@
     {"path": "../packages/pg-schema-print-types"},
     {"path": "../packages/pg-test"},
     {"path": "../packages/pg-typed"},
-    {"path": "../packages/push-to-async-iterable"},
     {"path": "../packages/queue"},
     {"path": "../packages/shared"},
     {"path": "../packages/shared-print-types"},

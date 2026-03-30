@@ -1,4 +1,8 @@
-import connect, {ConnectionPool, Queryable, sql} from '@databases/mysql';
+import connect, {
+  type ConnectionPool,
+  type Queryable,
+  sql,
+} from '@databases/mysql';
 import TableType from './enums/TableType';
 import getColumns, {Column} from './getColumns';
 import getConstraints, {Constraint} from './getConstraints';

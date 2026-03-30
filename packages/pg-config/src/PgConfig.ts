@@ -419,7 +419,7 @@ export const TypesConfigSchema: ft.Runtype<TypesConfig> = ft
   })
   .withConstraint((value) => true, {name: `TypesConfig`});
 
-interface PgConfig {
+export interface PgConfig {
   /**
    * The environment variable containing the
    * connection string to the postgres database
@@ -454,5 +454,3 @@ export const PgConfigSchema: ft.Runtype<PgConfig> = ft.Object({
   test: withDefault(TestConfigSchema, TestConfigSchema.parse({})),
   types: withDefault(TypesConfigSchema, TypesConfigSchema.parse({})),
 });
-
-export default PgConfig;

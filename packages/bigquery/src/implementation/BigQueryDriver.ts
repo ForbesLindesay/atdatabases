@@ -1,18 +1,12 @@
 import {escapeMySqlIdentifier} from '@databases/escape-identifier';
 import splitSqlQuery from '@databases/split-sql-query';
-import {FormatConfig, isSqlQuery, SQLQuery} from '@databases/sql';
+import {FormatConfig, isSqlQuery, type SQLQuery} from '@databases/sql';
 import {Job, QueryResultsOptions} from '@google-cloud/bigquery';
-import {Readable} from 'stream';
 import BigQueryStreamOptions from '../types/BigQueryStreamOptions';
-const {codeFrameColumns} = require('@babel/code-frame');
+import {codeFrameColumns} from '@babel/code-frame';
+import {assertSql} from '../utils';
 
 const DEFAULT_PAGE_SIZE = 1000;
-
-interface BigQueryPage {
-  isEmpty: () => boolean;
-  shift: () => any;
-  nextPage: undefined | (() => Promise<BigQueryPage>);
-}
 
 const bqFormat: FormatConfig = {
   escapeIdentifier: (str) => escapeMySqlIdentifier(str),
@@ -21,43 +15,49 @@ const bqFormat: FormatConfig = {
 
 export type CreateQueryJob = (q: {query: string; params: any}) => Promise<Job>;
 
-class BigQueryResultsStream extends Readable {
-  constructor(getFirstPage: () => Promise<BigQueryPage>) {
-    let reading = false;
-    let currentPage: BigQueryPage | undefined;
+class BigQueryResultsStream extends ReadableStream<any> {
+  constructor(
+    query: SQLQuery,
+    options: QueryResultsOptions,
+    createQueryJob: CreateQueryJob,
+  ) {
+    const {text, values} = query.format(bqFormat);
+    let job: Job | undefined;
+    let nextOptions: QueryResultsOptions = options;
+    let isCancelled = false;
     super({
-      objectMode: true,
-      read() {
-        (async () => {
-          if (reading) {
-            return;
+      async start() {
+        job = await handleError(
+          async () => await createQueryJob({query: text, params: values}),
+          text,
+        );
+      },
+      async pull(controller) {
+        try {
+          const [records, nextPage] = await handleError(async () => {
+            if (!job) throw new Error('Failed to initiate query job');
+            return await job.getQueryResults(nextOptions);
+          }, text);
+
+          if (isCancelled) return;
+          for (const record of records) {
+            controller.enqueue(record);
           }
-          reading = true;
-          let more = true;
-          while (more) {
-            if (!currentPage) {
-              currentPage = await getFirstPage();
-            }
-            if (currentPage.isEmpty()) {
-              if (currentPage.nextPage) {
-                currentPage = await currentPage.nextPage();
-                if (currentPage.isEmpty()) {
-                  this.push(null);
-                  return;
-                }
-              } else {
-                this.push(null);
-                return;
-              }
-            }
-            while (!currentPage.isEmpty()) {
-              more = this.push(currentPage.shift());
-            }
+          if (nextPage) {
+            nextOptions = nextPage;
+          } else {
+            controller.close();
           }
-          reading = false;
-        })().catch((e) => {
-          this.destroy(e);
-        });
+        } catch (err) {
+          if (isCancelled) return;
+          isCancelled = true;
+          controller.error(err);
+        }
+      },
+      async cancel() {
+        if (isCancelled) return;
+        isCancelled = true;
+        await job?.cancel();
       },
     });
   }
@@ -109,92 +109,21 @@ export default class BigQueryDriver {
     return results;
   }
 
-  private async _getFirstPage(
-    query: SQLQuery,
-    options: BigQueryStreamOptions,
-    createQueryJob: CreateQueryJob,
-  ) {
-    if (!isSqlQuery(query)) {
-      throw new Error('Expected query to be an SQLQuery');
-    }
-    const {text, values} = query.format(bqFormat);
-    const getNextPage = async (
-      job: Job,
-      query: QueryResultsOptions,
-    ): Promise<BigQueryPage> => {
-      const results = await handleError(
-        async () => await job.getQueryResults(query),
-        text,
-      );
-      const records = results[0];
-      const nextQuery = results[1] as any;
-      let i = 0;
-      return {
-        isEmpty() {
-          return i === records.length;
-        },
-        shift() {
-          return records[i++];
-        },
-        nextPage: nextQuery ? () => getNextPage(job, nextQuery) : undefined,
-      };
-    };
-    const job = await handleError(
-      async () => await createQueryJob({query: text, params: values}),
-      text,
-    );
-    return await getNextPage(job, {
-      ...this._options,
-      autoPaginate: false,
-      maxResults: options.pageSize ?? DEFAULT_PAGE_SIZE,
-    });
-  }
   queryStream(
     query: SQLQuery,
     options: BigQueryStreamOptions,
     createQueryJob: CreateQueryJob,
-  ): AsyncGenerator<any, void, unknown> {
-    const getFirstPage = async () =>
-      await this._getFirstPage(query, options, createQueryJob);
-    let currentPage: BigQueryPage | undefined;
-    return {
-      async next(): Promise<IteratorResult<any, void>> {
-        if (!currentPage) {
-          currentPage = await getFirstPage();
-        }
-        if (currentPage.isEmpty()) {
-          if (currentPage.nextPage) {
-            currentPage = await currentPage.nextPage();
-            if (currentPage.isEmpty()) {
-              return {done: true, value: undefined};
-            }
-          } else {
-            return {done: true, value: undefined};
-          }
-        }
-        return {done: false, value: currentPage.shift()};
+  ): ReadableStream<any> {
+    assertSql(query);
+    return new BigQueryResultsStream(
+      query,
+      {
+        ...this._options,
+        autoPaginate: false,
+        maxResults: options.pageSize ?? DEFAULT_PAGE_SIZE,
       },
-      async return(): Promise<IteratorResult<any, void>> {
-        return {done: true, value: undefined};
-      },
-      async throw(e): Promise<IteratorResult<any, void>> {
-        throw e;
-      },
-      [Symbol.asyncIterator](): AsyncGenerator<any, void, unknown> {
-        // tslint:disable-next-line no-invalid-this
-        return this;
-      },
-    };
-  }
-
-  queryNodeStream(
-    query: SQLQuery,
-    options: BigQueryStreamOptions,
-    createQueryJob: CreateQueryJob,
-  ): Readable {
-    const getFirstPage = async () =>
-      await this._getFirstPage(query, options, createQueryJob);
-    return new BigQueryResultsStream(getFirstPage);
+      createQueryJob,
+    );
   }
 }
 

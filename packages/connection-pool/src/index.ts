@@ -338,7 +338,3 @@ export default function createConnectionPool<T>(
 ): ConnectionPool<T> {
   return new ConnectionPoolState(new PoolOptionsObject(options));
 }
-
-module.exports = Object.assign(createConnectionPool, {
-  default: createConnectionPool,
-});

@@ -14,7 +14,40 @@ const IntegerSchema = t.Number.withConstraint(
 const aliases = new Map<string | DataType, DataType>([
   [`geometrycollection`, DataType.geomcollection],
 ]);
-const SimpleColumnTypeSchema = t.Named(
+
+export interface SimpleColumnType {
+  kind:
+    | DataType.bigint
+    | DataType.blob
+    | DataType.date
+    | DataType.datetime
+    | DataType.double
+    | DataType.float
+    | DataType.geometry
+    | DataType.geomcollection
+    | DataType.int
+    | DataType.json
+    | DataType.linestring
+    | DataType.longblob
+    | DataType.longtext
+    | DataType.mediumblob
+    | DataType.mediumint
+    | DataType.mediumtext
+    | DataType.multilinestring
+    | DataType.multipoint
+    | DataType.multipolygon
+    | DataType.point
+    | DataType.polygon
+    | DataType.smallint
+    | DataType.text
+    | DataType.time
+    | DataType.timestamp
+    | DataType.tinyblob
+    | DataType.tinyint
+    | DataType.tinytext
+    | DataType.year;
+}
+const SimpleColumnTypeSchema: t.Codec<SimpleColumnType> = t.Named(
   `SimpleColumnType`,
   t.Object({
     kind: t.Union(
@@ -50,40 +83,60 @@ const SimpleColumnTypeSchema = t.Named(
     ),
   }),
 );
-export type SimpleColumnType = t.Static<typeof SimpleColumnTypeSchema>;
-const DecimalTypeSchema = t.Named(
+export interface DecimalType {
+  kind: DataType.decimal;
+  /**
+   * aka "numeric_precision"
+   */
+  digits: number;
+  /**
+   * aka "numeric_scale"
+   */
+  decimals: number;
+}
+const DecimalTypeSchema: t.Codec<DecimalType> = t.Named(
   `DecimalType`,
   t.Object({
     kind: t.Literal(DataType.decimal),
-    /**
-     * aka "numeric_precision"
-     */
     digits: IntegerSchema,
-    /**
-     * aka "numeric_scale"
-     */
     decimals: IntegerSchema,
   }),
 );
-export type DecimalType = t.Static<typeof DecimalTypeSchema>;
 
-const EnumTypeSchema = t.Named(
+export interface EnumType {
+  kind: DataType.enum;
+  values: string[];
+}
+const EnumTypeSchema: t.Codec<EnumType> = t.Named(
   `Enum`,
   t.Object({
     kind: t.Literal(DataType.enum),
     values: t.Array(t.String),
   }),
 );
-export type EnumType = t.Static<typeof EnumTypeSchema>;
-const SetTypeSchema = t.Named(
+
+export interface SetType {
+  kind: DataType.set;
+  values: string[];
+}
+const SetTypeSchema: t.Codec<SetType> = t.Named(
   `Set`,
   t.Object({
     kind: t.Literal(DataType.set),
     values: t.Array(t.String),
   }),
 );
-export type SetType = t.Static<typeof SetTypeSchema>;
-const ColumnTypeWithLengthSchema = t.Named(
+
+export interface ColumnTypeWithLength {
+  kind:
+    | DataType.binary
+    | DataType.bit
+    | DataType.char
+    | DataType.varbinary
+    | DataType.varchar;
+  length: number;
+}
+const ColumnTypeWithLengthSchema: t.Codec<ColumnTypeWithLength> = t.Named(
   `ColumnTypeWithLength`,
   t.Object({
     kind: t.Union(
@@ -96,16 +149,20 @@ const ColumnTypeWithLengthSchema = t.Named(
     length: IntegerSchema,
   }),
 );
-export type ColumnTypeWithLength = t.Static<typeof ColumnTypeWithLengthSchema>;
 
-export const ColumnTypeSchema = t.Union(
+export type ColumnType =
+  | SimpleColumnType
+  | DecimalType
+  | EnumType
+  | SetType
+  | ColumnTypeWithLength;
+export const ColumnTypeSchema: t.Codec<ColumnType> = t.Union(
   SimpleColumnTypeSchema,
   DecimalTypeSchema,
   EnumTypeSchema,
   SetTypeSchema,
   ColumnTypeWithLengthSchema,
 );
-export type ColumnType = t.Static<typeof ColumnTypeSchema>;
 
 export default function getColumnType(column: {
   data_type: DataType;

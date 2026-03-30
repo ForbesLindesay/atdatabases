@@ -1,3 +1,5 @@
+import {expect} from '@jest/globals';
+
 export interface RequestsTester<T> {
   add(request: T): void;
   expect(requests: T[], fn: () => Promise<void>): Promise<void>;

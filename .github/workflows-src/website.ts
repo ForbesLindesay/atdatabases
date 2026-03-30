@@ -19,17 +19,17 @@ export default createWorkflow(({setWorkflowName, addTrigger, addJob}) => {
 
     add(buildCache());
 
-    run('yarn build');
+    run('node --run build');
 
     use('Enable NextJS Cache', 'actions/cache@v4', {
       with: {
         path: ['packages/website/.next/cache'].join('\n'),
-        key: interpolate`next-${hashFiles('yarn.lock')}`,
+        key: interpolate`next-${hashFiles('package-lock.json')}`,
         'restore-keys': [`next-`].join('\n'),
       },
     });
 
-    run('yarn workspace @databases/website build');
+    run('cd packages/website && node --run build');
 
     run(`npm install netlify-cli@17.10.1 -g`);
     const netlifyDeploy = [

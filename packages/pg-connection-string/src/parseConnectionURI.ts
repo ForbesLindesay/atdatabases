@@ -2,9 +2,12 @@
  * This file handles 33.1.1.2 from https://www.postgresql.org/docs/13/libpq-connect.html
  */
 
-import {ConfigurationBuilder, ConfigurationOptions} from './Configuration';
+import Configuration, {
+  ConfigurationBuilder,
+  ConfigurationOptions,
+} from './Configuration';
 
-export function isConnectionURI(str: string) {
+export function isConnectionURI(str: string): boolean {
   return str.startsWith('postgresql://') || str.startsWith('postgres://');
 }
 
@@ -15,15 +18,15 @@ const symbolsWithSpecialMeaning = new Set([':', '/', '@', ',', '?', '=', '&']);
 export default function parseConnectionURI(
   originalString: string,
   options: ConfigurationOptions,
-) {
+): Configuration {
   const config = new ConfigurationBuilder(options);
   let str = originalString.startsWith('postgresql://')
     ? originalString.substr('postgresql://'.length)
     : originalString.startsWith('postgres://')
-    ? originalString.substr('postgres://'.length)
-    : fail(
-        `Expected the connection string to start with "postgresql://" or "postgres://"`,
-      );
+      ? originalString.substr('postgres://'.length)
+      : fail(
+          `Expected the connection string to start with "postgresql://" or "postgres://"`,
+        );
 
   // [user[:password]@]
   str = parseAuth(config, str);

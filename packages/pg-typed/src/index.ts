@@ -1,5 +1,5 @@
 import assertNever from 'assert-never';
-import {SQLQuery, Queryable} from '@databases/pg';
+import type {SQLQuery, Queryable} from '@databases/pg';
 import {
   bulkUpdate,
   bulkDelete,
@@ -9,10 +9,9 @@ import {
 } from '@databases/pg-bulk';
 
 const NO_RESULT_FOUND = `NO_RESULT_FOUND`;
-const MULTIPLE_RESULTS_FOUND = `MULTIPLE_RESULTS_FOUND`;
 export function isNoResultFoundError(
   err: unknown,
-): err is Error & {code: typeof NO_RESULT_FOUND} {
+): err is Error & {code: 'NO_RESULT_FOUND'} {
   return (
     typeof err === 'object' &&
     err !== null &&
@@ -21,9 +20,10 @@ export function isNoResultFoundError(
   );
 }
 
+const MULTIPLE_RESULTS_FOUND = `MULTIPLE_RESULTS_FOUND`;
 export function isMultipleResultsFoundError(
   err: unknown,
-): err is Error & {code: typeof MULTIPLE_RESULTS_FOUND} {
+): err is Error & {code: 'MULTIPLE_RESULTS_FOUND'} {
   return (
     typeof err === 'object' &&
     err !== null &&
@@ -182,7 +182,7 @@ class FieldQuery<T> {
 
     return sql`${columnName} = ${toValue(q)}`;
   }
-  static getSpecial<T>(q: T | FieldQuery<T>) {
+  static getSpecial<T>(q: T | FieldQuery<T>): SpecialFieldQuery<T> | undefined {
     if (q && q instanceof FieldQuery) {
       return q.__special;
     } else {
@@ -485,9 +485,10 @@ export function or<TRecord>(
   return new WhereCombinedCondition(conditions, 'OR');
 }
 
-class SelectQueryImplementation<TRecord>
-  implements SelectQuery<TRecord, SelectQueryMethods>
-{
+class SelectQueryImplementation<TRecord> implements SelectQuery<
+  TRecord,
+  SelectQueryMethods
+> {
   private _distinctColumnNames: string[] | undefined;
   private readonly _orderByQueries: {
     columnName: string;
@@ -553,8 +554,8 @@ class SelectQueryImplementation<TRecord>
               `,`,
             )})`
           : distinctColumnNames
-          ? sql`DISTINCT`
-          : null,
+            ? sql`DISTINCT`
+            : null,
         selectFields
           ? sql.join(
               selectFields.map((f) => sql.ident(f)),
@@ -565,8 +566,8 @@ class SelectQueryImplementation<TRecord>
         whereCondition === `TRUE`
           ? null
           : whereCondition === `FALSE`
-          ? sql`WHERE FALSE`
-          : sql`WHERE ${whereCondition}`,
+            ? sql`WHERE FALSE`
+            : sql`WHERE ${whereCondition}`,
         orderByQueries.length
           ? sql`ORDER BY ${sql.join(
               orderByQueries.map((q) =>
@@ -800,8 +801,8 @@ class Table<TRecord, TInsertParameters> {
     return query === `TRUE`
       ? this._underlyingDb.sql`TRUE`
       : query === `FALSE`
-      ? this._underlyingDb.sql`FALSE`
-      : query;
+        ? this._underlyingDb.sql`FALSE`
+        : query;
   }
 
   async bulkInsert<
@@ -979,7 +980,7 @@ class Table<TRecord, TInsertParameters> {
       TRecord,
       TWhereColumns[number]
     >[];
-  }) {
+  }): Promise<void> {
     if (whereConditions.length === 0) {
       return;
     }
@@ -1086,25 +1087,28 @@ class Table<TRecord, TInsertParameters> {
     const doNotSet = getOption('doNotSet');
 
     const {sql} = this._underlyingDb;
-    return this._insert((columnNames) => {
-      let updateKeys: readonly (string | number | symbol)[] = columnNames;
-      if (set) {
-        updateKeys = set;
-      }
-      if (doNotSet) {
-        const keysNotToSet = new Set<string | number | symbol>(doNotSet);
-        updateKeys = updateKeys.filter((key) => !keysNotToSet.has(key));
-      }
-      return sql`ON CONFLICT (${sql.join(
-        conflictKeys.map((k) => sql.ident(k)),
-        sql`, `,
-      )}) DO UPDATE SET ${sql.join(
-        updateKeys.map(
-          (key) => sql`${sql.ident(key)}=EXCLUDED.${sql.ident(key)}`,
-        ),
-        sql`, `,
-      )}`;
-    }, ...rows) as any;
+    return this._insert(
+      (columnNames) => {
+        let updateKeys: readonly (string | number | symbol)[] = columnNames;
+        if (set) {
+          updateKeys = set;
+        }
+        if (doNotSet) {
+          const keysNotToSet = new Set<string | number | symbol>(doNotSet);
+          updateKeys = updateKeys.filter((key) => !keysNotToSet.has(key));
+        }
+        return sql`ON CONFLICT (${sql.join(
+          conflictKeys.map((k) => sql.ident(k)),
+          sql`, `,
+        )}) DO UPDATE SET ${sql.join(
+          updateKeys.map(
+            (key) => sql`${sql.ident(key)}=EXCLUDED.${sql.ident(key)}`,
+          ),
+          sql`, `,
+        )}`;
+      },
+      ...rows,
+    ) as any;
   }
 
   async insertOrIgnore<TRecordsToInsert extends readonly TInsertParameters[]>(
@@ -1174,15 +1178,6 @@ class Table<TRecord, TInsertParameters> {
     }
   }
 
-  /**
-   * @deprecated use .find instead of .select
-   */
-  select(
-    whereValues: WhereCondition<TRecord> = {},
-  ): UnorderedSelectQuery<TRecord> {
-    return this.find(whereValues);
-  }
-
   private _findUntyped(
     whereCondition: SQLQuery | 'TRUE' | 'FALSE',
   ): UnorderedSelectQuery<TRecord> {
@@ -1208,14 +1203,6 @@ class Table<TRecord, TInsertParameters> {
     );
   }
 
-  /**
-   * @deprecated use .findOne instead of .selectOne
-   */
-  async selectOne(
-    whereValues: WhereCondition<TRecord>,
-  ): Promise<TRecord | null> {
-    return this.findOne(whereValues);
-  }
   // throws if > 1 row matches
   async findOne(whereValues: WhereCondition<TRecord>): Promise<TRecord | null> {
     return await this.find(whereValues).one();
@@ -1491,19 +1478,3 @@ function getTableSerializeValue(
       }
     : (_, value) => value;
 }
-
-module.exports = Object.assign(defineTables, {
-  default: defineTables,
-  anyOf,
-  allOf,
-  not,
-  inQueryResults,
-  lessThan,
-  jsonPath,
-  caseInsensitive,
-  greaterThan,
-  and,
-  or,
-  isNoResultFoundError,
-  isMultipleResultsFoundError,
-});

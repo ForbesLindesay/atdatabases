@@ -1,8 +1,8 @@
 import connect from '@databases/pg';
 import {getPgConfigSync} from '@databases/pg-config';
-import isInteractive = require('is-interactive');
+import isInteractive from 'is-interactive';
 import * as interrogator from 'interrogator';
-import chalk = require('chalk');
+import chalk from 'chalk';
 import {
   CommandLineInterfaceConfig,
   parameters,

@@ -8,6 +8,26 @@ const {
 
 const LICENSE = readFileSync(__dirname + '/../LICENSE.md');
 
+const PACKAGE_KEY_ORDER = [
+  `name`,
+  `version`,
+  `description`,
+  `type`,
+  `files`,
+  `exports`,
+  `bin`,
+  `types`,
+  `dependencies`,
+  `devDependencies`,
+  `peerDependencies`,
+  `engines`,
+  `scripts`,
+  `repository`,
+  `bugs`,
+  `homepage`,
+  `publishConfig`,
+  `license`,
+];
 const packageNames = [];
 const packageDocs = new Map([
   ['@databases/expo', 'https://www.atdatabases.org/docs/websql'],
@@ -25,20 +45,18 @@ readdirSync(__dirname + '/../packages').forEach((directory) => {
       LICENSE,
     );
   }
-  let pkg = {};
+  let before = '';
   try {
-    pkg = JSON.parse(
-      readFileSync(
-        __dirname + '/../packages/' + directory + '/package.json',
-        'utf8',
-      ),
+    before = readFileSync(
+      __dirname + '/../packages/' + directory + '/package.json',
+      'utf8',
     );
   } catch (ex) {
     if (ex.code !== 'ENOENT') {
       throw ex;
     }
   }
-  const before = JSON.stringify(pkg);
+  const pkg = JSON.parse(before || '{}');
   if (!pkg.name) {
     pkg.name = '@databases/' + directory;
   }
@@ -49,22 +67,27 @@ readdirSync(__dirname + '/../packages').forEach((directory) => {
   if (!pkg.description) {
     pkg.description = '';
   }
-  if (!pkg.main) {
-    pkg.main = './lib/index.js';
-  }
-  if (!pkg.types) {
-    pkg.types = './lib/index.d.ts';
-  }
+  pkg.type = 'module';
+  pkg.files = ['dist/'];
+  pkg.types = './dist/index.d.ts';
+  pkg.exports = pkg.exports ?? {
+    '.': './dist/index.js',
+    './package.json': './package.json',
+  };
   if (!pkg.dependencies) {
     pkg.dependencies = {};
   }
   if (!pkg.scripts) {
     pkg.scripts = {};
   }
-
-  pkg.repository =
-    'https://github.com/ForbesLindesay/atdatabases/tree/master/packages/' +
-    directory;
+  pkg.engines = {
+    node: '>= 20.20.1',
+  };
+  pkg.repository = {
+    type: 'git',
+    url: 'git+https://github.com/ForbesLindesay/atdatabases.git',
+    directory: `packages/${directory}`,
+  };
   pkg.bugs = 'https://github.com/ForbesLindesay/atdatabases/issues';
   if (existsSync(__dirname + '/../docs/' + directory + '.md')) {
     packageDocs.set(pkg.name, 'https://www.atdatabases.org/docs/' + directory);
@@ -85,11 +108,28 @@ readdirSync(__dirname + '/../packages').forEach((directory) => {
       access: 'public',
     };
   }
-  const after = JSON.stringify(pkg);
+  const after =
+    JSON.stringify(
+      Object.fromEntries(
+        Object.entries(pkg)
+          .filter(([name]) => name !== `main`)
+          .sort(([a], [b]) => {
+            const aIndex = PACKAGE_KEY_ORDER.indexOf(a);
+            const bIndex = PACKAGE_KEY_ORDER.indexOf(b);
+            if (aIndex === -1)
+              throw new Error(`Unknown package.json key: ${a}`);
+            if (bIndex === -1)
+              throw new Error(`Unknown package.json key: ${b}`);
+            return aIndex - bIndex;
+          }),
+      ),
+      null,
+      '  ',
+    ) + '\n';
   if (before !== after) {
     writeFileSync(
       __dirname + '/../packages/' + directory + '/package.json',
-      JSON.stringify(pkg, null, '  ') + '\n',
+      after,
     );
   }
   const deps = [
@@ -104,17 +144,15 @@ readdirSync(__dirname + '/../packages').forEach((directory) => {
         )}},`,
     )
     .join(``);
+  // "references": ${deps.length ? `[${deps}\n  ],` : `[],`}
   writeFileSync(
     __dirname + '/../packages/' + directory + '/tsconfig.json',
     `{
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "composite": true,
     "rootDir": "src",
     "outDir": "lib",
-    "tsBuildInfoFile": "lib/tsconfig.tsbuildinfo",
   },
-  "references": ${deps.length ? `[${deps}\n  ],` : `[],`}
 }
 `,
   );

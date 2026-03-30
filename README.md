@@ -73,7 +73,6 @@ Package Name | Version | Docs
 @databases/pg-schema-cli | [![NPM version](https://img.shields.io/npm/v/@databases/pg-schema-cli?style=for-the-badge)](https://www.npmjs.com/package/@databases/pg-schema-cli) | Not documented yet
 @databases/pg-schema-introspect | [![NPM version](https://img.shields.io/npm/v/@databases/pg-schema-introspect?style=for-the-badge)](https://www.npmjs.com/package/@databases/pg-schema-introspect) | Not documented yet
 @databases/pg-schema-print-types | [![NPM version](https://img.shields.io/npm/v/@databases/pg-schema-print-types?style=for-the-badge)](https://www.npmjs.com/package/@databases/pg-schema-print-types) | Not documented yet
-@databases/push-to-async-iterable | [![NPM version](https://img.shields.io/npm/v/@databases/push-to-async-iterable?style=for-the-badge)](https://www.npmjs.com/package/@databases/push-to-async-iterable) | Not documented yet
 @databases/shared | [![NPM version](https://img.shields.io/npm/v/@databases/shared?style=for-the-badge)](https://www.npmjs.com/package/@databases/shared) | Not documented yet
 @databases/shared-print-types | [![NPM version](https://img.shields.io/npm/v/@databases/shared-print-types?style=for-the-badge)](https://www.npmjs.com/package/@databases/shared-print-types) | Not documented yet
 @databases/websql-core | [![NPM version](https://img.shields.io/npm/v/@databases/websql-core?style=for-the-badge)](https://www.npmjs.com/package/@databases/websql-core) | Not documented yet

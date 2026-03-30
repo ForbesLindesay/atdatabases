@@ -64,7 +64,7 @@ export class ConfigurationBuilder {
       ...this._config,
     };
   }
-  set(paramName: string, paramValue: string) {
+  set(paramName: string, paramValue: string): void {
     switch (paramName) {
       // Non standard parameters
       case 'ssl':

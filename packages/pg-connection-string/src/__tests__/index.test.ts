@@ -1,6 +1,11 @@
+import {expect, test} from '@jest/globals';
 import {readFileSync, writeFileSync} from 'fs';
 import {inspect} from 'util';
 import parseConnectionString from '..';
+
+// @ts-expect-error
+const __dirname: string = import.meta.dirname;
+if (typeof __dirname !== 'string') throw new Error('Missing __dirname');
 
 const examples: (string | {connectionString: string | undefined; env: any})[] =
   [
