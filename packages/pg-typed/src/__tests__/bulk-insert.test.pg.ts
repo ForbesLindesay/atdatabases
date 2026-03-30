@@ -1,11 +1,12 @@
 import {expect, test, afterAll} from '@jest/globals';
 import connect, {sql} from '@databases/pg';
 import Schema from './__generated__';
+import databaseSchema from './__generated__/schema.json' with {type: 'json'}
 import defineTables, {anyOf} from '..';
 
 const {users} = defineTables<Schema>({
   schemaName: 'typed_queries_bulk_insert',
-  databaseSchema: require('./__generated__/schema.json'),
+  databaseSchema,
 });
 
 const db = connect({bigIntMode: 'number'});

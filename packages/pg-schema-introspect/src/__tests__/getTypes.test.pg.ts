@@ -1,10 +1,13 @@
 import {expect, jest, test, afterAll} from '@jest/globals';
 import connect, {sql, DataTypeID} from '@databases/pg';
+// @ts-expect-error
+import prettier from 'prettier';
+// @ts-expect-error
+import pgTypes from 'pg-types/lib/textParsers';
 import getTypes from '../getTypes';
-import TypeCateogry from '../enums/TypeCategory';
+import TypeCategory from '../enums/TypeCategory';
 import {readFileSync, writeFileSync} from 'fs';
 import TypeKind from '../enums/TypeKind';
-const prettier = require('prettier');
 
 // @ts-expect-error
 const __dirname: string = import.meta.dirname;
@@ -77,7 +80,7 @@ interface BuiltinTypesState {
     kind: TypeKind;
     typeID: number;
     typeName: string;
-    category: TypeCateogry;
+    category: TypeCategory;
     comment: string | null;
   }[];
   ambiguousTypes: {
@@ -87,7 +90,7 @@ interface BuiltinTypesState {
       kind: TypeKind;
       typeID: number;
       typeName: string;
-      category: TypeCateogry;
+      category: TypeCategory;
       comment: string | null;
     }[];
   };
@@ -201,8 +204,8 @@ test('get built in types', async () => {
   const groupedTypes = builtInTypesFromFile.reduce<{
     [key: string]: (typeof builtInTypesFromFile)[number][];
   }>((result, ty) => {
-    const category = Object.keys(TypeCateogry).find(
-      (c) => (TypeCateogry as any)[c] === ty.category,
+    const category = Object.keys(TypeCategory).find(
+      (c) => (TypeCategory as any)[c] === ty.category,
     )!;
     result[category] = (result[category] || []).concat([ty]);
     return result;
@@ -260,7 +263,6 @@ test('get built in types', async () => {
   PgDataTypeIDsEnum.push(``);
   await writeIfDifferent(PG_DATA_TYPE_FILENAME, PgDataTypeIDsEnum.join('\n'));
 
-  const pgTypes = require('pg-types/lib/textParsers');
   const mapping = new Map<number, unknown>();
   const reverseMapping = new Map<unknown, number[]>();
   pgTypes.init((id: number, parser: unknown) => {

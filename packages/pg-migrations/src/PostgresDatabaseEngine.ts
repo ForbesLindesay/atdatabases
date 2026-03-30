@@ -12,10 +12,14 @@ import {
   IDirectoryContext,
 } from '@databases/migrations-base';
 import type {ConnectionPool, Queryable, Transaction} from '@databases/pg';
+import {createJiti} from 'jiti';
+import pkg from '../package.json' with {type: 'json'};
 
-const packageVersion: string = JSON.parse(
-  readFileSync(fileURLToPath(import.meta.resolve('../package.json')), 'utf8'),
-).version;
+const jiti = createJiti(import.meta.url);
+
+const packageVersion: string = pkg.version;
+if (typeof packageVersion !== 'string')
+  throw new Error("Missing package version")
 
 export interface MigrationsConfig {
   migrationsDirectory: string;
@@ -226,10 +230,16 @@ export default class PostgresDatabaseEngine
       case '.js':
       case '.mjs':
       case '.jsx':
-        return getExport(await import(migrationFileName), migrationFileName);
+        return getExport(
+          await jiti.import(migrationFileName),
+          migrationFileName,
+        );
       case '.ts':
       case '.tsx':
-        return getExport(await import(migrationFileName), migrationFileName);
+        return getExport(
+          await jiti.import(migrationFileName),
+          migrationFileName,
+        );
       default:
         throw new Error(
           `Unsupported extension "${extname(migrationFileName)}"`,

@@ -14,10 +14,11 @@ import defineTables, {
   and,
 } from '..';
 import User from './__generated__/users';
+import databaseSchema from './__generated__/schema.json' with {type: 'json'}
 
 const {users, photos} = defineTables<Schema>({
   schemaName: 'typed_queries_advanced_tests',
-  databaseSchema: require('./__generated__/schema.json'),
+  databaseSchema,
 });
 
 let queries: {readonly text: string; readonly values: readonly any[]}[] = [];

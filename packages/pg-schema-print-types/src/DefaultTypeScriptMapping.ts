@@ -2,7 +2,7 @@
 
 import DataTypeID from '@databases/pg-data-type-id';
 
-const DefaultTypeScriptMapping: ReadonlyMap<DataTypeID, string> = new Map([
+const DefaultTypeScriptMapping = new Map([
   [DataTypeID._bool, 'Array<boolean | nul>'],
   [DataTypeID._bpchar, 'Array<string | null>'],
   [DataTypeID._bytea, 'Array<Buffer | null>'],
