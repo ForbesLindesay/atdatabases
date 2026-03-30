@@ -24,7 +24,7 @@
     "test:bigquery": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" TZ=Australia/Adelaide jest --selectProjects bigquery",
     "posttest": "wsrun --parallel --exclude-missing test",
     "watch:jest": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest --watch",
-    "clean": "rimraf packages/*/lib && rimraf packages/*/.last_build && rimraf packages/*/.cache && rimraf packages/*/build && rimraf packages/*/node_modules && rimraf node_modules",
+    "clean": "rimraf packages/*/dist && rimraf packages/*/.cache && rimraf packages/*/build && rimraf packages/*/node_modules && rimraf node_modules",
     "tslint": "tslint './packages/*/src/**/*.{js,jsx,ts,tsx}' -t verbose -p ."
   },
   "dependencies": {

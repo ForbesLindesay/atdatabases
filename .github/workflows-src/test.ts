@@ -43,10 +43,7 @@ export function buildCache(): Steps {
     use(`Enable Cache`, 'actions/cache@v4', {
       with: {
         path: [
-          ...packageNames.map((packageName) => `packages/${packageName}/lib`),
-          ...packageNames.map(
-            (packageName) => `packages/${packageName}/.last_build`,
-          ),
+          ...packageNames.map((packageName) => `packages/${packageName}/dist`),
         ].join('\n'),
         key: interpolate`v2-build-output-${hashFiles(
           `package-lock.json`,
@@ -82,9 +79,7 @@ export function buildJob(): Job<{output: string}> {
 
     run('node --run build');
 
-    const output = add(
-      saveOutput('build', ['packages/*/lib', 'packages/*/.last_build']),
-    );
+    const output = add(saveOutput('build', ['packages/*/dist']));
     return {output};
   };
 }
