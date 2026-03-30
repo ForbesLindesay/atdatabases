@@ -49,7 +49,7 @@ export default async function getTables(
         tableType: t.table_type,
         // Views always have a comment of "VIEW", but that isn't very helpful.
         comment:
-          t.table_type === TableType.BaseTable ? t.table_comment ?? '' : '',
+          t.table_type === TableType.BaseTable ? (t.table_comment ?? '') : '',
       }),
     )
     .map((t) => TableSchema.parse(t));

@@ -30,11 +30,10 @@ const DEFAULT_PG_PORT = 5432;
 const DEFAULT_PG_USER = process.env.PG_TEST_USER || config.test.pgUser;
 const DEFAULT_PG_DB = process.env.PG_TEST_DB || config.test.pgDb;
 
-export interface PgTestOptions
-  extends Omit<
-    WithContainerOptions,
-    'internalPort' | 'enableDebugInstructions' | 'testConnection'
-  > {
+export interface PgTestOptions extends Omit<
+  WithContainerOptions,
+  'internalPort' | 'enableDebugInstructions' | 'testConnection'
+> {
   pgUser: string;
   pgDb: string;
 }

@@ -1,6 +1,4 @@
 import {extname} from 'path';
-import {fileURLToPath} from 'url';
-import {readFileSync} from 'fs';
 import {
   DatabaseEngine,
   DatabaseEngineTransaction,
@@ -19,7 +17,7 @@ const jiti = createJiti(import.meta.url);
 
 const packageVersion: string = pkg.version;
 if (typeof packageVersion !== 'string')
-  throw new Error("Missing package version")
+  throw new Error('Missing package version');
 
 export interface MigrationsConfig {
   migrationsDirectory: string;
@@ -34,9 +32,7 @@ export interface MigrationsConfig {
 }
 
 export type Migration = (tx: Transaction) => Promise<void>;
-export default class PostgresDatabaseEngine
-  implements DatabaseEngine<Migration>
-{
+export default class PostgresDatabaseEngine implements DatabaseEngine<Migration> {
   private readonly _connection: ConnectionPool;
   private readonly _config: MigrationsConfig;
   public readonly directory: IDirectoryContext<Migration>;

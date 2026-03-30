@@ -32,11 +32,10 @@ const DEFAULT_MYSQL_PASSWORD =
   process.env.MYSQL_TEST_PASSWORD || config.test.mySqlPassword;
 const DEFAULT_MYSQL_DB = process.env.MYSQL_TEST_DB || config.test.mySqlDb;
 
-export interface MySqlTestOptions
-  extends Omit<
-    WithContainerOptions,
-    'internalPort' | 'enableDebugInstructions' | 'testConnection'
-  > {
+export interface MySqlTestOptions extends Omit<
+  WithContainerOptions,
+  'internalPort' | 'enableDebugInstructions' | 'testConnection'
+> {
   mysqlUser: string;
   mysqlPassword: string;
   mysqlDb: string;

@@ -129,9 +129,9 @@ export function greaterThan<T>(value: T): FieldQuery<T> {
   );
 }
 
-class SelectQueryImplementation<TRecord>
-  implements OrderedSelectQuery<TRecord>
-{
+class SelectQueryImplementation<
+  TRecord,
+> implements OrderedSelectQuery<TRecord> {
   public readonly orderByQueries: SQLQuery[] = [];
   public limitCount: number | undefined;
   private _selectFields: SQLQuery | undefined;
@@ -383,8 +383,7 @@ export interface MySqlTypedOptions {
 
   // TODO: easy aliasing of fields and easy parsing of fields using a similar API to the serializeValue?
 }
-export interface MySqlTypedOptionsWithDefaultConnection
-  extends MySqlTypedOptions {
+export interface MySqlTypedOptionsWithDefaultConnection extends MySqlTypedOptions {
   defaultConnection: Queryable;
 }
 

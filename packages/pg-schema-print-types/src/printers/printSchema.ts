@@ -64,10 +64,10 @@ export default function printSchemaWithContext(
         columns.length === 0
           ? `false`
           : columns.length === 1
-          ? `c === ${JSON.stringify(columns[0])}`
-          : `(${columns
-              .map((columnName) => `c === ${JSON.stringify(columnName)}`)
-              .join(' || ')})`;
+            ? `c === ${JSON.stringify(columns[0])}`
+            : `(${columns
+                .map((columnName) => `c === ${JSON.stringify(columnName)}`)
+                .join(' || ')})`;
       const tableConditions = tables.map(
         ({tableName, jsonAttributes}) =>
           `t === ${JSON.stringify(tableName)} && ${columnCondition(
@@ -123,7 +123,7 @@ export default function printSchemaWithContext(
                 typeName.substring(0, typeName.length - `[]`.length),
               ) ?? typeName.substring(0, typeName.length - `[]`.length)
             }[]`
-          : typeAliases.get(typeName) ?? typeName,
+          : (typeAliases.get(typeName) ?? typeName),
       ]),
   );
 

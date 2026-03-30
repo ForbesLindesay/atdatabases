@@ -28,9 +28,10 @@ function isRecoverableError(err: unknown) {
   return isSQLError(err) && RECOVERABLE_ERRORS.has(err.code);
 }
 
-export default class PgDriver
-  implements Driver<TransactionOptions, QueryStreamOptions>
-{
+export default class PgDriver implements Driver<
+  TransactionOptions,
+  QueryStreamOptions
+> {
   public readonly acquireLockTimeoutMilliseconds: number;
   public readonly client: PgClient;
   private readonly _handlers: EventHandlers;
@@ -177,10 +178,10 @@ export default class PgDriver
     const retrySerializationFailuresCount = !transactionOptions
       ? 0
       : transactionOptions.retrySerializationFailures === true
-      ? 10
-      : typeof transactionOptions.retrySerializationFailures === 'number'
-      ? transactionOptions.retrySerializationFailures
-      : 0;
+        ? 10
+        : typeof transactionOptions.retrySerializationFailures === 'number'
+          ? transactionOptions.retrySerializationFailures
+          : 0;
     if (isSQLError(ex) && ex.code === SQLErrorCode.SERIALIZATION_FAILURE) {
       if (retrySerializationFailuresCount > failureCount) {
         await new Promise((resolve) =>

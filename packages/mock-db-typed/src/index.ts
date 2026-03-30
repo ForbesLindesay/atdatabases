@@ -129,9 +129,9 @@ export function greaterThan<T>(value: T): FieldQuery<T> {
   );
 }
 
-class SelectQueryImplementation<TRecord>
-  implements OrderedSelectQuery<TRecord>
-{
+class SelectQueryImplementation<
+  TRecord,
+> implements OrderedSelectQuery<TRecord> {
   public readonly orderByQueries: SQLQuery[] = [];
   public limitCount: number | undefined;
   private _selectFields: SQLQuery | undefined;

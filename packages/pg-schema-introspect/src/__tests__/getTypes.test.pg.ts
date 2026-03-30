@@ -1,6 +1,5 @@
 import {expect, jest, test, afterAll} from '@jest/globals';
 import connect, {sql, DataTypeID} from '@databases/pg';
-// @ts-expect-error
 import prettier from 'prettier';
 // @ts-expect-error
 import pgTypes from 'pg-types/lib/textParsers';
@@ -57,7 +56,7 @@ const typeMappings: {[key in DataTypeID]?: string} = {
 async function writeIfDifferent(filename: string, content: string) {
   const prettierOptions = (await prettier.resolveConfig(filename)) || {};
   prettierOptions.parser = 'typescript';
-  const formatted = prettier.format(content, prettierOptions);
+  const formatted = await prettier.format(content, prettierOptions);
   let currentContent = '';
   try {
     currentContent = readFileSync(filename, 'utf8');
@@ -297,7 +296,7 @@ test('get built in types', async () => {
     ``,
     `import DataTypeID from '@databases/pg-data-type-id';`,
     ``,
-    `const DefaultTypeScriptMapping = new Map([`,
+    `const DefaultTypeScriptMapping: ReadonlyMap<DataTypeID, string> = new Map([`,
     ...typeMappingLines.sort(),
     `]);`,
     ``,

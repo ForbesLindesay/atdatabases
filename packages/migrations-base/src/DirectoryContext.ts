@@ -14,9 +14,9 @@ export interface IDirectoryContext<TMigration = unknown> {
   ): Promise<Result<TMigration, MigrationWithNoValidExport>>;
 }
 
-export default class DirectoryContext<TMigration>
-  implements IDirectoryContext<TMigration>
-{
+export default class DirectoryContext<
+  TMigration,
+> implements IDirectoryContext<TMigration> {
   private readonly _directory: string;
   private readonly _loadMigration: (
     filename: string,
@@ -36,9 +36,7 @@ export default class DirectoryContext<TMigration>
   async listFiles(): Promise<string[]> {
     return (
       await Promise.all(
-        (
-          await promises.readdir(this._directory)
-        ).map(async (file) => {
+        (await promises.readdir(this._directory)).map(async (file) => {
           return (await promises.stat(this._resolve(file))).isFile()
             ? file
             : null;

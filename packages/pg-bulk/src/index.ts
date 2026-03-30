@@ -9,19 +9,22 @@ export interface BulkOperationOptions<TColumnName extends ColumnName> {
   readonly serializeValue?: (columnName: string, value: unknown) => unknown;
 }
 
-export interface BulkInsertOptions<TColumnToInsert extends ColumnName>
-  extends BulkOperationOptions<TColumnToInsert> {
+export interface BulkInsertOptions<
+  TColumnToInsert extends ColumnName,
+> extends BulkOperationOptions<TColumnToInsert> {
   readonly columnsToInsert: readonly TColumnToInsert[];
   readonly records: readonly any[];
 }
 
-export interface BulkConditionOptions<TWhereColumn extends ColumnName>
-  extends BulkOperationOptions<TWhereColumn> {
+export interface BulkConditionOptions<
+  TWhereColumn extends ColumnName,
+> extends BulkOperationOptions<TWhereColumn> {
   readonly whereColumnNames: readonly TWhereColumn[];
   readonly whereConditions: readonly any[];
 }
-export interface BulkSelectOptions<TWhereColumn extends ColumnName>
-  extends BulkConditionOptions<TWhereColumn> {
+export interface BulkSelectOptions<
+  TWhereColumn extends ColumnName,
+> extends BulkConditionOptions<TWhereColumn> {
   readonly distinctColumnNames?: readonly string[];
   readonly selectColumnNames?: readonly string[];
   readonly orderBy?: readonly {
@@ -40,8 +43,9 @@ export interface BulkUpdateOptions<
   readonly updates: readonly {readonly where: any; readonly set: any}[];
 }
 
-export interface BulkDeleteOptions<TWhereColumn extends ColumnName>
-  extends BulkConditionOptions<TWhereColumn> {}
+export interface BulkDeleteOptions<
+  TWhereColumn extends ColumnName,
+> extends BulkConditionOptions<TWhereColumn> {}
 
 function tableId<TColumnName extends ColumnName>(
   options: BulkOperationOptions<TColumnName>,

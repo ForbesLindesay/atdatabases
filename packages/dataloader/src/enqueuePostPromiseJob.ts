@@ -60,12 +60,12 @@ const enqueuePostPromiseJob: () => Promise<void> =
           () => new Promise<void>((resolve) => process.nextTick(resolve)),
         )
     : setImmediate
-    ? () =>
-        resolvedPromise.then(
-          () => new Promise<void>((resolve) => setImmediate(resolve)),
-        )
-    : () =>
-        resolvedPromise.then(
-          () => new Promise<void>((resolve) => setTimeout(resolve, 0)),
-        );
+      ? () =>
+          resolvedPromise.then(
+            () => new Promise<void>((resolve) => setImmediate(resolve)),
+          )
+      : () =>
+          resolvedPromise.then(
+            () => new Promise<void>((resolve) => setTimeout(resolve, 0)),
+          );
 export default enqueuePostPromiseJob;

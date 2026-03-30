@@ -29,11 +29,10 @@ export interface WithContainerOptions {
   ) => Promise<boolean>;
 }
 
-export interface NormalizedOptions
-  extends Pick<
-    WithContainerOptions,
-    Exclude<keyof WithContainerOptions, 'defaultExternalPort'>
-  > {
+export interface NormalizedOptions extends Pick<
+  WithContainerOptions,
+  Exclude<keyof WithContainerOptions, 'defaultExternalPort'>
+> {
   detached: boolean;
   externalPort: number;
 }
