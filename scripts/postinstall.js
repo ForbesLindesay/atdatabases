@@ -70,7 +70,7 @@ readdirSync(__dirname + '/../packages').forEach((directory) => {
   pkg.type = 'module';
   pkg.files = ['dist/'];
   pkg.types = './dist/index.d.ts';
-  pkg.exports = {
+  pkg.exports = pkg.exports ?? {
     '.': './dist/index.js',
     './package.json': './package.json',
   };
