@@ -79,3 +79,20 @@ This method exists to mimic the API in `ConnectionPool.task`. It does not alloca
 ### `Transaction.addPostCommitStep(fn): Promise<void>`
 
 Queue `fn` to be called after the top-level transaction is successfully committed. If this transaction is nested inside another transaction, `fn` will not be called until the outer most transaction has been committed. This can be used to clear caches after updating values.
+
+
+### `Transaction.advisoryTxLock(key): Promise<void>`
+
+Obtain exclusive transaction level advisory lock for the given key. The lock is automatically released at the end of the current transaction and cannot be released explicitly.
+
+### `Transaction.advisoryTxLockShared(key): Promise<void>`
+
+Obtain shared transaction level advisory lock for the given key. The lock is automatically released at the end of the current transaction and cannot be released explicitly. An exclusive lock cannot be obtained for a given key while at least one transaction has a shared lock for that key.
+
+### `Transaction.tryAdvisoryTxLock(key): Promise<boolean>`
+
+Equivalent to `advisoryTxLock` except that it will not wait if the lock is not immediately available. It will return `true` if a lock was acquired, and `false` if the lock is currently held by a different transaction.
+
+### `Transaction.tryAdvisoryTxLockShared(key): Promise<boolean>`
+
+Equivalent to `advisoryTxLockShared` except that it will not wait if the lock is not immediately available. It will return `true` if a lock was acquired, and `false` if the lock is currently held by a different transaction.
