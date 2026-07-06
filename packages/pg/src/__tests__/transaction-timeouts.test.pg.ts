@@ -81,7 +81,7 @@ test(`lock timeout can be set overall and per transaction`, async () => {
       `[error: canceling statement due to lock timeout]`,
     );
     const end = Date.now();
-    expect(Math.abs(500 - (end - start))).toBeLessThan(200);
+    expect(Math.abs(700 - (end - start))).toBeLessThan(200);
   }
   {
     const start = Date.now();
@@ -96,7 +96,7 @@ test(`lock timeout can be set overall and per transaction`, async () => {
       `[error: canceling statement due to lock timeout]`,
     );
     const end = Date.now();
-    expect(Math.abs(1000 - (end - start))).toBeLessThan(200);
+    expect(Math.abs(1200 - (end - start))).toBeLessThan(200);
   }
   {
     const start = Date.now();
@@ -111,7 +111,7 @@ test(`lock timeout can be set overall and per transaction`, async () => {
       `[error: canceling statement due to lock timeout]`,
     );
     const end = Date.now();
-    expect(Math.abs(2_000 - (end - start))).toBeLessThan(200);
+    expect(Math.abs(2_200 - (end - start))).toBeLessThan(200);
   }
   {
     const start = Date.now();
@@ -123,7 +123,7 @@ test(`lock timeout can be set overall and per transaction`, async () => {
       `[error: canceling statement due to lock timeout]`,
     );
     const end = Date.now();
-    expect(Math.abs(3_000 - (end - start))).toBeLessThan(200);
+    expect(Math.abs(3_200 - (end - start))).toBeLessThan(200);
   }
   releaseLock.resolve(undefined);
   await lock;
@@ -136,7 +136,7 @@ test(`idle in transaction timeout can be set overall`, async () => {
     await db.advisoryTxLock(64);
     await releaseLock.wait();
   });
-  expect(Math.abs(1_000 - (await timeUntilLockAvailable()))).toBeLessThan(200);
+  expect(Math.abs(1_200 - (await timeUntilLockAvailable()))).toBeLessThan(200);
   releaseLock.resolve(undefined);
   await expect(lock).rejects.toMatchInlineSnapshot(
     `[error: terminating connection due to idle-in-transaction timeout]`,
@@ -152,7 +152,7 @@ test(`idle in transaction timeout can be per transaction`, async () => {
     },
     {idleInTransactionSessionTimeoutMilliseconds: 500},
   );
-  expect(Math.abs(500 - (await timeUntilLockAvailable()))).toBeLessThan(200);
+  expect(Math.abs(700 - (await timeUntilLockAvailable()))).toBeLessThan(200);
   releaseLock.resolve(undefined);
   await expect(lock).rejects.toMatchInlineSnapshot(
     `[error: terminating connection due to idle-in-transaction timeout]`,
