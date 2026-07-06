@@ -10,7 +10,7 @@ export default interface Driver<TTransactionOptions, TQueryStreamOptions> {
 
   beginTransaction(options: TTransactionOptions | undefined): Promise<void>;
   commitTransaction(): Promise<void>;
-  rollbackTransaction(): Promise<void>;
+  rollbackTransaction(err: Error): Promise<void>;
 
   createSavepoint(savepointName: string): Promise<void>;
   releaseSavepoint(savepointName: string): Promise<void>;

@@ -24,6 +24,7 @@ export default class MySqlDriver
   public readonly client: MySqlClient;
   private readonly _handlers: EventHandlers;
   private _endCalled = false;
+  private _canRecycleConnection = true;
   constructor(
     client: MySqlClient,
     handlers: EventHandlers,
@@ -70,6 +71,7 @@ export default class MySqlDriver
   }
 
   async canRecycleConnectionAfterError(_err: Error) {
+    if (!this._canRecycleConnection) return false;
     try {
       let timeout: any | undefined;
       const result: undefined | {1?: {rows?: {0?: {result?: number}}}} =
@@ -111,8 +113,13 @@ export default class MySqlDriver
   async commitTransaction() {
     await execute(this.client, `COMMIT`);
   }
-  async rollbackTransaction() {
-    await execute(this.client, `ROLLBACK`);
+  async rollbackTransaction(err: Error) {
+    try {
+      await execute(this.client, `ROLLBACK`);
+    } catch (ex) {
+      this._canRecycleConnection = false;
+      throw err;
+    }
   }
   async shouldRetryTransactionFailure(
     _transactionOptions: TransactionOptions | undefined,

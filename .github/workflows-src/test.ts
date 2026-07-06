@@ -148,11 +148,11 @@ export default createWorkflow(({setWorkflowName, addTrigger, addJob}) => {
       {
         node: INTEGRATION_TEST_NODE_VERSIONS,
         pg: [
-          // '9.6.19-alpine', -- unsupported by pg-migrations
-          '10.14-alpine',
-          '11.9-alpine',
-          '12.4-alpine',
-          '13.0-alpine',
+          '14.23-alpine',
+          '15.18-alpine',
+          '16.14-alpine',
+          '17.10-alpine',
+          '18.4-alpine',
         ],
       },
       {failFast: false},

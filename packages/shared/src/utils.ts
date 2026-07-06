@@ -51,9 +51,9 @@ export async function queryInternal<TTransactionOptions, TResult>(
       await driver.commitTransaction();
     }
     return results;
-  } catch (ex) {
+  } catch (ex: any) {
     if (hasTransaction) {
-      await driver.rollbackTransaction();
+      await driver.rollbackTransaction(ex);
     }
     throw ex;
   }
@@ -98,7 +98,7 @@ export async function txInternal<
       await driver.commitTransaction();
     } catch (ex: any) {
       await tx.dispose();
-      await driver.rollbackTransaction();
+      await driver.rollbackTransaction(ex);
       if (
         await driver.shouldRetryTransactionFailure(options, ex, ++failureCount)
       ) {

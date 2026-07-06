@@ -18,6 +18,8 @@ export interface PgOptions {
   statement_timeout?: number;
   query_timeout?: number;
   idle_in_transaction_session_timeout?: number;
+  lock_timeout?: number;
+  transaction_timeout?: number;
   application_name?: string;
   keepAlive: boolean;
   keepAliveInitialDelayMillis: number;

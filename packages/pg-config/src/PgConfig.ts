@@ -53,7 +53,7 @@ export interface TestConfig {
    * The docker image to use when testing
    * using @databases/pg-test
    *
-   * @default "postgres:10.6-alpine"
+   * @default "postgres:18.4-alpine"
    */
   image: string;
   /**
@@ -101,7 +101,7 @@ export const TestConfigSchema: ft.Runtype<TestConfig> = ft
   .Object({
     debug: withDefault(ft.Boolean, false),
     migrationsScript: ft.Union(ft.String, ft.Array(ft.String), ft.Undefined),
-    image: withDefault(ft.String, `postgres:10.6-alpine`),
+    image: withDefault(ft.String, `postgres:18.4-alpine`),
     containerName: withDefault(ft.String, `pg-test`),
     connectTimeoutSeconds: withDefault(integer({min: 0}), 20),
     port: withDefault(integer({min: 0, max: 65535}), undefined),

@@ -133,6 +133,26 @@ export interface ClientConfig {
   idleInTransactionSessionTimeoutMilliseconds?: number;
 
   /**
+   * Abort any statement that waits longer than the specified
+   * amount of time while attempting to acquire a lock on a
+   * table, index, row, or other database object. The time limit
+   * applies separately to each lock acquisition attempt.
+   *
+   * default is no timeout
+   */
+  lockTimeoutMilliseconds?: number;
+
+  /**
+   * Terminate any session that spans longer than the specified
+   * amount of time in a transaction. The limit applies both to
+   * explicit transactions (started with BEGIN) and to an implicitly
+   * started transaction corresponding to a single statement.
+   *
+   * default is no timeout
+   */
+  transactionTimeoutMilliseconds?: number;
+
+  /**
    * Passed to `new Connection(...)`,
    * defaults to false
    */
@@ -226,6 +246,8 @@ export default function createConnectionPool(
     statementTimeoutMilliseconds = 0,
     queryTimeoutMilliseconds = 0,
     idleInTransactionSessionTimeoutMilliseconds = 0,
+    lockTimeoutMilliseconds = 0,
+    transactionTimeoutMilliseconds = 0,
     queueTimeoutMilliseconds = Math.max(
       60_000,
       (connectionConfigObject.connectionTimeoutMilliseconds ?? 10_000) *
@@ -321,6 +343,10 @@ export default function createConnectionPool(
           idle_in_transaction_session_timeout:
             idleInTransactionSessionTimeoutMilliseconds,
         }
+      : {}),
+    ...(lockTimeoutMilliseconds ? {lock_timeout: lockTimeoutMilliseconds} : {}),
+    ...(transactionTimeoutMilliseconds
+      ? {transaction_timeout: transactionTimeoutMilliseconds}
       : {}),
     application_name:
       applicationName ||
