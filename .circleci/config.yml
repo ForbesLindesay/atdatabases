@@ -5,11 +5,12 @@ refs:
     docker:
       - image: node:24
         environment:
-          PG_URL: 'postgres://test-user@localhost:5432/test-db'
+          PG_URL: 'postgres://test-user:password@localhost:5432/test-db'
           MYSQL_URL: 'mysql://test-user:password@localhost:3306/test-db'
       - image: postgres:18.4-alpine
         environment:
           POSTGRES_USER: test-user
+          POSTGRES_PASSWORD: password
           POSTGRES_DB: test-db
       - image: mysql:8.0.23
         environment:
