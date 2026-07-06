@@ -41,9 +41,9 @@ function promise<T>() {
       resolve!(value);
     },
     result: () => result?.value,
-    wait() {
+    async wait() {
       hasSubscriber = true;
-      return promise;
+      return await promise;
     },
     isResolved: () => result !== undefined,
     hasSubscriber: () => hasSubscriber,
@@ -64,12 +64,12 @@ function testTransaction<T>(getLock: (db: Transaction) => Promise<T>) {
     hasLock: () => gotLock.isResolved() && !releaseLock.isResolved(),
     lockValue: () => gotLock.result(),
 
-    releaseLock: () => {
+    releaseLock: async () => {
       expect(releaseLock.isResolved()).toBe(false);
       activeLockCount--;
       releaseLock.resolve(undefined);
+      await tx;
     },
-    waitForRelease: () => tx,
   };
 }
 
@@ -85,7 +85,7 @@ for (const [keyName, key, otherKey] of [
     const txOther = testTransaction(async (db) => {
       await db.advisoryTxLock(otherKey);
     });
-    txOther.waitForLock();
+    await txOther.waitForLock();
 
     const txA = testTransaction(async (db) => {
       await db.advisoryTxLock(key);
@@ -98,15 +98,15 @@ for (const [keyName, key, otherKey] of [
     expect(txA.hasLock()).toBe(true);
     expect(txB.hasLock()).toBe(false);
 
-    txA.releaseLock();
+    await txA.releaseLock();
     await txB.waitForLock();
 
     expect(txA.hasLock()).toBe(false);
     expect(txB.hasLock()).toBe(true);
 
-    txB.releaseLock();
+    await txB.releaseLock();
 
-    txOther.releaseLock();
+    await txOther.releaseLock();
   });
 
   test(`exclusive locks wait for shared locks - ${keyName}`, async () => {
@@ -131,8 +131,8 @@ for (const [keyName, key, otherKey] of [
     expect(txB.hasLock()).toBe(true);
     expect(txC.hasLock()).toBe(false);
 
-    txA.releaseLock();
-    txB.releaseLock();
+    await txA.releaseLock();
+    await txB.releaseLock();
     await txC.waitForLock();
 
     const txD = testTransaction(async (db) => {
@@ -149,15 +149,15 @@ for (const [keyName, key, otherKey] of [
     expect(txD.hasLock()).toBe(false);
     expect(txE.hasLock()).toBe(false);
 
-    txC.releaseLock();
+    await txC.releaseLock();
     await Promise.all([txD.waitForLock(), txE.waitForLock()]);
     expect(txA.hasLock()).toBe(false);
     expect(txB.hasLock()).toBe(false);
     expect(txC.hasLock()).toBe(false);
     expect(txD.hasLock()).toBe(true);
     expect(txE.hasLock()).toBe(true);
-    txD.releaseLock();
-    txE.releaseLock();
+    await txD.releaseLock();
+    await txE.releaseLock();
   });
 
   test(`try does not wait - ${keyName}`, async () => {
@@ -168,13 +168,11 @@ for (const [keyName, key, otherKey] of [
     const txB = testTransaction(async (db) => await db.tryAdvisoryTxLock(key));
     expect(await txB.waitForLock()).toBe(false);
 
-    txA.releaseLock();
-    txB.releaseLock();
-    await txA.waitForRelease();
+    await Promise.all([txA.releaseLock(), txB.releaseLock()]);
 
     const txC = testTransaction(async (db) => await db.tryAdvisoryTxLock(key));
     expect(await txC.waitForLock()).toBe(true);
-    txC.releaseLock();
+    await txC.releaseLock();
   });
   test(`try does not wait shared - ${keyName}`, async () => {
     await prepare();
@@ -191,10 +189,11 @@ for (const [keyName, key, otherKey] of [
     const txC = testTransaction(async (db) => await db.tryAdvisoryTxLock(key));
     expect(await txC.waitForLock()).toBe(false);
 
-    txA.releaseLock();
-    txB.releaseLock();
-    txC.releaseLock();
-    await Promise.all([txA.waitForRelease(), txB.waitForRelease()]);
+    await Promise.all([
+      txA.releaseLock(),
+      txB.releaseLock(),
+      txC.releaseLock(),
+    ]);
 
     const txD = testTransaction(async (db) => await db.tryAdvisoryTxLock(key));
     expect(await txD.waitForLock()).toBe(true);
@@ -202,9 +201,7 @@ for (const [keyName, key, otherKey] of [
       async (db) => await db.tryAdvisoryTxLockShared(key),
     );
     expect(await txE.waitForLock()).toBe(false);
-    txD.releaseLock();
-    txE.releaseLock();
-    await txD.waitForRelease();
+    await Promise.all([txD.releaseLock(), txE.releaseLock()]);
 
     const txF = testTransaction(
       async (db) => await db.tryAdvisoryTxLockShared(key),
@@ -214,7 +211,7 @@ for (const [keyName, key, otherKey] of [
       async (db) => await db.tryAdvisoryTxLockShared(key),
     );
     expect(await txG.waitForLock()).toBe(true);
-    txF.releaseLock();
-    txG.releaseLock();
+    await txF.releaseLock();
+    await txG.releaseLock();
   });
 }
