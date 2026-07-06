@@ -51,10 +51,10 @@ Options:
 | `isolationLevel`                              | `IsolationLevel` | ✓        | Transaction Isolation Level                                                                                                      |
 | `readOnly`                                    | `boolean`        | ✓        | Sets transaction access mode                                                                                                     |
 | `deferrable`                                  | `boolean`        | ✓        | Sets the transaction deferrable mode. It is only used when `isolationLevel` is `IsolationLevel.serializable` and `readOnly=true` |
-| `idleInTransactionSessionTimeoutMilliseconds` | `number`         | ✓        | Overrides [the default setting for the connection](/docs/pg-options)                                                             |
-| `lockTimeoutMilliseconds`                     | `number`         | ✓        | Overrides [the default setting for the connection](/docs/pg-options)                                                             |
-| `statementTimeoutMilliseconds`                | `number`         | ✓        | Overrides [the default setting for the connection](/docs/pg-options)                                                             |
-| `transactionTimeoutMilliseconds`              | `number`         | ✓        | Overrides [the default setting for the connection](/docs/pg-options)                                                             |
+| `idleInTransactionSessionTimeoutMilliseconds` | `number`         | ✓        | Overrides [the default setting for the connection]pg-options.md                                                                  |
+| `lockTimeoutMilliseconds`                     | `number`         | ✓        | Overrides [the default setting for the connection]pg-options.md                                                                  |
+| `statementTimeoutMilliseconds`                | `number`         | ✓        | Overrides [the default setting for the connection]pg-options.md                                                                  |
+| `transactionTimeoutMilliseconds`              | `number`         | ✓        | Overrides [the default setting for the connection]pg-options.md                                                                  |
 
 ### `ConnectionPool.dispose(): Promise<void>`
 
