@@ -124,7 +124,7 @@ test('get built in types', async () => {
   const oldState: BuiltinTypesState = JSON.parse(
     readFileSync(`${__dirname}/builtinTypes.json`, 'utf8'),
   );
-  let {types: builtInTypesFromFile} = oldState;
+  const {types: builtInTypesFromFile} = oldState;
   // const {ambiguousTypes} = oldState;
   // for (const typeFromPg of builtInTypesFromPg) {
   //   const ambiguousType = ambiguousTypes[typeFromPg.typeName] || [];
