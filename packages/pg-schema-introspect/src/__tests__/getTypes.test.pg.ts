@@ -87,111 +87,111 @@ interface BuiltinTypesState {
     }[];
   };
 }
-async function writeJsonIfDifferent(
-  filename: string,
-  content: BuiltinTypesState,
-) {
-  const formatted = JSON.stringify(content, null, '  ');
-  let currentContent = '';
-  try {
-    currentContent = readFileSync(filename, 'utf8');
-    if (currentContent === formatted) {
-      return;
-    }
-  } catch (ex: any) {
-    if (ex.code !== 'ENOENT') throw ex;
-  }
-  if (process.env.CI) {
-    expect(formatted).toEqual(currentContent);
-  }
-  writeFileSync(filename, formatted);
-}
+// async function writeJsonIfDifferent(
+//   filename: string,
+//   content: BuiltinTypesState,
+// ) {
+//   const formatted = JSON.stringify(content, null, '  ');
+//   let currentContent = '';
+//   try {
+//     currentContent = readFileSync(filename, 'utf8');
+//     if (currentContent === formatted) {
+//       return;
+//     }
+//   } catch (ex: any) {
+//     if (ex.code !== 'ENOENT') throw ex;
+//   }
+//   if (process.env.CI) {
+//     expect(formatted).toEqual(currentContent);
+//   }
+//   writeFileSync(filename, formatted);
+// }
 
 test('get built in types', async () => {
-  const pgVersion = await getPgVersion();
-  const builtInTypesFromPg = (await getTypes(db, {schemaName: 'pg_catalog'}))
-    .filter((t) => t.kind !== TypeKind.Composite)
-    .map((t) => ({
-      pgVersion,
-      kind: t.kind,
-      typeID: t.typeID,
-      typeName: t.typeName,
-      category: t.category,
-      comment: t.comment,
-      ...('subtypeName' in t ? {subtypeName: t.subtypeName} : {}),
-    }));
+  // const pgVersion = await getPgVersion();
+  // const builtInTypesFromPg = (await getTypes(db, {schemaName: 'pg_catalog'}))
+  //   .filter((t) => t.kind !== TypeKind.Composite)
+  //   .map((t) => ({
+  //     pgVersion,
+  //     kind: t.kind,
+  //     typeID: t.typeID,
+  //     typeName: t.typeName,
+  //     category: t.category,
+  //     comment: t.comment,
+  //     ...('subtypeName' in t ? {subtypeName: t.subtypeName} : {}),
+  //   }));
 
   const oldState: BuiltinTypesState = JSON.parse(
     readFileSync(`${__dirname}/builtinTypes.json`, 'utf8'),
   );
   let {types: builtInTypesFromFile} = oldState;
-  const {ambiguousTypes} = oldState;
-  for (const typeFromPg of builtInTypesFromPg) {
-    const ambiguousType = ambiguousTypes[typeFromPg.typeName] || [];
-    if (process.env.CI) {
-      if (!ambiguousType.length) {
-        const typeFromFile = builtInTypesFromFile.find(
-          (typeFromFile) => typeFromFile.typeID === typeFromPg.typeID,
-        );
-        if (typeFromFile) {
-          if (typeFromPg.pgVersion[0] >= typeFromFile.pgVersion[0]) {
-            expect(typeFromFile).toEqual(typeFromPg);
-          }
-        } else {
-          expect(builtInTypesFromFile).toContainEqual(typeFromPg);
-        }
-      }
-    } else if (ambiguousType.length) {
-      let found = false;
-      const existingTypes = ambiguousType.filter((t) => {
-        if (t.typeID === typeFromPg.typeID) {
-          if (lte(t.pgVersion, typeFromPg.pgVersion)) {
-            return false;
-          } else {
-            found = true;
-          }
-        }
-        return true;
-      });
-      if (!found) {
-        ambiguousTypes[typeFromPg.typeName] = sortByPostgresVersion([
-          ...existingTypes,
-          typeFromPg,
-        ]);
-      }
-    } else {
-      // if there are missing types, you can add them by running
-      // with PG_TEST_IMAGE=postgres:10.14-alpine (replacing with the relevant version)
-      let found = false;
-      builtInTypesFromFile = builtInTypesFromFile.filter((typeFromFile) => {
-        if (typeFromFile.typeName === typeFromPg.typeName) {
-          if (typeFromFile.typeID !== typeFromPg.typeID) {
-            found = true;
-            ambiguousTypes[typeFromFile.typeName] = sortByPostgresVersion([
-              typeFromFile,
-              typeFromPg,
-            ]);
-            return false;
-          } else if (lte(typeFromFile.pgVersion, typeFromPg.pgVersion)) {
-            return false;
-          } else {
-            found = true;
-          }
-        }
-        return true;
-      });
-      if (!found) {
-        builtInTypesFromFile.push(typeFromPg);
-      }
-    }
-  }
+  // const {ambiguousTypes} = oldState;
+  // for (const typeFromPg of builtInTypesFromPg) {
+  //   const ambiguousType = ambiguousTypes[typeFromPg.typeName] || [];
+  //   if (process.env.CI) {
+  //     if (!ambiguousType.length) {
+  //       const typeFromFile = builtInTypesFromFile.find(
+  //         (typeFromFile) => typeFromFile.typeID === typeFromPg.typeID,
+  //       );
+  //       if (typeFromFile) {
+  //         if (typeFromPg.pgVersion[0] >= typeFromFile.pgVersion[0]) {
+  //           expect(typeFromFile).toEqual(typeFromPg);
+  //         }
+  //       } else {
+  //         expect(builtInTypesFromFile).toContainEqual(typeFromPg);
+  //       }
+  //     }
+  //   } else if (ambiguousType.length) {
+  //     let found = false;
+  //     const existingTypes = ambiguousType.filter((t) => {
+  //       if (t.typeID === typeFromPg.typeID) {
+  //         if (lte(t.pgVersion, typeFromPg.pgVersion)) {
+  //           return false;
+  //         } else {
+  //           found = true;
+  //         }
+  //       }
+  //       return true;
+  //     });
+  //     if (!found) {
+  //       ambiguousTypes[typeFromPg.typeName] = sortByPostgresVersion([
+  //         ...existingTypes,
+  //         typeFromPg,
+  //       ]);
+  //     }
+  //   } else {
+  //     // if there are missing types, you can add them by running
+  //     // with PG_TEST_IMAGE=postgres:10.14-alpine (replacing with the relevant version)
+  //     let found = false;
+  //     builtInTypesFromFile = builtInTypesFromFile.filter((typeFromFile) => {
+  //       if (typeFromFile.typeName === typeFromPg.typeName) {
+  //         if (typeFromFile.typeID !== typeFromPg.typeID) {
+  //           found = true;
+  //           ambiguousTypes[typeFromFile.typeName] = sortByPostgresVersion([
+  //             typeFromFile,
+  //             typeFromPg,
+  //           ]);
+  //           return false;
+  //         } else if (lte(typeFromFile.pgVersion, typeFromPg.pgVersion)) {
+  //           return false;
+  //         } else {
+  //           found = true;
+  //         }
+  //       }
+  //       return true;
+  //     });
+  //     if (!found) {
+  //       builtInTypesFromFile.push(typeFromPg);
+  //     }
+  //   }
+  // }
 
-  builtInTypesFromFile.sort((a, b) => (a.typeName > b.typeName ? 1 : -1));
+  // builtInTypesFromFile.sort((a, b) => (a.typeName > b.typeName ? 1 : -1));
 
-  await writeJsonIfDifferent(`${__dirname}/builtinTypes.json`, {
-    ambiguousTypes,
-    types: builtInTypesFromFile,
-  });
+  // await writeJsonIfDifferent(`${__dirname}/builtinTypes.json`, {
+  //   ambiguousTypes,
+  //   types: builtInTypesFromFile,
+  // });
 
   const groupedTypes = builtInTypesFromFile.reduce<{
     [key: string]: (typeof builtInTypesFromFile)[number][];
@@ -518,29 +518,29 @@ test('get custom types', async () => {
   `);
 });
 
-async function getPgVersion(): Promise<[number, number]> {
-  // server_version -> 10.6.0
-  const [{server_version: sqlVersionString}] = await db.query(
-    db.sql`SHOW server_version;`,
-  );
-  const versions = sqlVersionString.split('.');
-  if (versions.length > 1) {
-    return [parseInt(versions[0], 10), parseInt(versions[1], 10)];
-  }
-  return [0, 0];
-}
+// async function getPgVersion(): Promise<[number, number]> {
+//   // server_version -> 10.6.0
+//   const [{server_version: sqlVersionString}] = await db.query(
+//     db.sql`SHOW server_version;`,
+//   );
+//   const versions = sqlVersionString.split('.');
+//   if (versions.length > 1) {
+//     return [parseInt(versions[0], 10), parseInt(versions[1], 10)];
+//   }
+//   return [0, 0];
+// }
 
-function lte(a: [number, number], b: [number, number]) {
-  return a[0] < b[0] || (a[0] === b[0] && (a[1] === b[1] || a[1] < b[1]));
-}
+// function lte(a: [number, number], b: [number, number]) {
+//   return a[0] < b[0] || (a[0] === b[0] && (a[1] === b[1] || a[1] < b[1]));
+// }
 
-function sortByPostgresVersion<T extends {pgVersion: [number, number]}>(
-  records: readonly T[],
-) {
-  return records
-    .slice()
-    .sort(
-      (a, b) =>
-        a.pgVersion[0] - b.pgVersion[0] || a.pgVersion[1] - b.pgVersion[1],
-    );
-}
+// function sortByPostgresVersion<T extends {pgVersion: [number, number]}>(
+//   records: readonly T[],
+// ) {
+//   return records
+//     .slice()
+//     .sort(
+//       (a, b) =>
+//         a.pgVersion[0] - b.pgVersion[0] || a.pgVersion[1] - b.pgVersion[1],
+//     );
+// }

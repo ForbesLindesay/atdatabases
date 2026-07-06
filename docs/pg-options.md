@@ -16,9 +16,11 @@ sidebar_label: Connection Options
 - `applicationName`/`fallbackApplicationName` (`string`) - useful for debugging/analytics on the database usage
 - `poolSize` (`number`, default: `10`) - the maximum number of connections in the connection pool
 - `maxUses` (`number`, default: `Infinity`) - the maximum number of times a connection can be returned from the connection pool before being closed and replaced with a fresh connection
-- `statementTimeoutMilliseconds` (default: no timeout) - number of milliseconds before a statement in query will time out
-- `queryTimeoutMilliseconds` (default: no timeout) - number of milliseconds before a query call will timeout
-- `idleInTransactionSessionTimeoutMilliseconds` (`number`, default: no timeout) - number of milliseconds before terminating any session with an open idle transaction
+- `statementTimeoutMilliseconds` (default: no timeout) - number of milliseconds before a statement sent to Postgres will timeout in the Postgres database engine.
+- `queryTimeoutMilliseconds` (default: no timeout) - number of milliseconds before a query call will timeout in the node.js process. Postgres may still continue running the query after this timeout expires.
+- `idleInTransactionSessionTimeoutMilliseconds` (`number`, default: no timeout) - number of milliseconds before terminating any session with an open idle transaction in Postgres.
+- `lockTimeoutMilliseconds` (`number`, default: no timeout) - number of milliseconds Postgres will wait when attempting to acquire a lock before timing out.
+- `transactionTimeoutMilliseconds` (`number`, default: no timeout) - number of milliseconds before Postgres will timeout and abort any transactions.
 - `idleTimeoutMilliseconds` (`number`, default: `30_000`ms) - max milliseconds a client can go unused before it is removed from the pool and destroyed
 - `queueTimeoutMilliseconds` (`number`, default: `60_000`ms) - number of milliseconds to wait for a connection from the connection pool before throwing a timeout error
 - `acquireLockTimeoutMilliseconds` (`number`, default: `60_000`ms) - Number of milliseconds to wait for a lock on a connection/transaction. This is helpful for catching cases where you have accidentally attempted to query a connection within a transaction that is on that connection, or attempted to query an outer transaction within a nested transaction

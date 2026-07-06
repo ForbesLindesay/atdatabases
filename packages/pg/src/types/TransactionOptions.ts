@@ -29,4 +29,9 @@ export default interface TransactionOptions {
   deferrable?: boolean;
 
   retrySerializationFailures?: boolean | number;
+
+  statementTimeoutMilliseconds?: number;
+  transactionTimeoutMilliseconds?: number;
+  lockTimeoutMilliseconds?: number;
+  idleInTransactionSessionTimeoutMilliseconds?: number;
 }

@@ -64,7 +64,7 @@ export default class PgDriver
       if (this._idleErrorEventHandler) {
         this._idleErrorEventHandler(err);
       }
-    } else {
+    } else if (!this._idleError) {
       this._idleError = err;
     }
 
@@ -138,6 +138,26 @@ export default class PgDriver
       } else {
         await execute(this.client, `BEGIN`);
       }
+      await setTransactionSetting(
+        this.client,
+        `statement_timeout`,
+        options?.statementTimeoutMilliseconds,
+      );
+      await setTransactionSetting(
+        this.client,
+        `transaction_timeout`,
+        options?.transactionTimeoutMilliseconds,
+      );
+      await setTransactionSetting(
+        this.client,
+        `lock_timeout`,
+        options?.lockTimeoutMilliseconds,
+      );
+      await setTransactionSetting(
+        this.client,
+        `idle_in_transaction_session_timeout`,
+        options?.idleInTransactionSessionTimeoutMilliseconds,
+      );
     } catch (ex) {
       this._canRecycleConnection = false;
       throw ex;
@@ -160,13 +180,13 @@ export default class PgDriver
       throw err;
     }
   }
-  async rollbackTransaction() {
+  async rollbackTransaction(err: Error) {
     try {
       this._throwPendingIdleError();
       await execute(this.client, `ROLLBACK`);
     } catch (ex) {
       this._canRecycleConnection = false;
-      throw ex;
+      throw err;
     }
   }
   async shouldRetryTransactionFailure(
@@ -395,6 +415,19 @@ export default class PgDriver
   }
 }
 
+async function setTransactionSetting(
+  client: PgClient,
+  name: string,
+  value: number | undefined,
+) {
+  if (value !== undefined) {
+    // is_local=TRUE ensures setting only applies to current transaction
+    await execute(client, {
+      text: `SELECT set_config($1, $2, TRUE);`,
+      values: [name, value.toString()],
+    });
+  }
+}
 async function execute(client: PgClient, query: unknown): Promise<void> {
   try {
     await client.query(query);

@@ -46,11 +46,15 @@ const result = await db.tx(async (db) => {
 
 Options:
 
-| Name             | Type             | Optional | Description                                                                                                                      |
-| ---------------- | ---------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `isolationLevel` | `IsolationLevel` | ✓        | Transaction Isolation Level                                                                                                      |
-| `readOnly`       | `boolean`        | ✓        | Sets transaction access mode                                                                                                     |
-| `deferrable`     | `boolean`        | ✓        | Sets the transaction deferrable mode. It is only used when `isolationLevel` is `IsolationLevel.serializable` and `readOnly=true` |
+| Name                                          | Type             | Optional | Description                                                                                                                      |
+| --------------------------------------------- | ---------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `isolationLevel`                              | `IsolationLevel` | ✓        | Transaction Isolation Level                                                                                                      |
+| `readOnly`                                    | `boolean`        | ✓        | Sets transaction access mode                                                                                                     |
+| `deferrable`                                  | `boolean`        | ✓        | Sets the transaction deferrable mode. It is only used when `isolationLevel` is `IsolationLevel.serializable` and `readOnly=true` |
+| `idleInTransactionSessionTimeoutMilliseconds` | `number`         | ✓        | Overrides [the default setting for the connection](/docs/pg-options)                                                             |
+| `lockTimeoutMilliseconds`                     | `number`         | ✓        | Overrides [the default setting for the connection](/docs/pg-options)                                                             |
+| `statementTimeoutMilliseconds`                | `number`         | ✓        | Overrides [the default setting for the connection](/docs/pg-options)                                                             |
+| `transactionTimeoutMilliseconds`              | `number`         | ✓        | Overrides [the default setting for the connection](/docs/pg-options)                                                             |
 
 ### `ConnectionPool.dispose(): Promise<void>`
 
