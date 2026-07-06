@@ -3,6 +3,7 @@ import {QueryableType} from '@databases/shared';
 import {SQL, SQLQuery} from '@databases/sql';
 import AbortSignal from './AbortSignal';
 import TransactionOptions from './TransactionOptions';
+import AdvisoryLockKey from './AdvisoryLockKey';
 
 export default interface Queryable {
   readonly type: QueryableType;
@@ -35,6 +36,38 @@ export default interface Queryable {
  */
 export interface Transaction extends Queryable {
   readonly type: QueryableType.Transaction;
+
+  /**
+   * Obtain exclusive transaction level advisory lock for
+   * the given key. The lock is automatically released at
+   * the end of the current transaction and cannot be
+   * released explicitly.
+   */
+  advisoryTxLock(key: AdvisoryLockKey): Promise<void>;
+  /**
+   * Obtain shared transaction level advisory lock for the
+   * given key. The lock is automatically released at the
+   * end of the current transaction and cannot be released
+   * explicitly. An exclusive lock cannot be obtained for
+   * a given key while at least one transaction has a shared
+   * lock for that key.
+   */
+  advisoryTxLockShared(key: AdvisoryLockKey): Promise<void>;
+  /**
+   * Equivalent to `advisoryTxLock` except that it will not
+   * wait if the lock is not immediately available. It will
+   * return `true` if a lock was acquired, and `false` if
+   * the lock is currently held by a different transaction.
+   */
+  tryAdvisoryTxLock(key: AdvisoryLockKey): Promise<boolean>;
+  /**
+   * Equivalent to `advisoryTxLockShared` except that it will not
+   * wait if the lock is not immediately available. It will
+   * return `true` if a lock was acquired, and `false` if
+   * the lock is currently held by a different transaction.
+   */
+  tryAdvisoryTxLockShared(key: AdvisoryLockKey): Promise<boolean>;
+
   task<T>(fn: (connection: Transaction) => Promise<T>): Promise<T>;
   tx<T>(fn: (connection: Transaction) => Promise<T>): Promise<T>;
 }
