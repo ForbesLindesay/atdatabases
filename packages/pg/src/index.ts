@@ -254,10 +254,10 @@ export default function createConnectionPool(
         (Array.isArray(host)
           ? host.length
           : host === undefined
-          ? 1
-          : parsedConnectionString.host.length
-          ? parsedConnectionString.host.length
-          : 1) *
+            ? 1
+            : parsedConnectionString.host.length
+              ? parsedConnectionString.host.length
+              : 1) *
         2,
     ),
     acquireLockTimeoutMilliseconds = 60_000,
@@ -362,8 +362,8 @@ export default function createConnectionPool(
         portList.length === 0
           ? undefined
           : portList.length === 1
-          ? portList[0]
-          : portList[i];
+            ? portList[0]
+            : portList[i];
       return {
         host,
         port: port ?? undefined,

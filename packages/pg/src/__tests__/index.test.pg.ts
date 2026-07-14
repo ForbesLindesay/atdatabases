@@ -141,8 +141,8 @@ test('json', async () => {
   ): Promise<{id: string; val: unknown}> {
     const [result] = await db.query(sql`
       INSERT INTO json_test.json (id, val) VALUES (${id}, ${JSON.stringify(
-      val,
-    )})
+        val,
+      )})
       ON CONFLICT (id) DO UPDATE SET val=EXCLUDED.val
       RETURNING *;
     `);
