@@ -59,6 +59,7 @@ export type UnorderedSelectQueryMethods =
 export type SelectQueryMethods =
   | UnorderedSelectQueryMethods
   | 'first'
+  | 'offset'
   | 'limit';
 export interface SelectQuery<TRecord, TMethods extends SelectQueryMethods> {
   toSql(): SQLQuery;
@@ -68,6 +69,20 @@ export interface SelectQuery<TRecord, TMethods extends SelectQueryMethods> {
   all(): Promise<TRecord[]>;
   first(): Promise<TRecord | null>;
   limit(count: number): Promise<TRecord[]>;
+  offset(
+    count: number,
+  ): PartialSelectQuery<
+    TRecord,
+    Exclude<
+      TMethods,
+      | 'distinct'
+      | 'orderByAscDistinct'
+      | 'orderByDescDistinct'
+      | 'orderByAsc'
+      | 'orderByDesc'
+      | 'offset'
+    >
+  >;
 
   select<
     TKeys extends readonly [keyof TRecord, ...(readonly (keyof TRecord)[])],
@@ -94,13 +109,13 @@ export interface SelectQuery<TRecord, TMethods extends SelectQueryMethods> {
     key: keyof TRecord,
   ): PartialSelectQuery<
     TRecord,
-    Exclude<TMethods, 'distinct'> | 'first' | 'limit'
+    Exclude<TMethods, 'distinct'> | 'first' | 'limit' | 'offset'
   >;
   orderByDescDistinct(
     key: keyof TRecord,
   ): PartialSelectQuery<
     TRecord,
-    Exclude<TMethods, 'distinct'> | 'first' | 'limit'
+    Exclude<TMethods, 'distinct'> | 'first' | 'limit' | 'offset'
   >;
   orderByAsc(
     key: keyof TRecord,
@@ -112,6 +127,7 @@ export interface SelectQuery<TRecord, TMethods extends SelectQueryMethods> {
       >
     | 'first'
     | 'limit'
+    | 'offset'
   >;
   orderByDesc(
     key: keyof TRecord,
@@ -123,6 +139,7 @@ export interface SelectQuery<TRecord, TMethods extends SelectQueryMethods> {
       >
     | 'first'
     | 'limit'
+    | 'offset'
   >;
   andWhere(condition: WhereCondition<TRecord>): this;
 }
@@ -494,6 +511,7 @@ class SelectQueryImplementation<TRecord>
     direction: 'ASC' | 'DESC';
   }[] = [];
   private _limitCount: number | undefined;
+  private _offsetCount: number | undefined;
   private _selectFields: readonly string[] | undefined;
   private readonly _whereAnd: WhereCondition<TRecord>[] = [];
 
@@ -525,6 +543,7 @@ class SelectQueryImplementation<TRecord>
     const selectFields = this._selectFields;
     const orderByQueries = this._orderByQueries;
     const limitCount = this._limitCount;
+    const offsetCount = this._offsetCount;
     const distinctColumnNames = this._distinctColumnNames;
 
     const whereCondition =
@@ -578,6 +597,7 @@ class SelectQueryImplementation<TRecord>
             )}`
           : null,
         limitCount ? sql`LIMIT ${limitCount}` : null,
+        offsetCount ? sql`OFFSET ${offsetCount}` : null,
       ].filter(<T>(v: T): v is Exclude<T, null> => v !== null),
       sql` `,
     );
@@ -660,6 +680,18 @@ class SelectQueryImplementation<TRecord>
     }
     this._limitCount = count;
     return await this._getResults('limit');
+  }
+  public offset(offset: number) {
+    if (!this._orderByQueries.length) {
+      throw new Error(
+        'You cannot call "offset" until after you call "orderByAsc" or "orderByDesc".',
+      );
+    }
+    if (this.offsetCount !== undefined) {
+      throw new Error('You cannot call "offset" multiple times');
+    }
+    this._offsetCount = offset;
+    return this;
   }
   public async first() {
     if (!this._orderByQueries.length) {
