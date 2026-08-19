@@ -28,7 +28,7 @@ function keySerialization(rawString: string) {
   // URL encode the value e.g. given /param first, that SHOULD become %2Fparam%20first
   const encoded = encodeURIComponent(rawString);
   // Escape meta-characters within the raw value; a single quote ' becomes \'
-  const escaped = encoded.replace(/'/g, (char) => `\\${char}`);
+  const escaped = encoded.replace(/'/g, `\\'`);
   return escaped;
 }
 function keyDeserialization(rawString: string) {
@@ -45,7 +45,7 @@ function valueSerialization(rawString: string) {
   // URL encode the value e.g. given /param first, that SHOULD become %2Fparam%20first
   const encoded = encodeURIComponent(removeInvalidUnicode(rawString));
   // Escape meta-characters within the raw value; a single quote ' becomes \'
-  const escaped = encoded.replace(/'/g, (char) => `\\${char}`);
+  const escaped = encoded.replace(/'/g, `\\'`);
   // SQL escape the value by placing it within two single quotes e.g.
   // DROP should become 'DROP'
   // FOO 'BAR should become 'FOO%20\'BAR'
