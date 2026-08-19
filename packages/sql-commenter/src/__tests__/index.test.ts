@@ -1,4 +1,4 @@
-import sql, {FormatConfig} from '@databases/sql/web';
+import sql, {FormatConfig, SQLQuery} from '@databases/sql/web';
 import {addContext, extractContext, parseComment, serializeComment} from '../';
 
 const formatConfig: FormatConfig = {
@@ -7,7 +7,7 @@ const formatConfig: FormatConfig = {
   formatValue: (value) => ({placeholder: '?', value}),
 };
 
-function text(q: ReturnType<typeof sql>) {
+function text(q: SQLQuery) {
   return q.format(formatConfig).text;
 }
 
@@ -64,6 +64,40 @@ describe('serializeComment', () => {
     expect(() => serializeComment({action: 42 as unknown as string})).toThrow(
       `Values for sql-commenter must be strings`,
     );
+  });
+
+  test('does not throw for an unpaired high surrogate in a value', () => {
+    // `\uD800` on its own is a valid JS/JSON string (JSON.parse happily
+    // produces it from `"\ud800"`), but `encodeURIComponent` throws a
+    // `URIError` on it - it must be sanitized before encoding, rather than
+    // allowing attacker-controlled JSON to crash `prepareQuery`.
+    expect(() => serializeComment({action: '\uD800'})).not.toThrow();
+    expect(serializeComment({action: '\uD800'})).toBe(`/*action='%EF%BF%BD'*/`);
+  });
+
+  test('does not throw for an unpaired low surrogate in a value', () => {
+    expect(() => serializeComment({action: '\uDC00'})).not.toThrow();
+    expect(serializeComment({action: '\uDC00'})).toBe(`/*action='%EF%BF%BD'*/`);
+  });
+
+  test('does not throw for an unpaired surrogate embedded in a larger value', () => {
+    expect(serializeComment({action: `before\uD800after`})).toBe(
+      `/*action='before%EF%BF%BDafter'*/`,
+    );
+  });
+
+  test('throws for an unpaired surrogate in a key, rather than sanitizing it', () => {
+    // Unlike values, keys are not sanitized - silently mangling a key could
+    // make two distinct keys collide, so this throws instead. Callers that
+    // accept untrusted keys should validate them first (e.g. with
+    // `isValidUnicode` from `@databases/validate-unicode`).
+    expect(() => serializeComment({[`\uD800`]: 'value'})).toThrow(
+      /unmatched surrogate pairs/,
+    );
+  });
+
+  test('leaves valid surrogate pairs (e.g. emoji) untouched', () => {
+    expect(serializeComment({action: '😀'})).toBe(`/*action='%F0%9F%98%80'*/`);
   });
 });
 
