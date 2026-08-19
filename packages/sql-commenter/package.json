@@ -4,7 +4,9 @@
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
-  "dependencies": {},
+  "dependencies": {
+    "@databases/validate-unicode": "^0.0.0"
+  },
   "devDependencies": {
     "@databases/sql": "^0.0.0"
   },

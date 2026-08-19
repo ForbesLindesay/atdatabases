@@ -1,3 +1,3 @@
-# sql-commenter
+# @databases/sql-commenter
 
-A work in progress utility to add context to SQL queries following [Google's sqlcommenter spec](https://google.github.io/sqlcommenter/spec/)
+For documentation, see https://www.atdatabases.org/docs/sql-commenter

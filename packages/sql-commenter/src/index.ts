@@ -1,3 +1,6 @@
+import assertValidUnicode, {
+  removeInvalidUnicode,
+} from '@databases/validate-unicode';
 import sql, {SQLQuery, SQLItem, SQLItemType} from '@databases/sql/web';
 
 /**
@@ -19,6 +22,9 @@ export type ContextComment = {
 
 function keySerialization(rawString: string) {
   if (!rawString) throw new Error('Key for sql-commenter cannot be empty');
+  // Keys are not sanitized like values are - silently mangling a key could
+  // make two distinct keys collide, so we reject invalid unicode outright.
+  assertValidUnicode(rawString);
   // URL encode the value e.g. given /param first, that SHOULD become %2Fparam%20first
   const encoded = encodeURIComponent(rawString);
   // Escape meta-characters within the raw value; a single quote ' becomes \'
@@ -37,7 +43,7 @@ function valueSerialization(rawString: string) {
   if (typeof rawString !== 'string')
     throw new Error(`Values for sql-commenter must be strings`);
   // URL encode the value e.g. given /param first, that SHOULD become %2Fparam%20first
-  const encoded = encodeURIComponent(rawString);
+  const encoded = encodeURIComponent(removeInvalidUnicode(rawString));
   // Escape meta-characters within the raw value; a single quote ' becomes \'
   const escaped = encoded.replace(/'/g, (char) => `\\${char}`);
   // SQL escape the value by placing it within two single quotes e.g.
@@ -73,11 +79,18 @@ function keyValueDeserialization(rawPair: string): [string, string] {
  * `/*action='index',application='my-app'*\/`. Keys are sorted alphabetically,
  * and both keys and values are URL encoded and SQL escaped.
  *
+ * Any unpaired UTF-16 surrogate in a *value* (e.g. from JSON containing a
+ * bare `\uD800`) is replaced with `�` rather than causing a throw, so this
+ * remains safe to call with untrusted string values. Keys are not sanitized
+ * this way - an unpaired surrogate in a key throws instead, since silently
+ * mangling a key could make two distinct keys collide.
+ *
  * Keys with an `undefined` value are omitted. If there are no keys left
  * once `undefined` values are removed, this returns an empty string rather
  * than an empty comment (`/**\/`).
  *
- * @throws if any value is not a string, or any key is an empty string.
+ * @throws if any value is not a string, any key is an empty string, or any
+ * key contains invalid unicode (an unpaired UTF-16 surrogate).
  */
 export function serializeComment(comment: ContextComment) {
   const content = Object.entries(comment)
@@ -148,6 +161,12 @@ function hasCommentsFromParts(items: readonly SQLItem[]) {
  * removed), or `query` already appears to contain a comment (a line comment or
  * a block comment), `query` is returned unchanged rather than risking
  * corrupting/duplicating a comment.
+ *
+ * See `serializeComment` for the conditions under which this throws - in
+ * particular, invalid unicode in a *value* is sanitized rather than
+ * throwing, but an invalid unicode *key* still throws. If keys may come
+ * from an untrusted source, validate them (e.g. with `isValidUnicode` from
+ * `@databases/validate-unicode`) before calling `addContext`.
  */
 export function addContext(query: SQLQuery, comment: ContextComment): SQLQuery {
   const parts = query.format(toParts);
