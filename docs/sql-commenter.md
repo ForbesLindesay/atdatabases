@@ -36,25 +36,72 @@ export type ContextComment = {
 } & {[key: string]: string | undefined};
 
 /**
- * Serialize a set of key/value pairs into a sqlcommenter style SQL comment
- * (e.g. action='index',application='my-app' wrapped in a block comment).
- * Keys are sorted alphabetically and both keys & values are URL encoded and
- * SQL escaped.
+ * Serialize a `ContextComment` into a sqlcommenter style SQL comment, e.g.
+ * `/*action='index',application='my-app'*/`. Keys are sorted alphabetically,
+ * and both keys and values are URL encoded and SQL escaped.
  *
- * Keys with an `undefined` value are omitted. If there are no keys left,
- * this returns an empty string.
+ * Keys with an `undefined` value are omitted. If there are no keys left once
+ * `undefined` values are removed, this returns an empty string rather than
+ * an empty comment (`/**/`).
+ *
+ * Throws if any value is not a string, or any key is an empty string.
  */
 export function serializeComment(comment: ContextComment): string;
 
 /**
- * Returns a new query with a sqlcommenter style comment appended to the end.
+ * Returns a new query with a sqlcommenter style comment (from
+ * `serializeComment`) appended to the end. This is normally used via the
+ * `prepareQuery` option in `@databases/pg`/`@databases/mysql`/`@databases/mock-db`
+ * so that every query run through the connection gets tagged.
  *
- * If the query is empty, the comment is empty, or the query already appears
- * to contain a comment (a line comment or a block comment), the original
- * query is returned unchanged rather than risking corrupting/duplicating a
- * comment.
+ * If the query is empty, the comment has no keys (once `undefined` values
+ * are removed), or the query already appears to contain a comment (a line
+ * comment or a block comment), the original query is returned unchanged
+ * rather than risking corrupting/duplicating a comment.
  */
 export function addContext(query: SQLQuery, comment: ContextComment): SQLQuery;
+
+/**
+ * Parse a sqlcommenter style SQL comment (e.g.
+ * `/*action='index',application='my-app'*/`) back into the key/value pairs
+ * it was created from, reversing `serializeComment`.
+ *
+ * `comment` must be *only* the comment, optionally surrounded by whitespace
+ * - use `extractContext` to pull a trailing comment out of a full query
+ * first.
+ *
+ * Returns `null`, rather than throwing, if `comment` is not a single
+ * `/* ... */` block comment, if the comment is empty (e.g. `/**/`), or if
+ * any key/value pair within it fails to parse. This never throws.
+ */
+export function parseComment(comment: string): ContextComment | null;
+
+export interface ExtractContextResult {
+  /**
+   * The query, with the sqlcommenter comment (if any) removed.
+   */
+  query: string;
+  /**
+   * The key/value pairs extracted from the sqlcommenter comment, or `null`
+   * if there was no comment (or it was empty).
+   */
+  comment: ContextComment | null;
+}
+
+/**
+ * Extract the sqlcommenter style comment appended to the end of `query`
+ * (e.g. by `addContext`), returning the query with the comment removed
+ * alongside the parsed key/value pairs (see `parseComment`).
+ *
+ * Unlike `parseComment`, `query` can be a full SQL query - e.g. as read from
+ * a database log or a tool like `pg_stat_activity` - rather than only the
+ * comment.
+ *
+ * If `query` does not end with a valid, non-empty sqlcommenter comment,
+ * `comment` will be `null` and `query` is returned completely unchanged
+ * (including any trailing comment that failed to parse). This never throws.
+ */
+export function extractContext(query: string): ExtractContextResult;
 ```
 
 `ContextComment` suggests a few well known keys, but you can also pass any other string keys you want to record.
@@ -140,3 +187,30 @@ app.listen(process.env.PORT ?? 3000);
 ```
 
 When the `GET /users/:id` endpoint is hit, the log context means that any query run by `getUser` will have `/*action='get',application='my-app',controller='users'*/` appended to it.
+
+## Parsing the context back out of a query
+
+Once you find an interesting query in a database log, slow query report, or a tool like `pg_stat_activity`, you can use `extractContext` to turn its trailing comment back into the original key/value pairs. It returns both the parsed `comment` and the original `query` with the comment stripped off:
+
+```typescript
+import {extractContext} from '@databases/sql-commenter';
+
+extractContext(
+  `SELECT * FROM users WHERE id = $1 /*action='get',application='my-app',controller='users'*/`,
+);
+// => {
+//   query: `SELECT * FROM users WHERE id = $1`,
+//   comment: {action: 'get', application: 'my-app', controller: 'users'},
+// }
+```
+
+If the query does not end with a valid, non-empty sqlcommenter style comment, `comment` is `null` and `query` is returned completely unchanged - including any trailing text that looked like a comment but failed to parse. `extractContext` never throws, however malformed the input.
+
+If you already have just the comment on its own (without the rest of the query), you can use `parseComment` instead, which has the same never-throws behaviour:
+
+```typescript
+import {parseComment} from '@databases/sql-commenter';
+
+parseComment(`/*action='get',application='my-app',controller='users'*/`);
+// => {action: 'get', application: 'my-app', controller: 'users'}
+```

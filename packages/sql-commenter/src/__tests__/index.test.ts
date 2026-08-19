@@ -1,5 +1,5 @@
 import sql, {FormatConfig} from '@databases/sql/web';
-import {addContext, serializeComment} from '../';
+import {addContext, extractContext, parseComment, serializeComment} from '../';
 
 const formatConfig: FormatConfig = {
   // NOTE: This is not a safe way to escape the identifier, it's good enough for our simple test though.
@@ -65,6 +65,239 @@ describe('serializeComment', () => {
       `Values for sql-commenter must be strings`,
     );
   });
+});
+
+describe('parseComment', () => {
+  test('returns null for a string that is not a comment', () => {
+    expect(parseComment(`SELECT * FROM foo`)).toBe(null);
+    expect(parseComment(``)).toBe(null);
+  });
+
+  test('returns null for an empty comment', () => {
+    expect(parseComment(`/**/`)).toBe(null);
+  });
+
+  test('parses a single key/value pair', () => {
+    expect(parseComment(`/*action='index'*/`)).toEqual({action: 'index'});
+  });
+
+  test('allows surrounding whitespace', () => {
+    expect(parseComment(`  /*action='index'*/  \n`)).toEqual({
+      action: 'index',
+    });
+  });
+
+  test('parses multiple key/value pairs', () => {
+    expect(
+      parseComment(`/*action='index',application='my-app',controller='foo'*/`),
+    ).toEqual({action: 'index', application: 'my-app', controller: 'foo'});
+  });
+
+  test('decodes URL encoded and SQL escaped keys and values', () => {
+    expect(parseComment(`/*%2Fparam%20first='FOO%20\\'BAR'*/`)).toEqual({
+      ['/param first']: `FOO 'BAR`,
+    });
+  });
+
+  test('correctly captures empty strings as values', () => {
+    expect(parseComment(`/*action=''*/`)).toEqual({action: ''});
+  });
+
+  test('correctly captures empty strings as values alongside other pairs', () => {
+    expect(parseComment(`/*action='',application='my-app'*/`)).toEqual({
+      action: '',
+      application: 'my-app',
+    });
+  });
+
+  test('allows unescaped quotes in values', () => {
+    // This may not strictly be valid, but we can handle it and
+    // that's easier than rejecting it.
+    expect(parseComment(`/*key=''''*/`)).toEqual({
+      key: `''`,
+    });
+  });
+
+  test('is the inverse of serializeComment', () => {
+    const comment = {
+      action: 'index',
+      controller: 'users',
+      route: '/users/:id',
+      application: `my-app's "commenter"`,
+    };
+    expect(parseComment(serializeComment(comment))).toEqual(comment);
+  });
+
+  test('does not pollute Object.prototype via a __proto__ key', () => {
+    // NB: {__proto__: 'polluted'} as an object literal would set the
+    // prototype rather than creating an own property (and silently ignore
+    // the non-object value), so we can't compare against that literal here.
+    const comment = parseComment(`/*__proto__='polluted'*/`);
+    expect(Object.getPrototypeOf(comment)).toBe(Object.prototype);
+    expect(Object.prototype.hasOwnProperty.call(comment, '__proto__')).toBe(
+      true,
+    );
+    expect(comment?.__proto__).toBe('polluted');
+    expect(({} as any).polluted).toBeUndefined();
+  });
+
+  test('does not pollute Object.prototype via a constructor key', () => {
+    const comment = parseComment(`/*constructor='polluted'*/`);
+    expect(comment?.constructor).toBe('polluted');
+  });
+
+  test('returns null if a pair has no "="', () => {
+    expect(parseComment(`/*action*/`)).toBe(null);
+  });
+
+  test('returns null if a value is not wrapped in single quotes', () => {
+    expect(parseComment(`/*action=index*/`)).toBe(null);
+  });
+
+  test('returns null if any one pair is invalid, even if the rest are valid', () => {
+    expect(parseComment(`/*action='index',bad,application='my-app'*/`)).toBe(
+      null,
+    );
+  });
+
+  test('returns null (rather than throwing) for a malformed escape sequence', () => {
+    // `%` on its own is not valid percent-encoding, so `decodeURIComponent`
+    // would throw a `URIError` if it weren't caught internally.
+    expect(parseComment(`/*action='%'*/`)).toBe(null);
+    expect(parseComment(`/*%='value'*/`)).toBe(null);
+    expect(parseComment(`/*action='%zz'*/`)).toBe(null);
+  });
+  const malformedInputs = [
+    ``,
+    `/`,
+    `/*`,
+    `*/`,
+    `/**/`,
+    `/*=*/`,
+    `/*=''*/`,
+    `/*key*/`,
+    `/*key=*/`,
+    `/*key='unterminated*/`,
+    `/*%*/`,
+    `/*%='value'*/`,
+    `/*action='%'*/`,
+    `SELECT * FROM foo /*key='value',*/`,
+  ];
+  for (const input of malformedInputs) {
+    test(`never throws, even for malformed the input like ${JSON.stringify(
+      input,
+    )}`, () => {
+      expect(() => parseComment(input)).not.toThrow();
+      expect(parseComment(input)).toBe(null);
+    });
+  }
+});
+
+describe('extractContext', () => {
+  test('returns the query unchanged and a null comment when there is no comment', () => {
+    expect(extractContext(`SELECT * FROM foo`)).toEqual({
+      query: `SELECT * FROM foo`,
+      comment: null,
+    });
+  });
+
+  test('keeps the original query (including the comment) if the comment has no pairs at all', () => {
+    const query = `SELECT * FROM foo /**/`;
+    expect(extractContext(query)).toEqual({query, comment: null});
+  });
+
+  test('parses a comment appended to a full query, and strips it from the query', () => {
+    expect(extractContext(`SELECT * FROM foo /*action='index'*/`)).toEqual({
+      query: `SELECT * FROM foo`,
+      comment: {action: 'index'},
+    });
+  });
+
+  test('ignores trailing whitespace after the comment', () => {
+    expect(extractContext(`SELECT * FROM foo /*action='index'*/  \n`)).toEqual({
+      query: `SELECT * FROM foo`,
+      comment: {action: 'index'},
+    });
+  });
+
+  test('parses multiple key/value pairs', () => {
+    expect(
+      extractContext(
+        `SELECT * FROM foo /*action='index',application='my-app',controller='bar'*/`,
+      ),
+    ).toEqual({
+      query: `SELECT * FROM foo`,
+      comment: {action: 'index', application: 'my-app', controller: 'bar'},
+    });
+  });
+
+  test('correctly captures empty strings as values', () => {
+    expect(extractContext(`SELECT * FROM foo /*action=''*/`)).toEqual({
+      query: `SELECT * FROM foo`,
+      comment: {action: ''},
+    });
+  });
+
+  test('is the inverse of addContext', () => {
+    const query = addContext(sql`SELECT * FROM foo WHERE id = ${10}`, {
+      action: 'index',
+      application: 'my-app',
+    });
+    const {text: formattedQuery} = query.format(formatConfig);
+    expect(extractContext(formattedQuery)).toEqual({
+      query: `SELECT * FROM foo WHERE id = ?`,
+      comment: {action: 'index', application: 'my-app'},
+    });
+  });
+
+  test('ignores a comment that is not at the end of the query', () => {
+    const query = `SELECT * FROM foo /*action='index'*/ WHERE id = 10`;
+    expect(extractContext(query)).toEqual({query, comment: null});
+  });
+
+  test('keeps the original query (including the comment) if a pair has no "="', () => {
+    const query = `SELECT * FROM foo /*action*/`;
+    expect(extractContext(query)).toEqual({query, comment: null});
+  });
+
+  test('keeps the original query (including the comment) if a value is not wrapped in single quotes', () => {
+    const query = `SELECT * FROM foo /*action=index*/`;
+    expect(extractContext(query)).toEqual({query, comment: null});
+  });
+
+  test('keeps the original query (including the comment) if any one pair is invalid, even if the rest are valid', () => {
+    const query = `SELECT * FROM foo /*action='index',bad,application='my-app'*/`;
+    expect(extractContext(query)).toEqual({query, comment: null});
+  });
+
+  test('keeps the original query (including the comment) for a malformed escape sequence, rather than throwing', () => {
+    const query = `SELECT * FROM foo /*action='%'*/`;
+    expect(() => extractContext(query)).not.toThrow();
+    expect(extractContext(query)).toEqual({query, comment: null});
+  });
+
+  const malformedInputs = [
+    ``,
+    `SELECT * FROM foo`,
+    `SELECT * FROM foo /`,
+    `SELECT * FROM foo /*`,
+    `SELECT * FROM foo /**/`,
+    `SELECT * FROM foo /*key*/`,
+    `SELECT * FROM foo /*key=*/`,
+    `SELECT * FROM foo /*key='unterminated*/`,
+    `SELECT * FROM foo /*%*/`,
+    `SELECT * FROM foo /*%='value'*/`,
+    `SELECT * FROM foo /*action='%'*/`,
+    `SELECT * FROM foo /*key='value',*/`,
+  ];
+  for (const input of malformedInputs) {
+    test(`never throws and keeps original query, even for malformed the queries like: ${JSON.stringify(
+      input,
+    )}`, () => {
+      expect(() => extractContext(input)).not.toThrow();
+      expect(extractContext(input)).toEqual({query: input, comment: null});
+    });
+  }
 });
 
 describe('addContext', () => {
