@@ -12,7 +12,7 @@ SELECT * FROM users WHERE id = $1 /*action='show',application='my-app',controlle
 
 This makes it possible to trace a slow or unexpected query, seen in a database log or an APM tool like Google Cloud SQL Insights, back to the application, route or controller that issued it — without having to correlate timestamps.
 
-It is normally used together with the `prepareQuery` hook in [`@databases/pg`](pg-guide-logging.md#preparing-queries) or [`@databases/mysql`](mysql-guide-logging.md#preparing-queries), which lets you transform every query before it is run.
+It is normally used together with the `prepareQuery` hook in [`@databases/pg`](pg-guide-logging.md) or [`@databases/mysql`](mysql-guide-logging.md), which lets you transform every query before it is run.
 
 ## Installation
 
