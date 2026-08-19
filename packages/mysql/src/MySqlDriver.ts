@@ -139,7 +139,10 @@ export default class MySqlDriver
     await execute(this.client, `ROLLBACK TO SAVEPOINT ${savepointName}`);
   }
 
-  private async _executeQuery(query: SQLQuery): Promise<any[]> {
+  private async _executeQuery(rawQuery: SQLQuery): Promise<any[]> {
+    const query = this._handlers.prepareQuery
+      ? this._handlers.prepareQuery(rawQuery)
+      : rawQuery;
     const q = query.format(mysqlFormat);
     if (this._handlers.onQueryStart) {
       enforceUndefined(this._handlers.onQueryStart(query, q));

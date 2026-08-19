@@ -74,7 +74,10 @@ export default class MockDbDriver
     throw new Error(`Savepoints are not supported by mock-db`);
   }
 
-  private async _executeQuery(query: SQLQuery): Promise<any[]> {
+  private async _executeQuery(rawQuery: SQLQuery): Promise<any[]> {
+    const query = this._handlers.prepareQuery
+      ? this._handlers.prepareQuery(rawQuery)
+      : rawQuery;
     const q = query.format(mockFormat);
     if (this._handlers.onQueryStart) {
       enforceUndefined(this._handlers.onQueryStart(query, q));

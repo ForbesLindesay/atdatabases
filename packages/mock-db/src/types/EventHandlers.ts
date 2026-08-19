@@ -1,6 +1,7 @@
 import {SQLQuery} from '@databases/sql/web';
 
 export default interface EventHandlers {
+  prepareQuery?: (query: SQLQuery) => SQLQuery;
   onConnectionOpened?: () => void;
   onConnectionClosed?: () => void;
   onQueryStart?: (

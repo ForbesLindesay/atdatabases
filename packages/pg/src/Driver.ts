@@ -243,9 +243,12 @@ export default class PgDriver
     }
   }
 
-  private async _executeQuery(query: SQLQuery): Promise<any[]> {
+  private async _executeQuery(rawQuery: SQLQuery): Promise<any[]> {
     try {
       this._throwPendingIdleError();
+      const query = this._handlers.prepareQuery
+        ? this._handlers.prepareQuery(rawQuery)
+        : rawQuery;
       const q = query.format(pgFormat);
       if (this._handlers.onQueryStart) {
         enforceUndefined(this._handlers.onQueryStart(query, q));

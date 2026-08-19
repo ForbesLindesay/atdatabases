@@ -270,6 +270,7 @@ export default function createConnectionPool(
     bigIntAsString = false,
     schema,
     types: typeOverrides,
+    prepareQuery,
     onError = (err: Error) => {
       // It's common for connections to be terminated "unexpectedly"
       // If it happens on a connection that is actively in use, you'll get the error
@@ -382,6 +383,7 @@ export default function createConnectionPool(
     },
     schema,
     handlers: {
+      prepareQuery,
       onError,
       onQueryStart,
       onQueryResults,
