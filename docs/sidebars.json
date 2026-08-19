@@ -93,6 +93,7 @@
       "lock",
       "queue",
       "split-sql-query",
+      "sql-commenter",
       "validate-unicode"
     ]
   }

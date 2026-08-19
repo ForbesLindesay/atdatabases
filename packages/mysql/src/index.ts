@@ -162,6 +162,7 @@ export default function createConnectionPool(
     idleTimeoutMilliseconds = 30_000,
     queueTimeoutMilliseconds = 60_000,
     acquireLockTimeoutMilliseconds = 60_000,
+    prepareQuery,
     onConnectionClosed,
     onConnectionOpened,
     onQueryStart,
@@ -210,6 +211,7 @@ export default function createConnectionPool(
       queueTimeoutMilliseconds,
     },
     {
+      prepareQuery,
       onConnectionClosed,
       onConnectionOpened,
       onQueryStart,

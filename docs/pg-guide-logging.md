@@ -184,8 +184,52 @@ const db = createConnectionPool({
 module.exports = db;
 ```
 
+## Preparing Queries
+
+The `prepareQuery` hook is called immediately before a query is formatted & sent to postgres, and lets you return a new query to actually run in its place. The returned query is what gets executed, and is also what is passed to `onQueryStart`, `onQueryResults` and `onQueryError`.
+
+A common use for `prepareQuery` is adding a [sqlcommenter](https://google.github.io/sqlcommenter/) style comment to every query, using [`@databases/sql-commenter`](sql-commenter.md), so that you can trace a slow or unexpected query in your database logs/monitoring tools back to the application (and optionally route/controller) that issued it:
+
+```typescript
+// database.ts
+
+import createConnectionPool, {sql} from '@databases/pg';
+import {addContext} from '@databases/sql-commenter';
+
+export {sql};
+
+const db = createConnectionPool({
+  prepareQuery: (query) => addContext(query, {application: 'my-app'}),
+});
+
+export default db;
+```
+
+```javascript
+// database.js
+
+const createConnectionPool = require('@databases/pg');
+const {addContext} = require('@databases/sql-commenter');
+
+const db = createConnectionPool({
+  prepareQuery: (query) => addContext(query, {application: 'my-app'}),
+});
+
+module.exports = db;
+```
+
+Every query run via `db.query`, `db.tx` or `db.task` will now have `/*application='my-app'*/` appended, e.g.:
+
+```sql
+SELECT * FROM users WHERE id = $1 /*application='my-app'*/
+```
+
+See [`@databases/sql-commenter`](sql-commenter.md) for more details, including how to add request context.
+
+`prepareQuery` is **not** currently applied to `queryStream`/`queryNodeStream`.
+
 ## Logging in production
 
-Although the overhead of calling these methods is negligable, serializing your queries & parameters to a string in order to log them can be costly. This shouldn't be a problem until you have very high query volume.
+Although the overhead of calling these methods is negligible, serializing your queries & parameters to a string in order to log them can be costly. This shouldn't be a problem until you have very high query volume.
 
 If you find that logging is a bottleneck, you may want to consider only logging queries if they are slower than some threshold, or only logging a random sample of the events. You may also find a tool like [pino](https://getpino.io) helpful. It allows you to log structured JSON, and then use a separate process to either format those logs or send them somewhere for processing and filtering.

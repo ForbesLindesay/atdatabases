@@ -38,6 +38,7 @@
     {"path": "../packages/shared-print-types"},
     {"path": "../packages/split-sql-query"},
     {"path": "../packages/sql"},
+    {"path": "../packages/sql-commenter"},
     {"path": "../packages/sqlite"},
     {"path": "../packages/sqlite-sync"},
     {"path": "../packages/validate-unicode"},
