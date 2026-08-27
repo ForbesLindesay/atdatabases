@@ -1086,25 +1086,28 @@ class Table<TRecord, TInsertParameters> {
     const doNotSet = getOption('doNotSet');
 
     const {sql} = this._underlyingDb;
-    return this._insert((columnNames) => {
-      let updateKeys: readonly (string | number | symbol)[] = columnNames;
-      if (set) {
-        updateKeys = set;
-      }
-      if (doNotSet) {
-        const keysNotToSet = new Set<string | number | symbol>(doNotSet);
-        updateKeys = updateKeys.filter((key) => !keysNotToSet.has(key));
-      }
-      return sql`ON CONFLICT (${sql.join(
-        conflictKeys.map((k) => sql.ident(k)),
-        sql`, `,
-      )}) DO UPDATE SET ${sql.join(
-        updateKeys.map(
-          (key) => sql`${sql.ident(key)}=EXCLUDED.${sql.ident(key)}`,
-        ),
-        sql`, `,
-      )}`;
-    }, ...rows) as any;
+    return this._insert(
+      (columnNames) => {
+        let updateKeys: readonly (string | number | symbol)[] = columnNames;
+        if (set) {
+          updateKeys = set;
+        }
+        if (doNotSet) {
+          const keysNotToSet = new Set<string | number | symbol>(doNotSet);
+          updateKeys = updateKeys.filter((key) => !keysNotToSet.has(key));
+        }
+        return sql`ON CONFLICT (${sql.join(
+          conflictKeys.map((k) => sql.ident(k)),
+          sql`, `,
+        )}) DO UPDATE SET ${sql.join(
+          updateKeys.map(
+            (key) => sql`${sql.ident(key)}=EXCLUDED.${sql.ident(key)}`,
+          ),
+          sql`, `,
+        )}`;
+      },
+      ...rows,
+    ) as any;
   }
 
   async insertOrIgnore<TRecordsToInsert extends readonly TInsertParameters[]>(

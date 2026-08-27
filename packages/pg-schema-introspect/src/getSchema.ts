@@ -29,8 +29,8 @@ export default async function getSchema(
   const schemaName = query.schemaName
     ? query.schemaName
     : query.schemaID
-    ? await getSchemaName(connection, query.schemaID)
-    : (await getSearchPath(connection))[0];
+      ? await getSchemaName(connection, query.schemaID)
+      : (await getSearchPath(connection))[0];
   if (!schemaName) {
     throw new Error('No schema found');
   }

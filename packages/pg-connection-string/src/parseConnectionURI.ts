@@ -20,10 +20,10 @@ export default function parseConnectionURI(
   let str = originalString.startsWith('postgresql://')
     ? originalString.substr('postgresql://'.length)
     : originalString.startsWith('postgres://')
-    ? originalString.substr('postgres://'.length)
-    : fail(
-        `Expected the connection string to start with "postgresql://" or "postgres://"`,
-      );
+      ? originalString.substr('postgres://'.length)
+      : fail(
+          `Expected the connection string to start with "postgresql://" or "postgres://"`,
+        );
 
   // [user[:password]@]
   str = parseAuth(config, str);

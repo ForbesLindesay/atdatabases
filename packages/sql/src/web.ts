@@ -32,9 +32,8 @@ const literalSeparators = new Set([
   ') OR (',
   ';',
 ] as const);
-type LiteralSeparator = typeof literalSeparators extends Set<infer T>
-  ? T
-  : never;
+type LiteralSeparator =
+  typeof literalSeparators extends Set<infer T> ? T : never;
 /**
  * The representation of a SQL query. Call `compile` to turn it into a SQL
  * string with value placeholders.

@@ -19,9 +19,7 @@ export default async function writeFiles<TypeID>({
 
   // delete files that would no longer be output
   await Promise.all(
-    (
-      await promises.readdir(directory)
-    )
+    (await promises.readdir(directory))
       .filter((fileName) => !filenames.has(fileName))
       .map(async (fileName) => {
         const filePath = join(directory, fileName);
